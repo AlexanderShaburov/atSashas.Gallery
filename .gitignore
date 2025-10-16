@@ -1,0 +1,109 @@
+# ====================================
+# 🌐 FRONTEND (Node / React / Vite)
+# ====================================
+node_modules/
+dist/
+build/
+.cache/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+vite.config.ts.timestamp*
+.vite/
+coverage/
+
+# Local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ====================================
+# 🐍 BACKEND (Python / FastAPI)
+# ====================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+instance/
+.env
+.env.*
+*.log
+
+# Virtualenv
+.venv/
+venv/
+ENV/
+env/
+Pipfile.lock
+poetry.lock
+
+# Mypy / Pyright / Pylint caches
+.mypy_cache/
+.pyright/
+.pyre/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ====================================
+# 🐳 DOCKER
+# ====================================
+# Ignore local-only docker-compose override files
+docker-compose.override.yml
+# Ignore built images & intermediate artifacts
+**/tmp/
+**/.docker-cache/
+**/.docker-build/
+.dockerignore
+
+# ====================================
+# 🧰 IDE / SYSTEM
+# ====================================
+# VS Code
+.vscode/
+.history/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ====================================
+# 🔐 SENSITIVE / SECRETS
+# ====================================
+# API keys, tokens, credentials
+secrets.*
+*.key
+*.pem
+*.crt
+
+# ====================================
+# 🧪 TEST / TEMP
+# ====================================
+tmp/
+temp/
+logs/
+*.tmp
+*.bak
+*.swp
+# ====================================
+# 🍤 Temporal documentation
+# ====================================
+*.txt
+Docs/**
+# ====================================
+# 🌠 NOT IMAGES BUT FOLDER STRUCTURE:
+# ====================================
+vault/**
+!vault/**/*.json
+!vault/**/.gitkeep
+# ====================================
+# 💾 PREVIOUS VERSION
+# ====================================
+sasha-gallery-js/**

@@ -1,0 +1,27 @@
+[project]
+name = "admin-backend"
+version = "0.1.0"
+description = "Mini FastAPI backend: JSON read/write + uploads"
+authors = [
+    {name = "AlexanderShaburov",email = "shaburov@mac.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi (>=0.119.0,<0.120.0)",
+    "uvicorn[standard] (>=0.37.0,<0.38.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "pydantic-settings (>=2.11.0,<3.0.0)"
+]
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.group.dev.dependencies]
+httpx = "^0.27.0"
+
+[tool.poetry.scripts]
+serve = "uvicorn:main"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
