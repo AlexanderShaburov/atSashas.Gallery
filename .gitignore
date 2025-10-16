@@ -98,12 +98,15 @@ logs/
 *.txt
 Docs/**
 # ====================================
-# 🌠 NOT IMAGES BUT FOLDER STRUCTURE:
+# 🌠 Vault: keep folder tree + JSON, but ignore binaries
 # ====================================
-vault/**
+vault/**                # ignore everything under vault
+!vault/**/              # BUT keep all subdirectories (so Git can descend)
 !vault/**/*.json
 !vault/**/.gitkeep
 # ====================================
 # 💾 PREVIOUS VERSION
 # ====================================
 sasha-gallery-js/**
+
+
