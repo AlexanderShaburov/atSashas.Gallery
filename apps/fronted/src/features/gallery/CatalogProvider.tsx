@@ -1,6 +1,6 @@
 // src/features/images/CatalogContext.tsx
 import { createContext, useContext, useEffect, useState } from 'react';
-import type { ArtCatalog } from './types/catalog';
+import type { ArtCatalog } from '@entities/catalog';
 
 import { getFromCatalog, loadCatalogOnce } from './components/catalogModule';
 

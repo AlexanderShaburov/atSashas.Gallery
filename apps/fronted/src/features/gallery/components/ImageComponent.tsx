@@ -1,4 +1,4 @@
-import { ImageBlock } from '@/models/Block';
+import { ImageBlock } from '@entities/block';
 import { getFromCatalog } from './catalogModule';
 
 type ImageComponentProps = { block: ImageBlock };

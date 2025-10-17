@@ -1,4 +1,4 @@
-import type { Block, StreamData } from '@/models/Block';
+import type { Block, StreamData } from '@entities/block';
 import GalleryBlock from './GalleryBlock';
 
 export function GalleryStream(stream: StreamData) {

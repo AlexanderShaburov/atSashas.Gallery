@@ -1,6 +1,4 @@
-.main-layout {
-  padding-top: var(--header-h);
-}
+
 .container {
   width: min(calc(100% - 2 * var(--gutter)), var(--page-max));
   padding-inline: 12px;

@@ -1,4 +1,4 @@
-import type { Block, ImageBlock, TextBlock } from '@/models/Block';
+import type { Block, ImageBlock, TextBlock } from '@entities/block';
 import './gallery.css';
 import ImageComponent from './ImageComponent';
 import TextComponent from './TextComponent';

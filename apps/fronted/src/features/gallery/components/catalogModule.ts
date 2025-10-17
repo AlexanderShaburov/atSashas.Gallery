@@ -1,5 +1,5 @@
-import type { ArtItemJSON } from '@/features/gallery/types';
-import type { ArtCatalog } from '../types/catalog';
+import type { ArtItemJSON } from '@entities/art';
+import type { ArtCatalog } from '@entities/catalog';
 
 const BASE = import.meta.env.VITE_VAULT_BASE_URL;
 const CATALOG_URL = `${BASE}arts/catalog.json`;

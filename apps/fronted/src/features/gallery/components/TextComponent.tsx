@@ -1,4 +1,4 @@
-import { TextBlock } from '@/models/Block';
+import { TextBlock } from '@entities/block';
 type TextBlockProps = { block: TextBlock };
 export default function TextComponent({ block }: TextBlockProps) {
   const { noteContent, align } = { ...block };

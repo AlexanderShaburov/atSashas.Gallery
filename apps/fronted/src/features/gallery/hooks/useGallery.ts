@@ -1,4 +1,4 @@
-import type { StreamData } from '@/models/Block';
+import type { StreamData } from '@entities/block';
 import { useEffect, useState } from 'react';
 
 function getStreamUrl(slug: string): string {
