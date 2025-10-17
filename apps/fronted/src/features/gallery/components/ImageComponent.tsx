@@ -1,5 +1,5 @@
 import { ImageBlock } from '@entities/block';
-import { getFromCatalog } from './catalogModule';
+import { getFromCatalog } from '@features/gallery/api/catalogModule';
 
 type ImageComponentProps = { block: ImageBlock };
 

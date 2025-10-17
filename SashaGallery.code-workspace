@@ -1,0 +1,34 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{ 
+			"name": "backend", "path": "apps/admin-backend" 
+		},
+    	{ 
+			"name": "frontend", "path": "apps/frontend" 
+		},
+	],
+	"settings": {
+		"typescript.tsdk": "apps/sasha-gallery-ts/node_modules/typescript/lib",
+		"typescript.enablePromptUseWorkspaceTsdk": true,
+		"files.associations": {
+			"*.tsx": "typescriptreact",
+			"*.ts": "typescript"
+		},   
+		"emmet.includeLanguages": {
+			"typescriptreact": "html"
+		},
+	"extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "ms-python.black-formatter",
+      "charliermarsh.ruff",
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint"
+    ]
+  }
+	}
+}

@@ -1,5 +1,5 @@
-import type { ArtCatalog } from '@/entities/catalog/catalog';
-import type { StreamData } from '@/entities/block/BlockAndStream';
+import type { ArtCatalog } from '@entities/catalog';
+import type { StreamData } from '@entities/stream';
 
 const BASE = import.meta.env.VITE_VAULT_BASE_URL;
 const CATALOG_URL = `${BASE}api/catalog.json`;

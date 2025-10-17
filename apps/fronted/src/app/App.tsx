@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import './App.css';
 import MainLayout from './layouts/PublicLayout';
 import GalleryPage from '../features/gallery/GalleryPage';
-import AdminApp from '../features/admin/pages/AdminApp';
+import AdminApp from '@features/admin/pages/AdminIndexPage';
 import About from '../features/gallery/pages/AboutPage';
 import NotFound from './pages/NotFound';
 

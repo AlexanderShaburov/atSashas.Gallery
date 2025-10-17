@@ -6,7 +6,7 @@ import AdminLayout from "./layouts/AdminLayout";
 const HomePage = lazy(() => import('@/features/gallery/pages/HomePage'));
 const GalleryPage = lazy(() => import('@/features/gallery/GalleryPage'))
 const AboutPage = lazy(() => import('@/features/gallery/pages/AboutPage'))
-const UploadPage = lazy(() => import('@/features/admin/pages/AdminApp'))
+const UploadPage = lazy(() => import('@/features/admin/pages/AdminIndexPage'))
 const CatalogPage = lazy(() => import('@/features/admin/pages/CatalogPage'))
 const BlocksPage = lazy(() => import('@/features/admin/pages/BlocksPage'))
 const StreamsPage = lazy(() => import('@/features/admin/pages/StreamsPage'))
