@@ -1,0 +1,71 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+:root {
+  --gap: clamp(24px, 6vw, 48px); /* единый зазор по умолчанию */
+  --gutter: clamp(24px, 6vw, 56px); /* боковые поля для контейнера */
+  --container-gutter: clamp(
+    24px,
+    6vw,
+    56px
+  ); /* Базовый «жир» по бокам: не меньше 24px, растёт с вьюпортом до 56px */
+  --page-max: 1100px; /* максимальная ширина страницы */
+  --header-h: 5rem; /* высота шапки, если fixed/sticky */
+}
+
+@media (min-width: 820px) {
+  :root {
+    --gap: 16px;
+  }
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+:root {
+  --bg: #f8f7f5; /* фон — светлый, теплый, не чисто белый */
+  --text: #1e1e1c; /* основной текст — почти чёрный, но мягче */
+  --muted: #555555; /* второстепенный текст */
+  --border: #dcdad6; /* рамки и линии */
+  --card-bg: #ffffff; /* фон карточек/блоков */
+  --accent: #3a5f8a; /* глубокий сине-серый, спокойный акцент */
+  --accent-hover: #2f4f6d;
+  --tile-title: #eaeaea81;
+}
+
+:root[data-theme="dark"] {
+  --bg: #121212; /* фон — глубокий графит */
+  --text: #e4e4e2; /* текст — почти белый, но мягче */
+  --muted: #aaaaaa; /* второстепенный текст */
+  --border: #2c2c2c; /* рамки и линии */
+  --card-bg: #1c1c1c; /* карточки чуть светлее фона */
+  --accent: #5b8ab2; /* светлый акцент (вариация синего) */
+  --accent-hover: #729ec0;
+  --tile-title: #eaeaea81;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: sans-serif;
+}
+
+.btn {
+  background: var(--accent);
+  color: var(--card-bg);
+  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+.btn:hover {
+  opacity: 0.8;
+  background: var(--accent-hover);
+}

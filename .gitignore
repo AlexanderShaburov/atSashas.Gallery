@@ -1,4 +1,11 @@
 # ====================================
+# 🌠 Vault: keep folder tree + JSON, but ignore binaries
+# ====================================
+vault/**                # ignore everything under vault
+!vault/**/              # BUT keep all subdirectories (so Git can descend)
+!vault/**/*.json
+!vault/**/.gitkeep
+# ====================================
 # 🌐 FRONTEND (Node / React / Vite)
 # ====================================
 node_modules/
@@ -97,13 +104,7 @@ logs/
 # ====================================
 *.txt
 Docs/**
-# ====================================
-# 🌠 Vault: keep folder tree + JSON, but ignore binaries
-# ====================================
-vault/**                # ignore everything under vault
-!vault/**/              # BUT keep all subdirectories (so Git can descend)
-!vault/**/*.json
-!vault/**/.gitkeep
+
 # ====================================
 # 💾 PREVIOUS VERSION
 # ====================================

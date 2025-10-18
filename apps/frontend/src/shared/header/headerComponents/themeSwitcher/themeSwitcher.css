@@ -1,0 +1,23 @@
+.themeSwitcherButton {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  line-height: 0;
+  justify-items: end;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+
+  padding: 0;
+  background: var(--main-bg);
+  cursor: pointer;
+}
+.themeSwitcherButton svg {
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+}
