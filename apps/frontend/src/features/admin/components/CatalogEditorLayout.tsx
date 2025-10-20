@@ -1,25 +1,15 @@
-// CatalogEditorLayout.tsx
-
-// WHY WE REDO THAT. BETTE REUSE WHAT WE HAVE IN CreateForm.tsx
-
-const techsForCat = useMemo(() => {
-    const raw = values.category ? (techniques[values.category]?.items ?? []) : [];
-    // Normalize to { key, label }
-    return raw.map((it: any) => (typeof it === 'string' ? { key: it, label: it } : it));
-}, [values.category, techniques]);
-import React from 'react';
+// EditorLayout.tsx
 import './catalog-editor.css';
-
-type Thumb = { id: string; src: string; alt?: string };
+type Thumb = { id: string; srs: string; alt?: string };
 
 interface Props {
     thumbs: Thumb[];
     selectedId: string | null;
     setSelectedId: (id: string) => void;
-    form: React.ReactNode; // your form JSX
+    form: React.ReactNode;
 }
 
-export default function CatalogEditorLayout({ thumbs, selectedId, setSelectedId, form }: Props) {
+export default function EditorLayout({ thumbs, selectedId, setSelectedId, form }: Props) {
     const selected = thumbs.find((t) => t.id === selectedId) || null;
 
     return (
@@ -27,7 +17,7 @@ export default function CatalogEditorLayout({ thumbs, selectedId, setSelectedId,
             <aside className="ce-previews" aria-label="Artwork previews">
                 {/* Mobile: horizontal scroller */}
                 {/* GIVES US THUMBNAIL PREVIEW SET */}
-                <div className="ce-thumbs-strip">
+                <div className="ce-=thumbs-strip">
                     {thumbs.map((t) => (
                         <ThumbCard
                             key={t.id}
@@ -51,7 +41,6 @@ export default function CatalogEditorLayout({ thumbs, selectedId, setSelectedId,
                     </div>
                 )}
                 {/* GIVES US THUMBNAIL PREVIEW SET */}
-
                 <div className="ce-thumbs-grid">
                     {thumbs.map((t) => (
                         <ThumbCard
@@ -96,7 +85,7 @@ function ThumbCard({
             aria-pressed={selected}
             aria-label={ariaLabel || t.alt || 'thumbnail'}
         >
-            <img src={t.src} alt={t.alt || ''} className="ce-thumb-img" loading="lazy" />
+            <img src={t.srs} alt={t.alt || ''} className="ce-thumb-img" loading="lazy" />
             {selected && <span className="ce-badge">Selected</span>}
         </button>
     );

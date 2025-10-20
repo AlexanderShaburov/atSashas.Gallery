@@ -1,0 +1,28 @@
+{
+  "catalogVersion": 29,
+  "updatedAt": "2025-10-19T10:23:00Z",
+  "order": ["art-20251019-001"],
+  "items": {
+    "art-20251019-001": {
+      "id": "art-20251019-001",
+      "title": { "en": "Blue Horizon" },
+      "dateCreated": "2025-10-19",
+      "techniques": ["painting", "oil"],
+      "price": { "amount": 400, "currency": "EUR" },
+      "availability": "available",
+      "series": "Horizon",
+      "tags": ["landscape", "blue"],
+      "notes": null,
+      "images": {
+        "alt": { "en": "Abstract blue horizon" },
+        "preview": {
+          "avif": "arts/previews/art-20251019-001.avif",
+          "webp": "arts/previews/art-20251019-001.webp",
+          "jpeg": "arts/previews/art-20251019-001.jpeg"
+        },
+        "full": "arts/fullsize/art-20251019-001.jpg"
+      },
+      "dimensions": { "width": 50, "height": 70, "unit": "cm" }
+    }
+  }
+}

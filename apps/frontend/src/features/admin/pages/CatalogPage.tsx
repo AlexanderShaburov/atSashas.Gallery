@@ -1,273 +1,144 @@
-import type { ArtItemJSON, ImagesJSON } from '@/entities/art';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { FullPath } from '@/entities/art/images';
-import { Availability, ISODate } from '@/entities/common';
-import { HOPPER_LIST_URL, UPDATE_CATALOG } from '../api';
+import type { TechniquesJson } from '@/entities/art';
+import type { HopperThumb } from '@/entities/catalog';
+import { getCatalog, getHopperContent, getTechniques } from '@/features/admin/api';
+import { CreateForm, type CreateFormValues } from '@/features/admin/components/CreateForm';
 import './catalogPage.css';
 
-interface HopperItem {
-    name: string;
-    url: string;
-    previewUrl?: string;
-    size?: number;
-    mtime?: string;
-}
-
 export default function CatalogPage() {
-    const [loading, setLoading] = useState(true);
+    const [mode, setMode] = useState<'create' | 'edit'>('create');
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [items, setItems] = useState<HopperItem[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [q, setQ] = useState('');
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [selected, setSelected] = useState<HopperItem | null>(null);
-    const [draft, setDraft] = useState<ArtItemJSON | null>(null);
-    const [saving, setSaving] = useState(false);
-    const [savedId, setSavedId] = useState<string | null>(null);
-    const busy = loading || saving;
-    const fmtDate = (d = new Date()) => d.toISOString().slice(0, 10) as ISODate;
-    const newId = () =>
-        crypto?.randomUUID
-            ? crypto.randomUUID()
-            : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    const [hopper, setHopper] = useState<HopperThumb[]>([]);
+    const [selected, setSelected] = useState<string | null>(null);
+    const [techniques, setTechniques] = useState<TechniquesJson>({});
+    const [formValues, setFormValues] = useState<CreateFormValues | null>(null);
+    const [seriesOptions, setSeriesOptions] = useState<string[]>([]);
 
     useEffect(() => {
-        const run = async () => {
+        // load techniques once
+        (async () => {
+            try {
+                const t = await getTechniques();
+                setTechniques(t);
+            } catch (e) {
+                if (e instanceof Error) setError(e.message);
+                else setError(String(e));
+            }
+        })();
+    }, []);
+
+    // when user clicks  on hopper card
+    const onHopperClick = (h: HopperThumb) => {
+        setSelected(h.id);
+        // seed form with defaults; if in NOT required for create
+        setFormValues({
+            dateCreated: '',
+            availability: 'available',
+            price_currency: 'EUR',
+            unit: 'cm',
+            // optional: alt_en prefill from filename without extension
+            title_en: '',
+            title_ru: '',
+        });
+    };
+    useEffect(() => {
+        // create series list to have for choose from
+        // if (mode !== 'create') return;
+        // ⬆  series field could be edited not only in 'create' mode, it also could
+        //      be edited later.
+        (async () => {
+            try {
+                const cat = await getCatalog();
+                const set = new Set<string>();
+                for (const id of cat.order) {
+                    const s = cat.items[id]?.series;
+                    if (s && s.trim()) set.add(s.trim());
+                }
+                setSeriesOptions([...set].sort((a, b) => a.localeCompare(b)));
+            } catch (e) {
+                console.log(`It is series reader error! Hello!`);
+                if (e instanceof Error) {
+                    setError(e.message);
+                } else setError(String(e));
+            }
+        })();
+    }, [mode]);
+
+    useEffect(() => {
+        // if mode =  create it reads Hopper content
+        if (mode !== 'create') return;
+        (async () => {
             try {
                 setLoading(true);
                 setError(null);
-                const resp = await fetch(HOPPER_LIST_URL, { credentials: 'include' });
-                if (!resp.ok) throw new Error(`Hopper list failed: ${resp.status}`);
-                const data = (await resp.json()) as HopperItem[];
-                setItems(data);
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } catch (e: any) {
-                setError(e.message || String(e));
+                const list = await getHopperContent();
+                setHopper(list);
+            } catch (e) {
+                if (e instanceof Error) setError(e.message);
+                else setError(String(e));
             } finally {
                 setLoading(false);
             }
-        };
-        run();
-    }, []);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const filtered = useMemo(() => {
-        const s = q.trim().toLowerCase();
-        if (!s) return items;
-        return items.filter((it) => it.name.toLowerCase().includes(s));
-    }, [items, q]);
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const onPick = (it: HopperItem) => {
-        setSelected(it);
-        const id = newId();
-        const baseNameNoExt = it.name.replace(/\.[^.]+$/, '');
-        // const preview = it.previewUrl ?? it.url;
-        const draftItem: ArtItemJSON = {
-            id,
-            title: { ru: baseNameNoExt },
-            dateCreated: fmtDate(),
-            techniques: [],
-            price: null,
-            availability: 'available',
-            series: null,
-            tags: [],
-            notes: null,
-            images: {
-                full: it.url as FullPath,
-            } as ImagesJSON,
-            dimensions: { width: 0, height: 0, unit: 'cm' },
-        };
-        setDraft(draftItem);
-        setSavedId(null);
-    };
-
-    const updateDraft = (patch: Partial<ArtItemJSON>) =>
-        setDraft((d) => (d ? { ...d, ...patch } : d));
-
-    const save = async () => {
-        if (!draft) return;
-        setSaving(true);
-        setSavedId(null);
-        try {
-            const resp = await fetch(UPDATE_CATALOG, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(draft),
-            });
-            if (!resp.ok) throw new Error(`Save failed: ${resp.status}`);
-            const payload = await resp.json();
-            setSavedId(payload?.id || draft.id || null);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (e: any) {
-            setError(e.message || String(e));
-        } finally {
-            setSaving(false);
-        }
-    };
-    if (loading) {
-        return <div className="empty">Загружаю превью…</div>;
-    }
-    if (error) {
+        })();
+    }, [mode]);
+    // PLACEHOLDER FOR  EDIT CATALOG PAGE
+    if (mode !== 'create') {
         return (
-            <div className="empty" style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}>
-                Ошибка: {error}
+            <div className="catalog-page">
+                <header>
+                    <button onClick={() => setMode('create')}>Create</button>
+                    <button className="active">Edit</button>
+                </header>
+                <p>Edit mode coming next</p>
             </div>
         );
     }
-    // if (!draft) {
-    //     return <div className="empty">Выберите превью слева, чтобы начать.</div>;
-    // }
     return (
-        <div className="form-grid">
-            <div className="form-field">
-                <label className="form-label">Серия</label>
-                <input
-                    className="form-input"
-                    value={draft.series ?? ''}
-                    onChange={(e) => updateDraft({ series: e.target.value || null })}
-                />
-            </div>
-
-            <div className="form-field">
-                <label className="form-label">Теги (через запятую)</label>
-                <input
-                    className="form-input"
-                    value={(draft.tags ?? []).join(', ')}
-                    onChange={(e) =>
-                        updateDraft({
-                            tags: e.target.value.split(/\s*,\s*/).filter(Boolean),
-                        })
-                    }
-                />
-            </div>
-
-            <div className="form-row-3">
-                <div className="form-field">
-                    <label className="form-label">Ширина</label>
-                    <input
-                        type="number"
-                        min={0}
-                        className="form-input"
-                        value={draft.dimensions.width}
-                        onChange={(e) =>
-                            updateDraft({
-                                dimensions: { ...draft.dimensions, width: Number(e.target.value) },
-                            })
-                        }
-                    />
+        <div className="catalog-page">
+            <header>
+                {/* SWITCH MODE BUTTONS BLOCK  */}
+                <button className="active">Create</button>
+                <button onClick={() => setMode('edit')}>Edit</button>
+                {error && <span style={{ color: 'crimson' }}>{error}</span>}
+            </header>
+            {loading ? (
+                <p>Loading hopper`</p>
+            ) : (
+                // HOPPER CONTENT GRID
+                <div className="grid">
+                    {hopper.map((h) => (
+                        <button
+                            key={h.id}
+                            className={`card ${selected === h.id ? 'selected' : ''}`}
+                            onClick={() => onHopperClick(h)}
+                            title={h.id}
+                        >
+                            <img src={h.url} alt={h.id} loading="lazy" />
+                            <div className="meta">{h.id}</div>
+                        </button>
+                    ))}
+                    {hopper.length === 0 && <p>No uploads in hopper</p>}
                 </div>
-                <div className="form-field">
-                    <label className="form-label">Высота</label>
-                    <input
-                        type="number"
-                        min={0}
-                        className="form-input"
-                        value={draft.dimensions.height}
-                        onChange={(e) =>
-                            updateDraft({
-                                dimensions: { ...draft.dimensions, height: Number(e.target.value) },
-                            })
-                        }
-                    />
-                </div>
-                <div className="form-field">
-                    <label className="form-label">Ед. изм.</label>
-                    <select
-                        className="form-select"
-                        value={draft.dimensions.unit ?? 'cm'}
-                        onChange={(e) =>
-                            updateDraft({
-                                dimensions: {
-                                    ...draft.dimensions,
-                                    unit: e.target.value as 'cm' | 'in',
-                                },
-                            })
-                        }
-                    >
-                        <option value="cm">cm</option>
-                        <option value="mm">mm</option>
-                        <option value="in">in</option>
-                    </select>
-                </div>
-            </div>
+            )}
+            {selected && (
+                <section className="catalog-form-section">
+                    <h3 className="catalog-form-title">Metadata for: {selected}</h3>
 
-            <div className="form-field">
-                <label className="form-label">Заметки</label>
-                <textarea
-                    className="form-textarea"
-                    value={draft.notes ?? ''}
-                    onChange={(e) => updateDraft({ notes: e.target.value || null })}
-                />
-            </div>
-
-            <fieldset
-                className="form-field"
-                style={{ border: '1px solid var(--border)', borderRadius: 12, padding: 12 }}
-            >
-                <legend className="form-label">Цена (опционально)</legend>
-                <div className="form-row-3">
-                    <input
-                        className="form-input"
-                        placeholder="EUR"
-                        value={draft.price?.currency ?? ''}
-                        onChange={(e) => {
-                            updateDraft({
-                                price: {
-                                    currency: 'EUR',
-                                    // eslint-disable-next-line no-constant-binary-expression
-                                    amount: Number(e.target.value) ?? 0,
-                                },
-                            });
-                        }}
-                    />
-                    <input
-                        className="form-input"
-                        type="number"
-                        min={0}
-                        step={0.01}
-                        placeholder="0"
-                        value={draft.price?.amount ?? 0}
-                        onChange={(e) =>
-                            updateDraft({
-                                price: {
-                                    currency: draft.price?.currency ?? 'EUR',
-                                    amount: Number(e.target.value),
-                                },
-                            })
-                        }
-                    />
-                    <button
-                        type="button"
-                        className="btn"
-                        onClick={() => updateDraft({ price: null })}
-                    >
-                        Очистить цену
-                    </button>
-                </div>
-            </fieldset>
-
-            <div className="form-field">
-                <label className="form-label">Статус доступности</label>
-                <select
-                    className="form-select"
-                    value={draft.availability}
-                    onChange={(e) => updateDraft({ availability: e.target.value as Availability })}
-                >
-                    <option value="available">available</option>
-                    <option value="reserved">reserved</option>
-                    <option value="sold">sold</option>
-                    <option value="not_for_sale">not_for_sale</option>
-                </select>
-            </div>
-
-            <div className="form-actions">
-                <button className="btn btn--primary" onClick={save} disabled={busy}>
-                    {busy ? 'Сохраняю…' : 'Сохранить в каталог'}
-                </button>
-                {savedId && <span className="status">Сохранено (id: {savedId})</span>}
-            </div>
+                    {Object.keys(techniques).length === 0 ? (
+                        <p className="catalog-form-loading">Loading techniques...</p>
+                    ) : (
+                        <CreateForm
+                            techniques={techniques}
+                            initial={formValues ?? undefined}
+                            onChange={(v) => setFormValues(v)}
+                            seriesOptions={seriesOptions}
+                        />
+                    )}
+                    {/* Submit button */}
+                </section>
+            )}
         </div>
     );
 }

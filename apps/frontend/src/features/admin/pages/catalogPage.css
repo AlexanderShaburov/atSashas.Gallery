@@ -1,232 +1,156 @@
-import type { ArtItemJSON, ImagesJSON } from '@/entities/art';
-import { useEffect, useMemo, useState } from 'react';
-
-import { FullPath } from '@/entities/art/images';
-import { Availability, ISODate } from '@/entities/common';
-import { HOPPER_LIST_URL, UPDATE_CATALOG /*, CATALOG_META_URL?*/ } from '../api';
-import './catalogPage.css';
-
-import HopperGrid from './HopperGrid';
-import DraftsColumn from './DraftsColumn';
-import ItemForm from './ItemForm';
-
-type Currency = 'EUR' | 'USD' | 'ILS' | 'GBP';
-type Unit = 'cm' | 'mm' | 'in';
-
-interface HopperItem {
-  name: string;
-  url: string;
-  previewUrl?: string;
-  size?: number;
-  mtime?: string;
+.catalog-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    padding: var(--gutter);
+    color: var(--text);
+    background: var(--bg);
 }
 
-interface MetaData {
-  techniques: string[];
-  series: string[];
-  tags: string[];
-  currencies: Currency[];
-  units: Unit[];
-  availability: Availability[];
+/* ===== Header ===== */
+.catalog-page header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-const DEFAULT_META: MetaData = {
-  techniques: [],
-  series: [],
-  tags: [],
-  currencies: ['EUR', 'USD', 'ILS', 'GBP'],
-  units: ['cm', 'mm', 'in'],
-  availability: ['available', 'reserved', 'sold', 'not_for_sale'],
-};
+.catalog-page header button {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    border-radius: 6px;
+    cursor: pointer;
+    transition:
+        background 0.2s,
+        color 0.2s,
+        border-color 0.2s;
+}
 
-export default function CatalogPage() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+.catalog-page header button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--card-bg);
+}
 
-  const [items, setItems] = useState<HopperItem[]>([]);
-  const [q, setQ] = useState('');
-  const [focusedId, setFocusedId] = useState<string | null>(null);
+.catalog-page header button:hover:not(.active) {
+    background: var(--accent-hover);
+    color: var(--card-bg);
+}
 
-  // ключ: draftId, значение: драфт
-  const [drafts, setDrafts] = useState<Record<string, ArtItemJSON>>({});
-  const [meta, setMeta] = useState<MetaData>(DEFAULT_META);
+/* ===== GRID ===== */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: start;
+}
 
-  const fmtDate = (d = new Date()) => d.toISOString().slice(0, 10) as ISODate;
-  const newId = () =>
-    crypto?.randomUUID
-      ? crypto.randomUUID()
-      : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+/* ===== CARD ===== */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        border-color 0.15s;
+}
 
-  useEffect(() => {
-    const run = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const resp = await fetch(HOPPER_LIST_URL, { credentials: 'include' });
-        if (!resp.ok) throw new Error(`Hopper list failed: ${resp.status}`);
-        const data = (await resp.json()) as HopperItem[];
-        setItems(data);
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px var(--border);
+}
 
-        // Если есть отдельная ручка метаданных — подтяни:
-        // const m = await (await fetch(CATALOG_META_URL, { credentials: 'include' })).json();
-        // setMeta({ ...DEFAULT_META, ...m });
+.card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 60%, transparent);
+}
 
-      } catch (e: any) {
-        setError(e.message || String(e));
-      } finally {
-        setLoading(false);
-      }
-    };
-    run();
-  }, []);
+/* Image */
+.card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+    background: var(--tile-title);
+}
 
-  const filtered = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    if (!s) return items;
-    return items.filter(it => (it.name || '').toLowerCase().includes(s));
-  }, [items, q]);
+/* Meta text under image */
+.card .meta {
+    font-size: 0.8rem;
+    color: var(--muted);
+    padding: 6px 8px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* ========== FORM SECTION ========== */
+.catalog-form-section {
+    margin-top: var(--gap);
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card-bg);
+    color: var(--text);
+    max-width: 700px;
+}
 
-  const buildDraft = (it: HopperItem): ArtItemJSON => {
-    const id = newId();
-    const baseNameNoExt = it.name.replace(/\.[^.]+$/, '');
-    return {
-      id,
-      title: { ru: baseNameNoExt },
-      dateCreated: fmtDate(),
-      techniques: [],
-      price: null,
-      availability: 'available',
-      series: null,
-      tags: [],
-      notes: null,
-      images: { full: it.url as FullPath } as ImagesJSON,
-      dimensions: { width: 0, height: 0, unit: 'cm' },
-    };
-  };
+.catalog-form-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+}
 
-  // Клик по превью
-  const onPick = (it: HopperItem) => {
-    // Ищем уже созданный драфт по этому url (чтобы не плодить дубликаты)
-    const existingEntry = Object.values(drafts).find(d => (d.images as any)?.full === it.url);
-    if (existingEntry) {
-      setFocusedId(existingEntry.id!);
-      return;
-    }
-    const d = buildDraft(it);
-    setDrafts(prev => ({ ...prev, [d.id!]: d }));
-    setFocusedId(d.id!);
-  };
+.catalog-form-loading {
+    font-size: 0.9rem;
+    color: var(--muted);
+    padding: 0.5rem 0;
+}
+/* Create form container already themed in previous step */
+.create-form {
+    display: grid;
+    gap: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+}
 
-  const updateDraft = (id: string, patch: Partial<ArtItemJSON>) =>
-    setDrafts(prev => {
-      const cur = prev[id];
-      return cur ? { ...prev, [id]: { ...cur, ...patch } } : prev;
-    });
+/* Generic field block */
+.catalog-field {
+    display: grid;
+    gap: 6px;
+}
 
-  const removeDraft = (id: string) =>
-    setDrafts(prev => {
-      const copy = { ...prev };
-      delete copy[id];
-      if (focusedId === id) setFocusedId(null);
-      return copy;
-    });
+.catalog-label {
+    font-size: 0.9rem;
+    color: var(--muted);
+}
 
-  const saveOne = async (id: string) => {
-    const draft = drafts[id];
-    if (!draft) return;
-    setSaving(true);
-    try {
-      const resp = await fetch(UPDATE_CATALOG, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(draft),
-      });
-      if (!resp.ok) throw new Error(`Save failed: ${resp.status}`);
-      // Можно пометить драфт как сохранённый/очистить/оставить
-    } catch (e: any) {
-      setError(e.message || String(e));
-    } finally {
-      setSaving(false);
-    }
-  };
+.catalog-input,
+.catalog-textarea,
+.create-form select,
+.create-form input[type='date'],
+.create-form input[type='number'] {
+    width: 100%;
+    padding: 8px 10px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+}
 
-  const saveAll = async () => {
-    setSaving(true);
-    try {
-      const all = Object.values(drafts);
-      await Promise.all(
-        all.map(d =>
-          fetch(UPDATE_CATALOG, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(d),
-          }),
-        ),
-      );
-    } catch (e: any) {
-      setError(e.message || String(e));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (loading) return <div className="empty">Загружаю превью…</div>;
-  if (error) {
-    return (
-      <div className="empty" style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}>
-        Ошибка: {error}
-      </div>
-    );
-  }
-
-  return (
-    <div className="catalog-grid">
-      <aside className="hopper-pane">
-        <div className="hopper-tools">
-          <input
-            className="form-input"
-            placeholder="Поиск…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </div>
-        <HopperGrid items={filtered} onPick={onPick} />
-      </aside>
-
-      <section className="drafts-pane">
-        <div className="drafts-header">
-          <div>Выбрано: {Object.keys(drafts).length}</div>
-          <div className="drafts-actions">
-            <button className="btn" onClick={saveAll} disabled={saving || !Object.keys(drafts).length}>
-              {saving ? 'Сохраняю…' : 'Сохранить все'}
-            </button>
-          </div>
-        </div>
-
-        <DraftsColumn
-          drafts={drafts}
-          meta={meta}
-          focusedId={focusedId}
-          setFocusedId={setFocusedId}
-          onUpdate={updateDraft}
-          onRemove={removeDraft}
-          onSave={saveOne}
-        />
-
-        {focusedId && drafts[focusedId] && (
-          <div className="form-panel">
-            <ItemForm
-              draft={drafts[focusedId]}
-              meta={meta}
-              onChange={(patch) => updateDraft(focusedId, patch)}
-              onSave={() => saveOne(focusedId)}
-            />
-          </div>
-        )}
-      </section>
-    </div>
-  );
+.catalog-input:focus,
+.catalog-textarea:focus,
+.create-form select:focus,
+.create-form input[type='date']:focus,
+.create-form input[type='number']:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
 }

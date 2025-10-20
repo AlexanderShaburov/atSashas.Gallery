@@ -6,3 +6,8 @@ export type ArtCatalog = {
     order: string[];
     items: Record<string, ArtItemJSON>;
 };
+
+export type HopperThumb = {
+    id: string;
+    url: string;
+};

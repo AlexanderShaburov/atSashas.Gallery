@@ -103,7 +103,7 @@ logs/
 # 🍤 Temporal documentation
 # ====================================
 *.txt
-Docs/**
+Docs/*
 
 # ====================================
 # 💾 PREVIOUS VERSION

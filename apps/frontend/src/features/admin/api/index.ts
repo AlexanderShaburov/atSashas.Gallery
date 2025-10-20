@@ -1,22 +1,36 @@
-import type { ArtCatalog } from '@/entities/catalog';
+import type { TechniquesJson } from '@/entities/art';
+import type { ArtCatalog, HopperThumb } from '@/entities/catalog';
+import type { ApiResponse } from '@/entities/common';
 import type { StreamData } from '@/entities/stream';
-
 export const VAULT_BASE = import.meta.env.VITE_VAULT_BASE_URL;
 export const API_BASE = import.meta.env.VITE_API_BASE_URL;
 export const STREAMS_URL = import.meta.env.VITE_STREAMS_BASE_URL;
-export const CATALOG_URL = `${VAULT_BASE}api/catalog.json`;
 export const UPDATE_CATALOG = `${API_BASE}/catalog/update`;
 export const HOPPER_LIST_URL = ` ${API_BASE}/hopper/content`;
+export const JSON_VAULT = `${API_BASE}/json`;
 // const VAULT_URL = `${BASE}api/vault/`;
 export const UPLOAD_URL = `${API_BASE}upload`;
 console.log(VAULT_BASE, API_BASE, STREAMS_URL, UPLOAD_URL);
 
-export async function getCatalog() {
-    return (await fetch(CATALOG_URL)).json();
+// async function j<T>(res: Response): Promise<T> {
+//     if (!res.ok) {
+//         const txt = await res.text();
+//         throw new Error(`${res.status} ${res.statusText}: ${txt}`);
+//     }
+//     return res.json() as Promise<T>;
+// }
+
+export async function getCatalog(): Promise<ArtCatalog> {
+    const request = `${JSON_VAULT}/catalog`;
+    const res = await fetch(request);
+    if (!res.ok) throw new Error(`Catalog ${res.status}`);
+    const raw = (await res.json()) as ApiResponse<ArtCatalog>;
+    return raw.data;
 }
 
 export async function saveCatalog(data: ArtCatalog) {
-    await fetch(CATALOG_URL, {
+    const request = `${JSON_VAULT}/catalog`;
+    await fetch(request, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -39,9 +53,21 @@ export async function uploadImage(file: File, category: string, filename?: strin
     const fd = new FormData();
     fd.append('file', file);
     fd.append('category', category);
-    console.log(VAULT_BASE, API_BASE, STREAMS_URL, UPLOAD_URL);
-    console.log(`Form for ${file.name} created ${fd} be created to ${UPLOAD_URL}`);
-    console.log(`Where base is ${UPLOAD_URL}`);
     if (filename) fd.append('filename', filename);
     return (await fetch(UPLOAD_URL, { method: 'POST', body: fd })).json();
+}
+
+export async function getHopperContent(): Promise<HopperThumb[]> {
+    const resp = await fetch(HOPPER_LIST_URL);
+    if (!resp.ok) throw new Error(`Hopper list request failed with error ${resp.status}`);
+    return await resp.json();
+}
+
+export async function getTechniques(): Promise<TechniquesJson> {
+    const request = `${JSON_VAULT}/techniques`;
+    const res = await fetch(request);
+    if (!res.ok) throw new Error(`Techniques ${res.status}`);
+    console.log(`Techniques request status: ${res.status}`);
+    const raw = (await res.json()) as ApiResponse<TechniquesJson>;
+    return raw.data;
 }

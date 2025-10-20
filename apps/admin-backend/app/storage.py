@@ -18,9 +18,11 @@ def json_path(key: str) -> Path:
 
 
 def read_json(key: str) -> Any:
+    print(f"JSON read_json reached with {key} key.")
     p = json_path(key)
     if not p.exists():
         return None
+    print(f"JSON read_json obtained {p} path.")
     with p.open("r", encoding="utf-8") as f:
         return json.load(f)
 

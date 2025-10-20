@@ -1,1 +1,1 @@
-export type {ArtCatalog} from './catalog'
+export type { ArtCatalog, HopperThumb } from './catalog';
