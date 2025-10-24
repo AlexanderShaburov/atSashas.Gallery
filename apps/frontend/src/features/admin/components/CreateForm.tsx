@@ -1,85 +1,69 @@
 // CreateForm.tsx
 import { TechniquesJson } from '@/entities/art';
-import type { Availability, CurrencyName } from '@/entities/common';
+import type { Availability, Dimensions, ISODate, Localized, Money } from '@/entities/common';
 import { useEffect, useMemo, useState } from 'react';
-
-type Unit = 'cm' | 'in';
+import './create-form.css';
+import DimensionsInput from './UX/DimentionsInput';
+import LangInput from './UX/LangInput';
+import MoneyInput from './UX/MoneyInput';
 
 export interface CreateFormValues {
-    dateCreated: string; // YYYY-MM-DD
-    title_en?: string;
-    title_ru?: string;
+    dateCreated: ISODate;
+    title?: Localized | undefined;
     category?: string; // techniques[0]
     technique?: string; // techniques[1]
     availability: Availability;
-    width?: number;
-    height?: number;
-    unit: Unit;
-    price_amount?: number;
-    price_currency: CurrencyName;
-    alt_en?: string;
-    alt_ru?: string;
-    series?: string;
-    tags?: string;
-    notes?: string;
+    dimensions: Dimensions | undefined;
+    price: Money | undefined;
+    alt?: Localized | undefined;
+    series?: string | undefined;
+    tags?: string[] | undefined;
+    notes?: string | undefined;
 }
 
 const DEFAULT_CATEGORY = 'painting' as const;
 const DEFAULT_TECHNIQUE = 'watercolor' as const;
 
-function todayISO(): string {
+function todayISO(): ISODate {
     const d = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` as ISODate;
 }
+export type CreateFormProps = {
+    techniques: TechniquesJson; // techniques in CatalogPage.tsx
+    initial: Partial<CreateFormValues> | null; // formValues
+    onChange: (v: CreateFormValues) => void; // setFormValues()
+    seriesOptions: string[]; // seriesOptions
+};
 
-export function CreateForm({
-    techniques,
-    initial,
-    onChange,
-    seriesOptions = [],
-}: {
-    techniques: TechniquesJson;
-    initial?: Partial<CreateFormValues> | undefined;
-    onChange: (v: CreateFormValues) => void;
-    seriesOptions?: string[];
-}) {
+export function CreateForm({ techniques, initial, onChange, seriesOptions = [] }: CreateFormProps) {
     const categories = useMemo(
         () => Object.entries(techniques).map(([key, v]) => ({ key, label: v.label })),
         [techniques],
     );
 
     const [values, setValues] = useState<CreateFormValues>(() => {
-        const defCat = initial?.category ?? categories[0]?.key ?? DEFAULT_CATEGORY;
+        const defCat: string = initial?.category ?? categories[0]?.key ?? DEFAULT_CATEGORY;
         const defTech: string =
             initial?.technique ?? techniques[defCat]?.items[0]?.key ?? DEFAULT_TECHNIQUE;
 
         const v: CreateFormValues = {
             dateCreated: initial?.dateCreated ?? todayISO(),
-            title_en: initial?.title_en ?? '',
-            title_ru: initial?.title_ru ?? '',
+            title: initial?.title ?? { en: '' },
             category: defCat,
             technique: defTech,
             availability: initial?.availability ?? 'available',
-            // width: initial?.width,
-            // height: initial?.height,
-            unit: initial?.unit ?? 'cm',
-            // price_amount: initial?.price_amount,
-            price_currency: initial?.price_currency ?? 'EUR',
-            alt_en: initial?.alt_en ?? '',
-            alt_ru: initial?.alt_ru ?? '',
+            dimensions: initial?.dimensions ?? { width: 0, height: 0, unit: 'cm' },
+            price: initial?.price,
+            alt: initial?.alt ?? { en: '' },
             series: initial?.series ?? '',
-            tags: initial?.tags ?? '',
-            notes: initial?.notes ?? '',
+            tags: initial?.tags ?? [],
+            notes: initial?.notes,
         };
-
-        if (initial?.width !== undefined) v.width = initial.width;
-        if (initial?.height !== undefined) v.height = initial.height;
-        if (initial?.price_amount !== undefined) v.price_amount = initial.price_amount;
 
         return v;
     });
-
+    //???????????????????????/
     useEffect(() => {
         onChange(values);
     }, [values, onChange]);
@@ -92,57 +76,54 @@ export function CreateForm({
     }, [values.category, techniques]);
 
     return (
-        <div
-            className="create-form"
-            style={{
-                display: 'grid',
-                gap: '10px',
-                background: 'var(--card-bg)',
-                border: '1px solid var(--border)',
-                borderRadius: 12,
-                padding: 16,
-            }}
-        >
-            <div>
-                <label>Date</label>
-                <br />
+        <form className="cf-form" onSubmit={(e) => e.preventDefault()}>
+            {/* Date */}
+            <div className="cf-row">
+                <label htmlFor="dateCreated" className="cf-label">
+                    Date
+                </label>
                 <input
+                    id="dateCreated"
                     type="date"
+                    className="cf-input"
                     value={values.dateCreated}
-                    onChange={(e) => setValues((v) => ({ ...v, dateCreated: e.target.value }))}
+                    onChange={(e) =>
+                        setValues((v) => ({ ...v, dateCreated: e.target.value as ISODate }))
+                    }
                 />
             </div>
 
-            <div>
-                <label>Title (EN)</label>
-                <br />
-                <input
-                    value={values.title_en ?? ''}
-                    onChange={(e) => setValues((v) => ({ ...v, title_en: e.target.value }))}
-                />
-            </div>
+            {/* Title */}
+            <LangInput
+                label="Title"
+                value={{ en: values.alt?.en ?? '', ru: values.alt?.ru ?? '' }}
+                className="cf-field--title"
+                inputId="title_multi"
+                onChange={(next) =>
+                    setValues((v) => ({
+                        ...v,
+                        title_en: next.en ?? '',
+                        title_ru: next.ru ?? '',
+                    }))
+                }
+                placeholder="Here is artwork name"
+            />
 
-            <div>
-                <label>Title (RU)</label>
-                <br />
-                <input
-                    value={values.title_ru ?? ''}
-                    onChange={(e) => setValues((v) => ({ ...v, title_ru: e.target.value }))}
-                />
-            </div>
-
-            <div>
-                <label>Category</label>
-                <br />
+            {/* Category */}
+            <div className="cf-row">
+                <label htmlFor="category" className="cf-label">
+                    Category
+                </label>
                 <select
+                    id="category"
+                    className="cf-select"
                     value={values.category ?? ''}
                     onChange={(e) => {
                         const category = e.target.value;
                         const firstTech = techniques[category]?.items[0]?.key;
-
                         setValues((prev) => {
                             if (firstTech !== undefined) {
-                                return { ...prev, category, techniques: firstTech };
+                                return { ...prev, category, technique: firstTech }; // ✅ technique (not techniques)
                             } else {
                                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                 const { technique: _omit, ...rest } = prev;
@@ -159,20 +140,22 @@ export function CreateForm({
                 </select>
             </div>
 
-            <div>
-                <label>Technique</label>
-                <br />
+            {/* Technique */}
+            <div className="cf-row">
+                <label htmlFor="technique" className="cf-label">
+                    Technique
+                </label>
                 <select
+                    id="technique"
+                    className="cf-select"
                     value={values.technique ?? ''}
                     onChange={(e) => setValues((v) => ({ ...v, technique: e.target.value }))}
                 >
-                    {/* placeholder when technique is unset */}
                     {values.technique == null && (
                         <option value="" disabled>
                             — Select technique —
                         </option>
                     )}
-
                     {techsForCat.map((t) => (
                         <option key={t.key} value={t.key}>
                             {t.label}
@@ -180,12 +163,16 @@ export function CreateForm({
                     ))}
                 </select>
             </div>
-            {/* SERIES with suggestions via datalist */}
-            <div className="catalog-field">
-                <label className="catalog-label">Series</label>
+
+            {/* Series with datalist */}
+            <div className="cf-row">
+                <label htmlFor="series" className="cf-label">
+                    Series
+                </label>
                 <input
-                    className="catalog-input"
+                    id="series"
                     list="series-list"
+                    className="cf-input"
                     value={values.series ?? ''}
                     onChange={(e) => setValues((v) => ({ ...v, series: e.target.value }))}
                     placeholder="Start typing or pick…"
@@ -196,22 +183,39 @@ export function CreateForm({
                     ))}
                 </datalist>
             </div>
-            {/* TAGS (comma-separated) */}
-            <div className="catalog-field">
-                <label className="catalog-label">Tags</label>
+
+            {/* Tags */}
+            <div className="cf-row">
+                <label htmlFor="tags" className="cf-label">
+                    Tags
+                </label>
                 <input
-                    className="catalog-input"
-                    value={values.tags ?? ''}
-                    onChange={(e) => setValues((v) => ({ ...v, tags: e.target.value }))}
+                    id="tags"
+                    className="cf-input"
+                    value={values.tags?.join(', ') ?? ''}
+                    onChange={(e) => {
+                        const raw = e.target.value;
+                        const tags = raw
+                            .split(',')
+                            .map((s) => s.trim())
+                            .filter(Boolean);
+                        setValues((v) => ({
+                            ...v,
+                            tags: tags.length ? tags : undefined,
+                        }));
+                    }}
                     placeholder="comma, separated (e.g. roses, landscape)"
                 />
             </div>
 
-            {/* NOTES */}
-            <div className="catalog-field">
-                <label className="catalog-label">Notes</label>
+            {/* Notes */}
+            <div className="cf-row">
+                <label htmlFor="notes" className="cf-label">
+                    Notes
+                </label>
                 <textarea
-                    className="catalog-textarea"
+                    id="notes"
+                    className="cf-textarea"
                     rows={3}
                     value={values.notes ?? ''}
                     onChange={(e) => setValues((v) => ({ ...v, notes: e.target.value }))}
@@ -219,10 +223,14 @@ export function CreateForm({
                 />
             </div>
 
-            <div>
-                <label>Availability</label>
-                <br />
+            {/* Availability */}
+            <div className="cf-row">
+                <label htmlFor="availability" className="cf-label">
+                    Availability
+                </label>
                 <select
+                    id="availability"
+                    className="cf-select"
                     value={values.availability}
                     onChange={(e) =>
                         setValues((v) => ({ ...v, availability: e.target.value as Availability }))
@@ -236,117 +244,39 @@ export function CreateForm({
                 </select>
             </div>
 
-            <div>
-                <label>Dimensions</label>
-                <br />
-                <div style={{ display: 'flex', gap: 8 }}>
-                    <input
-                        type="number"
-                        placeholder="W"
-                        value={values.width ?? ''}
-                        onChange={(e) =>
-                            setValues((prev) => {
-                                const raw = e.target.value;
-                                const n = raw === '' ? undefined : Number(raw);
-
-                                if (n === undefined) {
-                                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                    const { width: _omit, ...rest } = prev;
-                                    return rest;
-                                }
-
-                                return { ...prev, width: n };
-                            })
-                        }
+            {/* Dimensions */}
+            <div className="cf-row">
+                <span className="cf-label">Dimensions</span>
+                <div className="cf-row--inline">
+                    <DimensionsInput
+                        label="artwork-size"
+                        value={values.dimensions}
+                        onChange={(size) => setValues((prev) => ({ ...prev, dimensions: size }))}
                     />
-                    <input
-                        type="number"
-                        placeholder="H"
-                        value={values.height ?? ''}
-                        onChange={(e) =>
-                            setValues((prev) => {
-                                const raw = e.target.value;
-                                const n = raw === '' ? undefined : Number(raw);
-
-                                if (n === undefined) {
-                                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                    const { height: _omit, ...rest } = prev;
-                                    return rest;
-                                }
-                                return { ...prev, height: n };
-                            })
-                        }
-                    />
-                    <select
-                        value={values.unit}
-                        onChange={(e) => setValues((v) => ({ ...v, unit: e.target.value as Unit }))}
-                    >
-                        <option value="cm">cm</option>
-                        <option value="in">in</option>
-                    </select>
                 </div>
             </div>
 
-            <div>
-                <label>Price</label>
-                <br />
-                <div style={{ display: 'flex', gap: 8 }}>
-                    <input
-                        type="number"
-                        step="0.01"
-                        placeholder="Amount"
-                        value={values.price_amount ?? ''}
-                        onChange={(e) =>
-                            setValues((prev) => {
-                                const raw = e.target.value;
-                                const n = raw === '' ? undefined : Number(raw);
-
-                                if (n === undefined) {
-                                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                    const { price_amount: _omit, ...rest } = prev;
-                                    return rest;
-                                }
-                                return { ...prev, price_amount: n };
-                            })
-                        }
-                    />
-                    <select
-                        value={values.price_currency}
-                        onChange={(e) =>
-                            setValues((v) => ({
-                                ...v,
-                                price_currency: e.target.value as CurrencyName,
-                            }))
-                        }
-                    >
-                        {(
-                            ['USD', 'EUR', 'ILS', 'GBP', 'CHF', 'JPY', 'CNY', 'CAD', 'AUD'] as const
-                        ).map((c) => (
-                            <option key={c} value={c}>
-                                {c}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-
-            <div>
-                <label>ALT (EN) This text fill in for image unavailable.</label>
-                <br />
-                <input
-                    value={values.alt_en ?? ''}
-                    onChange={(e) => setValues((v) => ({ ...v, alt_en: e.target.value }))}
-                />
-            </div>
-
-            <div>
-                <label>ALT (RU) Этот текст заменит картинку в случае недоступности</label>
-                <br />
-                <input
-                    value={values.alt_ru ?? ''}
-                    onChange={(e) => setValues((v) => ({ ...v, alt_ru: e.target.value }))}
-                />
-            </div>
-        </div>
+            {/* Price */}
+            <MoneyInput
+                label="artwork-price"
+                value={values.price}
+                onChange={(next) => setValues((prev) => ({ ...prev, price: next }))}
+            />
+            {/* ALT */}
+            <LangInput
+                label="ALT (fallback text)"
+                className="cf-field--alt"
+                inputId="alt_multi"
+                value={values.alt}
+                onChange={(next) =>
+                    setValues((v) => ({
+                        ...v,
+                        alt_en: next.en ?? '',
+                        alt_ru: next.ru ?? '',
+                    }))
+                }
+                placeholder="Artwork short description"
+            />
+        </form>
     );
 }

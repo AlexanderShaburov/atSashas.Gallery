@@ -7,7 +7,8 @@ export type ArtCatalog = {
     items: Record<string, ArtItemJSON>;
 };
 
-export type HopperThumb = {
+export type Thumb = {
     id: string;
-    url: string;
+    src: string;
+    alt?: string;
 };

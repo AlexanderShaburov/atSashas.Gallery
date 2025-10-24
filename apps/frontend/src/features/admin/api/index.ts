@@ -1,5 +1,5 @@
 import type { TechniquesJson } from '@/entities/art';
-import type { ArtCatalog, HopperThumb } from '@/entities/catalog';
+import type { ArtCatalog, Thumb } from '@/entities/catalog';
 import type { ApiResponse } from '@/entities/common';
 import type { StreamData } from '@/entities/stream';
 export const VAULT_BASE = import.meta.env.VITE_VAULT_BASE_URL;
@@ -9,7 +9,7 @@ export const UPDATE_CATALOG = `${API_BASE}/catalog/update`;
 export const HOPPER_LIST_URL = ` ${API_BASE}/hopper/content`;
 export const JSON_VAULT = `${API_BASE}/json`;
 // const VAULT_URL = `${BASE}api/vault/`;
-export const UPLOAD_URL = `${API_BASE}upload`;
+export const UPLOAD_URL = `${API_BASE}/upload`;
 console.log(VAULT_BASE, API_BASE, STREAMS_URL, UPLOAD_URL);
 
 // async function j<T>(res: Response): Promise<T> {
@@ -57,7 +57,7 @@ export async function uploadImage(file: File, category: string, filename?: strin
     return (await fetch(UPLOAD_URL, { method: 'POST', body: fd })).json();
 }
 
-export async function getHopperContent(): Promise<HopperThumb[]> {
+export async function getHopperContent(): Promise<Thumb[]> {
     const resp = await fetch(HOPPER_LIST_URL);
     if (!resp.ok) throw new Error(`Hopper list request failed with error ${resp.status}`);
     return await resp.json();

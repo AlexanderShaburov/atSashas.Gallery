@@ -9,7 +9,7 @@ interface Props {
     form: React.ReactNode;
 }
 
-export default function EditorLayout({ thumbs, selectedId, setSelectedId, form }: Props) {
+export default function CatalogEditorLayout({ thumbs, selectedId, setSelectedId, form }: Props) {
     const selected = thumbs.find((t) => t.id === selectedId) || null;
 
     return (

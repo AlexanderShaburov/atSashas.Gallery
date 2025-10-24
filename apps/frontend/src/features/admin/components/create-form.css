@@ -1,0 +1,117 @@
+/* Base form layout */
+.cf-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    color: var(--text);
+}
+
+.cf-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+/* Labels */
+.cf-label {
+    font-size: 0.98rem;
+    color: var(--muted);
+}
+
+.cf-select {
+    -webkit-appearance: none; /* kill Safari's native styling */
+    appearance: none;
+
+    background-color: var(--card-bg, var(--surface));
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23aab' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center; /* custom chevron */
+    background-size: 12px 8px;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: none; /* remove bevel */
+    color: var(--text);
+    padding: 0.55rem 2.1rem 0.55rem 0.7rem; /* leave room for chevron */
+
+    /* Improve legibility */
+    font-size: 1.05rem;
+    line-height: 1.4;
+    min-height: 44px;
+}
+
+/* Inputs / selects / textarea */
+.cf-input,
+.cf-select,
+.cf-textarea {
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card-bg, var(--surface));
+    color: var(--text);
+    font-size: 1.05rem;
+    min-height: 44px;
+    line-height: 1.4;
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+.cf-select option {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    padding: 0.4rem 0.6rem;
+}
+/* Focus state */
+.cf-input:focus,
+.cf-select:focus,
+.cf-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+/* Invalid state (optional) */
+.cf-input[aria-invalid='true'],
+.cf-textarea[aria-invalid='true'],
+.cf-select[aria-invalid='true'] {
+    border-color: #c25252;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #c25252 20%, transparent);
+}
+.cf-lang-wrap {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+}
+.cf-select--lang {
+    min-width: 88px;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+/* iOS Safari: prevent auto-zoom and ensure readable picker text */
+@supports (-webkit-touch-callout: none) {
+    .cf-input,
+    .cf-select,
+    .cf-textarea {
+        font-size: 16px; /* ≥16px prevents zoom on focus */
+    }
+}
+
+@media (min-width: 680px) {
+    .cf-select {
+        font-size: 1.1rem;
+        min-height: 46px;
+    }
+    .cf-select option {
+        font-size: 1.1rem;
+    }
+    .cf-money-wrap {
+        grid-template-columns: 1fr 140px;
+    }
+}
+
+/* ---------------- Special styling: Title + Alt ---------------- */
+/* Use slightly elevated surface so they stand out in both themes */
+/* .cf-field--title .cf-input,
+.cf-fi */

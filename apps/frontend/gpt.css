@@ -1,0 +1,40 @@
+/* Bigger, touch-friendly controls */
+.cf-input,
+.cf-select,
+.cf-textarea {
+    font-size: 1.05rem; /* up from 0.95rem */
+    min-height: 44px; /* Apple HIG tap target */
+    line-height: 1.4;
+}
+
+/* Ensure the dropdown list (where supported) also uses larger text */
+.cf-select option {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    padding: 0.4rem 0.6rem; /* desktop browsers honor this */
+}
+
+/* Slightly larger group labels for readability */
+.cf-label {
+    font-size: 0.98rem;
+}
+
+/* iOS Safari: prevent auto-zoom and ensure readable picker text */
+@supports (-webkit-touch-callout: none) {
+    .cf-input,
+    .cf-select,
+    .cf-textarea {
+        font-size: 16px; /* ≥16px prevents zoom on focus */
+    }
+}
+
+/* Optional: bigger selects specifically for small screens */
+@media (max-width: 480px) {
+    .cf-select {
+        font-size: 1.1rem;
+        min-height: 46px;
+    }
+    .cf-select option {
+        font-size: 1.1rem;
+    }
+}

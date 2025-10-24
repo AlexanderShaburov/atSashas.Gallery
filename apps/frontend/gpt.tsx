@@ -1,103 +1,55 @@
-// CatalogEditorLayout.tsx
+type CurrencyName = 'USD' | 'EUR' | 'ILS' | 'GBP' | 'CHF' | 'JPY' | 'CNY' | 'CAD' | 'AUD';
 
-// WHY WE REDO THAT. BETTE REUSE WHAT WE HAVE IN CreateForm.tsx
+type Money = { amount: number; currency: CurrencyName };
+type MoneyDraft = { amount?: number; currency?: CurrencyName };
 
-const techsForCat = useMemo(() => {
-    const raw = values.category ? (techniques[values.category]?.items ?? []) : [];
-    // Normalize to { key, label }
-    return raw.map((it: any) => (typeof it === 'string' ? { key: it, label: it } : it));
-}, [values.category, techniques]);
-import React from 'react';
-import './catalog-editor.css';
-
-type Thumb = { id: string; src: string; alt?: string };
-
-interface Props {
-    thumbs: Thumb[];
-    selectedId: string | null;
-    setSelectedId: (id: string) => void;
-    form: React.ReactNode; // your form JSX
+function isCompleteMoney(d: MoneyDraft): d is Money {
+    return d.amount !== undefined && d.currency !== undefined;
 }
 
-export default function CatalogEditorLayout({ thumbs, selectedId, setSelectedId, form }: Props) {
-    const selected = thumbs.find((t) => t.id === selectedId) || null;
+type MoneyInputProps = {
+    value?: Money; // controlled final value (optional)
+    onChange: (value: Money) => void; // fire only when complete
+};
+
+export function MoneyInput({ value, onChange }: MoneyInputProps) {
+    // seed draft from final value (if any)
+    const [draft, setDraft] = React.useState<MoneyDraft>(value ?? {});
+
+    // keep draft in sync if parent changes value externally
+    React.useEffect(() => setDraft(value ?? {}), [value?.amount, value?.currency]);
+
+    const update = (next: Partial<MoneyDraft>) => {
+        const merged = { ...draft, ...next };
+        setDraft(merged);
+        if (isCompleteMoney(merged)) onChange(merged); // only call when complete
+    };
 
     return (
-        <div className="ce-layout">
-            <aside className="ce-previews" aria-label="Artwork previews">
-                {/* Mobile: horizontal scroller */}
-                {/* GIVES US THUMBNAIL PREVIEW SET */}
-                <div className="ce-thumbs-strip">
-                    {thumbs.map((t) => (
-                        <ThumbCard
-                            key={t.id}
-                            t={t}
-                            selected={t.id === selectedId}
-                            onClick={() => setSelectedId(t.id)}
-                            mobile
-                        />
-                    ))}
-                </div>
-
-                {/* Desktop: featured + grid */}
-                {selected && (
-                    <div className="ce-featured">
-                        <ThumbCard
-                            t={selected}
-                            selected
-                            onClick={() => {}}
-                            ariaLabel="Selected artwork"
-                        />
-                    </div>
+        <div>
+            <input
+                type="number"
+                placeholder="Amount"
+                value={draft.amount ?? ''}
+                onChange={(e) =>
+                    update({ amount: e.target.value ? Number(e.target.value) : undefined })
+                }
+            />
+            <select
+                value={draft.currency ?? ''}
+                onChange={(e) => update({ currency: e.target.value as CurrencyName })}
+            >
+                <option value="" disabled>
+                    Select currency
+                </option>
+                {(['USD', 'EUR', 'ILS', 'GBP', 'CHF', 'JPY', 'CNY', 'CAD', 'AUD'] as const).map(
+                    (c) => (
+                        <option key={c} value={c}>
+                            {c}
+                        </option>
+                    ),
                 )}
-                {/* GIVES US THUMBNAIL PREVIEW SET */}
-
-                <div className="ce-thumbs-grid">
-                    {thumbs.map((t) => (
-                        <ThumbCard
-                            key={t.id}
-                            t={t}
-                            selected={t.id === selectedId}
-                            onClick={() => setSelectedId(t.id)}
-                        />
-                    ))}
-                </div>
-            </aside>
-
-            <section className="ce-form-col" aria-label="Metadata form">
-                <div className="ce-form-wrap">{form}</div>
-            </section>
+            </select>
         </div>
-    );
-}
-
-function ThumbCard({
-    t,
-    selected,
-    onClick,
-    mobile = false,
-    ariaLabel,
-}: {
-    t: Thumb;
-    selected: boolean;
-    onClick: () => void;
-    mobile?: boolean;
-    ariaLabel?: string;
-}) {
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            className={[
-                'ce-thumb',
-                mobile ? 'is-mobile' : '',
-                selected ? 'is-selected' : 'is-dimmed',
-            ].join(' ')}
-            aria-pressed={selected}
-            aria-label={ariaLabel || t.alt || 'thumbnail'}
-        >
-            <img src={t.src} alt={t.alt || ''} className="ce-thumb-img" loading="lazy" />
-            {selected && <span className="ce-badge">Selected</span>}
-        </button>
     );
 }
