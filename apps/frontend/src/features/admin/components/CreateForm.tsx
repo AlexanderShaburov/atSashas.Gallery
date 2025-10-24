@@ -3,7 +3,7 @@ import { TechniquesJson } from '@/entities/art';
 import type { Availability, Dimensions, ISODate, Localized, Money } from '@/entities/common';
 import { useEffect, useMemo, useState } from 'react';
 import './create-form.css';
-import DimensionsInput from './UX/DimentionsInput';
+import DimensionsInput from './UX/DimensionsInput';
 import LangInput from './UX/LangInput';
 import MoneyInput from './UX/MoneyInput';
 
@@ -249,7 +249,7 @@ export function CreateForm({ techniques, initial, onChange, seriesOptions = [] }
                 <span className="cf-label">Dimensions</span>
                 <div className="cf-row--inline">
                     <DimensionsInput
-                        label="artwork-size"
+                        label="artwork-size-NEW"
                         value={values.dimensions}
                         onChange={(size) => setValues((prev) => ({ ...prev, dimensions: size }))}
                     />

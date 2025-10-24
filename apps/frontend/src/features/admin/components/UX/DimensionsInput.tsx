@@ -1,5 +1,6 @@
 import type { Dimensions, UnitName } from '@/entities/common';
 import { useEffect, useState } from 'react';
+import NumericInput from './NumericInput';
 
 interface DimensionsInputProps {
     label: string;
@@ -29,14 +30,12 @@ export default function DimensionsInput({
 
     useEffect(() => {
         setDraft((prev) => {
-            if (value) {
-                const next = value;
-                const same =
-                    prev?.height === next.height &&
-                    prev?.width === next.width &&
-                    prev?.unit === next.unit;
-                return same ? prev : next;
-            }
+            if (!value) return prev;
+            const same =
+                prev?.height === value.height &&
+                prev?.width === value.width &&
+                prev?.unit === value.unit;
+            return same ? prev : value;
         });
     }, [value]);
 
@@ -52,47 +51,27 @@ export default function DimensionsInput({
 
             <div className="cf-row-inline cf-money-wrap">
                 <div>
-                    <label htmlFor={inputId} className="cf-label">
+                    <label htmlFor={`${inputId}-width-NEW`} className="cf-label">
                         Width
                     </label>
-                    <input
+                    <NumericInput
                         id={`${inputId}-width`}
                         className="cf-input"
-                        type="number"
-                        step="0.01"
-                        inputMode="decimal"
-                        placeholder="Amount"
+                        placeholder="Width"
                         value={draft?.width}
-                        onChange={(e) => {
-                            const raw = e.target.value;
-                            if (raw === undefined) {
-                                update({ width: undefined }); //unset size entirely
-                            } else {
-                                const n = Number(raw);
-                                if (!Number.isNaN(n)) update({ width: n });
-                            }
-                        }}
+                        decimals={2}
+                        onChangeNumber={(n) => update({ width: n })}
                     />
                     <label htmlFor={inputId} className="cf-label">
                         Height
                     </label>
-                    <input
+                    <NumericInput
                         id={`${inputId}-height`}
                         className="cf-input"
-                        type="number"
-                        step="0.1"
-                        inputMode="decimal"
                         placeholder="Height"
-                        value={draft?.width}
-                        onChange={(e) => {
-                            const raw = e.target.value;
-                            if (raw === undefined) {
-                                update({ height: undefined }); //
-                            } else {
-                                const n = Number(raw);
-                                if (!Number.isNaN(n)) update({ ...draft, height: n });
-                            }
-                        }}
+                        value={draft?.height}
+                        decimals={2}
+                        onChangeNumber={(n) => update({ height: n })}
                     />
                 </div>
                 <div>

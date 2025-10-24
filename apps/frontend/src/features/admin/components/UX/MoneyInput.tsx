@@ -1,5 +1,6 @@
-import { useState } from 'react';
 import type { CurrencyName, Money } from '@/entities/common';
+import { useState } from 'react';
+import NumericInput from './NumericInput';
 
 interface MoneyInputProps {
     label: string;
@@ -46,23 +47,14 @@ export default function MoneyInput({
                     <label htmlFor={idAmount} className="cf-label">
                         Amount
                     </label>
-                    <input
-                        id={idAmount}
+                    <NumericInput
+                        id={`${label}-amount`}
                         className="cf-input"
-                        type="number"
-                        step="0.01"
-                        inputMode="decimal"
                         placeholder="Amount"
                         value={value?.amount}
-                        onChange={(e) => {
-                            const raw = e.target.value;
-                            if (raw === undefined) {
-                                update({ amount: undefined }); //unset price entirely
-                            } else {
-                                const n = Number(raw);
-                                if (!Number.isNaN(n)) update({ amount: n });
-                            }
-                        }}
+                        decimals={2}
+                        allowNegative={false}
+                        onChangeNumber={(n) => update({ amount: n })}
                     />
                 </div>
                 <div>

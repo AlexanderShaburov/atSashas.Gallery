@@ -1,14 +1,13 @@
-// components/UX/NumericInput.tsx
 import { useEffect, useState } from 'react';
 
 type NumericInputProps = {
     id?: string;
     className?: string;
     placeholder?: string;
-    value?: number; // external numeric value
-    onChangeNumber: (next?: number) => void; // propagates number | undefined
-    decimals?: number; // how many decimal places to allow
-    allowNegative?: boolean; // optional
+    value?: number | undefined;
+    onChangeNumber: (next?: number) => void;
+    decimals?: number;
+    allowNegative?: boolean;
 };
 
 export default function NumericInput({
@@ -20,24 +19,21 @@ export default function NumericInput({
     decimals = 2,
     allowNegative = false,
 }: NumericInputProps) {
-    // internal text state for free typing
     const [text, setText] = useState<string>(value != null ? String(value) : '');
 
-    // keep text in sync if parent value changes (e.g. reset form)
     useEffect(() => {
         setText(value != null ? String(value) : '');
     }, [value]);
 
-    // Build regex: ^-?\d*(?:[.,]\d{0,decimals})?$
-    const decPart = decimals > 0 ? `{0,${decimals}}` : `{0,0}`;
+    const decPart = decimals > 0 ? `{0, ${decimals}}` : `{0,0}`;
     const sign = allowNegative ? '-?' : '';
     const allowed = new RegExp(`^${sign}\\d*(?:[.,]\\d${decPart})?$`);
 
     return (
         <input
             id={id}
-            type="text" // <- text, not number
-            inputMode="decimal" // mobile numeric keyboard
+            type="text"
+            inputMode="decimal"
             enterKeyHint="done"
             className={className}
             placeholder={placeholder}
@@ -45,19 +41,16 @@ export default function NumericInput({
             onChange={(e) => {
                 const t = e.target.value.trim();
                 if (t === '' || allowed.test(t)) {
-                    setText(t); // accept only allowed patterns
+                    setText(t);
                 }
-                // else ignore keystroke
             }}
             onBlur={() => {
                 if (text === '') {
                     onChangeNumber(undefined);
                     return;
                 }
-                // Normalize comma → dot
                 const n = Number(text.replace(',', '.'));
                 if (!Number.isNaN(n)) onChangeNumber(n);
-                // else keep text as-is (user will see it's invalid)
             }}
         />
     );

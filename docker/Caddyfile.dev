@@ -1,6 +1,12 @@
 
 
-:80 
+:80 {
+
+  log {
+    output stdout
+    format console
+    level INFO
+  }
 
 # 1. Static from vault:
 handle_path /media/* {
@@ -21,4 +27,4 @@ handle {
 # (optional) useful cache headers for images:
 @images path_regexp img ^/media/arts/(previews|fullsize)/.*\.(avif|webp|jpe?g|png)$
 header @images Cache-Control "public, max-age=31536000, immutable"
-
+}
