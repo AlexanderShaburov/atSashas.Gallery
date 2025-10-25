@@ -1,0 +1,237 @@
+/* =========================
+   Create Form — Final Balanced Version
+   ========================= */
+
+/* -------- Semantic color mapping -------- */
+:root {
+    --form-label-group: var(--muted); /* same as single labels */
+    --form-label-sub: color-mix(in srgb, var(--accent) 35%, var(--text));
+    --form-label-single: var(--muted);
+    --form-placeholder: color-mix(in srgb, var(--muted) 70%, transparent);
+
+    --form-border: var(--border);
+    --form-border-hover: color-mix(in srgb, var(--accent) 45%, var(--border));
+    --form-bg: var(--card-bg);
+    --form-shadow: var(--shadow, 0 4px 18px rgba(0, 0, 0, 0.25));
+}
+
+:root[data-theme='dark'] {
+    --form-label-group: var(--muted);
+    --form-label-sub: color-mix(in srgb, var(--accent) 50%, var(--text));
+    --form-label-single: var(--muted);
+    --form-placeholder: color-mix(in srgb, var(--muted) 50%, transparent);
+
+    --form-border: var(--border);
+    --form-border-hover: var(--accent);
+    --form-bg: var(--card-bg);
+}
+
+/* -------- Base layout -------- */
+.cf-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    color: var(--text);
+}
+
+.cf-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+/* -------- Label hierarchy -------- */
+.cf-group-label {
+    /* placed BEFORE the frame */
+    font-size: 0.96rem;
+    font-weight: 500;
+    color: var(--form-label-group);
+    margin-bottom: 0.35rem;
+}
+
+.cf-sub-label {
+    /* inside groups (Width, Height, Unit) */
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--form-label-sub);
+}
+
+.cf-single-label,
+.cf-label {
+    /* for ordinary single-field labels */
+    font-size: 0.96rem;
+    font-weight: 500;
+    color: var(--form-label-single);
+}
+
+/* -------- Inputs / selects / textarea -------- */
+.cf-input,
+.cf-select,
+.cf-textarea {
+    width: 100%;
+    padding: 0.6rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid var(--form-border);
+    background: var(--form-bg);
+    color: var(--text);
+    font-size: 1rem;
+    min-height: 44px;
+    line-height: 1.4;
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        background-color 0.25s ease;
+}
+
+.cf-input::placeholder,
+.cf-textarea::placeholder {
+    color: var(--form-placeholder);
+}
+
+/* Select styling */
+.cf-select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: var(--form-bg);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23aab' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 12px 8px;
+}
+
+.cf-select option {
+    font-size: 0.98rem;
+    line-height: 1.6;
+    padding: 0.4rem 0.6rem;
+}
+
+/* Focus & hover */
+.cf-input:focus,
+.cf-select:focus,
+.cf-textarea:focus,
+.cf-input:hover,
+.cf-select:hover {
+    outline: none;
+    border-color: var(--form-border-hover);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+/* Invalid state */
+.cf-input[aria-invalid='true'],
+.cf-textarea[aria-invalid='true'],
+.cf-select[aria-invalid='true'] {
+    border-color: #c25252;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #c25252 20%, transparent);
+}
+
+/* -------- Group container (frame only) -------- */
+.cf-group {
+    border: 1px solid var(--form-border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 0;
+    background: color-mix(in srgb, var(--form-bg) 98%, var(--accent) 2%);
+    box-shadow: var(--form-shadow);
+}
+
+/* Remove legend spacing (no legend used now) */
+.cf-group > legend {
+    display: none;
+}
+
+/* Spacing between group label and frame */
+.cf-group-label + .cf-group {
+    margin-top: 0;
+}
+
+/* -------- Inline field groups -------- */
+.cf-inline {
+    display: grid;
+    gap: 0.5rem 0.75rem;
+    align-items: end;
+}
+
+.cf-inline-3 {
+    grid-template-columns: 1fr 1fr minmax(88px, 140px);
+}
+
+.cf-inline-2 {
+    grid-template-columns: 1fr minmax(88px, 140px);
+}
+
+.cf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.cf-select--short {
+    min-width: 88px;
+    max-width: 140px;
+    width: 100%;
+    padding-left: 0.5rem;
+    padding-right: 2rem;
+}
+
+/* Language picker */
+.cf-lang-wrap {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.cf-select--lang {
+    min-width: 88px;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+/* -------- Responsive / mobile -------- */
+@supports (-webkit-touch-callout: none) {
+    .cf-input,
+    .cf-select,
+    .cf-textarea {
+        font-size: 16px;
+    }
+}
+
+/* Hybrid collapse */
+@media (max-width: 520px) {
+    .cf-inline-3 {
+        grid-template-columns: 1fr 1fr;
+    }
+    .cf-inline-3 .cf-field:last-child {
+        grid-column: 1 / -1;
+    }
+    .cf-inline-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 380px) {
+    .cf-inline-3,
+    .cf-inline-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 680px) {
+    .cf-select {
+        font-size: 1.1rem;
+        min-height: 46px;
+    }
+    .cf-select option {
+        font-size: 1.1rem;
+    }
+}
+
+/* -------- Number input spinners -------- */
+.cf-input[type='number']::-webkit-outer-spin-button,
+.cf-input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.cf-input[type='number'] {
+    -moz-appearance: textfield;
+}

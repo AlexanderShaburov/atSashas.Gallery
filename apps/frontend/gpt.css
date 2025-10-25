@@ -1,40 +1,51 @@
-/* Bigger, touch-friendly controls */
-.cf-input,
-.cf-select,
-.cf-textarea {
-    font-size: 1.05rem; /* up from 0.95rem */
-    min-height: 44px; /* Apple HIG tap target */
-    line-height: 1.4;
+/* --- Label hierarchy --- */
+.cf-group-label {
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.2px;
+    margin-bottom: 0.25rem;
 }
 
-/* Ensure the dropdown list (where supported) also uses larger text */
-.cf-select option {
-    font-size: 1.05rem;
-    line-height: 1.6;
-    padding: 0.4rem 0.6rem; /* desktop browsers honor this */
+.cf-sub-label {
+    font-size: 0.88rem;
+    font-weight: 600; /* highlight */
+    color: color-mix(in srgb, var(--text) 86%, var(--accent));
+    letter-spacing: 0.15px;
 }
 
-/* Slightly larger group labels for readability */
-.cf-label {
+/* Optional: lighter, consistent single-field label style */
+.cf-single-label {
     font-size: 0.98rem;
+    color: var(--muted);
+    font-weight: 500;
 }
 
-/* iOS Safari: prevent auto-zoom and ensure readable picker text */
-@supports (-webkit-touch-callout: none) {
-    .cf-input,
-    .cf-select,
-    .cf-textarea {
-        font-size: 16px; /* ≥16px prevents zoom on focus */
-    }
+/* Align group title with grid rows nicely */
+.cf-group {
+    border: 0;
+    padding: 0;
+    margin: 0;
 }
 
-/* Optional: bigger selects specifically for small screens */
-@media (max-width: 480px) {
-    .cf-select {
-        font-size: 1.1rem;
-        min-height: 46px;
+.cf-group > legend.cf-group-label {
+    padding: 0;
+}
+
+/* Keep spacing tidy in groups */
+.cf-field {
+    /* you already use this in the inline layouts */
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+/* Responsive font tweaks (optional) */
+@media (max-width: 520px) {
+    .cf-group-label {
+        font-size: 1rem;
     }
-    .cf-select option {
-        font-size: 1.1rem;
+    .cf-sub-label {
+        font-size: 0.9rem;
     }
 }

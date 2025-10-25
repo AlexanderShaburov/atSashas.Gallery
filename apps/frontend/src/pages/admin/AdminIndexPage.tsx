@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import './adminIndex.css';
+import '@/pages/admin/AdminIndex.module.css';
 
 type Tile = {
     to: string;

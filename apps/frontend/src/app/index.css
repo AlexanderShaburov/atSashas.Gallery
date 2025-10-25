@@ -14,7 +14,26 @@
     --page-max: 1100px; /* максимальная ширина страницы */
     --header-h: 5rem; /* высота шапки, если fixed/sticky */
 }
-
+:root {
+    /* text hierarchy */
+    --form-label-group: var(--text); /* big group titles */
+    --form-label-sub: color-mix(in srgb, var(--accent) 45%, var(--text)); /* small inside group */
+    --form-label-single: var(--muted); /* single field label */
+    --form-placeholder: color-mix(in srgb, var(--muted) 70%, transparent);
+    --form-border: var(--border);
+    --form-border-hover: color-mix(in srgb, var(--accent) 45%, var(--border));
+    --form-bg: var(--card-bg);
+    --form-shadow: var(--shadow);
+}
+:root[data-theme='dark'] {
+    --form-label-group: var(--text);
+    --form-label-sub: color-mix(in srgb, var(--accent) 60%, var(--text));
+    --form-label-single: var(--muted);
+    --form-placeholder: color-mix(in srgb, var(--muted) 50%, transparent);
+    --form-border: var(--border);
+    --form-border-hover: var(--accent);
+    --form-bg: var(--card-bg);
+}
 @media (min-width: 820px) {
     :root {
         --gap: 16px;

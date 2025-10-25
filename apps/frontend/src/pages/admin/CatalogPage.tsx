@@ -7,9 +7,10 @@ import {
     CreateForm,
     type CreateFormProps,
     type CreateFormValues,
-} from '@/features/admin/components/CreateForm';
-import SingleItemEditor from '../components/SingleItemEditor';
-import './catalogPage.css';
+    todayISO,
+} from '@/features/admin/ui/CreateForm/CreateForm';
+import SingleItemEditor from '@/features/admin/ui/SingleItemEditor/SingleItemEditor';
+import '@/pages/admin/CatalogPage.module.css';
 
 export default function CatalogPage() {
     const [mode, setMode] = useState<'create' | 'edit'>('create');
@@ -42,13 +43,11 @@ export default function CatalogPage() {
         setSelected(h.id);
         // seed form with defaults; if in NOT required for create
         const initials = {
-            dateCreated: '',
+            dateCreated: todayISO(),
             availability: 'available',
             price_currency: 'EUR',
-            unit: 'cm',
-            // optional: alt_en prefill from filename without extension
-            title_en: '',
-            title_ru: '',
+            dimensions: undefined,
+            price: undefined,
         } as CreateFormValues;
         setFormValues(initials);
         console.log(``);

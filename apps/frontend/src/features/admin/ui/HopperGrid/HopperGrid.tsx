@@ -1,12 +1,10 @@
-import './hoppergrid.css'
+import '@/features/admin/ui/HopperGrid/HopperGrid.module.css';
 
 type Props = {
     items: string[];
 };
 
-
-
-export default function HopperGrid({items}: Props){
+export default function HopperGrid({ items }: Props) {
     if (!items.length) return <p>No files yet.</p>;
 
     return (
@@ -17,5 +15,5 @@ export default function HopperGrid({items}: Props){
                 </div>
             ))}
         </div>
-    )
+    );
 }

@@ -1,6 +1,6 @@
 import type { Block } from '@/entities/block';
 import type { StreamData } from '@/entities/stream';
-import GalleryBlock from './GalleryBlock';
+import GalleryBlock from '@/features/gallery/ui/GalleryBlock/GalleryBlock';
 
 export function GalleryStream(stream: StreamData) {
     return (

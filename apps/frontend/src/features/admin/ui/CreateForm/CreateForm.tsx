@@ -1,11 +1,11 @@
 // CreateForm.tsx
 import { TechniquesJson } from '@/entities/art';
 import type { Availability, Dimensions, ISODate, Localized, Money } from '@/entities/common';
+import '@/features/admin/ui/CreateForm/CreateForm.module.css';
+import DimensionsInput from '@/features/admin/ui/CreateForm/UX/DimensionsInput';
+import LangInput from '@/features/admin/ui/CreateForm/UX/LangInput';
+import MoneyInput from '@/features/admin/ui/CreateForm/UX/MoneyInput';
 import { useEffect, useMemo, useState } from 'react';
-import './create-form.css';
-import DimensionsInput from './UX/DimensionsInput';
-import LangInput from './UX/LangInput';
-import MoneyInput from './UX/MoneyInput';
 
 export interface CreateFormValues {
     dateCreated: ISODate;
@@ -24,7 +24,8 @@ export interface CreateFormValues {
 const DEFAULT_CATEGORY = 'painting' as const;
 const DEFAULT_TECHNIQUE = 'watercolor' as const;
 
-function todayISO(): ISODate {
+// eslint-disable-next-line react-refresh/only-export-components
+export function todayISO(): ISODate {
     const d = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` as ISODate;
@@ -102,8 +103,7 @@ export function CreateForm({ techniques, initial, onChange, seriesOptions = [] }
                 onChange={(next) =>
                     setValues((v) => ({
                         ...v,
-                        title_en: next.en ?? '',
-                        title_ru: next.ru ?? '',
+                        title: next,
                     }))
                 }
                 placeholder="Here is artwork name"
@@ -219,7 +219,7 @@ export function CreateForm({ techniques, initial, onChange, seriesOptions = [] }
                     rows={3}
                     value={values.notes ?? ''}
                     onChange={(e) => setValues((v) => ({ ...v, notes: e.target.value }))}
-                    placeholder="Any internal notes for admin…"
+                    placeholder="Say something about this artwork here."
                 />
             </div>
 
@@ -246,10 +246,10 @@ export function CreateForm({ techniques, initial, onChange, seriesOptions = [] }
 
             {/* Dimensions */}
             <div className="cf-row">
-                <span className="cf-label">Dimensions</span>
+                {/* <span className="cf-label">Dimensions</span> */}
                 <div className="cf-row--inline">
                     <DimensionsInput
-                        label="artwork-size-NEW"
+                        label="Dimensions"
                         value={values.dimensions}
                         onChange={(size) => setValues((prev) => ({ ...prev, dimensions: size }))}
                     />
@@ -258,21 +258,20 @@ export function CreateForm({ techniques, initial, onChange, seriesOptions = [] }
 
             {/* Price */}
             <MoneyInput
-                label="artwork-price"
+                label="Artwork price"
                 value={values.price}
                 onChange={(next) => setValues((prev) => ({ ...prev, price: next }))}
             />
             {/* ALT */}
             <LangInput
-                label="ALT (fallback text)"
+                label="Alt"
                 className="cf-field--alt"
                 inputId="alt_multi"
                 value={values.alt}
                 onChange={(next) =>
                     setValues((v) => ({
                         ...v,
-                        alt_en: next.en ?? '',
-                        alt_ru: next.ru ?? '',
+                        next,
                     }))
                 }
                 placeholder="Artwork short description"

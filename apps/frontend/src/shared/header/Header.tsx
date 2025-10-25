@@ -1,8 +1,8 @@
-import './header.css';
-import { InstagramLink } from './headerComponents/instagram/InstagramLink';
-import Logo from './headerComponents/Logo';
-import Menu from './headerComponents/menuButton/Menu';
-import ThemeSwitcher from './headerComponents/themeSwitcher/ThemeSwitcher';
+import '@/shared/header/Header.module.css';
+import { InstagramLink } from '@/shared/header/headerComponents/instagram/InstagramLink';
+import Logo from '@/shared/header/headerComponents/Logo';
+import Menu from '@/shared/header/headerComponents/menuButton/Menu';
+import ThemeSwitcher from '@/shared/header/headerComponents/themeSwitcher/ThemeSwitcher';
 
 export default function Header() {
     return (

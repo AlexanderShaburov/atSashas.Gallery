@@ -1,7 +1,7 @@
 import type { Thumb } from '@/entities/catalog';
-import { CreateFormProps } from './CreateForm';
 import React from 'react';
-import './single-item-editor.css';
+import { CreateFormProps } from '@/features/admin/ui/CreateForm/CreateForm';
+import '@/features/admin/ui/SingleItemEditor/SingleItemEditor.module.css';
 
 interface Props {
     thumb: Thumb; // the selected item

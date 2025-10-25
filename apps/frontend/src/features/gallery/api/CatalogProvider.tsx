@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ArtCatalog } from '@/entities/catalog';
 
-import { getFromCatalog, loadCatalogOnce } from './catalogModule';
+import { getFromCatalog, loadCatalogOnce } from '@/features/gallery/api/catalogModule';
 
 type Ctx = {
     ready: boolean;

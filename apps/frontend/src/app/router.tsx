@@ -1,17 +1,17 @@
+import AdminLayout from '@/app/layouts/AdminLayout';
+import PublicLayout from '@/app/layouts/PublicLayout';
 import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
-import AdminLayout from './layouts/AdminLayout';
-import PublicLayout from './layouts/PublicLayout';
 
-const HomePage = lazy(() => import('@/features/gallery/pages/HomePage'));
-const GalleryPage = lazy(() => import('@/features/gallery/GalleryPage'));
-const AboutPage = lazy(() => import('@/features/gallery/pages/AboutPage'));
-const AdminIndex = lazy(() => import('@/features/admin/pages/AdminIndexPage'));
-const UploadPage = lazy(() => import('@/features/admin/pages/UploadPage'));
-const CatalogPage = lazy(() => import('@/features/admin/pages/CatalogPage'));
-const BlocksPage = lazy(() => import('@/features/admin/pages/BlocksPage'));
-const StreamsPage = lazy(() => import('@/features/admin/pages/StreamsPage'));
-const NotFound = lazy(() => import('./pages/NotFound'));
+const HomePage = lazy(() => import('@/pages/public/HomePage'));
+const GalleryPage = lazy(() => import('@/pages/public/GalleryPage'));
+const AboutPage = lazy(() => import('@/pages/public/AboutPage'));
+const AdminIndex = lazy(() => import('@/pages/admin/AdminIndexPage'));
+const UploadPage = lazy(() => import('@/pages/admin/UploadPage'));
+const CatalogPage = lazy(() => import('@/pages/admin/CatalogPage'));
+const BlocksPage = lazy(() => import('@/pages/admin/BlocksPage'));
+const StreamsPage = lazy(() => import('@/pages/admin/StreamsPage'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
 
 export const router = createBrowserRouter([
     {

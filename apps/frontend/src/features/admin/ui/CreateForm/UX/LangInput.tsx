@@ -1,17 +1,20 @@
-//LangInput.tsx
-
 import { LangCode, Localized } from '@/entities/common';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface LangInputProps {
     label: string;
     value: Localized | undefined;
-    onChange: (next: Localized) => void;
+    onChange: (next: Localized | undefined) => void;
     availableLangs?: readonly LangCode[];
     initialLang?: LangCode;
     className?: string;
     inputId?: string;
-    placeholder: string | undefined;
+    placeholder?: string;
+}
+
+function isEmptyLocalized(obj: Localized | undefined, langs: readonly LangCode[]): boolean {
+    if (!obj) return true;
+    return langs.every((lc) => !obj[lc] || obj[lc]?.trim() === '');
 }
 
 export default function LangInput({
@@ -27,21 +30,40 @@ export default function LangInput({
     const LANGS: readonly LangCode[] = availableLangs ?? (['en', 'ru', 'it', 'es', 'pt'] as const);
 
     const [lang, setLang] = useState<LangCode>(initialLang);
+    const [draft, setDraft] = useState<Localized | undefined>(value);
+
+    // keep local draft in sync when parent value changes
+    useEffect(() => {
+        if (!value) setDraft(value);
+    }, [value]);
+
+    // build safe input id
+    const fieldId = useMemo(
+        () => inputId ?? `${label.replace(/\s+/g, '-').toLowerCase()}-${lang}`,
+        [inputId, label, lang],
+    );
+
+    function updateLangValue(text: string) {
+        const next: Localized = { ...(draft ?? {}), [lang]: text };
+        setDraft(next);
+        onChange(isEmptyLocalized(next, LANGS) ? undefined : next);
+    }
 
     return (
         <div className={`cf-row cf-lang ${className ?? ''}`}>
-            <label htmlFor={inputId} className="cf-label">
+            <label htmlFor={fieldId} className="cf-label">
                 {label}
             </label>
 
             <div className="cf-lang-wrap">
                 <input
-                    id={inputId}
+                    id={fieldId}
                     className="cf-input"
-                    value={value?.[lang]}
+                    value={draft?.[lang] ?? ''}
                     placeholder={placeholder}
-                    onChange={(e) => onChange({ ...value, [lang]: e.target.value })}
+                    onChange={(e) => updateLangValue(e.target.value)}
                 />
+
                 <select
                     aria-label={`${label} language`}
                     className="cf-select cf-select--lang"

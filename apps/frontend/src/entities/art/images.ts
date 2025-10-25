@@ -1,5 +1,4 @@
 import { Localized } from '@/entities/common/locales';
-import { DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS } from 'react';
 
 export type ImageExt = 'avif' | 'webp' | 'jpeg' | 'jpg' | 'png';
 
@@ -14,6 +13,6 @@ export interface PreviewSources {
 
 export interface ImagesJSON {
     alt: Localized;
-    preview: PreviewSources | DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS;
+    preview: PreviewSources;
     full: FullPath;
 }
