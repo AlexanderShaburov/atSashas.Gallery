@@ -1,7 +1,7 @@
+import '@/shared/header/headerComponents/menuButton/Menu.css';
+import MenuIcon from '@/shared/header/headerComponents/menuButton/MenuIcon';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import MenuIcon from '@/shared/header/headerComponents/menuButton/MenuIcon';
-import '@/shared/header/headerComponents/menuButton/Menu.module.css';
 
 export default function Menu() {
     const [open, setOpen] = useState(false);

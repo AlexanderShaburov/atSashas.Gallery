@@ -1,8 +1,7 @@
-/* eslint-disable no-unused-vars */
-import { useTheme } from '@/shared/lib/theme/ThemeContext';
-import { SunIcon } from '@/shared/header/headerComponents/themeSwitcher/SunIcon';
 import { MoonIcon } from '@/shared/header/headerComponents/themeSwitcher/MoonIcon';
-import '@/shared/header/headerComponents/themeSwitcher/ThemeSwitcher.module.css';
+import { SunIcon } from '@/shared/header/headerComponents/themeSwitcher/SunIcon';
+import '@/shared/header/headerComponents/themeSwitcher/ThemeSwitcher.css';
+import { useTheme } from '@/shared/lib/theme/ThemeContext';
 
 export default function ThemeSwitcher() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

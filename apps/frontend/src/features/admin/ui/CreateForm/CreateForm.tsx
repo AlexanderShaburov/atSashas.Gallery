@@ -1,7 +1,7 @@
 // CreateForm.tsx
 import { TechniquesJson } from '@/entities/art';
 import type { Availability, Dimensions, ISODate, Localized, Money } from '@/entities/common';
-import '@/features/admin/ui/CreateForm/CreateForm.module.css';
+import '@/features/admin/ui/CreateForm/CreateForm.css';
 import DimensionsInput from '@/features/admin/ui/CreateForm/UX/DimensionsInput';
 import LangInput from '@/features/admin/ui/CreateForm/UX/LangInput';
 import MoneyInput from '@/features/admin/ui/CreateForm/UX/MoneyInput';

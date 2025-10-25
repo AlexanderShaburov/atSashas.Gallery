@@ -1,4 +1,4 @@
-import '@/app/layouts/PublicLayout.module.css';
+import '@/app/layouts/PublicLayout.css';
 import { Outlet } from 'react-router-dom';
 
 export default function AdminLayout() {

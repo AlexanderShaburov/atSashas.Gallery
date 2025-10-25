@@ -1,4 +1,4 @@
-import '@/shared/header/Header.module.css';
+import '@/shared/header/Header.css';
 import { InstagramLink } from '@/shared/header/headerComponents/instagram/InstagramLink';
 import Logo from '@/shared/header/headerComponents/Logo';
 import Menu from '@/shared/header/headerComponents/menuButton/Menu';

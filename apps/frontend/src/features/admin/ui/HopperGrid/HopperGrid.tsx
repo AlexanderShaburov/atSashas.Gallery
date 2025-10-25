@@ -1,4 +1,4 @@
-import '@/features/admin/ui/HopperGrid/HopperGrid.module.css';
+import '@/features/admin/ui/HopperGrid/HopperGrid.css';
 
 type Props = {
     items: string[];

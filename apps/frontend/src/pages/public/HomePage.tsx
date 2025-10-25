@@ -1,14 +1,17 @@
-import styles from '@/pages/public/Home.module.css';
+import '@/pages/public/Home.css';
 import { Link } from 'react-router-dom';
-
 export default function HomePage() {
-    const base = (import.meta.env.BAST_URL || '/').replace(/\/+$/, '/');
+    const base = (import.meta.env.VITE_VAULT_BASE_URL || '/').replace(/\/+$/, '/');
 
+    // /Users/shaburov/Documents/Programming/PROJECTS/SASHA/SashaGallery/vault/arts/mixed/full/m01.png
+
+    console.log(`Base url: ${base}`);
+    console.log(`Tile url: ${base}/arts/mixed/full/img24.png`);
     const tiles = [
         {
             to: '/watercolor',
             title: 'Watercolor',
-            img: `${base}gallery/watercolor/origin/img24.png`,
+            img: `${base}/arts/watercolor/full/img24.png`,
             posx: 50,
             posy: 50,
             zoom: 1.3,
@@ -16,7 +19,7 @@ export default function HomePage() {
         {
             to: '/mixed-media',
             title: 'Mixed Media',
-            img: `${base}gallery/mixed/origin/m14.png`,
+            img: `${base}/arts/mixed/full/m14.png`,
             posx: 60,
             posy: 50,
             zoom: 1.3,

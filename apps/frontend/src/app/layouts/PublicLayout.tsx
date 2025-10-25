@@ -3,7 +3,7 @@ import Footer from '@/shared/footer/BottomBar';
 import Header from '@/shared/header/Header';
 import { Outlet } from 'react-router-dom';
 
-import '@/app/layouts/PublicLayout.module.css';
+import '@/app/layouts/PublicLayout.css';
 
 export default function PublicLayout() {
     return (

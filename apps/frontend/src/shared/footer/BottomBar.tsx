@@ -1,5 +1,5 @@
+import '@/shared/footer/bottomBar.css';
 import { Link } from 'react-router-dom';
-import '@/shared/footer/bottomBar.module.css';
 
 export default function BottomBar() {
     const year = new Date().getFullYear();

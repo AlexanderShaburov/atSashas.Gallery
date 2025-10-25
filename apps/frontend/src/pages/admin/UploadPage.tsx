@@ -1,7 +1,7 @@
-import HopperGrid from '@/features/admin/ui/HopperGrid/HopperGrid';
-import { useState } from 'react';
 import { uploadImage } from '@/features/admin/api';
-import '@/pages/admin/Upload.module.css';
+import HopperGrid from '@/features/admin/ui/HopperGrid/HopperGrid';
+import '@/pages/admin/Upload.css';
+import { useState } from 'react';
 
 export default function UploadPage() {
     const [files, setFiles] = useState<File[]>([]);

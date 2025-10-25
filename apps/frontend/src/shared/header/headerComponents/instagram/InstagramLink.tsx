@@ -1,5 +1,5 @@
+import '@/shared/header/headerComponents/instagram/InstagramButton.css';
 import { InstagramIcon } from '@/shared/header/headerComponents/instagram/InstagramIcon';
-import '@/shared/header/headerComponents/instagram/InstagramButton.module.css';
 
 export function InstagramLink({ username = 'a.sasha.art' }) {
     const openInstagram = () => {

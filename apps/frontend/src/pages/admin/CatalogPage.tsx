@@ -10,7 +10,7 @@ import {
     todayISO,
 } from '@/features/admin/ui/CreateForm/CreateForm';
 import SingleItemEditor from '@/features/admin/ui/SingleItemEditor/SingleItemEditor';
-import '@/pages/admin/CatalogPage.module.css';
+import '@/pages/admin/CatalogPage.css';
 
 export default function CatalogPage() {
     const [mode, setMode] = useState<'create' | 'edit'>('create');

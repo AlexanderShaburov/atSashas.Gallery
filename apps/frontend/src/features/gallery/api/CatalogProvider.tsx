@@ -1,6 +1,6 @@
 // src/features/images/CatalogContext.tsx
-import { createContext, useContext, useEffect, useState } from 'react';
 import type { ArtCatalog } from '@/entities/catalog';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 import { getFromCatalog, loadCatalogOnce } from '@/features/gallery/api/catalogModule';
 
@@ -15,7 +15,7 @@ export function CatalogProvider({ children }: { children: React.ReactNode }) {
     const [catalog, setCatalog] = useState<ArtCatalog | null>(null);
 
     useEffect(() => {
-        loadCatalogOnce().then(setCatalog).catch(console.error);
+        loadCatalogOnce().then(setCatalog);
     }, []);
 
     const value: Ctx = {
