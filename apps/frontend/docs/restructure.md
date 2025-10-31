@@ -19,7 +19,7 @@ src/
   pages/
     admin/
       AdminIndexPage.tsx
-      CatalogPage.tsx
+      CatalogEditorPage.tsx
       UploadPage.tsx
       StreamsPage.tsx
       BlocksPage.tsx
@@ -149,7 +149,7 @@ $ find . -name "*.css"
 ./apps/frontend/src/shared/header/headerComponents/themeSwitcher/themeSwitcher.css✅
 ./apps/frontend/src/shared/header/headerComponents/instagram/instagramButton.css✅
 ./apps/frontend/src/shared/header/header.css✅
-./apps/frontend/src/pages/admin/CatalogPage.css✅
+./apps/frontend/src/pages/admin/CatalogEditorPage.css✅
 ./apps/frontend/src/pages/admin/AdminIndex.css✅
 ./apps/frontend/src/pages/admin/Upload.css✅
 ./apps/frontend/src/pages/public/home.css✅

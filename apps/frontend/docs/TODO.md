@@ -1,14 +1,42 @@
-1. ## В vite.config.ts укажем алиасы и поменяем entry-импорт на @app/main.
-2. ## src/admin/AdminApp.tsx → разложить на страницы:
-    - src/features/admin/pages/UploadPage.tsx
-    - src/features/admin/pages/CatalogPage.tsx
-    - src/features/admin/pages/BlocksPage.tsx
-    - src/features/admin/pages/StreamsPage.tsx
-3. ## src/admin/api.ts → src/features/admin/api/index.ts
-**(разбей на функции: getCatalog, saveCatalog, getStreams, saveStreams,uploadImage, importFromHopper, listHopper).**
+## I lost the thread doing CreateForm Save button:
 
-4. ## API-слой
-features/admin/api/index.ts — ок. Для публички приготовь зеркальный features/gallery/api/ (ты уже оставил папку).
-➜ Утильную сеть (fetch/json, обработка ошибок, baseURL, токен) вынеси в shared/lib/api (маленький helper), чтобы не дублировать.
-5. ## Auth / Guard (на потом, но важно)
-Для /admin/* добавь “guard” (пока хотя бы Basic/Token). В роутере оборачивай AdminLayout в RequireAuth (и положи это в app/providers или features/admin/lib).?????
+**The matter is I lost ArtItem object creation sequence.**
+
+1. In CreateForm.tsx we have CreateFormValues interface.
+2. Basing on this interface we create initial values for the **form**.
+3. Using collected values, **Then unknown starts:**
+
+### Previous version:
+
+- Convert **CreateFormValues** data to **ArtItemJSON** data format.
+- Convey created **ArtItemJSON** to backend for save it.
+
+## Alternative vision:
+
+- Create **ArtItemInit** type object
+- Convey this object to **ArtItem** constructor as a New ArtItem(myArtItemInit)
+- Convey just done object to backend as myNewObject.toJSON() to the backend.
+
+### The difference between CreateFormValues and ArtItemInit is just in _category_ field!
+
+IDEA is: convey repacked CreateFormValues to constructor as:
+
+```ts
+const newArtItem = {...values, combineTechniques(values.category, values.technique)}
+```
+
+I like it!!!!
+
+---
+
+# NEXT STEP:
+
+### What fields ArtItem must contain?
+
+**Assumption:** just two - ID and url
+
+## AGREEMENT:
+
+1. On click on Hopper thumbnail ->
+    1. Create id;
+    2. ImageDraft - url to Hopper url;

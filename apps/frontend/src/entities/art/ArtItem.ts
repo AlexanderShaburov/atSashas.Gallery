@@ -1,12 +1,32 @@
 import type { Dimensions, Availability } from '../common/';
-import type { ImagesJSON } from './';
+import type { ImagesJSON, PriceJSON } from './';
 import { Tags } from '@/entities/common/Tags';
 import { ArtItemJSON } from '@/entities/art';
 import { ISODate, Localized, Money } from '@/entities/common';
 
+export interface ArtItemDraft {
+    id: string;
+    images: ImagesJSON; // хотя бы 1 файл
+    status: 'draft';
+    createdAt: string; // авто: new Date().toISOString()
+    catalogVersion: number;
+    updatedAt: string; // авто
+    // всё остальное — необязательно на этом этапе:
+    title?: Localized;
+    dateCreated?: ISODate; // YYYY-MM-DD реальной работы (может быть не известна сразу)
+    techniques?: string[]; // позже соберём из category+technique
+    dimensions?: Dimensions;
+    availability?: Availability; // по умолчанию не знаем
+    price?: PriceJSON | null;
+    series?: string | null;
+    tags?: string[];
+    notes?: string | null;
+    alt?: Localized;
+}
+
 export interface ArtItemInit {
     id: string;
-    title: Localized;
+    title?: Localized;
     dateCreated: ISODate;
     techniques: string[];
     dimensions: Dimensions;

@@ -10,15 +10,39 @@ import {
     todayISO,
 } from '@/features/admin/ui/CreateForm/CreateForm';
 import SingleItemEditor from '@/features/admin/ui/SingleItemEditor/SingleItemEditor';
-import '@/pages/admin/CatalogPage.css';
+import '@/pages/admin/CatalogEditorPage.css';
 
-export default function CatalogPage() {
+import { ISODate } from '@/entities/common';
+import { generateArtId } from '@/features/admin/ui/CatalogGrid/utils/generateArtId';
+
+function prepareInitials(): CreateFormValues {
+    return {
+        id: generateArtId() as string,
+        dateCreated: todayISO() as ISODate,
+        title: undefined,
+        technique: undefined,
+        availability: undefined,
+        dimensions: undefined,
+        price: undefined,
+        alt: undefined,
+        series: undefined,
+        tags: undefined,
+        notes: undefined,
+    };
+}
+
+function handleSave() {}
+
+function handleCancel() {}
+
+export default function CatalogEditorPage() {
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [hopper, setHopper] = useState<Thumb[]>([]);
     const [selected, setSelected] = useState<string | null>(null);
     const [techniques, setTechniques] = useState<TechniquesJson>({});
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [formValues, setFormValues] = useState<CreateFormValues | null>(null);
     const [seriesOptions, setSeriesOptions] = useState<string[]>([]);
 
@@ -42,18 +66,13 @@ export default function CatalogPage() {
     const onHopperClick = (h: Thumb) => {
         setSelected(h.id);
         // seed form with defaults; if in NOT required for create
-        const initials = {
-            dateCreated: todayISO(),
-            availability: 'available',
-            price_currency: 'EUR',
-            dimensions: undefined,
-            price: undefined,
-        } as CreateFormValues;
+        // Here we will set mode checker and give to createForm current
+        // values from ArtItem object in edit mode.
+        const initials = prepareInitials() as CreateFormValues;
         setFormValues(initials);
-        console.log(``);
         activeThumb.current = h;
         formProps.current = {
-            techniques: techniques,
+            techniques: techniques, // All range of ...
             initial: initials,
             onChange: setFormValues,
             seriesOptions: seriesOptions,

@@ -8,17 +8,18 @@ import MoneyInput from '@/features/admin/ui/CreateForm/UX/MoneyInput';
 import { useEffect, useMemo, useState } from 'react';
 
 export interface CreateFormValues {
-    dateCreated: ISODate;
-    title?: Localized | undefined;
-    category?: string; // techniques[0]
-    technique?: string; // techniques[1]
-    availability: Availability;
+    id: string;
+    dateCreated?: ISODate;
+    title: Localized | undefined;
+    category?: string | undefined;
+    technique: string | undefined; // techniques[1]
+    availability: Availability | undefined;
     dimensions: Dimensions | undefined;
     price: Money | undefined;
-    alt?: Localized | undefined;
-    series?: string | undefined;
-    tags?: string[] | undefined;
-    notes?: string | undefined;
+    alt: Localized | undefined;
+    series: string | undefined;
+    tags: string[] | undefined;
+    notes: string | undefined;
 }
 
 const DEFAULT_CATEGORY = 'painting' as const;
@@ -27,12 +28,15 @@ const DEFAULT_TECHNIQUE = 'watercolor' as const;
 // eslint-disable-next-line react-refresh/only-export-components
 export function todayISO(): ISODate {
     const d = new Date();
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` as ISODate;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+
+    return `${y}-${m}-${day}` as ISODate;
 }
 export type CreateFormProps = {
-    techniques: TechniquesJson; // techniques in CatalogPage.tsx
-    initial: Partial<CreateFormValues> | null; // formValues
+    techniques: TechniquesJson; // techniques in CatalogEditorPage.tsx
+    initial: Pick<CreateFormValues, 'id'> & Partial<Omit<CreateFormValues, 'id'>>; // formValues
     onChange: (v: CreateFormValues) => void; // setFormValues()
     seriesOptions: string[]; // seriesOptions
 };
@@ -44,27 +48,27 @@ export function CreateForm({ techniques, initial, onChange, seriesOptions = [] }
     );
 
     const [values, setValues] = useState<CreateFormValues>(() => {
-        const defCat: string = initial?.category ?? categories[0]?.key ?? DEFAULT_CATEGORY;
+        const defCat: string = categories[0]?.key ?? DEFAULT_CATEGORY;
         const defTech: string =
             initial?.technique ?? techniques[defCat]?.items[0]?.key ?? DEFAULT_TECHNIQUE;
 
         const v: CreateFormValues = {
+            id: initial.id,
             dateCreated: initial?.dateCreated ?? todayISO(),
-            title: initial?.title ?? { en: '' },
+            title: initial?.title,
             category: defCat,
             technique: defTech,
-            availability: initial?.availability ?? 'available',
-            dimensions: initial?.dimensions ?? { width: 0, height: 0, unit: 'cm' },
+            availability: initial?.availability,
+            dimensions: initial?.dimensions,
             price: initial?.price,
-            alt: initial?.alt ?? { en: '' },
-            series: initial?.series ?? '',
-            tags: initial?.tags ?? [],
+            alt: initial?.alt,
+            series: initial?.series,
+            tags: initial?.tags,
             notes: initial?.notes,
         };
 
         return v;
     });
-    //???????????????????????/
     useEffect(() => {
         onChange(values);
     }, [values, onChange]);
@@ -97,7 +101,7 @@ export function CreateForm({ techniques, initial, onChange, seriesOptions = [] }
             {/* Title */}
             <LangInput
                 label="Title"
-                value={{ en: values.alt?.en ?? '', ru: values.alt?.ru ?? '' }}
+                value={{ en: values.title?.en ?? '', ru: values.alt?.ru ?? '' }}
                 className="cf-field--title"
                 inputId="title_multi"
                 onChange={(next) =>
@@ -117,19 +121,11 @@ export function CreateForm({ techniques, initial, onChange, seriesOptions = [] }
                 <select
                     id="category"
                     className="cf-select"
-                    value={values.category ?? ''}
+                    value={values.category}
                     onChange={(e) => {
                         const category = e.target.value;
-                        const firstTech = techniques[category]?.items[0]?.key;
-                        setValues((prev) => {
-                            if (firstTech !== undefined) {
-                                return { ...prev, category, technique: firstTech }; // ✅ technique (not techniques)
-                            } else {
-                                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                const { technique: _omit, ...rest } = prev;
-                                return { ...rest, category };
-                            }
-                        });
+                        // const firstTech = techniques[category]?.items[0]?.key;
+                        setValues((prev) => ({ ...prev, category: category }));
                     }}
                 >
                     {categories.map((c) => (
@@ -148,7 +144,7 @@ export function CreateForm({ techniques, initial, onChange, seriesOptions = [] }
                 <select
                     id="technique"
                     className="cf-select"
-                    value={values.technique ?? ''}
+                    value={values.technique}
                     onChange={(e) => setValues((v) => ({ ...v, technique: e.target.value }))}
                 >
                     {values.technique == null && (
@@ -271,7 +267,7 @@ export function CreateForm({ techniques, initial, onChange, seriesOptions = [] }
                 onChange={(next) =>
                     setValues((v) => ({
                         ...v,
-                        next,
+                        alt: next,
                     }))
                 }
                 placeholder="Artwork short description"

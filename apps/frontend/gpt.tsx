@@ -1,59 +1,54 @@
-<fieldset className="cf-group">
-    <legend className="cf-group-label">{label}</legend>
+// ...imports stay the same
 
-    <div className="cf-inline cf-inline-2">
-        <div className="cf-field">
-            <label htmlFor={`${label}-amount`} className="cf-sub-label">
-                Amount
-            </label>
-            <NumericInput
-                id={`${label}-amount`}
-                className="cf-input"
-                placeholder="Amount"
-                value={value?.amount}
-                decimals={2}
-                onChangeNumber={(n) => {
-                    // tailor to your Money shape:
-                    if (n == null && !value?.currency) return onChange(undefined);
-                    if (value?.currency)
-                        return onChange(
-                            n == null
-                                ? {
-                                      amount: undefined as unknown as number,
-                                      currency: value.currency,
-                                  }
-                                : { currency: value.currency, amount: n },
-                        );
-                    // no currency yet:
-                    return onChange(undefined);
-                }}
-            />
-        </div>
+type CreateFormInitial = Pick<CreateFormValues, 'id'> & Partial<Omit<CreateFormValues, 'id'>>;
 
-        <div className="cf-field">
-            <label htmlFor={`${label}-currency`} className="cf-sub-label">
-                Currency
-            </label>
-            <select
-                id={`${label}-currency`}
-                className="cf-select cf-select--short"
-                value={value?.currency ?? ''}
-                onChange={(e) => {
-                    const currency = e.target.value as CurrencyName;
-                    if (!currency) return onChange(undefined);
-                    if (value?.amount != null) return onChange({ amount: value.amount, currency });
-                    return onChange({ amount: undefined as unknown as number, currency });
-                }}
-            >
-                <option value="" disabled>
-                    —
-                </option>
-                {CURRENCIES.map((c) => (
-                    <option key={c} value={c}>
-                        {c}
-                    </option>
-                ))}
-            </select>
-        </div>
-    </div>
-</fieldset>;
+export type CreateFormProps = {
+    techniques: TechniquesJson;
+    initial: CreateFormInitial;
+    onChange: (v: CreateFormValues) => void;
+    seriesOptions: string[];
+    onSave?: (v: CreateFormValues) => void | Promise<void>; // <-- NEW
+    submitting?: boolean; // <-- NEW
+};
+
+function isValid(v: CreateFormValues) {
+    // Minimal “ready to save” checks; expand as needed
+    return Boolean(
+        v.id && v.dateCreated && v.technique && v.availability && v.dimensions, // you can also check width/height if those exist inside
+    );
+}
+
+export function CreateForm({
+    techniques,
+    initial,
+    onChange,
+    seriesOptions = [],
+    onSave,
+    submitting = false,
+}: CreateFormProps) {
+    // ...state and memos unchanged
+
+    const canSave = isValid(values) && !submitting;
+
+    return (
+        <form className="cf-form" onSubmit={(e) => e.preventDefault()}>
+            {/* ...all existing fields... */}
+
+            {/* Actions */}
+            <div className="cf-actions">
+                <button
+                    type="button"
+                    className="cf-btn cf-btn--primary"
+                    disabled={!canSave}
+                    onClick={() => {
+                        if (!onSave) return;
+                        onSave(values);
+                    }}
+                    title={!isValid(values) ? 'Fill required fields to enable Save' : 'Save item'}
+                >
+                    {submitting ? 'Saving…' : 'Save'}
+                </button>
+            </div>
+        </form>
+    );
+}

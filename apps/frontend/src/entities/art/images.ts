@@ -16,3 +16,8 @@ export interface ImagesJSON {
     preview: PreviewSources;
     full: FullPath;
 }
+export interface ImageDraft {
+    alt?: Localized;
+    preview?: PreviewSources;
+    full: FullPath;
+}

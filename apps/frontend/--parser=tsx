@@ -257,7 +257,7 @@ SyntaxError: This experimental syntax requires enabling one of the following par
     at core (/Users/shaburov/Documents/Programming/PROJECTS/SASHA/SashaGallery/apps/frontend/node_modules/jscodeshift/src/core.js:44:5)
     at j (/Users/shaburov/Documents/Programming/PROJECTS/SASHA/SashaGallery/apps/frontend/node_modules/jscodeshift/src/core.js:142:12)
     at transformer (/Users/shaburov/Documents/Programming/PROJECTS/SASHA/SashaGallery/apps/frontend/codemods/css-modules-classname.js:15:18)
- ERR src/pages/admin/CatalogPage.tsx Transformation error (Unexpected token, expected "from" (3:12))
+ ERR src/pages/admin/CatalogEditorPage.tsx Transformation error (Unexpected token, expected "from" (3:12))
 SyntaxError: Unexpected token, expected "from" (3:12)
     at toParseError (/Users/shaburov/Documents/Programming/PROJECTS/SASHA/SashaGallery/apps/frontend/node_modules/@babel/parser/src/parse-error.ts:95:45)
     at JSXParserMixin.raise (/Users/shaburov/Documents/Programming/PROJECTS/SASHA/SashaGallery/apps/frontend/node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)

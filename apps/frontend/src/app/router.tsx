@@ -8,7 +8,7 @@ const GalleryPage = lazy(() => import('@/pages/public/GalleryPage'));
 const AboutPage = lazy(() => import('@/pages/public/AboutPage'));
 const AdminIndex = lazy(() => import('@/pages/admin/AdminIndexPage'));
 const UploadPage = lazy(() => import('@/pages/admin/UploadPage'));
-const CatalogPage = lazy(() => import('@/pages/admin/CatalogPage'));
+const CatalogEditorPage = lazy(() => import('@/pages/admin/CatalogEditorPage'));
 const BlocksPage = lazy(() => import('@/pages/admin/BlocksPage'));
 const StreamsPage = lazy(() => import('@/pages/admin/StreamsPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
@@ -29,7 +29,7 @@ export const router = createBrowserRouter([
         children: [
             { index: true, element: <AdminIndex /> },
             { path: 'upload', element: <UploadPage /> },
-            { path: 'catalog', element: <CatalogPage /> },
+            { path: 'catalog', element: <CatalogEditorPage /> },
             { path: 'blocks', element: <BlocksPage /> },
             { path: 'stream', element: <StreamsPage /> },
         ],
