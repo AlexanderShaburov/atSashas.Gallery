@@ -1,75 +1,41 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { TechniquesJson } from '@/entities/art';
 import type { Thumb } from '@/entities/catalog';
 import { getCatalog, getHopperContent, getTechniques } from '@/features/admin/api';
 import {
     CreateForm,
     type CreateFormProps,
-    type CreateFormValues,
-    todayISO,
+    type FormValues,
 } from '@/features/admin/ui/CreateForm/CreateForm';
 import SingleItemEditor from '@/features/admin/ui/SingleItemEditor/SingleItemEditor';
 import '@/pages/admin/CatalogEditorPage.css';
 
-import { ISODate } from '@/entities/common';
-import { generateArtId } from '@/features/admin/ui/CatalogGrid/utils/generateArtId';
 import { validateCreateForm } from '@/features/admin/utils/Validators';
+import { deepEqual } from '@/features/admin/utils/checkers';
+import { isEmptyErrors, validateErrors } from '@/features/admin/utils/errorMapper';
 
-function prepareInitials(): CreateFormValues {
-    return {
-        id: generateArtId() as string,
-        dateCreated: todayISO() as ISODate,
-        title: undefined,
-        technique: undefined,
-        availability: undefined,
-        dimensions: undefined,
-        price: undefined,
-        alt: undefined,
-        series: undefined,
-        tags: undefined,
-        notes: undefined,
-    };
-}
-function normalizeForCompare(v: unknown): unknown {
-    if (Array.isArray(v)) {
-        return v.map(normalizeForCompare);
-    }
-    if (v && typeof v === 'object') {
-        const o = v as Record<string, unknown>;
-        const sorted: Record<string, unknown> = {};
-        for (const k of Object.keys(o).sort()) {
-            sorted[k] = normalizeForCompare(o[k]);
-        }
-        return sorted;
-    }
-    return v;
-}
+// for Edit mode pull up ArtItem and transform it to FormValues
+// here beforehand downloaded catalog.json should be used catalog.items[id.id]
 
-function deepEqual(a: unknown, b: unknown): boolean {
-    try {
-        return JSON.stringify(normalizeForCompare(a)) === JSON.stringify(normalizeForCompare(b));
-    } catch {
-        // fallback (very rare)
-        return a === b;
-    }
-}
 export default function CatalogEditorPage() {
-    const [mode, setMode] = useState<'create' | 'edit'>('create');
+    const { identity, formValues, setFormValues, isDirty, isValid, saving, save, exit } = ue;
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [hopper, setHopper] = useState<Thumb[]>([]);
     const [selected, setSelected] = useState<string | null>(null);
-    const [techniques, setTechniques] = useState<TechniquesJson>({});
-    const [formValues, setFormValues] = useState<CreateFormValues | null>(null);
-    const [seriesOptions, setSeriesOptions] = useState<string[]>([]);
-    const [isDirty, setIsDirty] = useState(false);
-    const [isValid, setIsValid] = useState(false);
-    const [saving, setSaving] = useState(false);
+    const [touched, setTouched] = useState<Record<string, boolean>>({});
 
     const activeThumb = useRef<Thumb | null>(null);
     const formProps = useRef<CreateFormProps | null>(null);
-    const initialSnapshot = useRef<CreateFormValues | null>(null);
+
+    // Recompute on form validity change:
+    useEffect(() => {
+        setErrors(validateErrors(formValues));
+    }, [formValues]);
+
+    // adjust current isValid:
+    useEffect(() => {
+        setIsValid(isEmptyErrors(errors));
+    }, [errors]);
 
     const handleSave = useCallback(async () => {
         if (!formValues) return;
@@ -79,7 +45,7 @@ export default function CatalogEditorPage() {
         }
         setSaving(true);
         try {
-            // TODO: transform CreateFormValues -> ArtItemJSON as your saver expects
+            // TODO: transform FormValues -> ArtItemJSON as your saver expects
             // e.g., call a helper build function and POST to backend:
             // const payload = buildArtItemJSON({ form: formValues, imageId: activeThumb.current!.id });
             // await apiSaveToCatalog(payload);
@@ -120,11 +86,6 @@ export default function CatalogEditorPage() {
         formProps.current = null;
     }, [isDirty]);
 
-    function handleBack() {
-        if (isDirty && !confirm('Discard unsaved changes?')) return;
-        setSelected(null);
-    }
-
     {
         /* 
         Validation rules:
@@ -152,8 +113,8 @@ export default function CatalogEditorPage() {
         return () => window.removeEventListener('keydown', onKey);
     }, [selected, handleCancel]);
 
+    // load techniques once
     useEffect(() => {
-        // load techniques once
         (async () => {
             try {
                 const t = await getTechniques();
@@ -171,7 +132,7 @@ export default function CatalogEditorPage() {
         // seed form with defaults; if in NOT required for create
         // Here we will set mode checker and give to createForm current
         // values from ArtItem object in edit mode.
-        const initials = prepareInitials() as CreateFormValues;
+        const initials = prepareInitials() as FormValues;
         setFormValues(initials);
         activeThumb.current = h;
         initialSnapshot.current = initials; // <- baseline for dirty check
@@ -293,39 +254,50 @@ export default function CatalogEditorPage() {
     }
     if (selected && activeThumb.current && formProps.current) {
         return (
-            <div className="catalog-page">
-                <header>
-                    <button onClick={handleBack}>← Back</button>
-                    <button onClick={handleCancel} style={{ marginLeft: 8 }}>
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleSave}
-                        disabled={!isValid || saving}
-                        style={{ marginLeft: 8 }}
-                        title={!isValid ? 'Form is not valid' : 'Save this item'}
-                    >
-                        {saving ? 'Saving…' : 'Save'}
-                    </button>
-                    {isDirty && (
-                        <span className="dirty-dot" title="Unsaved changes">
-                            •
+            <EditorSessionContext.Provider
+                value={{
+                    formValues,
+                    setFormValues,
+                    se,
+                }}
+            >
+                <div className="catalog-page">
+                    <header>
+                        <button onClick={handleBack}>← Back</button>
+                        <button onClick={handleCancel} style={{ marginLeft: 8 }}>
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            disabled={!isValid || saving}
+                            style={{ marginLeft: 8 }}
+                            title={!isValid ? 'Form is not valid' : 'Save this item'}
+                        >
+                            {saving ? 'Saving…' : 'Save'}
+                        </button>
+                        {isDirty && (
+                            <span className="dirty-dot" title="Unsaved changes">
+                                •
+                            </span>
+                        )}
+                        <span style={{ marginLeft: 12, opacity: 0.7 }}>
+                            {isValid ? '✓ Valid' : '⚠ Not valid'}
                         </span>
-                    )}
-                    <span style={{ marginLeft: 12, opacity: 0.7 }}>
-                        {isValid ? '✓ Valid' : '⚠ Not valid'}
-                    </span>
-                </header>
-                <SingleItemEditor
-                    thumb={activeThumb.current}
-                    FormComponent={CreateForm}
-                    formProps={formProps.current}
-                    onSave={handleSave}
-                    onBack={handleBack}
-                    onCancel={handleCancel}
-                    values={formValues}
-                />
-            </div>
+                    </header>
+                    <SingleItemEditor
+                        thumb={activeThumb.current}
+                        FormComponent={CreateForm}
+                        formProps={formProps.current}
+                        onSave={handleSave}
+                        onBack={handleBack}
+                        onCancel={handleCancel}
+                        values={formValues}
+                        errors={errors}
+                        touched={touched}
+                        markTouched={(name: string) => setTouched((t) => ({ ...t, [name]: true }))}
+                    />
+                </div>
+            </EditorSessionContext.Provider>
         );
     }
 }

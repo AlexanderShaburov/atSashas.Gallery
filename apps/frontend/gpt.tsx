@@ -1,123 +1,97 @@
-// SingleItemEditor.tsx
-import type { Thumb } from '@/entities/catalog';
-import type { CreateFormProps, CreateFormValues } from '@/features/admin/ui/CreateForm/CreateForm';
-import '@/features/admin/ui/SingleItemEditor/SingleItemEditor.css';
-import React, { useEffect } from 'react';
+// CatalogEditorPage.tsx (фрагмент)
+import { EditorSessionProvider } from './model/editor-session.context';
+import SingleItemEditor from '@/features/admin/ui/SingleItemEditor/SingleItemEditor';
+import CreateForm from '@/features/admin/ui/CreateForm/CreateForm';
+import { generateArtId } from '@/features/admin/ui/CatalogGrid/utils/generateArtId';
+import { todayISO } from '@/features/admin/ui/CreateForm/CreateForm';
+import type { ISODate } from '@/entities/common';
 
-interface Props {
-    thumb: Thumb; // the selected item
-    FormComponent: React.ComponentType<CreateFormProps>; // metadata form
-    formProps: CreateFormProps;
+/* адаптеры для init/build/save */
 
-    // NEW:
-    values: CreateFormValues | null; // latest values from parent
-    onSave: (v: CreateFormValues) => void; // parent-provided save
-    onCancel: () => void; // parent-provided cancel
-    saving?: boolean; // show "Saving…" & disable
-    title?: string; // optional heading (e.g., item id or title)
-    onBack?: () => void; // optional back to grid
-
-    // Optional helpers for UX
-    isValid?: (v: CreateFormValues) => boolean; // if omitted, Save is always enabled when values exist
-    isDirty?: (v: CreateFormValues) => boolean; // to warn before cancel
+function prepareInitials(id: { mode: 'create'|'edit'; id: string }): FormValues {
+  if (id.mode === 'create') {
+    return {
+      id: generateArtId(),
+      dateCreated: todayISO() as ISODate,
+      title: undefined,
+      technique: undefined,
+      availability: undefined,
+      dimensions: undefined,
+      price: undefined,
+      alt: undefined,
+      series: undefined,
+      tags: undefined,
+      notes: undefined,
+    };
+  }
+  // edit — подтянуть ArtItem и спроецировать в FormValues (пример)
+  // тут можно использовать заранее загруженный catalog.items[id.id]
+  const item = /* getArtItemById(id.id) */;
+  return mapArtItemToForm(item);
 }
 
-export default function SingleItemEditor({
-    thumb,
-    FormComponent,
-    formProps,
-    values,
-    onSave,
-    onCancel,
-    saving = false,
-    title,
-    onBack,
-    isValid,
-    isDirty,
-}: Props) {
-    const canSave = !!values && (isValid ? isValid(values) : true) && !saving;
+function buildJSON(identity: { mode:'create'|'edit'; id: string }, form: FormValues): ArtItemJSON {
+  if (identity.mode === 'create') {
+    return buildFromCreate(form, identity.id); // привязка к hopper/preview basename
+  }
+  return buildFromEdit(form, identity.id);     // сохраняем существующий id и media
+}
 
-    // Optional: Cmd/Ctrl+S to save, Esc to cancel
-    useEffect(() => {
-        const onKey = (e: KeyboardEvent) => {
-            if (!values) return;
-            const mod = navigator.platform.includes('Mac') ? e.metaKey : e.ctrlKey;
-            if (mod && e.key.toLowerCase() === 's') {
-                e.preventDefault();
-                if (canSave) onSave(values);
-            } else if (e.key === 'Escape') {
-                e.preventDefault();
-                // confirm cancel if dirty
-                if (!isDirty || !isDirty(values) || confirm('Discard unsaved changes?')) {
-                    onCancel();
-                }
-            }
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [values, canSave, onSave, onCancel, isDirty]);
+async function saveJSON(payload: ArtItemJSON) {
+  await fetch('/api/catalog/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
 
-    return (
-        <div className="sie-layout">
-            {/* Thumbnail column */}
-            <aside className="sie-thumb-col" aria-label="Selected artwork">
-                <div className="sie-thumb-card">
-                    <img src={thumb.src} alt={thumb.alt || thumb.id} loading="lazy" />
-                    <div className="sie-thumb-meta">
-                        <div className="sie-thumb-id">{title ?? thumb.id}</div>
-                    </div>
-                </div>
-            </aside>
+export default function CatalogEditorPage() {
+  const [mode, setMode] = useState<'create'|'edit'>('create');
+  const [hopper, setHopper] = useState<Thumb[]>([]);
+  const [selectedThumb, setSelectedThumb] = useState<Thumb | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ArtItem | null>(null);
+  // загрузки/ошибки/series/techniques — как у тебя
 
-            {/* Form column */}
-            <section className="sie-form-col" aria-label="Metadata form">
-                <div className="sie-toolbar">
-                    {onBack && (
-                        <button type="button" className="sie-btn" onClick={onBack}>
-                            ← Back
-                        </button>
-                    )}
-                    <div className="sie-toolbar-spacer" />
-                    {/* Action buttons live in the toolbar */}
-                    <div className="sie-actions">
-                        <button
-                            type="button"
-                            className="sie-btn sie-btn--secondary"
-                            onClick={() => {
-                                if (!values) return;
-                                if (
-                                    !isDirty ||
-                                    !isDirty(values) ||
-                                    confirm('Discard unsaved changes?')
-                                ) {
-                                    onCancel();
-                                }
-                            }}
-                        >
-                            ✖ Cancel
-                        </button>
-                        <button
-                            type="button"
-                            className="sie-btn sie-btn--primary"
-                            disabled={!canSave}
-                            onClick={() => values && onSave(values)}
-                            title={
-                                !values
-                                    ? 'Fill the form'
-                                    : !canSave
-                                      ? 'Complete required fields'
-                                      : 'Save'
-                            }
-                        >
-                            {saving ? 'Saving…' : '💾 Save'}
-                        </button>
-                    </div>
-                </div>
+  /* выбор из сетки хоппера */
+  const onThumbClick = (h: Thumb) => {
+    setSelectedThumb(h);
+    // при желании генерируй artId здесь же и клади в form initial — но удобнее через prepareInitials
+  };
 
-                <div className="sie-form-wrap">
-                    <FormComponent {...formProps} />
-                </div>
-            </section>
-        </div>
-    );
+  // Ветвление рендера:
+  if (mode !== 'create' && !selectedItem) {
+    return /* список для выбора существующего ArtItem */;
+  }
+  if (mode === 'create' && !selectedThumb) {
+    return /* грид hopper + кнопки переключения режима */;
+  }
+
+  const identity = mode === 'create'
+    ? { mode: 'create' as const, id: selectedThumb!.id }
+    : { mode: 'edit'   as const, id: selectedItem!.id };
+
+  const exitSession = () => {
+    // единая точка выхода — обнуляем выбор и возвращаемся к списку
+    setSelectedThumb(null);
+    setSelectedItem(null);
+  };
+
+  return (
+    <EditorSessionProvider
+      identity={identity}
+      prepareInitials={prepareInitials}
+      buildJSON={buildJSON}
+      saveJSON={saveJSON}
+      exitSession={exitSession}
+    >
+      {/* Внутри провайдера — сам экран редактора */}
+      <SingleItemEditor
+        // внутри уже можно НЕ передавать save/exit/isDirty/saving — они из контекста
+        // покажи тулбар с кнопками Save/Close, читая useEditorSession()
+        FormComponent={CreateForm}
+        thumb={mode === 'create' ? selectedThumb! : undefined}
+        item={mode === 'edit' ? selectedItem! : undefined}
+      />
+    </EditorSessionProvider>
+  );
 }

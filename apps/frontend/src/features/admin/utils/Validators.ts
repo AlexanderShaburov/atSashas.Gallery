@@ -1,12 +1,13 @@
-import { CreateFormValues } from '@/features/admin/ui/CreateForm/CreateForm';
+import { FormValues } from '@/features/admin/ui/CreateForm/CreateForm';
+import { EditorIdentity } from '../editorSession/EditorSession.context';
 
 // ── Validation helpers (top-level) ───────────────────────────────────────────
-export function hasAnyTitle(v?: CreateFormValues['title']): boolean {
+export function hasAnyTitle(v?: FormValues['title']): boolean {
     if (!v) return false;
     return Object.values(v).some((s) => (s ?? '').trim().length > 0);
 }
 
-export function validDimensions(d?: CreateFormValues['dimensions']): boolean {
+export function validDimensions(d?: FormValues['dimensions']): boolean {
     if (!d) return false;
     // Allow integers/floats; require strictly positive
     const w = Number(d.width);
@@ -14,7 +15,7 @@ export function validDimensions(d?: CreateFormValues['dimensions']): boolean {
     return Number.isFinite(w) && Number.isFinite(h) && w > 0 && h > 0 && !!d.unit;
 }
 
-export function validateCreateForm(values: CreateFormValues | null): boolean {
+export function validateCreateForm(values: FormValues | null): boolean {
     if (!values) return false;
 
     const okId = typeof values.id === 'string' && values.id.trim().length > 0;
@@ -26,4 +27,17 @@ export function validateCreateForm(values: CreateFormValues | null): boolean {
     const okDims = validDimensions(values.dimensions);
 
     return okId && okDate && okTechnique && okAvailability && okTitleOrAlt && okDims;
+}
+//min validity: ID + image presence (no mode)
+export function isMinimalValid(form: FormValues, id: EditorIdentity): boolean {
+    const okId = typeof form?.id === 'string' && form.id.trim().length > 0;
+    const okImage = id.mode === 'create' ? !!id.id : !!id.id;
+    return okId && okImage;
+}
+
+// Normalization. Now soft:
+export function sanitizeForm(v: FormValues): FormValues {
+    const s = { ...v };
+    if (typeof s.id === 'string') s.id = s.id.trim();
+    return s;
 }

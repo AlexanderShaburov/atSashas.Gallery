@@ -2,9 +2,9 @@
 
 import type { ArtItemJSON, PriceJSON } from '@/entities/art';
 import type { Dimensions, Localized } from '@/entities/common';
-import type { CreateFormValues } from '@/features/admin/ui/CreateForm/CreateForm';
+import type { FormValues } from '@/features/admin/ui/CreateForm/CreateForm';
 type BuildParams = {
-    form: CreateFormValues;
+    form: FormValues;
     imageId: string;
     previewBasename?: string;
 };

@@ -1,1 +1,1 @@
-export type { ArtCatalog, Thumb } from './catalog';
+export type { ArtCatalog, EditorIdentity, Thumb } from './catalog';

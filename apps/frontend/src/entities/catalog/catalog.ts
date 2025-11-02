@@ -12,3 +12,5 @@ export type Thumb = {
     src: string;
     alt?: string;
 };
+
+export type EditorIdentity = { mode: 'create' | 'edit'; id: string };

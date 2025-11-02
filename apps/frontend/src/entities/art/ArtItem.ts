@@ -40,14 +40,15 @@ export interface ArtItemInit {
 
 export class ArtItem {
     readonly id: string;
-    title: Localized;
+    title: Localized | undefined;
     dateCreated: ISODate;
     techniques: string[];
-    price: Money | null;
+    price: Money | undefined;
     availability: Availability;
-    series: string | null;
-    tags: Tags;
-    notes: string | null;
+    series: string | undefined;
+    tags: string[];
+    alt: Localized | undefined;
+    notes: string | undefined;
     images: ImagesJSON;
     dimensions: Dimensions;
 
@@ -65,11 +66,11 @@ export class ArtItem {
         this.dateCreated = data.dateCreated;
         this.techniques = data.techniques;
         this.dimensions = data.dimensions;
-        this.price = data.price ?? null;
+        this.price = data.price ?? undefined;
         this.availability = data.availability;
-        this.series = data.series ?? null;
-        this.tags = new Tags(data.tags ?? []);
-        this.notes = data.notes ?? null;
+        this.series = data.series ?? undefined;
+        this.tags = [];
+        this.notes = data.notes ?? undefined;
         this.images = data.images;
     }
 
@@ -104,7 +105,7 @@ export class ArtItem {
             price: this.price,
             availability: this.availability,
             series: this.series,
-            tags: this.tags.toArray(),
+            tags: this.tags,
             notes: this.notes,
             images: {
                 alt: this.images.alt,

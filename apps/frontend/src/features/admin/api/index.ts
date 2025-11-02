@@ -67,7 +67,23 @@ export async function getTechniques(): Promise<TechniquesJson> {
     const request = `${JSON_VAULT}/techniques`;
     const res = await fetch(request);
     if (!res.ok) throw new Error(`Techniques ${res.status}`);
-    console.log(`Techniques request status: ${res.status}`);
     const raw = (await res.json()) as ApiResponse<TechniquesJson>;
     return raw.data;
+}
+
+// Collect and provide available series:
+export async function getSeriesOptionsCI(): Promise<string[]> {
+    const cat = await getCatalog();
+    const map = new Map<string, string>(); // key = lowercased, value = первая «нормальная» строка
+
+    for (const id of cat.order ?? []) {
+        const s = cat.items?.[id]?.series;
+        if (typeof s === 'string') {
+            const t = s.trim();
+            if (!t) continue;
+            const key = t.toLocaleLowerCase();
+            if (!map.has(key)) map.set(key, t);
+        }
+    }
+    return [...map.values()].sort((a, b) => a.localeCompare(b));
 }

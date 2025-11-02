@@ -24,4 +24,5 @@ def hopper_content():
         rel = p.relative_to(root).as_posix()
         rel_quoted = "/".join(quote(s) for s in rel.split("/"))
         response.append({"id": file_name, "src": f"{base_root}/{rel_quoted}"})
+        print(f"Hopper read: {response}")
     return response
