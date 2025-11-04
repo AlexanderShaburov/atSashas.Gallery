@@ -42,3 +42,24 @@ I like it!!!!
     2. ImageDraft - url to Hopper url;
 
 # **IMPORTANT: ARCHITECTURE DECISION**
+
+### !!!!
+
+- in the category - techniques frame, form has to cary current techniques list display and button add/edit field
+- on that button click frame has to change to current view: category select and depended techniques select list.
+- end confirm button after that view comes back to selected techniques list.
+
+**How transform ArtItem to FormValues?**
+
+1. id - ok
+2. dateCreated - ok
+3. title: ok
+4. techniques: to be refactored
+5. price: ok
+6. availability: ok
+7. dimensions: ok
+8. series: ok
+9. tags: not ok and it's to think issue
+10. alt: ok
+11. notes: ok
+12. images: -> not to transfer

@@ -1,7 +1,7 @@
 import { ArtGerm, ArtItem, TechniquesJson } from '@/entities/art';
-import type { EditorIdentity, Thumb } from '@/entities/catalog';
+import { Thumb } from '@/entities/catalog';
 import { getSeriesOptionsCI, getTechniques } from '@/features/admin/api';
-import { prepareEditorForm } from '@/features/admin/editorSession/editorLogic/editorLogic';
+import { ArtToFormAdapter, prepareEditorForm } from '@/features/admin/editorSession/editorLogic/';
 import type { FormValues } from '@/features/admin/editorSession/editorTypes';
 import { deepEqual } from '@/features/admin/utils/checkers';
 import { isMinimalValid } from '@/features/admin/utils/Validators';
@@ -16,13 +16,12 @@ import {
 } from 'react';
 
 export type EditorSession = {
-    identity: EditorIdentity | undefined; // matches state
+    identity: ArtGerm | undefined; // matches state
     values: FormValues | undefined;
     setValues: React.Dispatch<React.SetStateAction<FormValues | undefined>>;
-    setIdentity: (v: EditorIdentity | undefined) => void;
+    setIdentity: (v: ArtGerm | undefined) => void;
 
     /** Start a new session from a hopper unit or existing item */
-    startEditorSession: (unit: ArtGerm) => void;
     editorIsReady: boolean;
 
     /** Derived flags */
@@ -54,7 +53,7 @@ type ProviderProps = { children: React.ReactNode };
 
 export function EditorSessionProvider({ children }: ProviderProps) {
     // Core state
-    const [identity, setIdentity] = useState<EditorIdentity | undefined>(undefined);
+    const [identity, setIdentity] = useState<ArtGerm | undefined>(undefined);
     const [values, setValues] = useState<FormValues | undefined>(undefined);
 
     // UI/derived state
@@ -68,6 +67,13 @@ export function EditorSessionProvider({ children }: ProviderProps) {
     const [seriesOptions, setSeriesOptions] = useState<string[]>([]);
     // Snapshot for dirty checking
     const snapshot = useRef<FormValues | undefined>(undefined);
+    // valuesRef for use in functions not should be run after every values change:
+    const valuesRef = useRef<FormValues | undefined>(values);
+    useEffect(() => {
+        console.log('values watcher: run. values: ', values);
+        valuesRef.current = values;
+        console.log('values watcher: run. valuesRef.current: ', valuesRef.current);
+    }, [values]);
 
     /** One-time load of techniques.json */
     useEffect(() => {
@@ -95,43 +101,48 @@ export function EditorSessionProvider({ children }: ProviderProps) {
         setCanSave(!saving && isDirty && isValid);
     }, [isDirty, isValid, saving]);
 
-    /** Start a new editing session (create/edit) */
-    const startEditorSession = useCallback(
-        (unit: ArtGerm) => {
-            const initialValues = prepareEditorForm(unit);
-
-            let nextThumb: Thumb | undefined = undefined;
-            switch (unit.mode) {
-                case 'create': {
-                    nextThumb = unit.item as Thumb;
-                    break;
-                }
-                case 'edit': {
-                    const item = unit.item as ArtItem;
-                    nextThumb = {
-                        id: item.id,
-                        src: item.images.full,
-                        alt: item.alt,
-                    } as Thumb;
-                    break;
-                }
-                default: {
-                    // If modes expand later, fail fast for now
-                    console.error('Unsupported session mode:', unit?.mode);
-                    return;
-                }
+    /** Start a new editing session (create/edit) on every identity change */
+    useEffect(() => {
+        console.log('Session initiator called with identity: ', identity);
+        let nextThumb: Thumb | undefined = undefined;
+        switch (identity?.mode) {
+            case 'create': {
+                const initialValues = prepareEditorForm(identity);
+                console.log('Session initiator: initialValues.id: ', initialValues.id);
+                valuesRef.current = initialValues;
+                nextThumb = identity.item as Thumb;
+                setValues(initialValues);
+                console.log('Initiator: Values set as: ', initialValues);
+                break;
             }
+            case 'edit': {
+                const item = identity.item as ArtItem;
+                setValues(ArtToFormAdapter(item));
+                nextThumb = {
+                    id: item.id,
+                    src: item.images.full,
+                    alt: item.alt,
+                } as Thumb;
 
-            // Initialize state
-            setValues(initialValues);
-            setThumb(nextThumb);
-            snapshot.current = initialValues; // <-- critical: baseline for dirty checks
-            setIsDirty(false);
-            setIsValid(isMinimalValid(initialValues, identity));
-            setEditorIsReady(true);
-        },
-        [identity],
-    );
+                break;
+            }
+            case undefined:
+                break;
+            default: {
+                // If modes expand later, fail fast for now
+                console.error('Unsupported session mode:', identity?.mode);
+                return;
+            }
+        }
+
+        // Initialize state
+        setThumb(nextThumb);
+        console.log('Initiator: Session initiated. valuesRef.current:', valuesRef.current);
+        snapshot.current = valuesRef.current; // <-- critical: baseline for dirty checks
+        console.log('Initiator: Session initiated. snapshot.current: ', snapshot.current);
+        setIsDirty(false);
+        if (identity) setEditorIsReady(true);
+    }, [identity]);
 
     /** Reset the whole session */
     const exitSession = useCallback(() => {
@@ -149,13 +160,25 @@ export function EditorSessionProvider({ children }: ProviderProps) {
 
     /** Dirty & validity tracking on every form change */
     useEffect(() => {
-        if (!values || !snapshot.current) {
+        console.log('changeTracker: Identity: ', String(identity));
+        console.log('changeTracker: values: ', identity);
+        if (!valuesRef.current || !snapshot.current) {
             setIsDirty(false);
             setIsValid(false);
+            console.log('changeTracker: snapshot.current', snapshot.current);
+            console.log('changeTracker: !snapshot.current', !snapshot.current);
+            console.log('changeTracker: values', values, valuesRef.current);
+            console.log('changeTracker: !values', !values);
+            console.log('changeTracker: Checker decided to return: (!values || !snapshot.current)');
             return;
         }
-        setIsDirty(!deepEqual(snapshot.current, values));
-        setIsValid(isMinimalValid(values, identity));
+        if (identity) {
+            setIsDirty(!deepEqual(snapshot.current, values));
+            console.log('changeTracker: isDirty checked and is: ', isDirty);
+            console.log('changeTracker: isMinimalValid to call. values.id: ', values);
+            setIsValid(isMinimalValid(values, identity));
+            console.log('changeTracker: isValid checked and is: ', isValid);
+        }
     }, [values, identity]);
 
     /** Persist (stub left intact) */
@@ -181,6 +204,7 @@ export function EditorSessionProvider({ children }: ProviderProps) {
     /** Public exit with confirmation if dirty */
     const exit = useCallback(() => {
         if (saving) return;
+        console.log('isDirty: ', isDirty);
         if (isDirty && !confirm('Discard unsaved changes?')) return;
         exitSession();
     }, [saving, isDirty, exitSession]);
@@ -191,7 +215,6 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             values,
             setValues,
             setIdentity,
-            startEditorSession,
             editorIsReady,
             isDirty,
             isValid,
@@ -206,7 +229,6 @@ export function EditorSessionProvider({ children }: ProviderProps) {
         [
             identity,
             values,
-            startEditorSession,
             editorIsReady,
             isDirty,
             isValid,

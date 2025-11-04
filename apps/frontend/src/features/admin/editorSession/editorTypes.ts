@@ -4,8 +4,7 @@ export interface FormValues {
     id: string;
     dateCreated?: ISODate;
     title: Localized | undefined;
-    category?: string | undefined;
-    technique: string | undefined; // techniques[1]
+    techniques: string[];
     availability: Availability | undefined;
     dimensions: Dimensions | undefined;
     price: Money | undefined;

@@ -13,10 +13,12 @@ export function normalizeForCompare(v: unknown): unknown {
     return v;
 }
 export function deepEqual(a: unknown, b: unknown): boolean {
+    console.log('deepEqual got called.');
     try {
         return JSON.stringify(normalizeForCompare(a)) === JSON.stringify(normalizeForCompare(b));
     } catch {
         // fallback (very rare)
+        console.log('deepEqual fallback');
         return a === b;
     }
 }

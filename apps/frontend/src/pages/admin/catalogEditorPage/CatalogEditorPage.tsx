@@ -1,6 +1,6 @@
+import type { Thumb } from '@/entities/catalog';
 import { useEffect, useState } from 'react';
 
-import type { Thumb } from '@/entities/catalog';
 import { getHopperContent } from '@/features/admin/api';
 import SingleItemEditor from '@/features/admin/ui/SingleItemEditor/SingleItemEditor';
 import '@/pages/admin/catalogEditorPage/CatalogEditorPage.css';
@@ -8,7 +8,7 @@ import '@/pages/admin/catalogEditorPage/CatalogEditorPage.css';
 import { useEditorSession } from '@/features/admin/editorSession/EditorSession.context';
 
 export default function CatalogEditorPage() {
-    const { startEditorSession, editorIsReady, exit, save, saving, isValid, isDirty } = {
+    const { identity, setIdentity, editorIsReady } = {
         ...useEditorSession(),
     };
 
@@ -17,12 +17,6 @@ export default function CatalogEditorPage() {
     const [error, setError] = useState<string | null>(null);
     const [hopper, setHopper] = useState<Thumb[]>([]);
     const [loading, setLoading] = useState(false);
-    const [selected, setSelected] = useState<string | null>(null);
-
-    const onThumbClick = (h: Thumb) => {
-        setSelected(h.id);
-        startEditorSession({ mode: mode, item: h });
-    };
 
     useEffect(() => {
         // if mode =  create it reads Hopper content
@@ -52,7 +46,7 @@ export default function CatalogEditorPage() {
             </div>
         );
     }
-    if (!selected) {
+    if (!identity) {
         return (
             <div className="catalog-page">
                 <header>
@@ -71,8 +65,8 @@ export default function CatalogEditorPage() {
                         {hopper.map((h) => (
                             <button
                                 key={h.id}
-                                className={`card ${selected === h.id ? 'selected' : ''}`}
-                                onClick={() => onThumbClick(h)}
+                                className={`card`}
+                                onClick={() => setIdentity({ mode: mode, item: h })}
                                 title={h.id}
                             >
                                 <img src={h.src} alt={h.id} loading="lazy" />
@@ -85,29 +79,9 @@ export default function CatalogEditorPage() {
             </div>
         );
     }
-    if (selected && editorIsReady) {
+    if (identity && editorIsReady) {
         return (
             <div className="catalog-page">
-                <header>
-                    <button onClick={exit}>← Back</button>
-
-                    <button
-                        onClick={save}
-                        disabled={!isValid || saving}
-                        style={{ marginLeft: 8 }}
-                        title={!isValid ? 'Form is not valid' : 'Save this item'}
-                    >
-                        {saving ? 'Saving…' : 'Save'}
-                    </button>
-                    {isDirty && (
-                        <span className="dirty-dot" title="Unsaved changes">
-                            •
-                        </span>
-                    )}
-                    <span style={{ marginLeft: 12, opacity: 0.7 }}>
-                        {isValid ? '✓ Valid' : '⚠ Not valid'}
-                    </span>
-                </header>
                 <SingleItemEditor />
             </div>
         );

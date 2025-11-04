@@ -4,25 +4,12 @@ import { useEffect } from 'react';
 import { useEditorSession } from '../../editorSession/EditorSession.context';
 
 export default function SingleItemEditor() {
-    // {
-    // thumb,
-    // FormComponent,
-    // formProps,
-    // values,
-    // onSave,
-    // onCancel,
-    // saving = false,
-    // title,
-    // onBack,
-    // isValid,
-    // isDirty,
-    // }: Props
-    const { thumb, save, formValues, isDirty, isValid, exit, canSave } = { ...useEditorSession() };
+    const { thumb, save, values, isDirty, isValid, exit, canSave } = { ...useEditorSession() };
 
     //Cmd/Ctrl + S to save, Exc to cancel:
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
-            if (!formValues) return;
+            if (!values) return;
             const mod = /Mac/i.test(navigator.platform) ? e.metaKey : e.ctrlKey;
 
             if (mod && e.key.toLowerCase() === 's') {
@@ -39,16 +26,16 @@ export default function SingleItemEditor() {
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [isValid, exit, save, isDirty, formValues]);
+    }, [isValid, exit, save, isDirty, values]);
 
     return (
         <div className="sie-layout">
             {/* Thumbnail column */}
             <aside className="sie-thumb-col" aria-label="Selected artwork">
                 <div className="sie-thumb-card">
-                    <img src={thumb.src} alt={thumb.alt || thumb.id} loading="lazy" />
+                    <img src={thumb?.src} alt={thumb?.alt || thumb?.id} loading="lazy" />
                     <div className="sie-thumb-meta">
-                        <div className="sie-thumb-id">{formValues?.title?.en ?? thumb.id}</div>
+                        <div className="sie-thumb-id">{values?.title?.en ?? thumb?.id}</div>
                     </div>
                 </div>
             </aside>
@@ -64,12 +51,7 @@ export default function SingleItemEditor() {
                             <button
                                 type="button"
                                 className="sie-btn sie-btn--secondary"
-                                onClick={() => {
-                                    if (!formValues) return;
-                                    if (!isDirty || confirm('Discard unsaved changes?')) {
-                                        exit();
-                                    }
-                                }}
+                                onClick={() => exit()}
                             >
                                 ✖ Exit
                             </button>

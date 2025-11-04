@@ -186,7 +186,20 @@
     padding-left: 0.5rem;
     padding-right: 0.5rem;
 }
+/* Техредактор: список слева, управление справа */
+.cf-tech-editor {
+    display: grid;
+    grid-template-columns: 75% 25%; /* было около 80/20, сделали +5% кнопкам */
+    gap: 0.75rem;
+    align-items: stretch;
+}
 
+/* Правая колонка: чтобы элементы растягивались на ширину */
+.cf-tech-actions .cf-select,
+.cf-tech-actions button {
+    width: 100%;
+    min-height: 44px; /* чтобы не прыгало */
+}
 /* -------- Responsive / mobile -------- */
 @supports (-webkit-touch-callout: none) {
     .cf-input,
@@ -223,6 +236,9 @@
     }
     .cf-select option {
         font-size: 1.1rem;
+    }
+    .cf-tech-editor {
+        grid-template-columns: 1fr;
     }
 }
 

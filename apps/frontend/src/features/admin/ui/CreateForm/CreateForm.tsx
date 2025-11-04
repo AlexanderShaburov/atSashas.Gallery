@@ -1,45 +1,17 @@
 // CreateForm.tsx
 import type { Availability, ISODate } from '@/entities/common';
-import type { FormValues } from '@/features/admin/editorSession/editorTypes';
+import { useEditorSession } from '@/features/admin/editorSession/EditorSession.context';
 import '@/features/admin/ui/CreateForm/CreateForm.css';
 import DimensionsInput from '@/features/admin/ui/CreateForm/UX/DimensionsInput';
 import LangInput from '@/features/admin/ui/CreateForm/UX/LangInput';
 import MoneyInput from '@/features/admin/ui/CreateForm/UX/MoneyInput';
-import { useEffect, useMemo, useState } from 'react';
-import { useEditorSession } from '../../editorSession/EditorSession.context';
+// import TechniqueListEditor from '@/features/admin/ui/CreateForm/UX/TechniqueListEditor';
+import TechniqueListEditor from '@/features/admin/ui/CreateForm/UX/TechniqueListEditor';
 
-// const DEFAULT_CATEGORY = 'painting' as const;
-// const DEFAULT_TECHNIQUE = 'watercolor' as const;
-
-type FormDraft = Partial<FormValues>;
 export function CreateForm() {
-    const { values, setValues, techniques, seriesOptions, editorIsReady } = useEditorSession();
-    const [draft, setDraft] = useState<FormDraft>();
+    const { values, setValues, seriesOptions, editorIsReady } = useEditorSession();
 
-    const categories = useMemo(
-        () =>
-            techniques
-                ? Object.entries(techniques).map(([key, val]) => ({
-                      key,
-                      label: val.label ?? key, // на всякий случай
-                  }))
-                : [],
-        [techniques],
-    );
-
-    // save draft on every change:
-    useEffect(() => {
-        const d = draft as FormValues;
-        setValues(d);
-    }, [draft, setValues]);
-
-    // Set initial category and technique
-    const techsForCat = useMemo(() => {
-        const raw = values?.category ? (techniques[values.category]?.items ?? []) : [];
-        // Normalize to { key, label }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return raw.map((it: any) => (typeof it === 'string' ? { key: it, label: it } : it));
-    }, [values?.category, techniques]);
+    if (!editorIsReady || !values) return null;
 
     if (editorIsReady) {
         return (
@@ -55,10 +27,10 @@ export function CreateForm() {
                         className="cf-input"
                         value={values?.dateCreated ?? ''}
                         onChange={(e) =>
-                            setDraft((prev) => ({
-                                ...prev,
-                                dateCreated: e.target.value as ISODate,
-                            }))
+                            setValues((prev) => {
+                                if (!prev) throw new Error('Form not ready');
+                                return { ...prev, dateCreated: e.target.value as ISODate };
+                            })
                         }
                     />
                 </div>
@@ -66,64 +38,20 @@ export function CreateForm() {
                 {/* Title */}
                 <LangInput
                     label="Title"
-                    value={{ en: values?.title?.en ?? '', ru: values?.alt?.ru ?? '' }}
+                    value={{ en: values?.title?.en ?? '', ru: values?.title?.ru ?? '' }}
                     className="cf-field--title"
                     inputId="title_multi"
-                    onChange={(next) =>
-                        setDraft((v) => ({
-                            ...v,
-                            title: next,
-                        }))
+                    onChange={(e) =>
+                        setValues((prev) => {
+                            if (!prev) throw new Error('Form not ready');
+                            return { ...prev, title: e };
+                        })
                     }
                     placeholder="Here is artwork name"
                 />
 
-                {/* Category */}
-                <div className="cf-row">
-                    <label htmlFor="category" className="cf-label">
-                        Category
-                    </label>
-                    <select
-                        id="category"
-                        className="cf-select"
-                        value={values?.category}
-                        onChange={(e) => {
-                            const category = e.target.value;
-                            // const firstTech = techniques[category]?.items[0]?.key;
-                            setDraft((prev) => ({ ...prev, category: category }));
-                        }}
-                    >
-                        {categories.map((c) => (
-                            <option key={c.key} value={c.key}>
-                                {c.label}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Technique */}
-                <div className="cf-row">
-                    <label htmlFor="technique" className="cf-label">
-                        Technique
-                    </label>
-                    <select
-                        id="technique"
-                        className="cf-select"
-                        value={values?.technique}
-                        onChange={(e) => setDraft((v) => ({ ...v, technique: e.target.value }))}
-                    >
-                        {values?.technique == undefined && (
-                            <option value="" disabled>
-                                — Select technique —
-                            </option>
-                        )}
-                        {techsForCat.map((t) => (
-                            <option key={t.key} value={t.key}>
-                                {t.label}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                {/* Select techniques from the list */}
+                <TechniqueListEditor />
 
                 {/* Series with datalist */}
                 <div className="cf-row">
@@ -135,7 +63,12 @@ export function CreateForm() {
                         list="series-list"
                         className="cf-input"
                         value={values?.series ?? ''}
-                        onChange={(e) => setDraft((v) => ({ ...v, series: e.target.value }))}
+                        onChange={(e) =>
+                            setValues((prev) => {
+                                if (!prev) throw new Error('Form not ready');
+                                return { ...prev, series: e.target.value };
+                            })
+                        }
                         placeholder="Start typing or pick…"
                     />
                     <datalist id="series-list">
@@ -160,10 +93,10 @@ export function CreateForm() {
                                 .split(',')
                                 .map((s) => s.trim())
                                 .filter(Boolean);
-                            setDraft((v) => ({
-                                ...v,
-                                tags: tags.length ? tags : undefined,
-                            }));
+                            setValues((prev) => {
+                                if (!prev) throw new Error('Form not ready');
+                                return { ...prev, tags: tags.length ? tags : undefined };
+                            });
                         }}
                         placeholder="comma, separated (e.g. roses, landscape)"
                     />
@@ -179,7 +112,12 @@ export function CreateForm() {
                         className="cf-textarea"
                         rows={3}
                         value={values?.notes ?? ''}
-                        onChange={(e) => setDraft((v) => ({ ...v, notes: e.target.value }))}
+                        onChange={(e) =>
+                            setValues((prev) => {
+                                if (!prev) throw new Error('Form not ready');
+                                return { ...prev, notes: e.target.value as string };
+                            })
+                        }
                         placeholder="Say something about this artwork here."
                     />
                 </div>
@@ -194,10 +132,10 @@ export function CreateForm() {
                         className="cf-select"
                         value={values?.availability}
                         onChange={(e) =>
-                            setDraft((v) => ({
-                                ...v,
-                                availability: e.target.value as Availability,
-                            }))
+                            setValues((prev) => {
+                                if (!prev) throw new Error('Form not ready');
+                                return { ...prev, availability: e.target.value as Availability };
+                            })
                         }
                     >
                         <option value="available">available</option>
@@ -215,7 +153,12 @@ export function CreateForm() {
                         <DimensionsInput
                             label="Dimensions"
                             value={values?.dimensions}
-                            onChange={(size) => setDraft((prev) => ({ ...prev, dimensions: size }))}
+                            onChange={(size) =>
+                                setValues((prev) => {
+                                    if (!prev) throw new Error('Form not ready');
+                                    return { ...prev, dimensions: size };
+                                })
+                            }
                         />
                     </div>
                 </div>
@@ -224,7 +167,12 @@ export function CreateForm() {
                 <MoneyInput
                     label="Artwork price"
                     value={values?.price}
-                    onChange={(next) => setDraft((prev) => ({ ...prev, price: next }))}
+                    onChange={(price) =>
+                        setValues((prev) => {
+                            if (!prev) throw new Error('Form not ready');
+                            return { ...prev, price: price };
+                        })
+                    }
                 />
                 {/* ALT */}
                 <LangInput
@@ -233,10 +181,10 @@ export function CreateForm() {
                     inputId="alt_multi"
                     value={values?.alt}
                     onChange={(next) =>
-                        setDraft((v) => ({
-                            ...v,
-                            alt: next,
-                        }))
+                        setValues((prev) => {
+                            if (!prev) throw new Error('Form not ready');
+                            return { ...prev, alt: next };
+                        })
                     }
                     placeholder="Artwork short description"
                 />

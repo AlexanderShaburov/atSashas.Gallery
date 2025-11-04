@@ -1,7 +1,7 @@
 import { ArtGerm, ArtItem } from '@/entities/art';
 import { ISODate } from '@/entities/common';
 import { generateArtId } from '@/features/admin/editorSession/editorLogic/generateArtId';
-import type { FormValues } from '@/features/admin/ui/CreateForm/CreateForm';
+import type { FormValues } from '@/features/admin/editorSession/editorTypes';
 
 export function prepareEditorForm(unit: ArtGerm): FormValues {
     if (unit.mode === 'create') {
