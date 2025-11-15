@@ -4,7 +4,9 @@ import { useEffect } from 'react';
 import { useEditorSession } from '../../editorSession/EditorSession.context';
 
 export default function SingleItemEditor() {
-    const { thumb, save, values, isDirty, isValid, exit, canSave } = { ...useEditorSession() };
+    const { thumb, save, values, isDirty, isValid, exit, canSave, saving } = {
+        ...useEditorSession(),
+    };
 
     //Cmd/Ctrl + S to save, Exc to cancel:
     useEffect(() => {
@@ -25,8 +27,9 @@ export default function SingleItemEditor() {
             }
         };
         window.addEventListener('keydown', onKey);
+        console.log(`From SingleItemEditor component canSave visible as: ${canSave}`);
         return () => window.removeEventListener('keydown', onKey);
-    }, [isValid, exit, save, isDirty, values]);
+    }, [isValid, exit, save, isDirty, values, canSave]);
 
     return (
         <div className="sie-layout">
@@ -58,17 +61,17 @@ export default function SingleItemEditor() {
                             <button
                                 type="button"
                                 className="sie-btn sie-btn--primary"
-                                disabled={!canSave}
-                                onClick={() => canSave && save()}
+                                disabled={!canSave || saving}
+                                onClick={() => !saving && canSave && save()}
                                 title={
                                     !canSave
-                                        ? 'Fill the form'
-                                        : !canSave
-                                          ? 'Complete required fields'
+                                        ? 'Complete required fields'
+                                        : saving
+                                          ? 'Saving...'
                                           : 'Save'
                                 }
                             >
-                                {canSave ? 'Saving…' : '💾 Save'}
+                                {canSave ? '💾 Save' : 'Saving…'}
                             </button>
                         </div>
                     </div>

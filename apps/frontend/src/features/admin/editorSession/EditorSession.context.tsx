@@ -213,12 +213,18 @@ export function EditorSessionProvider({ children }: ProviderProps) {
     /* SAVE procedure: */
 
     const save = useCallback(async () => {
-        if (!values || !canSave) return;
+        console.log('save function called!');
+        if (!values || !canSave) {
+            console.log(`!values || !canSave control not passed`);
+            console.log(`values are: ${values} and canSave is ${canSave}`);
+            return;
+        }
         if (!isValid) {
             alert('Minimal required fields are missing (ID + Image).');
             return;
         }
         setSaving(true);
+        console.log(`saving set to ${saving}`);
         try {
             const clean = sanitizeForm(values);
 
@@ -234,7 +240,7 @@ export function EditorSessionProvider({ children }: ProviderProps) {
         } finally {
             setSaving(false);
         }
-    }, []); // keep identical behavior to your stub
+    }, [values, canSave, isValid, identity, exitSession, saving]); // keep identical behavior to your stub
 
     /** Public exit with confirmation if dirty */
     const exit = useCallback(() => {

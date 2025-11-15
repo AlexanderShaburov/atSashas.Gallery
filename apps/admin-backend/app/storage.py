@@ -7,7 +7,7 @@ from .settings import settings
 logger = getLogger(__name__)
 
 
-BASE = Path(settings.storage_dir)
+BASE = Path(settings.storage_root)
 
 JSON_DIR = BASE / settings.json_data.replace("/", "")
 UPLOAD_DIR = BASE / settings.upload_media_dir.replace("/", "")

@@ -3,7 +3,7 @@ import logging
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .settings import settings
-from .routers import health, json_kv, upload, hopper
+from .routers import health, json_kv, upload, hopper, catalog
 from .storage import BASE
 
 #   -----------------------
@@ -45,7 +45,7 @@ app.add_middleware(
 # Files download static:
 FILES_DIR = BASE  # Includes /json and /uploads
 logger.info(f"FILES_DIR from the main.py {FILES_DIR}")
-logger.info(f"settings.storage_dir: {settings.storage_dir}")
+logger.info(f"settings.storage_root: {settings.storage_root}")
 logger.info(f"settings.upload_media_dir {settings.upload_media_dir}")
 logger.info(f"settings.json_data {settings.json_data}")
 app.mount(
@@ -57,3 +57,4 @@ app.include_router(health.router)
 app.include_router(json_kv.router)
 app.include_router(upload.router)
 app.include_router(hopper.router)
+app.include_router(catalog.router)

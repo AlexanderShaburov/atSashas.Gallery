@@ -36,7 +36,7 @@ your-repo/
 ADMIN_ORIGIN=http://localhost:5173
 SITE_ORIGIN=http://localhost:5174
 # Базовый путь хранилища (в контейнере будет /app/storage)
-STORAGE_DIR=/app/storage
+STORAGE_ROOT=/app/storage
 # Простейшая защита на запись JSON/аплоад (по желанию)
 ADMIN_TOKEN=change-me
 ```
@@ -95,7 +95,7 @@ from typing import List
 class Settings(BaseSettings):
     admin_origin: AnyHttpUrl | None = None
     site_origin: AnyHttpUrl | None = None
-    storage_dir: str = "./storage"
+    storage_root: str = "./storage"
     admin_token: str | None = None
 
     class Config:
@@ -124,7 +124,7 @@ from typing import Any
 import json
 from .settings import settings
 
-BASE = Path(settings.storage_dir).resolve()
+BASE = Path(settings.storage_root).resolve()
 JSON_DIR = BASE / "json"
 UPLOAD_DIR = BASE / "uploads"
 JSON_DIR.mkdir(parents=True, exist_ok=True)
@@ -278,7 +278,7 @@ app.add_middleware(
 )
 
 # Статика для скачивания файлов
-BASE = Path(settings.storage_dir)
+BASE = Path(settings.storage_root)
 FILES_DIR = BASE  # включает /json и /uploads
 app.mount("/files", StaticFiles(directory=str(FILES_DIR), html=False), name="files")
 

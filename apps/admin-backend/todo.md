@@ -23,7 +23,7 @@ app/routers/__init__.py app/routers/health.py app/routers/json_kv.py app/routers
 cat > .env << 'EOF'
 ADMIN_ORIGIN=http://localhost:5173
 SITE_ORIGIN=http://localhost:5174
-STORAGE_DIR=./storage
+STORAGE_ROOT=./storage
 ADMIN_TOKEN=change-me
 EOF
 ```

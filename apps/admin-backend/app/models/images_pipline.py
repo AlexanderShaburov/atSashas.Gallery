@@ -4,11 +4,9 @@ import os
 import shutil
 from dataclasses import dataclass
 from typing import List, Optional
-
+from settings import settings
 from PIL import Image  # pip install pillow
 
-# Optional AVIF support:
-# pip install pillow-avif-plugin
 try:
     import pillow_avif  # noqa: F401  # register AVIF with Pillow if installed
 
@@ -26,54 +24,83 @@ class ImagesJSON:
     def from_hopper(
         cls,
         hopper_src: str,
-        full_dir: str,
-        preview_dir: str,
-        public_full_prefix: Optional[str] = None,
-        public_preview_prefix: Optional[str] = None,
-        max_preview_px: int = 500,
-        max_preview_bytes: int = 500 * 1024,
+        art_id: str,
+        *,
         base_name: Optional[str] = None,
         copy_instead_of_move: bool = False,
+        max_preview_px: int = 500,
+        max_preview_bytes: int = 500 * 1024,
     ) -> "ImagesJSON":
         """
-        Build ImagesJSON from a single source file in the hopper.
+        Build ImagesJSON from a single source file in the hopper, using paths
+        and prefixes defined in settings.
 
-        - Moves (or copies) the hopper file to `full_dir`
-        - Generates a single-size preview (longest edge <= max_preview_px) in JPEG, WebP and AVIF (if available)
-        - Tries to keep each preview file under `max_preview_bytes`
-        - Returns ImagesJSON with public or relative paths
+        - Moves (or copies) the hopper file into <storage_root>/<media_dir>/<full_size>
+        - Generates previews into <storage_root>/<media_dir>/<previews>
+        - Returns JSON paths starting with "/media/..." (public URLs)
 
         Args:
-            hopper_src: path to the original file in hopper (e.g. ".../hopper/IMG_00123.jpg")
-            full_dir: destination directory for full-size originals (e.g. ".../vault/arts/full")
-            preview_dir: destination directory for previews (e.g. ".../vault/arts/preview")
-            public_full_prefix: the URL/path prefix to expose "full" in JSON (e.g. "/vault/arts/full")
-            public_preview_prefix: the URL/path prefix to expose previews in JSON (e.g. "/vault/arts/preview")
-            max_preview_px: max longest edge for previews
-            max_preview_bytes: soft size cap per preview file
-            base_name: optional basename (without extension) for outputs; default: derived from hopper filename
-            copy_instead_of_move: if True, copy full instead of move
-
-        Returns:
-            ImagesJSON(full=<public or relative path>, previews=[<jpg>, <webp>, <avif?>])
+            hopper_src: path or filename of the original file in hopper.
+                If it's not absolute, it is resolved relative to
+                <storage_root>/<upload_media_dir>.
+            base_name: optional basename (without extension) for outputs;
+                default: derived from hopper filename.
+            copy_instead_of_move: if True, copy full instead of move.
+            max_preview_px: max longest edge for previews.
+            max_preview_bytes: soft size cap per preview file.
         """
+
+        # ---------- Resolve base directories from settings ----------
+        # Filesystem root for storage (mounted volume)
+        storage_root = settings.storage_root  # e.g. "/media"
+
+        # Hopper directory (incoming uploads)
+        hopper_dir = os.path.join(
+            storage_root,
+            settings.upload_media_dir.lstrip("/"),
+        )  # e.g. "/media/hopper"
+
+        # Root for art media
+        media_root = os.path.join(
+            storage_root,
+            settings.media_dir.lstrip("/"),
+        )  # e.g. "/media/arts"
+
+        # Fullsize and previews directories on filesystem
+        full_dir = os.path.join(
+            media_root,
+            settings.full_size.lstrip("/"),
+        )  # e.g. "/media/arts/fullsize"
+
+        preview_dir = os.path.join(
+            media_root,
+            settings.previews.lstrip("/"),
+        )  # e.g. "/media/arts/previews"
+
         os.makedirs(full_dir, exist_ok=True)
         os.makedirs(preview_dir, exist_ok=True)
 
-        src_basename = os.path.basename(hopper_src)
-        name, _ext = os.path.splitext(src_basename)
-        if base_name:
-            name = base_name
+        # ---------- Resolve hopper source path ----------
+        # If hopper_src is relative, assume it's inside hopper_dir
+        if not os.path.isabs(hopper_src):
+            hopper_src_path = os.path.join(hopper_dir, hopper_src)
+        else:
+            hopper_src_path = hopper_src
 
-        # ---- 1) Move/copy to full_dir with original extension preserved
+        src_basename = os.path.basename(hopper_src_path)
+        name, _ext = os.path.splitext(src_basename)
+        name = art_id
+
+        # ---------- Move/copy original into fullsize directory ----------
         full_ext = _ext.lower() if _ext else ".jpg"
         full_dst_path = os.path.join(full_dir, f"{name}{full_ext}")
-        if copy_instead_of_move:
-            shutil.copy2(hopper_src, full_dst_path)
-        else:
-            shutil.move(hopper_src, full_dst_path)
 
-        # ---- 2) Open the full image for preview generation
+        if copy_instead_of_move:
+            shutil.copy2(hopper_src_path, full_dst_path)
+        else:
+            shutil.move(hopper_src_path, full_dst_path)
+
+        # ---------- Open full image and build previews ----------
         with Image.open(full_dst_path) as im:
             im = im.convert("RGB")  # normalize for consistent encoders
 
@@ -92,7 +119,7 @@ class ImagesJSON:
             else:
                 preview_img = im  # already small enough
 
-            # Prepare output file paths
+            # Prepare preview output paths (filesystem)
             jpg_path = os.path.join(preview_dir, f"{name}.jpg")
             webp_path = os.path.join(preview_dir, f"{name}.webp")
             avif_path = os.path.join(preview_dir, f"{name}.avif")
@@ -126,21 +153,28 @@ class ImagesJSON:
                     # AVIF plugin present but failed — skip silently
                     pass
 
-        # ---- 3) Build public/JSON-facing paths
-        full_json_path = (
-            _join_url(public_full_prefix, f"{name}{full_ext}")
-            if public_full_prefix
-            else full_dst_path
-        )
+        # ---------- Build JSON-facing public paths ----------
+        # We assume that /media in URL maps to settings.storage_root on filesystem.
+        url_root = settings.storage_root.rstrip("/")  # "/media"
 
-        previews_json_paths = []
+        # Full image JSON path: "/media/arts/fullsize/<name>.<ext>"
+        full_rel = os.path.join(
+            settings.media_dir.lstrip("/"),
+            settings.full_size.lstrip("/"),
+            f"{name}{full_ext}",
+        )
+        full_json_path = _join_url(url_root, full_rel)
+
+        # Preview JSON paths: "/media/arts/previews/<name>.<ext>"
+        previews_json_paths: List[str] = []
         for p in created_paths:
-            if public_preview_prefix:
-                previews_json_paths.append(
-                    _join_url(public_preview_prefix, os.path.basename(p))
-                )
-            else:
-                previews_json_paths.append(p)
+            filename = os.path.basename(p)
+            rel = os.path.join(
+                settings.media_dir.lstrip("/"),
+                settings.previews.lstrip("/"),
+                filename,
+            )
+            previews_json_paths.append(_join_url(url_root, rel))
 
         return cls(full=full_json_path, previews=previews_json_paths)
 

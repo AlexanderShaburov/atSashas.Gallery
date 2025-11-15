@@ -5,10 +5,13 @@ from pydantic import AnyHttpUrl
 class Settings(BaseSettings):
     admin_origin: AnyHttpUrl | None = None
     site_origin: AnyHttpUrl | None = None
-    storage_dir: str = "storage"
-    upload_media_dir: str = "upload_media"
+    storage_root: str = "/media"
+    upload_media_dir: str = "/hopper"
+    media_dir: str = "/arts"
+    full_size: str = "/fullsize"
+    previews: str = "/previews"
     admin_token: str | None = None
-    json_data: str = "json_data"
+    json_data: str = "/json"
 
     class Config:
         env_prefix = ""
