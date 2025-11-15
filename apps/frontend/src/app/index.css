@@ -1,31 +1,96 @@
+/* =========================
+   Global Theme and Base Variables
+   ========================= */
+
+/* Universal box model */
 *,
 *::before,
 *::after {
     box-sizing: border-box;
 }
-:root {
-    --gap: clamp(24px, 6vw, 48px); /* единый зазор по умолчанию */
-    --gutter: clamp(24px, 6vw, 56px); /* боковые поля для контейнера */
-    --container-gutter: clamp(
-        24px,
-        6vw,
-        56px
-    ); /* Базовый «жир» по бокам: не меньше 24px, растёт с вьюпортом до 56px */
-    --page-max: 1100px; /* максимальная ширина страницы */
-    --header-h: 5rem; /* высота шапки, если fixed/sticky */
+
+/* Browser color scheme awareness */
+html {
+    color-scheme: light dark;
 }
+
+/* Force explicit color scheme depending on data-theme */
+html[data-theme='light'],
+:root[data-theme='light'],
+body[data-theme='light'] {
+    color-scheme: light !important;
+}
+
+html[data-theme='dark'],
+:root[data-theme='dark'],
+body[data-theme='dark'] {
+    color-scheme: dark !important;
+}
+
+/* Inherit color-scheme hint for native controls */
+body,
+.app-root,
+.cf-form,
+.cf-form *,
+.sie-layout,
+.sie-layout * {
+    color-scheme: inherit;
+}
+
+/* =========================
+   Root-level CSS variables
+   ========================= */
 :root {
-    /* text hierarchy */
-    --form-label-group: var(--text); /* big group titles */
-    --form-label-sub: color-mix(in srgb, var(--accent) 45%, var(--text)); /* small inside group */
-    --form-label-single: var(--muted); /* single field label */
+    /* --- Color palette (light mode defaults) --- */
+    --bg: #f8f7f5;
+    --text: #1e1e1c;
+    --muted: #555555;
+    --subtle: #b6b6c6;
+    --border: #dcdad6;
+    --card-bg: #ffffff;
+    --accent: #3a5f8a;
+    --accent-hover: #2f4f6d;
+    --on-accent: #ffffff;
+    --tile-title: #eaeaea81;
+    --shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+
+    /* --- Dark mode base palette --- */
+    --color-surface: #111218;
+    --color-muted: #1b1c25;
+    --color-text: #e6e6e6;
+    --color-border: #2a2b37;
+    --color-accent: #2563eb;
+    --color-on-accent: #ffffff;
+
+    /* --- Layout metrics --- */
+    --gap: clamp(24px, 6vw, 48px);
+    --gutter: clamp(24px, 6vw, 56px);
+    --container-gutter: clamp(24px, 6vw, 56px);
+    --page-max: 1100px;
+    --header-h: 5rem;
+
+    /* --- Form styling --- */
+    --form-label-group: var(--text);
+    --form-label-sub: color-mix(in srgb, var(--accent) 45%, var(--text));
+    --form-label-single: var(--muted);
     --form-placeholder: color-mix(in srgb, var(--muted) 70%, transparent);
     --form-border: var(--border);
     --form-border-hover: color-mix(in srgb, var(--accent) 45%, var(--border));
     --form-bg: var(--card-bg);
     --form-shadow: var(--shadow);
 }
+
+/* Dark theme overrides */
 :root[data-theme='dark'] {
+    --bg: #121212;
+    --text: #e4e4e2;
+    --muted: #aaaaaa;
+    --border: #2c2c2c;
+    --card-bg: #1c1c1c;
+    --accent: #5b8ab2;
+    --accent-hover: #729ec0;
+    --tile-title: #eaeaea81;
+
     --form-label-group: var(--text);
     --form-label-sub: color-mix(in srgb, var(--accent) 60%, var(--text));
     --form-label-single: var(--muted);
@@ -34,47 +99,22 @@
     --form-border-hover: var(--accent);
     --form-bg: var(--card-bg);
 }
+
+/* Adjust default spacing for larger viewports */
 @media (min-width: 820px) {
     :root {
         --gap: 16px;
     }
 }
 
+/* =========================
+   Base document styling
+   ========================= */
 html,
 body {
     margin: 0;
     padding: 0;
     height: 100%;
-}
-
-:root {
-    --surface: var(--color-surface, #111218);
-    --muted: var(--color-muted, #1b1c25);
-    --text: var(--color-text, #e6e6e6);
-    --subtle: var(--color-subtle, #b6b6c6);
-    --border: var(--color-border, #2a2b37);
-    --accent: var(--color-accent, #2563eb);
-    --on-accent: var(--color-on-accent, #ffffff);
-    --shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
-    --bg: #f8f7f5; /* фон — светлый, теплый, не чисто белый */
-    --text: #1e1e1c; /* основной текст — почти чёрный, но мягче */
-    --muted: #555555; /* второстепенный текст */
-    --border: #dcdad6; /* рамки и линии */
-    --card-bg: #ffffff; /* фон карточек/блоков */
-    --accent: #3a5f8a; /* глубокий сине-серый, спокойный акцент */
-    --accent-hover: #2f4f6d;
-    --tile-title: #eaeaea81;
-}
-
-:root[data-theme='dark'] {
-    --bg: #121212; /* фон — глубокий графит */
-    --text: #e4e4e2; /* текст — почти белый, но мягче */
-    --muted: #aaaaaa; /* второстепенный текст */
-    --border: #2c2c2c; /* рамки и линии */
-    --card-bg: #1c1c1c; /* карточки чуть светлее фона */
-    --accent: #5b8ab2; /* светлый акцент (вариация синего) */
-    --accent-hover: #729ec0;
-    --tile-title: #eaeaea81;
 }
 
 body {
@@ -84,6 +124,9 @@ body {
     font-family: sans-serif;
 }
 
+/* =========================
+   Generic button styling
+   ========================= */
 .btn {
     background: var(--accent);
     color: var(--card-bg);
@@ -91,7 +134,13 @@ body {
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     cursor: pointer;
+    font-size: 1rem;
+    min-height: 44px;
+    transition:
+        background-color 0.25s ease,
+        opacity 0.25s ease;
 }
+
 .btn:hover {
     opacity: 0.8;
     background: var(--accent-hover);

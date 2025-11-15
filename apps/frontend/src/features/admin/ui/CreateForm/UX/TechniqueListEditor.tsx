@@ -49,7 +49,7 @@ export default function TechniqueListEditor() {
             if (!nextList.includes(tech)) nextList.push(tech);
             return { ...prev, techniques: nextList };
         });
-        setAdding(false); // свернуть панель после добавления
+        setAdding(false); // close pane after got added
     };
 
     const removeTechnique = (tech: string) => {
@@ -64,7 +64,7 @@ export default function TechniqueListEditor() {
         <div className="cf-group">
             <div className="cf-group-label">Techniques</div>
             <div className="cf-tech-editor" style={{ alignItems: 'stretch' }}>
-                {/* Левая часть: список выбранных техник */}
+                {/* Left side: selected techniques list */}
                 <div className="cf-field" style={{ width: '100%' }}>
                     <div
                         className="cf-input"
@@ -95,7 +95,7 @@ export default function TechniqueListEditor() {
                                     <span>{t}</span>
                                     <button
                                         type="button"
-                                        className="cf-select cf-select--short"
+                                        className="cf-input cf-select--short"
                                         onClick={() => removeTechnique(t)}
                                         aria-label={`Remove ${t}`}
                                     >

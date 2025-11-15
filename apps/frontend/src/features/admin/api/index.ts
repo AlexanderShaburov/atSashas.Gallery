@@ -1,4 +1,5 @@
 import type { TechniquesJson } from '@/entities/art';
+import { ArtShipment } from '@/entities/art/shipment';
 import type { ArtCatalog, Thumb } from '@/entities/catalog';
 import type { ApiResponse } from '@/entities/common';
 import type { StreamData } from '@/entities/stream';
@@ -28,6 +29,17 @@ export async function getCatalog(): Promise<ArtCatalog> {
     return raw.data;
 }
 
+export async function updateCatalog(shipment: ArtShipment): Promise<number> {
+    const res = await fetch(UPDATE_CATALOG, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(shipment),
+    });
+    if (!res.ok) throw new Error(`Update catalog error: ${res.status}`);
+    return res.status;
+}
+
+// If it's needed anymore?????
 export async function saveCatalog(data: ArtCatalog) {
     const request = `${JSON_VAULT}/catalog`;
     await fetch(request, {
@@ -54,7 +66,15 @@ export async function uploadImage(file: File, category: string, filename?: strin
     fd.append('file', file);
     fd.append('category', category);
     if (filename) fd.append('filename', filename);
-    return (await fetch(UPLOAD_URL, { method: 'POST', body: fd })).json();
+    return (
+        await fetch(UPLOAD_URL, {
+            method: 'POST',
+            headers: {
+                Authorization: 'change-me',
+            },
+            body: fd,
+        })
+    ).json();
 }
 
 export async function getHopperContent(): Promise<Thumb[]> {

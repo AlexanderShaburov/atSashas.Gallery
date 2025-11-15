@@ -11,7 +11,7 @@ services:
             - WATCHFILES_FORCE_POLLING=true
         volumes:
             - ../apps/admin-backend:/app
-            - ../vault:/vault
+            - ../vault:/media
         expose:
             - 8000
         command: >

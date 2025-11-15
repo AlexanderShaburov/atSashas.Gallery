@@ -1,13 +1,15 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from fastapi.responses import FileResponse
 from pathlib import Path
+from logging import getLogger
 import hashlib
+
 import shutil
 from ..deps import require_admin_token
 from ..storage import UPLOAD_DIR
 
 router = APIRouter(prefix="/upload", tags=["upload"])
-
+logger = getLogger(__name__)
 ALLOWED_MIME = {
     "image/png",
     "image/jpeg",
@@ -29,20 +31,20 @@ def _digest(p: Path) -> str:
 
 @router.post("", dependencies=[Depends(require_admin_token)])
 async def upload(file: UploadFile = File(...)):
-    print("Upload handler called.")
-    print(f"Uploading file name is: {file.filename}")
+    logger.info("Upload handler called.")
+    logger.info(f"Uploading file name is: {file.filename}")
     if file.content_type not in ALLOWED_MIME:
         raise HTTPException(
             status_code=415, detail=f"Unsupported type: {file.content_type}"
         )
     # temporal path:
     tmp = UPLOAD_DIR / f"._tmp_{file.filename}"
-    print(f"Temp file name is: {tmp}")
+    logger.info(f"Temp file name is: {tmp}")
     total = 0
     with tmp.open("wb") as out:
         while True:
             chunk = await file.read(1024 * 1024)
-            print("Chunk read")
+            logger.info("Chunk read")
             if not chunk:
                 break
             total += len(chunk)
@@ -50,7 +52,7 @@ async def upload(file: UploadFile = File(...)):
                 tmp.unlink(missing_ok=True)
                 raise HTTPException(status_code=413, detail="File too large")
             out.write(chunk)
-            print(f"Chunk saved to {tmp}")
+            logger.info(f"Chunk saved to {tmp}")
 
     sha = _digest(tmp)
     if not file.filename:

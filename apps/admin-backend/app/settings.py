@@ -5,12 +5,14 @@ from pydantic import AnyHttpUrl
 class Settings(BaseSettings):
     admin_origin: AnyHttpUrl | None = None
     site_origin: AnyHttpUrl | None = None
-    storage_dir: str = "/hopper"
+    storage_dir: str = "storage"
+    upload_media_dir: str = "upload_media"
     admin_token: str | None = None
+    json_data: str = "json_data"
 
     class Config:
         env_prefix = ""
-        ent_file = ".env"
+        env_file = ".env"
 
 
 settings = Settings()

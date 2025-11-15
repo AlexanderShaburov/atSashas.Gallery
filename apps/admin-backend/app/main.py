@@ -1,10 +1,30 @@
 from fastapi import FastAPI
+import logging
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from pathlib import Path
 from .settings import settings
 from .routers import health, json_kv, upload, hopper
 from .storage import BASE
+
+#   -----------------------
+#   LOGGER SETTING
+#   -----------------------
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="\033[35mMY_LOG.\033[0mMY_LOG: %(asctime)s - \033[33m%(name)s\033[0m - %(levelname)s - %(message)s",
+)
+
+#   logging console out
+handler = logging.StreamHandler()
+
+
+logger = logging.getLogger(__name__)
+#   -----------------------
+#   END OF LOGGER SETTINGS
+#   -----------------------
+
 
 app = FastAPI(title="Admin Mini API")
 
@@ -24,7 +44,10 @@ app.add_middleware(
 
 # Files download static:
 FILES_DIR = BASE  # Includes /json and /uploads
-print(f"FILES_DIR from the main.py {FILES_DIR}")
+logger.info(f"FILES_DIR from the main.py {FILES_DIR}")
+logger.info(f"settings.storage_dir: {settings.storage_dir}")
+logger.info(f"settings.upload_media_dir {settings.upload_media_dir}")
+logger.info(f"settings.json_data {settings.json_data}")
 app.mount(
     "/files", StaticFiles(directory=str(FILES_DIR), html=False), name="files"
 )

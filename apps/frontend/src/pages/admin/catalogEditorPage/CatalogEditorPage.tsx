@@ -1,39 +1,17 @@
 import type { Thumb } from '@/entities/catalog';
 import { useEffect, useState } from 'react';
 
-import { getHopperContent } from '@/features/admin/api';
 import SingleItemEditor from '@/features/admin/ui/SingleItemEditor/SingleItemEditor';
 import '@/pages/admin/catalogEditorPage/CatalogEditorPage.css';
 
 import { useEditorSession } from '@/features/admin/editorSession/EditorSession.context';
 
 export default function CatalogEditorPage() {
-    const { identity, setIdentity, editorIsReady } = {
+    const { identity, setIdentity, editorIsReady, catalog, hopper, loading, mode, setMode } = {
         ...useEditorSession(),
     };
 
     // Important!!! In normal use default mode better to set to "edit"
-    const [mode, setMode] = useState<'create' | 'edit'>('create');
-    const [error, setError] = useState<string | null>(null);
-    const [hopper, setHopper] = useState<Thumb[]>([]);
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        // if mode =  create it reads Hopper content
-        if (mode !== 'create') return;
-        (async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const list = await getHopperContent();
-                setHopper(list);
-            } catch (e) {
-                setError(e instanceof Error ? e.message : String(e));
-            } finally {
-                setLoading(false);
-            }
-        })();
-    }, [mode]);
 
     if (mode !== 'create') {
         return (
@@ -53,7 +31,6 @@ export default function CatalogEditorPage() {
                     {/* SWITCH MODE BUTTONS BLOCK  */}
                     <button className="active">Create</button>
                     <button onClick={() => setMode('edit')}>Edit</button>
-                    {error && <span style={{ color: 'crimson' }}>{error}</span>}
                 </header>
 
                 {loading ? (

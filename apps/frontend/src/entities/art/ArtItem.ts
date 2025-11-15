@@ -1,8 +1,8 @@
-import type { Dimensions, Availability } from '../common/';
-import type { ImagesJSON, PriceJSON } from './';
-import { Tags } from '@/entities/common/Tags';
 import { ArtItemJSON } from '@/entities/art';
 import { ISODate, Localized, Money } from '@/entities/common';
+import { FormValues } from '@/features/admin/editorSession/editorTypes';
+import type { Availability, Dimensions } from '../common/';
+import type { ImagesJSON, PriceJSON } from './';
 
 export interface ArtItemDraft {
     id: string;
@@ -14,9 +14,9 @@ export interface ArtItemDraft {
     // всё остальное — необязательно на этом этапе:
     title?: Localized;
     dateCreated?: ISODate; // YYYY-MM-DD реальной работы (может быть не известна сразу)
-    techniques?: string[]; // позже соберём из category+technique
+    techniques?: string[];
     dimensions?: Dimensions;
-    availability?: Availability; // по умолчанию не знаем
+    availability?: Availability;
     price?: PriceJSON | null;
     series?: string | null;
     tags?: string[];
@@ -26,12 +26,13 @@ export interface ArtItemDraft {
 
 export interface ArtItemInit {
     id: string;
-    title?: Localized;
     dateCreated: ISODate;
+    title?: Localized;
     techniques: string[];
+    availability: Availability;
     dimensions: Dimensions;
     price?: Money | null;
-    availability: Availability;
+    alt: Localized | undefined;
     series?: string | null;
     tags?: string[];
     notes?: string | null;
@@ -95,7 +96,7 @@ export class ArtItem {
         return new ArtItem(init);
     }
 
-    toJSON(): ArtItemJSON {
+    toJSON(form: FormValues): ArtItemJSON {
         return {
             id: this.id,
             title: this.title,

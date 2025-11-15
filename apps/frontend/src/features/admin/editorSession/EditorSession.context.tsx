@@ -1,10 +1,17 @@
 import { ArtGerm, ArtItem, TechniquesJson } from '@/entities/art';
-import { Thumb } from '@/entities/catalog';
-import { getSeriesOptionsCI, getTechniques } from '@/features/admin/api';
+import { ArtCatalog, Thumb } from '@/entities/catalog';
+import {
+    getCatalog,
+    getHopperContent,
+    getSeriesOptionsCI,
+    getTechniques,
+    updateCatalog,
+} from '@/features/admin/api';
 import { ArtToFormAdapter, prepareEditorForm } from '@/features/admin/editorSession/editorLogic/';
+import { buildShipment } from '@/features/admin/editorSession/editorLogic/buildShipment';
 import type { FormValues } from '@/features/admin/editorSession/editorTypes';
 import { deepEqual } from '@/features/admin/utils/checkers';
-import { isMinimalValid } from '@/features/admin/utils/Validators';
+import { isMinimalValid, sanitizeForm } from '@/features/admin/utils/Validators';
 import {
     createContext,
     useCallback,
@@ -16,10 +23,14 @@ import {
 } from 'react';
 
 export type EditorSession = {
+    catalog: ArtCatalog | undefined;
+    hopper: Thumb[];
     identity: ArtGerm | undefined; // matches state
+    mode: 'create' | 'edit';
     values: FormValues | undefined;
     setValues: React.Dispatch<React.SetStateAction<FormValues | undefined>>;
     setIdentity: (v: ArtGerm | undefined) => void;
+    setMode: (m: 'edit' | 'create') => void;
 
     /** Start a new session from a hopper unit or existing item */
     editorIsReady: boolean;
@@ -28,6 +39,7 @@ export type EditorSession = {
     isDirty: boolean;
     isValid: boolean;
     canSave: boolean;
+    loading: boolean;
 
     /** Persistence controls */
     saving: boolean;
@@ -55,10 +67,14 @@ export function EditorSessionProvider({ children }: ProviderProps) {
     // Core state
     const [identity, setIdentity] = useState<ArtGerm | undefined>(undefined);
     const [values, setValues] = useState<FormValues | undefined>(undefined);
+    const [catalog, setCatalog] = useState<ArtCatalog | undefined>(undefined);
+    const [hopper, setHopper] = useState<Thumb[]>([]);
+    const [mode, setMode] = useState<'create' | 'edit'>('create'); // !!! 'edit' in production !!!
 
     // UI/derived state
     const [techniques, setTechniques] = useState<TechniquesJson>({});
     const [saving, setSaving] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
     const [isValid, setIsValid] = useState(false);
     const [editorIsReady, setEditorIsReady] = useState(false);
@@ -69,6 +85,29 @@ export function EditorSessionProvider({ children }: ProviderProps) {
     const snapshot = useRef<FormValues | undefined>(undefined);
     // valuesRef for use in functions not should be run after every values change:
     const valuesRef = useRef<FormValues | undefined>(values);
+
+    // Load current catalog and hopper version
+    async function refreshBase(): Promise<void> {
+        try {
+            setLoading(true);
+            const cat = await getCatalog();
+            setCatalog(cat);
+            const hop = await getHopperContent();
+            console.log('Received hopper: ', hop);
+            setHopper(hop);
+        } catch (e) {
+            console.error('Failed to load server data: ', e);
+        } finally {
+            setLoading(false);
+        }
+    }
+    // Load current catalog and hopper version once at provider creation:
+    useEffect(() => {
+        (async () => {
+            await refreshBase();
+        })();
+    }, []); // <- Load once at provider mounting
+
     useEffect(() => {
         console.log('values watcher: run. values: ', values);
         valuesRef.current = values;
@@ -160,45 +199,41 @@ export function EditorSessionProvider({ children }: ProviderProps) {
 
     /** Dirty & validity tracking on every form change */
     useEffect(() => {
-        console.log('changeTracker: Identity: ', String(identity));
-        console.log('changeTracker: values: ', identity);
         if (!valuesRef.current || !snapshot.current) {
             setIsDirty(false);
             setIsValid(false);
-            console.log('changeTracker: snapshot.current', snapshot.current);
-            console.log('changeTracker: !snapshot.current', !snapshot.current);
-            console.log('changeTracker: values', values, valuesRef.current);
-            console.log('changeTracker: !values', !values);
-            console.log('changeTracker: Checker decided to return: (!values || !snapshot.current)');
             return;
         }
         if (identity) {
             setIsDirty(!deepEqual(snapshot.current, values));
-            console.log('changeTracker: isDirty checked and is: ', isDirty);
-            console.log('changeTracker: isMinimalValid to call. values.id: ', values);
             setIsValid(isMinimalValid(values, identity));
-            console.log('changeTracker: isValid checked and is: ', isValid);
         }
     }, [values, identity]);
 
-    /** Persist (stub left intact) */
+    /* SAVE procedure: */
+
     const save = useCallback(async () => {
-        // if (!values) return;
-        // if (!isValid) {
-        //   alert('Minimal required fields are missing (ID + Image).');
-        //   return;
-        // }
-        // setSaving(true);
-        // try {
-        //   const clean = sanitizeForm(values);
-        //   const payload = buildJSON(identity!, clean);
-        //   await saveJSON(payload);
-        //   exitSession();
-        // } catch (e) {
-        //   console.error('Save failed', e);
-        // } finally {
-        //   setSaving(false);
-        // }
+        if (!values || !canSave) return;
+        if (!isValid) {
+            alert('Minimal required fields are missing (ID + Image).');
+            return;
+        }
+        setSaving(true);
+        try {
+            const clean = sanitizeForm(values);
+
+            const payload = buildShipment(identity!, clean);
+
+            // if (catalog) upsertCatalogItem(catalog, clean);
+            const HTTPCode = await updateCatalog(payload);
+            if (HTTPCode !== 200)
+                throw new Error(`Catalog  update unsuccessful! Code: ${HTTPCode}`);
+            exitSession();
+        } catch (e) {
+            console.error('Save failed', e);
+        } finally {
+            setSaving(false);
+        }
     }, []); // keep identical behavior to your stub
 
     /** Public exit with confirmation if dirty */
@@ -211,6 +246,9 @@ export function EditorSessionProvider({ children }: ProviderProps) {
 
     const value: EditorSession = useMemo(
         () => ({
+            mode,
+            catalog,
+            hopper,
             identity,
             values,
             setValues,
@@ -225,8 +263,13 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             canSave,
             techniques,
             seriesOptions,
+            loading,
+            setMode,
         }),
         [
+            mode,
+            catalog,
+            hopper,
             identity,
             values,
             editorIsReady,
@@ -239,6 +282,8 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             canSave,
             techniques,
             seriesOptions,
+            loading,
+            setMode,
         ],
     );
 

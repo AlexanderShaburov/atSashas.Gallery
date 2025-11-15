@@ -1,10 +1,30 @@
 /* =========================
-   Create Form — Final Balanced Version
+   Create Form — Final Balanced Version (theme-solid popups, one-column techniques)
    ========================= */
+
+/* --- Native controls theme hint (make select/datalist popups follow theme) --- */
+/* Cover typical theme anchors regardless of where data-theme is attached */
+html {
+    color-scheme: light;
+}
+:root[data-theme='dark'],
+html[data-theme='dark'],
+body[data-theme='dark'],
+[data-theme='dark'] {
+    color-scheme: dark;
+}
+
+/* Ensure nested native controls inherit theme context */
+.cf-form {
+    color-scheme: inherit;
+}
+.cf-form * {
+    color-scheme: inherit;
+}
 
 /* -------- Semantic color mapping -------- */
 :root {
-    --form-label-group: var(--muted); /* same as single labels */
+    --form-label-group: var(--muted);
     --form-label-sub: color-mix(in srgb, var(--accent) 35%, var(--text));
     --form-label-single: var(--muted);
     --form-placeholder: color-mix(in srgb, var(--muted) 70%, transparent);
@@ -33,7 +53,6 @@
     gap: 1rem;
     color: var(--text);
 }
-
 .cf-row {
     display: flex;
     flex-direction: column;
@@ -42,23 +61,18 @@
 
 /* -------- Label hierarchy -------- */
 .cf-group-label {
-    /* placed BEFORE the frame */
     font-size: 0.96rem;
     font-weight: 500;
     color: var(--form-label-group);
     margin-bottom: 0.35rem;
 }
-
 .cf-sub-label {
-    /* inside groups (Width, Height, Unit) */
     font-size: 0.88rem;
     font-weight: 600;
     color: var(--form-label-sub);
 }
-
 .cf-single-label,
 .cf-label {
-    /* for ordinary single-field labels */
     font-size: 0.96rem;
     font-weight: 500;
     color: var(--form-label-single);
@@ -74,15 +88,16 @@
     border: 1px solid var(--form-border);
     background: var(--form-bg);
     color: var(--text);
+    font: inherit;
     font-size: 1rem;
     min-height: 44px;
     line-height: 1.4;
+    color-scheme: inherit; /* native popups follow theme */
     transition:
         border-color 0.25s ease,
         box-shadow 0.25s ease,
         background-color 0.25s ease;
 }
-
 .cf-input::placeholder,
 .cf-textarea::placeholder {
     color: var(--form-placeholder);
@@ -98,9 +113,9 @@
     background-position: right 0.7rem center;
     background-size: 12px 8px;
 }
-
+/* Option popup font-size (where supported) */
 .cf-select option {
-    font-size: 0.98rem;
+    font-size: 1.1rem; /* match visible select size */
     line-height: 1.6;
     padding: 0.4rem 0.6rem;
 }
@@ -124,7 +139,7 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, #c25252 20%, transparent);
 }
 
-/* -------- Group container (frame only) -------- */
+/* -------- Group container -------- */
 .cf-group {
     border: 1px solid var(--form-border);
     border-radius: 12px;
@@ -133,13 +148,9 @@
     background: color-mix(in srgb, var(--form-bg) 98%, var(--accent) 2%);
     box-shadow: var(--form-shadow);
 }
-
-/* Remove legend spacing (no legend used now) */
 .cf-group > legend {
     display: none;
 }
-
-/* Spacing between group label and frame */
 .cf-group-label + .cf-group {
     margin-top: 0;
 }
@@ -150,11 +161,9 @@
     gap: 0.5rem 0.75rem;
     align-items: end;
 }
-
 .cf-inline-3 {
     grid-template-columns: 1fr 1fr minmax(88px, 140px);
 }
-
 .cf-inline-2 {
     grid-template-columns: 1fr minmax(88px, 140px);
 }
@@ -165,12 +174,14 @@
     gap: 0.35rem;
 }
 
+/* Short selects/buttons */
 .cf-select--short {
     min-width: 88px;
     max-width: 140px;
     width: 100%;
     padding-left: 0.5rem;
     padding-right: 2rem;
+    background-image: none; /* never show dropdown arrow on non-selects */
 }
 
 /* Language picker */
@@ -180,26 +191,71 @@
     gap: 0.5rem;
     align-items: center;
 }
-
 .cf-select--lang {
     min-width: 88px;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
 }
-/* Техредактор: список слева, управление справа */
+
+/* -------- Technique editor (one-column) -------- */
 .cf-tech-editor {
     display: grid;
-    grid-template-columns: 75% 25%; /* было около 80/20, сделали +5% кнопкам */
+    grid-template-columns: 1fr; /* single column */
     gap: 0.75rem;
     align-items: stretch;
 }
-
-/* Правая колонка: чтобы элементы растягивались на ширину */
+.cf-tech-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
 .cf-tech-actions .cf-select,
 .cf-tech-actions button {
     width: 100%;
-    min-height: 44px; /* чтобы не прыгало */
+    min-height: 44px;
 }
+
+/* -------- Neutral button (no select arrow artifacts) -------- */
+.cf-button {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--form-border);
+    border-radius: 10px;
+    background: var(--form-bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 1rem;
+    line-height: 1.4;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: none;
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        background-color 0.25s ease;
+}
+.cf-button:hover,
+.cf-button:focus {
+    outline: none;
+    border-color: var(--form-border-hover);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.cf-button--short {
+    min-width: 88px;
+    max-width: 140px;
+}
+
+/* -------- Datalist (Series) — Chromium tweaks -------- */
+.cf-input[list]::-webkit-calendar-picker-indicator {
+    display: none !important;
+}
+.cf-input[list] {
+    background-image: none;
+    font-size: 1.1rem; /* align with select */
+    color-scheme: inherit; /* suggestions follow theme where supported */
+}
+
 /* -------- Responsive / mobile -------- */
 @supports (-webkit-touch-callout: none) {
     .cf-input,
@@ -208,8 +264,6 @@
         font-size: 16px;
     }
 }
-
-/* Hybrid collapse */
 @media (max-width: 520px) {
     .cf-inline-3 {
         grid-template-columns: 1fr 1fr;
@@ -221,14 +275,12 @@
         grid-template-columns: 1fr;
     }
 }
-
 @media (max-width: 380px) {
     .cf-inline-3,
     .cf-inline-2 {
         grid-template-columns: 1fr;
     }
 }
-
 @media (min-width: 680px) {
     .cf-select {
         font-size: 1.1rem;
@@ -236,9 +288,6 @@
     }
     .cf-select option {
         font-size: 1.1rem;
-    }
-    .cf-tech-editor {
-        grid-template-columns: 1fr;
     }
 }
 

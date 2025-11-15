@@ -14,15 +14,15 @@ export const ITEM_TYPE = ['create', 'edit'];
 export type ItemType = (typeof ITEM_TYPE)[number];
 
 export interface ArtItemJSON {
-    id?: string;
+    id: string;
     title?: Localized;
     dateCreated: ISODate;
     techniques: string[];
-    price?: PriceJSON | null;
+    price?: PriceJSON | undefined;
     availability: Availability;
-    series?: string | null;
+    series?: string | undefined;
     tags?: string[];
-    notes?: string | null;
+    notes?: string | undefined;
     images: ImagesJSON;
     dimensions: Dimensions;
 }
@@ -33,9 +33,9 @@ export interface DraftArtItemJSON {
     techniques: string[];
     price?: PriceJSON | undefined;
     availability: Availability;
-    series?: string | null;
+    series?: string | undefined;
     tags?: string[];
-    notes?: string | null;
+    notes?: string | undefined;
     hopperImage: string;
     dimensions: Dimensions;
 }
