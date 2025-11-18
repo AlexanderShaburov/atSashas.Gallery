@@ -1,12 +1,12 @@
 import { ArtGerm, ArtItem } from '@/entities/art';
-import { FormValues } from '@/features/admin/editorSession/editorTypes';
 import { ArtShipment } from '@/entities/art/shipment';
 import { Thumb } from '@/entities/catalog';
+import { FormValues } from '@/features/admin/editorSession/editorTypes';
 
 export function buildShipment(idt: ArtGerm, clean: FormValues): ArtShipment {
     let shipment = undefined;
     switch (idt.mode) {
-        case 'create': {
+        case 'edit': {
             const i = idt.item as ArtItem;
             shipment = {
                 ...clean,
@@ -17,7 +17,7 @@ export function buildShipment(idt: ArtGerm, clean: FormValues): ArtShipment {
             };
             break;
         }
-        case 'edit': {
+        case 'create': {
             const t = idt.item as Thumb;
             shipment = {
                 ...clean,

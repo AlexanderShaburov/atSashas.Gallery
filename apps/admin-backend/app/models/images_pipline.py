@@ -2,23 +2,19 @@
 # comments: English
 import os
 import shutil
-from dataclasses import dataclass
-from typing import List, Optional
-from settings import settings
-from PIL import Image  # pip install pillow
+from typing import Optional
 
-try:
-    import pillow_avif  # noqa: F401  # register AVIF with Pillow if installed
+from pydantic import BaseModel
+from PIL import Image
 
-    AVIF_SUPPORTED = True
-except Exception:
-    AVIF_SUPPORTED = False
+from app.settings import settings
+from app.models.common import Localized, PreviewSources
 
 
-@dataclass
-class ImagesJSON:
+class ImagesJSON(BaseModel):
     full: str
-    previews: List[str]
+    previews: PreviewSources
+    alt: Optional[Localized] = None
 
     @classmethod
     def from_hopper(
@@ -43,8 +39,9 @@ class ImagesJSON:
             hopper_src: path or filename of the original file in hopper.
                 If it's not absolute, it is resolved relative to
                 <storage_root>/<upload_media_dir>.
+            art_id: id of the art item; used as basename for output files.
             base_name: optional basename (without extension) for outputs;
-                default: derived from hopper filename.
+                if not provided, art_id is used.
             copy_instead_of_move: if True, copy full instead of move.
             max_preview_px: max longest edge for previews.
             max_preview_bytes: soft size cap per preview file.
@@ -89,7 +86,9 @@ class ImagesJSON:
 
         src_basename = os.path.basename(hopper_src_path)
         name, _ext = os.path.splitext(src_basename)
-        name = art_id
+
+        # Prefer explicit base_name, otherwise use art_id
+        name = base_name or art_id
 
         # ---------- Move/copy original into fullsize directory ----------
         full_ext = _ext.lower() if _ext else ".jpg"
@@ -120,14 +119,14 @@ class ImagesJSON:
                 preview_img = im  # already small enough
 
             # Prepare preview output paths (filesystem)
-            jpg_path = os.path.join(preview_dir, f"{name}.jpg")
+            jpeg_path = os.path.join(preview_dir, f"{name}.jpeg")
             webp_path = os.path.join(preview_dir, f"{name}.webp")
             avif_path = os.path.join(preview_dir, f"{name}.avif")
 
             # Save previews with size/quality control
             _save_with_size_cap(
                 preview_img,
-                jpg_path,
+                jpeg_path,
                 fmt="JPEG",
                 target_bytes=max_preview_bytes,
             )
@@ -138,20 +137,22 @@ class ImagesJSON:
                 target_bytes=max_preview_bytes,
             )
 
-            created_paths = [jpg_path, webp_path]
+            created = {
+                "jpeg": jpeg_path,
+                "webp": webp_path,
+            }
 
-            if AVIF_SUPPORTED:
-                try:
-                    _save_with_size_cap(
-                        preview_img,
-                        avif_path,
-                        fmt="AVIF",
-                        target_bytes=max_preview_bytes,
-                    )
-                    created_paths.append(avif_path)
-                except Exception:
-                    # AVIF plugin present but failed — skip silently
-                    pass
+            try:
+                _save_with_size_cap(
+                    preview_img,
+                    avif_path,
+                    fmt="AVIF",
+                    target_bytes=max_preview_bytes,
+                )
+                created["avif"] = avif_path
+            except Exception:
+                # AVIF plugin present but failed — skip silently
+                pass
 
         # ---------- Build JSON-facing public paths ----------
         # We assume that /media in URL maps to settings.storage_root on filesystem.
@@ -166,17 +167,28 @@ class ImagesJSON:
         full_json_path = _join_url(url_root, full_rel)
 
         # Preview JSON paths: "/media/arts/previews/<name>.<ext>"
-        previews_json_paths: List[str] = []
-        for p in created_paths:
-            filename = os.path.basename(p)
+        def to_preview_url(filename: str) -> str:
             rel = os.path.join(
                 settings.media_dir.lstrip("/"),
                 settings.previews.lstrip("/"),
                 filename,
             )
-            previews_json_paths.append(_join_url(url_root, rel))
+            return _join_url(url_root, rel)
 
-        return cls(full=full_json_path, previews=previews_json_paths)
+        previews = PreviewSources()
+
+        if "jpeg" in created:
+            previews.jpeg = to_preview_url(os.path.basename(created["jpeg"]))
+        if "webp" in created:
+            previews.webp = to_preview_url(os.path.basename(created["webp"]))
+        if "avif" in created:
+            previews.avif = to_preview_url(os.path.basename(created["avif"]))
+
+        return cls(
+            full=full_json_path,
+            previews=previews,
+            alt=None,  # can be filled later
+        )
 
 
 def _join_url(prefix: str, tail: str) -> str:

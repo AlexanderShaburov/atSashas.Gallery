@@ -2,6 +2,15 @@ from fastapi import HTTPException
 from app.models.art_item import ArtItem
 from app.models.catalog import Catalog
 from app.models.images_pipline import ImagesJSON
+from logging import getLogger
+from app.models.shipment import (
+    ArtShipmentModel,
+    HopperImageShipment,
+    ReadyImageShipment,
+)
+
+
+logger = getLogger(__name__)
 
 CATALOG_PATH = "./vault/json/catalog.json"
 
@@ -35,32 +44,36 @@ CATALOG_PATH = "./vault/json/catalog.json"
 """
 
 
-async def update_catalog(shipment: dict):
-    cat = Catalog()
-    #   Check kind of shipment: artItem or artGerm
-    match shipment["images"]["kind"]:
-        case "hopper":
+async def update_catalog(catalog: Catalog, payload: ArtShipmentModel):
+    #   Check kind of payload: artItem or artGerm
+    match payload.images:
+        case HopperImageShipment(kind="hopper", hopperSrc=src):
             # If artGerm create propper images:
-            url = shipment["images"]["hopper_src"].split("/")[-1]
-            images = ImagesJSON.from_hopper(url, shipment["id"])
+            logger.info(
+                f'Shipment detected as hopper with payload["images"]["kind"]: {payload.images.kind}'
+            )
+            filename = src.split("/")[-1]
+            images = ImagesJSON.from_hopper(filename, payload.id)
 
-        case "ready":
+        case ReadyImageShipment(kind="ready", image=image):
             # If ready artItem translate to further processing
-            images = shipment["images"]["image"]
+            logger.info(
+                f'Shipment detected as ready with payload["images"]["kind"]: {payload.images.kind}'
+            )
+            images = image
         case _:
             raise HTTPException(
-                status_code=422, detail="Incorrect shipment format."
+                status_code=422, detail="Incorrect payload format."
             )
 
     #   Create new ArtItem object from received data:
-    art_item = ArtItem(
-        images=images,
-        **{k: v for k, v in shipment.items() if k != "images"},
-    )
-    cat.add_or_update(art_item)
-    cat.save_catalog()
+
+    data = payload.model_dump(exclude={"images"})
+    art_item = ArtItem(images=images, **data)
+
+    catalog.add_or_update(art_item)
     return {
         "ok": True,
-        "catalogVersion": cat.catalogVersion,
-        "updatedAt": cat.updatedAt,
+        "catalogVersion": catalog.catalogVersion,
+        "updatedAt": catalog.updatedAt,
     }

@@ -30,9 +30,12 @@ export async function getCatalog(): Promise<ArtCatalog> {
 }
 
 export async function updateCatalog(shipment: ArtShipment): Promise<number> {
+    console.log(`Shipment is sending to backend with type: ${shipment.images.kind}`);
     const res = await fetch(UPDATE_CATALOG, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+        },
         body: JSON.stringify(shipment),
     });
     if (!res.ok) throw new Error(`Update catalog error: ${res.status}`);

@@ -227,10 +227,12 @@ export function EditorSessionProvider({ children }: ProviderProps) {
         console.log(`saving set to ${saving}`);
         try {
             const clean = sanitizeForm(values);
-
+            console.log(`Before build shipment identity is: ${identity?.mode}`);
             const payload = buildShipment(identity!, clean);
 
             // if (catalog) upsertCatalogItem(catalog, clean);
+            console.log(`Before sending shipment values ${payload}`);
+            console.dir(payload);
             const HTTPCode = await updateCatalog(payload);
             if (HTTPCode !== 200)
                 throw new Error(`Catalog  update unsuccessful! Code: ${HTTPCode}`);

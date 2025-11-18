@@ -6,8 +6,12 @@ from pathlib import Path
 from typing import Dict, List, Optional, Iterable, Tuple
 import re
 
-from settings import settings
-from models.images_pipline import ImagesJSON  # твоя текущая модель картинок
+from app.models.common import Availability, Dimensions, Localized
+
+from ..settings import settings
+from app.models.images_pipline import (
+    ImagesJSON,
+)  # твоя текущая модель картинок
 
 
 @dataclass
@@ -34,11 +38,11 @@ class ArtItem:
 
     id: str
     dateCreated: str
-    techniques: List[str]
-    availability: str
-    dimensions: Dict[str, object]
     images: ImagesJSON
-
+    techniques: Optional[List[str]] = None
+    availability: Optional[Availability] = None
+    dimensions: Optional[Dimensions] = None
+    alt: Optional[Localized] = None
     title: Optional[Dict[str, str]] = None  # Localized
     price: Optional[Dict[str, object]] = None  # {amount, currency}
     series: Optional[str] = None
