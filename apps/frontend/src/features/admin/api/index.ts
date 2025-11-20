@@ -9,17 +9,7 @@ export const STREAMS_URL = import.meta.env.VITE_STREAMS_BASE_URL;
 export const UPDATE_CATALOG = `${API_BASE}/catalog/update`;
 export const HOPPER_LIST_URL = ` ${API_BASE}/hopper/content`;
 export const JSON_VAULT = `${API_BASE}/json`;
-// const VAULT_URL = `${BASE}api/vault/`;
 export const UPLOAD_URL = `${API_BASE}/upload`;
-console.log(VAULT_BASE, API_BASE, STREAMS_URL, UPLOAD_URL);
-
-// async function j<T>(res: Response): Promise<T> {
-//     if (!res.ok) {
-//         const txt = await res.text();
-//         throw new Error(`${res.status} ${res.statusText}: ${txt}`);
-//     }
-//     return res.json() as Promise<T>;
-// }
 
 export async function getCatalog(): Promise<ArtCatalog> {
     const request = `${JSON_VAULT}/catalog`;

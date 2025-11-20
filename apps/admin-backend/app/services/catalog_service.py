@@ -9,10 +9,7 @@ from app.models.shipment import (
     ReadyImageShipment,
 )
 
-
 logger = getLogger(__name__)
-
-CATALOG_PATH = "./vault/json/catalog.json"
 
 
 """

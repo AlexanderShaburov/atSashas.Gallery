@@ -1,6 +1,6 @@
 {
-  "catalogVersion": 30,
-  "updatedAt": "2025-11-18T11:07:22.429344+00:00",
+  "catalogVersion": 32,
+  "updatedAt": "2025-11-20T08:40:17.881276+00:00",
   "items": {
     "art-20251019-001": {
       "id": "art-20251019-001",
@@ -32,7 +32,11 @@
       },
       "alt": null,
       "title": {
-        "en": "Blue Horizon"
+        "en": "Blue Horizon",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
       },
       "price": {
         "amount": 400,
@@ -74,9 +78,71 @@
       "series": null,
       "tags": null,
       "notes": null
+    },
+    "art-20251120-jcsrbr": {
+      "id": "art-20251120-jcsrbr",
+      "dateCreated": "2025-11-20",
+      "images": {
+        "full": "/media/arts/fullsize/art-20251120-jcsrbr.png",
+        "previews": {
+          "avif": "/media/arts/previews/art-20251120-jcsrbr.avif",
+          "webp": "/media/arts/previews/art-20251120-jcsrbr.webp",
+          "jpeg": "/media/arts/previews/art-20251120-jcsrbr.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [
+        "charcoal"
+      ],
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "some fish",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
+    },
+    "art-20251120-9td10a": {
+      "id": "art-20251120-9td10a",
+      "dateCreated": "2025-11-20",
+      "images": {
+        "full": "/media/arts/fullsize/art-20251120-9td10a.png",
+        "previews": {
+          "avif": "/media/arts/previews/art-20251120-9td10a.avif",
+          "webp": "/media/arts/previews/art-20251120-9td10a.webp",
+          "jpeg": "/media/arts/previews/art-20251120-9td10a.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [
+        "charcoal"
+      ],
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "More fish",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
     }
   },
   "order": [
+    "art-20251120-9td10a",
+    "art-20251120-jcsrbr",
     "art-20251118-4gpfj3",
     "art-20251019-001"
   ]

@@ -5,8 +5,8 @@ from logging import getLogger
 import hashlib
 
 import shutil
-from ..deps import require_admin_token
-from ..storage import UPLOAD_DIR
+from app.deps import require_admin_token
+from app.storage import UPLOAD_DIR
 
 router = APIRouter(prefix="/upload", tags=["upload"])
 logger = getLogger(__name__)

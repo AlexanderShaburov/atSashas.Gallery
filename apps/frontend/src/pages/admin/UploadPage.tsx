@@ -1,27 +1,49 @@
-import { uploadImage } from '@/features/admin/api';
+import { ArtGerm } from '@/entities/art';
+import { Thumb } from '@/entities/catalog';
+import { getHopperContent, uploadImage } from '@/features/admin/api';
 import HopperGrid from '@/features/admin/ui/HopperGrid/HopperGrid';
 import '@/pages/admin/Upload.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function UploadPage() {
     const [files, setFiles] = useState<File[]>([]);
     const [uploading, setUploading] = useState(false);
-    const [uploaded, setUploaded] = useState<string[]>([]);
+    const [uploaded, setUploaded] = useState<Thumb[]>([]);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const noopSelect = (_thumb: ArtGerm | undefined) => {}; // Do nothing
+
+    useEffect(() => {
+        (async () => {
+            const t = await getHopperContent();
+            console.log(`Hopper content loaded and is: ${t}`);
+            console.dir(t);
+            setUploaded(t);
+        })();
+    }, []);
     async function handleUpload() {
         console.log(`Upload called with.`);
 
         if (!files.length) return;
         setUploading(true);
         try {
-            const urls: string[] = [];
+            const newThumbs: Thumb[] = [];
+
             for (const file of files) {
                 console.log(`cycle for ${file.name}`);
                 const { url, ok } = await uploadImage(file, 'hopper');
-                urls.push(url);
+
                 console.log(`url: ${url}`);
-                if (ok) setUploaded((prev) => [...prev, ...urls]);
+                if (ok && url) {
+                    const thumb: Thumb = {
+                        id: file.name,
+                        src: url,
+                    };
+                    newThumbs.push(thumb);
+                }
             }
+
+            setUploaded((prev) => [...prev, ...newThumbs]);
             setFiles([]);
         } finally {
             setUploading(false);
@@ -46,7 +68,7 @@ export default function UploadPage() {
             </section>
             <section className="upload-list">
                 <h2>Uploaded Files</h2>
-                <HopperGrid items={uploaded} />
+                <HopperGrid hopper={uploaded} setIdentity={noopSelect} />
             </section>
         </div>
     );

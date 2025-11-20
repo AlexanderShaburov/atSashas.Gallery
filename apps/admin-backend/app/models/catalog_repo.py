@@ -1,7 +1,6 @@
 # catalog_repo.py
 import asyncio
 from app.settings import settings
-from dataclasses import asdict
 from pathlib import Path
 import json
 from typing import AsyncIterator

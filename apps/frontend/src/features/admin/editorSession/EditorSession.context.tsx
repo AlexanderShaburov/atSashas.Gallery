@@ -87,7 +87,7 @@ export function EditorSessionProvider({ children }: ProviderProps) {
     const valuesRef = useRef<FormValues | undefined>(values);
 
     // Load current catalog and hopper version
-    async function refreshBase(): Promise<void> {
+    const refreshBase = useCallback(async (): Promise<void> => {
         try {
             setLoading(true);
             const cat = await getCatalog();
@@ -100,13 +100,13 @@ export function EditorSessionProvider({ children }: ProviderProps) {
         } finally {
             setLoading(false);
         }
-    }
+    }, []);
     // Load current catalog and hopper version once at provider creation:
     useEffect(() => {
         (async () => {
             await refreshBase();
         })();
-    }, []); // <- Load once at provider mounting
+    }, [refreshBase]); // <- Load once at provider mounting
 
     useEffect(() => {
         console.log('values watcher: run. values: ', values);
@@ -236,13 +236,16 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             const HTTPCode = await updateCatalog(payload);
             if (HTTPCode !== 200)
                 throw new Error(`Catalog  update unsuccessful! Code: ${HTTPCode}`);
+
+            await refreshBase();
+
             exitSession();
         } catch (e) {
             console.error('Save failed', e);
         } finally {
             setSaving(false);
         }
-    }, [values, canSave, isValid, identity, exitSession, saving]); // keep identical behavior to your stub
+    }, [values, canSave, isValid, identity, exitSession, saving, refreshBase]); // keep identical behavior to your stub
 
     /** Public exit with confirmation if dirty */
     const exit = useCallback(() => {

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     previews: str = "/previews"
     admin_token: str | None = None
     json_data: str = "/json"
+    catalog_file: str = "catalog.json"
 
     class Config:
         env_prefix = ""

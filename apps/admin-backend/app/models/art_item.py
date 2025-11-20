@@ -3,12 +3,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from token import OP
 from typing import Dict, List, Optional, Iterable, Tuple
 import re
 
 from app.models.common import Availability, Dimensions, Localized
 
-from ..settings import settings
+from app.settings import settings
 from app.models.images_pipline import (
     ImagesJSON,
 )  # твоя текущая модель картинок
@@ -43,7 +44,7 @@ class ArtItem:
     availability: Optional[Availability] = None
     dimensions: Optional[Dimensions] = None
     alt: Optional[Localized] = None
-    title: Optional[Dict[str, str]] = None  # Localized
+    title: Optional[Localized] = None  # Localized
     price: Optional[Dict[str, object]] = None  # {amount, currency}
     series: Optional[str] = None
     tags: Optional[List[str]] = None

@@ -1,10 +1,14 @@
-import '@/app/layouts/PublicLayout.css';
+import '@/app/layouts/AdminLayout.css';
+import { AdminHeader } from '@/features/admin/ui/adminHeader/AdminHeader';
 import { Outlet } from 'react-router-dom';
 
 export default function AdminLayout() {
     return (
-        <main className="main-layout">
-            <Outlet />
-        </main>
+        <div className="admin-layout">
+            <AdminHeader />
+            <main className="admin-main">
+                <Outlet />
+            </main>
+        </div>
     );
 }
