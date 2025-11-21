@@ -7,7 +7,8 @@ export const VAULT_BASE = import.meta.env.VITE_VAULT_BASE_URL;
 export const API_BASE = import.meta.env.VITE_API_BASE_URL;
 export const STREAMS_URL = import.meta.env.VITE_STREAMS_BASE_URL;
 export const UPDATE_CATALOG = `${API_BASE}/catalog/update`;
-export const HOPPER_LIST_URL = ` ${API_BASE}/hopper/content`;
+export const HOPPER_LIST_URL = `${API_BASE}/hopper/content`;
+export const HOPPER_DEL = `${API_BASE}/hopper`;
 export const JSON_VAULT = `${API_BASE}/json`;
 export const UPLOAD_URL = `${API_BASE}/upload`;
 
@@ -87,7 +88,7 @@ export async function getTechniques(): Promise<TechniquesJson> {
 // Collect and provide available series:
 export async function getSeriesOptionsCI(): Promise<string[]> {
     const cat = await getCatalog();
-    const map = new Map<string, string>(); // key = lowercased, value = первая «нормальная» строка
+    const map = new Map<string, string>();
 
     for (const id of cat.order ?? []) {
         const s = cat.items?.[id]?.series;
@@ -99,4 +100,27 @@ export async function getSeriesOptionsCI(): Promise<string[]> {
         }
     }
     return [...map.values()].sort((a, b) => a.localeCompare(b));
+}
+
+export async function deleteFromHopper(fileId: string): Promise<boolean> {
+    try {
+        const url = `${HOPPER_DEL}/${encodeURIComponent(fileId)}`;
+        console.log(`Endpoint for delete hopper file url ${url}`);
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            console.error('Failed to delete hopper file:', response.status, await response.text());
+            return false;
+        }
+
+        return true; // success
+    } catch (err) {
+        console.error('Network error while deleting hopper file:', err);
+        return false;
+    }
 }

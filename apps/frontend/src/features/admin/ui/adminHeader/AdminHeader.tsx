@@ -7,7 +7,7 @@ export function AdminHeader() {
             <div className="admin-header__inner">
                 <div className="admin-header__brand">
                     <span className="admin-header__title">Admin</span>
-                    <span className="admin-header__subtitle">SashaGallery</span>
+                    <span className="admin-header__subtitle">AtSasH</span>
                 </div>
 
                 <nav className="admin-nav">

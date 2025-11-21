@@ -1,19 +1,38 @@
-/* src/features/admin/components/hopperGrid.css */
+/* src/features/admin/ui/HopperGrid/HopperGrid.css */
+
 .hopper-grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
 }
 
-.hopper-item {
-  aspect-ratio: 1/1;
-  background: var(--border);
-  border-radius: 8px;
-  overflow: hidden;
+.hopper-grid--empty {
+    padding: 12px;
+    color: var(--muted);
+    font-size: 0.9rem;
 }
 
-.hopper-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+/* Кнопка-обёртка для тайла */
+.hopper-grid-item {
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Собственно картинка-превью */
+.hopper-grid-item img {
+    display: block;
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+/* Выбранный элемент */
+.hopper-grid-item.is-selected {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
