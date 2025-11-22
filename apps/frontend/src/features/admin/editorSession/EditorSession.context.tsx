@@ -65,7 +65,7 @@ type ProviderProps = { children: React.ReactNode };
 
 export function EditorSessionProvider({ children }: ProviderProps) {
     // Core state
-    const [identity, setIdentity] = useState<ArtGerm | undefined>(undefined);
+    const [identity, setIdentity] = useState<ArtGerm | undefined>(undefined); // Item selected to be edited
     const [values, setValues] = useState<FormValues | undefined>(undefined);
     const [catalog, setCatalog] = useState<ArtCatalog | undefined>(undefined);
     const [hopper, setHopper] = useState<Thumb[]>([]);

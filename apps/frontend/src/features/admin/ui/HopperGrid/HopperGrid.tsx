@@ -5,7 +5,6 @@ import './HopperGrid.css';
 interface HopperGridProps {
     hopper: GridItem[];
     setIdentity: (item: GridItem | undefined) => void;
-    selectedId?: string | null; // пока не используем, можно выкинуть
 }
 
 export default function HopperGrid({ hopper, setIdentity }: HopperGridProps) {

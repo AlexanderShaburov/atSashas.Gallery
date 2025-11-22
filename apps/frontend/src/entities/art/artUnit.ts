@@ -1,14 +1,7 @@
 import type { ImagesJSON } from '@/entities/art/images';
-import type { ISODate, Localized } from '@/entities/common';
-import type { Availability, Dimensions } from '@/entities/common/dimensions';
-import type { CurrencyName } from '@/entities/common/money';
+import type { Availability, Dimensions, ISODate, Localized, Money } from '@/entities/common';
 import { Thumb } from '../catalog';
 import { ArtItem } from './ArtItem';
-
-export interface PriceJSON {
-    amount: number;
-    currency: CurrencyName;
-}
 
 export const ITEM_TYPE = ['create', 'edit'];
 export type ItemType = (typeof ITEM_TYPE)[number];
@@ -18,26 +11,27 @@ export interface ArtItemJSON {
     title?: Localized;
     dateCreated: ISODate;
     techniques: string[];
-    price?: PriceJSON | undefined;
-    availability: Availability;
+    price?: Money | undefined;
+    availability?: Availability;
     series?: string | undefined;
-    tags?: string[];
+    tags: string[];
+    alt: Localized | undefined;
     notes?: string | undefined;
     images: ImagesJSON;
-    dimensions: Dimensions;
+    dimensions?: Dimensions;
 }
 export interface DraftArtItemJSON {
     id?: string;
     title?: Localized;
     dateCreated: ISODate;
     techniques: string[];
-    price?: PriceJSON | undefined;
-    availability: Availability;
+    price?: Money | undefined;
+    availability?: Availability;
     series?: string | undefined;
     tags?: string[];
     notes?: string | undefined;
     hopperImage: string;
-    dimensions: Dimensions;
+    dimensions?: Dimensions;
 }
 export type ArtGerm = {
     mode: 'create' | 'edit';

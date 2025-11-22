@@ -1,7 +1,7 @@
 // features/admin/ui/CreateForm/saveItem.ts
 
-import type { ArtItemJSON, PriceJSON } from '@/entities/art';
-import type { Dimensions, Localized } from '@/entities/common';
+import type { ArtItemJSON } from '@/entities/art';
+import type { Dimensions, Localized, Money } from '@/entities/common';
 import type { FormValues } from '@/features/admin/ui/CreateForm/CreateForm';
 type BuildParams = {
     form: FormValues;
@@ -23,7 +23,7 @@ export function buildArtItemJSON({ form, imageId, previewBasename }: BuildParams
         ...(form.technique ? [form.technique] : []),
     ];
 
-    const price: PriceJSON | null | undefined =
+    const price: Money | null | undefined =
         form.price && form.price.amount != null && form.price.currency
             ? { amount: form.price.amount, currency: form.price.currency }
             : undefined;

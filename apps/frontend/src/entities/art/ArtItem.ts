@@ -2,7 +2,7 @@ import { ArtItemJSON } from '@/entities/art';
 import { ISODate, Localized, Money } from '@/entities/common';
 import { FormValues } from '@/features/admin/editorSession/editorTypes';
 import type { Availability, Dimensions } from '../common/';
-import type { ImagesJSON, PriceJSON } from './';
+import type { ImagesJSON } from './';
 
 export interface ArtItemDraft {
     id: string;
@@ -17,7 +17,7 @@ export interface ArtItemDraft {
     techniques?: string[];
     dimensions?: Dimensions;
     availability?: Availability;
-    price?: PriceJSON | null;
+    price?: Money | null;
     series?: string | null;
     tags?: string[];
     notes?: string | null;
@@ -86,6 +86,7 @@ export class ArtItem {
             availability: json.availability,
             series: json.series ?? null,
             tags: json.tags ?? [],
+            alt: json.alt,
             notes: json.notes ?? null,
             images: {
                 alt: json.images?.alt ?? {},
@@ -95,23 +96,24 @@ export class ArtItem {
         };
         return new ArtItem(init);
     }
-
+    // TO DO
+    // How and where we use this adaptor? The issue is in the images source which not exists in form
     toJSON(form: FormValues): ArtItemJSON {
         return {
-            id: this.id,
-            title: this.title,
-            dateCreated: this.dateCreated,
-            techniques: this.techniques,
-            dimensions: this.dimensions,
-            price: this.price,
-            availability: this.availability,
-            series: this.series,
-            tags: this.tags,
-            notes: this.notes,
+            id: form.id,
+            title: form.title,
+            dateCreated: form.dateCreated,
+            techniques: form.techniques,
+            dimensions: form.dimensions,
+            price: form.price,
+            availability: form.availability,
+            series: form.series,
+            tags: form.tags ? form.tags : [],
+            notes: form.notes,
             images: {
-                alt: this.images.alt,
-                preview: this.images.preview,
-                full: this.images.full,
+                alt: form.images.alt,
+                preview: form.images.preview,
+                full: form.images.full,
             },
         };
     }

@@ -1,64 +1,51 @@
-// src/features/admin/ui/HopperGrid/HopperGrid.tsx
+export class ArtItem {
+    readonly id: string;
+    title: Localized | undefined;
+    dateCreated: ISODate;
+    techniques: string[];
+    price: Money | undefined;
+    availability: Availability;
+    series: string | undefined;
+    tags: string[];
+    alt: Localized | undefined;
+    notes: string | undefined;
+    images: ImagesJSON;
+    dimensions: Dimensions;
 
-import { GridItem } from '@/entities/grid';
-import { useEffect, useState } from 'react';
-import './HopperGrid.css';
+    constructor(data: {
+        id: string;
+        title?: Localized;
+        dateCreated: ISODate;
+        techniques: string[];
+        price?: Money;
+        availability: Availability;
+        series?: string;
+        tags?: string[];
+        alt?: Localized;
+        notes?: string;
+        images: ImagesJSON;
+        dimensions: Dimensions;
+    }) {
+        this.id = data.id;
+        this.title = data.title;
+        this.dateCreated = data.dateCreated;
+        this.techniques = data.techniques;
+        this.price = data.price;
+        this.availability = data.availability;
+        this.series = data.series;
+        this.tags = data.tags ?? []; // normalize to []
+        this.alt = data.alt;
+        this.notes = data.notes;
+        this.images = data.images;
+        this.dimensions = data.dimensions;
+    }
 
-interface HopperGridProps {
-    hopper: GridItem[];
-    // When selection changes: selected item or undefined if cleared
-    setIdentity: (item: GridItem | undefined) => void;
-}
-
-export default function HopperGrid({ hopper, setIdentity }: HopperGridProps) {
-    const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
-
-    // Handle click on tile: toggle selection
-    function handleClick(item: GridItem): void {
-        setSelectedId((prev) => {
-            const next = prev === item.id ? undefined : item.id;
-
-            if (next === undefined) {
-                // Deselected
-                setIdentity(undefined);
-            } else {
-                // Selected new item
-                setIdentity(item);
-            }
-
-            return next;
+    static fromJSON(json: ArtItemJSON): ArtItem {
+        return new ArtItem({
+            ...json,
+            tags: json.tags ?? [], // ensure not undefined
+            // alt: можно сюда подтащить из images.alt, если она там есть
+            // alt: json.images.alt,
         });
     }
-
-    // Handle Escape: clear selection
-    useEffect(() => {
-        function handleKeyDown(e: KeyboardEvent) {
-            if (e.key === 'Escape') {
-                setSelectedId(undefined);
-                setIdentity(undefined);
-            }
-        }
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [setIdentity]);
-
-    if (!hopper.length) {
-        return <div className="hopper-grid hopper-grid--empty">No items yet</div>;
-    }
-
-    return (
-        <div className="hopper-grid">
-            {hopper.map((item) => (
-                <button
-                    key={item.id}
-                    type="button"
-                    className={`hopper-grid-item ${item.id === selectedId ? 'is-selected' : ''}`}
-                    onClick={() => handleClick(item)}
-                >
-                    <img src={item.thumbUrl} alt={item.title ?? ''} loading="lazy" />
-                </button>
-            ))}
-        </div>
-    );
 }

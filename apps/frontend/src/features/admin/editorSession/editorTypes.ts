@@ -2,7 +2,7 @@ import { Availability, Dimensions, ISODate, Localized, Money } from '@/entities/
 
 export interface FormValues {
     id: string;
-    dateCreated?: ISODate;
+    dateCreated: ISODate;
     title: Localized | undefined;
     techniques: string[];
     availability: Availability | undefined;
