@@ -23,7 +23,11 @@ export default function UploadPage() {
     useEffect(() => {
         (async () => {
             const hopperGrid = await getHopperContent();
+            console.log(`Hopper content we got:`);
+            console.dir(hopperGrid);
             setUploaded(hopperGrid);
+            console.log(`Hopper content saved`);
+            console.dir(uploaded);
         })();
     }, []);
 
@@ -61,7 +65,7 @@ export default function UploadPage() {
         setSelectedId(null);
     }
 
-    // ---- Drag & drop handlers для зоны ----
+    // ---- Drag & drop handlers for drop zone ----
 
     function handleDragOver(e: DragEvent<HTMLDivElement>) {
         e.preventDefault();

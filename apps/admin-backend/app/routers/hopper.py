@@ -34,7 +34,9 @@ def hopper_content():
         file_name = p.name
         rel = p.relative_to(root).as_posix()
         rel_quoted = "/".join(quote(s) for s in rel.split("/"))
-        response.append({"id": file_name, "src": f"{base_root}/{rel_quoted}"})
+        response.append(
+            {"id": file_name, "thumbUrl": f"{base_root}/{rel_quoted}"}
+        )
     logger.info(f"Hopper read with lingth {len(response)}")
     return response
 

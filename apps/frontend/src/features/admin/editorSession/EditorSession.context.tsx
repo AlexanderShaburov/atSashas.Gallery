@@ -49,7 +49,7 @@ export type EditorSession = {
     exit: () => void;
 
     /** UI helpers */
-    thumb: CatalogGridItem | undefined;
+    thumb: GridItem | undefined;
     techniques: TechniquesJson;
     seriesOptions: string[];
 };
@@ -80,7 +80,7 @@ export function EditorSessionProvider({ children }: ProviderProps) {
     const [isDirty, setIsDirty] = useState(false);
     const [isValid, setIsValid] = useState(false);
     const [editorIsReady, setEditorIsReady] = useState(false);
-    const [thumb, setThumb] = useState<CatalogGridItem | undefined>(undefined);
+    const [thumb, setThumb] = useState<GridItem | undefined>(undefined);
     const [canSave, setCanSave] = useState(false);
     const [seriesOptions, setSeriesOptions] = useState<string[]>([]);
     // Snapshot for dirty checking
@@ -145,13 +145,14 @@ export function EditorSessionProvider({ children }: ProviderProps) {
     /** Start a new editing session (create/edit) on every identity change */
     useEffect(() => {
         console.log('Session initiator called with identity: ', identity);
+        console.dir(identity);
         let nextThumb: GridItem | undefined = undefined;
         switch (identity?.mode) {
             case 'create': {
                 const initialValues = prepareEditorForm(identity);
                 console.log('Session initiator: initialValues.id: ', initialValues.id);
                 valuesRef.current = initialValues;
-                nextThumb = identity.item as CatalogGridItem;
+                nextThumb = identity.item as GridItem;
                 setValues(initialValues);
                 console.log('Initiator: Values set as: ', initialValues);
                 break;

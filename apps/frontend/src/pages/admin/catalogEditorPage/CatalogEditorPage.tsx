@@ -104,7 +104,7 @@ export default function CatalogEditorPage() {
                     <p>Loading data</p>
                 ) : (
                     !identity && (
-                        <div className="grid">
+                        <div /*className="grid"*/>
                             <HopperGrid hopper={displayGrid} setIdentity={onClickHandler} />
                         </div>
                     )

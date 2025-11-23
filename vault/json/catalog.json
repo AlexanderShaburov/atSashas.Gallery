@@ -1,54 +1,7 @@
 {
-  "catalogVersion": 35,
-  "updatedAt": "2025-11-22T09:20:58.206589+00:00",
+  "catalogVersion": 39,
+  "updatedAt": "2025-11-23T10:30:30.463944+00:00",
   "items": {
-    "art-20251019-001": {
-      "id": "art-20251019-001",
-      "dateCreated": "2025-10-19",
-      "images": {
-        "full": "arts/fullsize/art-20251019-001.jpg",
-        "previews": {
-          "avif": "arts/previews/art-20251019-001.avif",
-          "webp": "arts/previews/art-20251019-001.webp",
-          "jpeg": "arts/previews/art-20251019-001.jpeg"
-        },
-        "alt": {
-          "en": "Abstract blue horizon",
-          "ru": null,
-          "it": null,
-          "es": null,
-          "pt": null
-        }
-      },
-      "techniques": [
-        "painting",
-        "oil"
-      ],
-      "availability": "available",
-      "dimensions": {
-        "width": 50.0,
-        "height": 70.0,
-        "unit": "cm"
-      },
-      "alt": null,
-      "title": {
-        "en": "Blue Horizon",
-        "ru": null,
-        "it": null,
-        "es": null,
-        "pt": null
-      },
-      "price": {
-        "amount": 400,
-        "currency": "EUR"
-      },
-      "series": "Horizon",
-      "tags": [
-        "landscape",
-        "blue"
-      ],
-      "notes": null
-    },
     "art-20251118-4gpfj3": {
       "id": "art-20251118-4gpfj3",
       "dateCreated": "2025-11-18",
@@ -138,101 +91,11 @@
       "series": null,
       "tags": null,
       "notes": null
-    },
-    "art-20251122-6bpdgr": {
-      "id": "art-20251122-6bpdgr",
-      "dateCreated": "2025-11-22",
-      "images": {
-        "full": "/media/arts/fullsize/art-20251122-6bpdgr.jpg",
-        "previews": {
-          "avif": "/media/arts/previews/art-20251122-6bpdgr.avif",
-          "webp": "/media/arts/previews/art-20251122-6bpdgr.webp",
-          "jpeg": "/media/arts/previews/art-20251122-6bpdgr.jpeg"
-        },
-        "alt": null
-      },
-      "techniques": null,
-      "availability": null,
-      "dimensions": null,
-      "alt": null,
-      "title": {
-        "en": "hebrew past ",
-        "ru": "",
-        "it": null,
-        "es": null,
-        "pt": null
-      },
-      "price": null,
-      "series": null,
-      "tags": null,
-      "notes": null
-    },
-    "art-20251122-rv8x2d": {
-      "id": "art-20251122-rv8x2d",
-      "dateCreated": "2025-11-22",
-      "images": {
-        "full": "/media/arts/fullsize/art-20251122-rv8x2d.jpg",
-        "previews": {
-          "avif": "/media/arts/previews/art-20251122-rv8x2d.avif",
-          "webp": "/media/arts/previews/art-20251122-rv8x2d.webp",
-          "jpeg": "/media/arts/previews/art-20251122-rv8x2d.jpeg"
-        },
-        "alt": null
-      },
-      "techniques": null,
-      "availability": null,
-      "dimensions": null,
-      "alt": null,
-      "title": {
-        "en": "Exam titlepage",
-        "ru": "",
-        "it": null,
-        "es": null,
-        "pt": null
-      },
-      "price": null,
-      "series": null,
-      "tags": null,
-      "notes": null
-    },
-    "art-20251122-0hj7tj": {
-      "id": "art-20251122-0hj7tj",
-      "dateCreated": "2025-11-22",
-      "images": {
-        "full": "/media/arts/fullsize/art-20251122-0hj7tj.jpg",
-        "previews": {
-          "avif": "/media/arts/previews/art-20251122-0hj7tj.avif",
-          "webp": "/media/arts/previews/art-20251122-0hj7tj.webp",
-          "jpeg": "/media/arts/previews/art-20251122-0hj7tj.jpeg"
-        },
-        "alt": null
-      },
-      "techniques": null,
-      "availability": null,
-      "dimensions": null,
-      "alt": null,
-      "title": {
-        "en": "Another past hebrew",
-        "ru": "",
-        "it": null,
-        "es": null,
-        "pt": null
-      },
-      "price": null,
-      "series": null,
-      "tags": [
-        "hebrew"
-      ],
-      "notes": null
     }
   },
   "order": [
-    "art-20251122-0hj7tj",
-    "art-20251122-rv8x2d",
-    "art-20251122-6bpdgr",
     "art-20251120-9td10a",
     "art-20251120-jcsrbr",
-    "art-20251118-4gpfj3",
-    "art-20251019-001"
+    "art-20251118-4gpfj3"
   ]
 }

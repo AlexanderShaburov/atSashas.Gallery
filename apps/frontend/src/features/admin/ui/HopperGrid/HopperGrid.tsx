@@ -13,6 +13,8 @@ export default function HopperGrid({ hopper, setIdentity }: HopperGridProps) {
     // Handle click on tile: toggle selection
     function handleClick(item: GridItem): void {
         setSelectedId((prev) => (prev === item.id ? undefined : item.id));
+        console.log(`Current hopper is: ${hopper}`);
+        console.dir(hopper);
     }
 
     // Sync selectedId -> identity (inform parent) AFTER render

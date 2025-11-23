@@ -1,9 +1,10 @@
 /* src/features/admin/ui/HopperGrid/HopperGrid.css */
 
+/* Базово — mobile-first: один столбец на всю ширину */
 .hopper-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 12px;
+    grid-template-columns: 1fr; /* один столбец на телефоне */
+    gap: 16px;
 }
 
 .hopper-grid--empty {
@@ -23,11 +24,12 @@
     overflow: hidden;
 }
 
-/* Собственно картинка-превью */
+/* Картинка-превью */
 .hopper-grid-item img {
     display: block;
     width: 100%;
-    height: 120px;
+    height: auto; /* пусть высота считается от ширины */
+    aspect-ratio: 4 / 3; /* классическое соотношение сторон */
     object-fit: cover;
 }
 
@@ -35,4 +37,20 @@
 .hopper-grid-item.is-selected {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
+}
+
+/* --- Брейкпоинты --- */
+
+/* Начиная примерно с планшета — несколько столбцов */
+@media (min-width: 600px) {
+    .hopper-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+}
+
+/* Большие экраны (20"+) — крупные превью, 4–7 штук в ряд */
+@media (min-width: 1200px) {
+    .hopper-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
 }

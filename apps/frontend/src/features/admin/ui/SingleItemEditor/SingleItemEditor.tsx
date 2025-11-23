@@ -2,12 +2,72 @@ import { CreateForm } from '@/features/admin/ui/CreateForm/CreateForm';
 import '@/features/admin/ui/SingleItemEditor/SingleItemEditor.css';
 import { useEffect } from 'react';
 import { useEditorSession } from '../../editorSession/EditorSession.context';
-
+import { deleteFromHopper } from '@/features/admin/api';
 export default function SingleItemEditor() {
-    const { thumb, save, values, isDirty, isValid, exit, canSave, saving } = {
+    const { thumb, save, values, isDirty, isValid, exit, canSave, saving, mode } = {
         ...useEditorSession(),
     };
+    console.log(`Current thumb is: `);
+    console.log(`current thumb.thumbUrl: ${thumb?.thumbUrl}`);
+    console.dir(thumb);
 
+    // TODO:
+    // When Blocks and Streams are implemented:
+    // - check real dependencies
+    // - prevent deletion if item is part of locked or published stream
+    // - implement placeholder item for removed artworks
+    // - update blocks by replacing removed item with placeholder token
+
+    async function deleteFromCatalog() {
+        if (!thumb?.id) return;
+
+        try {
+            // Check dependencies:
+            const depsResp = await fetch(`/api/catalog/dependencies/${thumb.id}`);
+            const deps = await depsResp.json();
+
+            let message = `Delete item "${thumb.id}" permanently?`;
+
+            // User message
+            if (deps.blocks?.length || deps.streams?.length) {
+                message =
+                    `This item is used in:\n\n` +
+                    (deps.blocks.length ? `Blocks:\n- ${deps.blocks.join('\n- ')}\n\n` : '') +
+                    (deps.streams.length ? `Streams:\n- ${deps.streams.join('\n- ')}` : '') +
+                    `\n\nAre you sure you want to delete it?`;
+            }
+
+            // Confirmation
+            if (!confirm(message)) return;
+
+            // Deleting
+            const delResp = await fetch(`/api/catalog/${thumb.id}`, {
+                method: 'DELETE',
+            });
+
+            if (!delResp.ok) {
+                alert('Failed to delete item');
+                return;
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error during deletion');
+        }
+    }
+
+    async function onDelete() {
+        switch (mode) {
+            case 'edit':
+                deleteFromCatalog();
+                break;
+            case 'create':
+                if (thumb && thumb.id) {
+                    await deleteFromHopper(thumb.id);
+                }
+                break;
+        }
+        exit();
+    }
     //Cmd/Ctrl + S to save, Exc to cancel:
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
@@ -27,7 +87,6 @@ export default function SingleItemEditor() {
             }
         };
         window.addEventListener('keydown', onKey);
-        console.log(`From SingleItemEditor component canSave visible as: ${canSave}`);
         return () => window.removeEventListener('keydown', onKey);
     }, [isValid, exit, save, isDirty, values, canSave]);
 
@@ -36,7 +95,7 @@ export default function SingleItemEditor() {
             {/* Thumbnail column */}
             <aside className="sie-thumb-col" aria-label="Selected artwork">
                 <div className="sie-thumb-card">
-                    <img src={thumb?.src} alt={thumb?.alt || thumb?.id} loading="lazy" />
+                    <img src={thumb?.thumbUrl} alt={thumb?.title || thumb?.id} loading="lazy" />
                     <div className="sie-thumb-meta">
                         <div className="sie-thumb-id">{values?.title?.en ?? thumb?.id}</div>
                     </div>
@@ -49,8 +108,17 @@ export default function SingleItemEditor() {
                     <CreateForm />
 
                     <div className="sie-toolbar">
-                        <div className="sie-toolbar-spacer" />
-                        <div className="sie-actions">
+                        <div className="sie-actions sie-actions--left">
+                            <button
+                                type="button"
+                                className="sie-btn sie-btn--danger"
+                                onClick={onDelete}
+                            >
+                                🗑 Delete
+                            </button>
+                        </div>
+
+                        <div className="sie-actions sie-actions--right">
                             <button
                                 type="button"
                                 className="sie-btn sie-btn--secondary"

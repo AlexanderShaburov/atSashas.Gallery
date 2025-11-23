@@ -9,3 +9,12 @@
 2. On the catalog page build:
     1. Display catalog content (_the same way as hopper does_)
     2. Add same functions to catalog view as in "create" view.
+
+## FOR Blocks and Stream modules implementation stage:
+
+// TODO:
+// When Blocks and Streams are implemented:
+// - check real dependencies
+// - prevent deletion if item is part of locked or published stream
+// - implement placeholder item for removed artworks
+// - update blocks by replacing removed item with placeholder token
