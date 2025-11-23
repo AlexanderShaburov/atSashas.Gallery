@@ -1,5 +1,7 @@
-import { ArtGerm, ArtItem, TechniquesJson } from '@/entities/art';
-import { ArtCatalog, Thumb } from '@/entities/catalog';
+import { TechniquesJson } from '@/entities/art';
+import { ArtCatalog } from '@/entities/catalog';
+import { EditorTarget } from '@/entities/common';
+import { CatalogGridItem, GridItem } from '@/entities/grid/gridItem';
 import {
     getCatalog,
     getHopperContent,
@@ -7,9 +9,9 @@ import {
     getTechniques,
     updateCatalog,
 } from '@/features/admin/api';
-import { ArtToFormAdapter, prepareEditorForm } from '@/features/admin/editorSession/editorLogic/';
+import { prepareEditorForm } from '@/features/admin/editorSession/editorLogic/';
 import { buildShipment } from '@/features/admin/editorSession/editorLogic/buildShipment';
-import type { FormValues } from '@/features/admin/editorSession/editorTypes';
+import type { ArtItemForm } from '@/features/admin/editorSession/editorTypes';
 import { deepEqual } from '@/features/admin/utils/checkers';
 import { isMinimalValid, sanitizeForm } from '@/features/admin/utils/Validators';
 import {
@@ -24,12 +26,12 @@ import {
 
 export type EditorSession = {
     catalog: ArtCatalog | undefined;
-    hopper: Thumb[];
-    identity: ArtGerm | undefined; // matches state
+    hopper: CatalogGridItem[];
+    identity: EditorTarget | undefined; // matches state
     mode: 'create' | 'edit';
-    values: FormValues | undefined;
-    setValues: React.Dispatch<React.SetStateAction<FormValues | undefined>>;
-    setIdentity: (v: ArtGerm | undefined) => void;
+    values: ArtItemForm | undefined;
+    setValues: React.Dispatch<React.SetStateAction<ArtItemForm | undefined>>;
+    setIdentity: (v: EditorTarget | undefined) => void;
     setMode: (m: 'edit' | 'create') => void;
 
     /** Start a new session from a hopper unit or existing item */
@@ -47,7 +49,7 @@ export type EditorSession = {
     exit: () => void;
 
     /** UI helpers */
-    thumb: Thumb | undefined;
+    thumb: CatalogGridItem | undefined;
     techniques: TechniquesJson;
     seriesOptions: string[];
 };
@@ -65,10 +67,10 @@ type ProviderProps = { children: React.ReactNode };
 
 export function EditorSessionProvider({ children }: ProviderProps) {
     // Core state
-    const [identity, setIdentity] = useState<ArtGerm | undefined>(undefined); // Item selected to be edited
-    const [values, setValues] = useState<FormValues | undefined>(undefined);
+    const [identity, setIdentity] = useState<EditorTarget | undefined>(undefined); // Item selected to be edited
+    const [values, setValues] = useState<ArtItemForm | undefined>(undefined);
     const [catalog, setCatalog] = useState<ArtCatalog | undefined>(undefined);
-    const [hopper, setHopper] = useState<Thumb[]>([]);
+    const [hopper, setHopper] = useState<GridItem[]>([]);
     const [mode, setMode] = useState<'create' | 'edit'>('create'); // !!! 'edit' in production !!!
 
     // UI/derived state
@@ -78,13 +80,13 @@ export function EditorSessionProvider({ children }: ProviderProps) {
     const [isDirty, setIsDirty] = useState(false);
     const [isValid, setIsValid] = useState(false);
     const [editorIsReady, setEditorIsReady] = useState(false);
-    const [thumb, setThumb] = useState<Thumb | undefined>(undefined);
+    const [thumb, setThumb] = useState<CatalogGridItem | undefined>(undefined);
     const [canSave, setCanSave] = useState(false);
     const [seriesOptions, setSeriesOptions] = useState<string[]>([]);
     // Snapshot for dirty checking
-    const snapshot = useRef<FormValues | undefined>(undefined);
-    // valuesRef for use in functions not should be run after every values change:
-    const valuesRef = useRef<FormValues | undefined>(values);
+    const snapshot = useRef<ArtItemForm | undefined>(undefined);
+    // valuesRef for use in functions not should run after every values change:
+    const valuesRef = useRef<ArtItemForm | undefined>(values);
 
     // Load current catalog and hopper version
     const refreshBase = useCallback(async (): Promise<void> => {
@@ -143,25 +145,24 @@ export function EditorSessionProvider({ children }: ProviderProps) {
     /** Start a new editing session (create/edit) on every identity change */
     useEffect(() => {
         console.log('Session initiator called with identity: ', identity);
-        let nextThumb: Thumb | undefined = undefined;
+        let nextThumb: GridItem | undefined = undefined;
         switch (identity?.mode) {
             case 'create': {
                 const initialValues = prepareEditorForm(identity);
                 console.log('Session initiator: initialValues.id: ', initialValues.id);
                 valuesRef.current = initialValues;
-                nextThumb = identity.item as Thumb;
+                nextThumb = identity.item as CatalogGridItem;
                 setValues(initialValues);
                 console.log('Initiator: Values set as: ', initialValues);
                 break;
             }
             case 'edit': {
-                const item = identity.item as ArtItem;
-                setValues(ArtToFormAdapter(item));
+                setValues(prepareEditorForm(identity));
                 nextThumb = {
-                    id: item.id,
-                    src: item.images.full,
-                    alt: item.alt,
-                } as Thumb;
+                    id: identity.item.id,
+                    thumbUrl: identity.item.images.full,
+                    title: identity.item.alt,
+                } as GridItem;
 
                 break;
             }
@@ -169,7 +170,8 @@ export function EditorSessionProvider({ children }: ProviderProps) {
                 break;
             default: {
                 // If modes expand later, fail fast for now
-                console.error('Unsupported session mode:', identity?.mode);
+                console.error('Unsupported session mode:');
+                console.dir(identity);
                 return;
             }
         }

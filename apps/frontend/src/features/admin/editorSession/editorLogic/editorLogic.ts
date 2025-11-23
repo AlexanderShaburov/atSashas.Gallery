@@ -1,38 +1,37 @@
-import { ArtGerm, ArtItem } from '@/entities/art';
-import { ISODate } from '@/entities/common';
+import { EditorTarget, ISODate } from '@/entities/common';
 import { generateArtId } from '@/features/admin/editorSession/editorLogic/generateArtId';
-import type { FormValues } from '@/features/admin/editorSession/editorTypes';
+import type { ArtItemForm } from '@/features/admin/editorSession/editorTypes';
 
-export function prepareEditorForm(unit: ArtGerm): FormValues {
-    if (unit.mode === 'create') {
-        return {
-            id: generateArtId() as string,
-            dateCreated: todayISO() as ISODate,
-            title: undefined,
-            technique: undefined,
-            availability: undefined,
-            dimensions: undefined,
-            price: undefined,
-            alt: undefined,
-            series: undefined,
-            tags: undefined,
-            notes: undefined,
-        };
-    } else {
-        const item = unit.item as ArtItem;
-        return {
-            id: item.id,
-            dateCreated: item.dateCreated,
-            title: item.title,
-            technique: item.techniques?.[0],
-            availability: item.availability,
-            dimensions: item.dimensions,
-            price: item.price,
-            alt: item.alt,
-            series: item.series,
-            tags: item.tags,
-            notes: item.notes,
-        };
+export function prepareEditorForm(unit: EditorTarget): ArtItemForm {
+    switch (unit.mode) {
+        case 'create':
+            return {
+                id: generateArtId() as string,
+                dateCreated: todayISO() as ISODate,
+                title: undefined,
+                techniques: undefined,
+                availability: undefined,
+                dimensions: undefined,
+                price: undefined,
+                alt: undefined,
+                series: undefined,
+                tags: undefined,
+                notes: undefined,
+            };
+        case 'edit':
+            return {
+                id: unit.item.id,
+                dateCreated: unit.item.dateCreated,
+                title: unit.item.title,
+                techniques: unit.item.techniques,
+                availability: unit.item.availability,
+                dimensions: unit.item.dimensions,
+                price: unit.item.price,
+                alt: unit.item.alt,
+                series: unit.item.series,
+                tags: unit.item.tags,
+                notes: unit.item.notes,
+            };
     }
 }
 

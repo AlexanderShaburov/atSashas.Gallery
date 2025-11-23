@@ -1,12 +1,12 @@
 import type { ArtCatalog } from '@/entities/catalog';
-import type { ArtItemJSON } from '@/entities/art';
+import type { ArtItemData } from '@/entities/art';
 // Types you likely already have:
 type ItemId = string;
 
 // 1) Upsert a full item (create or replace) and keep order consistent
 export function upsertCatalogItem(
     catalog: ArtCatalog,
-    item: ArtItemJSON,
+    item: ArtItemData,
     opts: { position?: 'append' | 'prepend' | number } = { position: 'prepend' }, // optional placement when inserting new
 ): ArtCatalog {
     const exists = !!catalog.items?.[item.id];
@@ -39,13 +39,13 @@ export function upsertCatalogItem(
 export function patchCatalogItem(
     catalog: ArtCatalog,
     id: ItemId,
-    patch: Partial<ArtItemJSON>,
+    patch: Partial<ArtItemData>,
 ): ArtCatalog {
     const current = catalog.items[id];
     if (!current) {
         throw new Error(`Item ${id} not found`);
     }
-    const nextItem: ArtItemJSON = { ...current, ...patch };
+    const nextItem: ArtItemData = { ...current, ...patch };
     return {
         ...catalog,
         items: { ...catalog.items, [id]: nextItem },
@@ -57,7 +57,7 @@ export function patchCatalogItem(
 export function upsertWith(
     catalog: ArtCatalog,
     id: ItemId,
-    build: (prev: ArtItemJSON | undefined) => ArtItemJSON,
+    build: (prev: ArtItemData | undefined) => ArtItemData,
     opts?: { position?: 'append' | 'prepend' | number },
 ): ArtCatalog {
     const next = build(catalog.items[id]);

@@ -1,66 +1,120 @@
-import type { Thumb } from '@/entities/catalog';
-import { useEffect, useState } from 'react';
-
-import SingleItemEditor from '@/features/admin/ui/SingleItemEditor/SingleItemEditor';
 import '@/pages/admin/catalogEditorPage/CatalogEditorPage.css';
 
+import { ArtItemData } from '@/entities/art';
+import { GridItem } from '@/entities/grid';
 import { useEditorSession } from '@/features/admin/editorSession/EditorSession.context';
+import HopperGrid from '@/features/admin/ui/HopperGrid/HopperGrid';
+import SingleItemEditor from '@/features/admin/ui/SingleItemEditor/SingleItemEditor';
+import { useEffect, useState } from 'react';
 
 export default function CatalogEditorPage() {
+    const [hopperGrid, setHopperGrid] = useState<GridItem[] | undefined>(undefined);
+    const [catalogGrid, setCatalogGrid] = useState<GridItem[] | undefined>(undefined);
+    const [displayGrid, setDisplayGrid] = useState<GridItem[]>([]);
+
     const { identity, setIdentity, editorIsReady, catalog, hopper, loading, mode, setMode } = {
         ...useEditorSession(),
     };
 
-    // Important!!! In normal use default mode better to set to "edit"
-
-    if (mode !== 'create') {
-        return (
-            <div className="catalog-page">
-                <header>
-                    <button onClick={() => setMode('create')}>Create</button>
-                    <button className="active">Edit</button>
-                </header>
-                <p>Edit mode coming next</p>
-            </div>
-        );
+    function artItemToGridItem(a: ArtItemData): GridItem {
+        const thumbUrl = a.images.full as string;
+        return {
+            id: a.id,
+            thumbUrl: thumbUrl,
+            title: a.title?.en ?? a.title?.ru ?? '',
+        };
     }
-    if (!identity) {
-        return (
+
+    function onClickHandler(t: GridItem | undefined) {
+        if (!t) {
+            return;
+        }
+        switch (mode) {
+            case 'create':
+                setIdentity({
+                    mode: mode,
+                    item: t,
+                });
+                break;
+            case 'edit': {
+                if (!catalog) {
+                    return;
+                }
+                const art = catalog.items[t.id];
+                if (!art) {
+                    return;
+                }
+
+                setIdentity({
+                    mode: mode,
+                    item: art,
+                });
+                break;
+            }
+        }
+    }
+
+    useEffect(() => {
+        if (hopper && hopper.length) {
+            setHopperGrid(hopper);
+        }
+        if (catalog && catalog.items) {
+            const c_grid = Object.values(catalog.items).map(artItemToGridItem);
+            setCatalogGrid(c_grid);
+        }
+    }, [hopper, catalog]);
+
+    // Form displayGrid:
+
+    useEffect(() => {
+        switch (mode) {
+            case 'create': {
+                if (hopperGrid) {
+                    setDisplayGrid(hopperGrid);
+                }
+                break;
+            }
+            case 'edit': {
+                if (catalogGrid) {
+                    setDisplayGrid(catalogGrid);
+                }
+            }
+        }
+    }, [mode, hopperGrid, catalogGrid]);
+
+    return (
+        <>
             <div className="catalog-page">
                 <header>
                     {/* SWITCH MODE BUTTONS BLOCK  */}
-                    <button className="active">Create</button>
-                    <button onClick={() => setMode('edit')}>Edit</button>
+                    <button
+                        className={mode === 'create' ? 'create' : ''}
+                        onClick={() => setMode('create')}
+                    >
+                        Create
+                    </button>
+                    <button
+                        className={mode === 'edit' ? 'edit' : ''}
+                        onClick={() => setMode('edit')}
+                    >
+                        Edit
+                    </button>
                 </header>
-
                 {loading ? (
-                    <p>Loading hopper`</p>
+                    <p>Loading data</p>
                 ) : (
-                    // HOPPER CONTENT GRID
-
-                    <div className="grid">
-                        {hopper.map((h) => (
-                            <button
-                                key={h.id}
-                                className={`card`}
-                                onClick={() => setIdentity({ mode: mode, item: h })}
-                                title={h.id}
-                            >
-                                <img src={h.src} alt={h.id} loading="lazy" />
-                                <div className="meta">{h.id}</div>
-                            </button>
-                        ))}
-                        {hopper.length === 0 && <p>No uploads in hopper</p>}
-                    </div>
+                    !identity && (
+                        <div className="grid">
+                            <HopperGrid hopper={displayGrid} setIdentity={onClickHandler} />
+                        </div>
+                    )
                 )}
             </div>
-        );
-    }
-    if (identity && editorIsReady) {
-        return (
-            <div className="catalog-page">
-                <SingleItemEditor />
-            </div>
-        );
-    }
+            {identity && editorIsReady && (
+                <div className="catalog-page">
+                    <SingleItemEditor />
+                </div>
+            )}
+        </>
+    );
 }

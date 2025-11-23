@@ -1,8 +1,9 @@
 import type { TechniquesJson } from '@/entities/art';
 import { ArtShipment } from '@/entities/art/shipment';
-import type { ArtCatalog, Thumb } from '@/entities/catalog';
+import type { ArtCatalog } from '@/entities/catalog';
 import type { ApiResponse } from '@/entities/common';
 import type { StreamData } from '@/entities/stream';
+import type { GridItem } from '@/entities/grid';
 export const VAULT_BASE = import.meta.env.VITE_VAULT_BASE_URL;
 export const API_BASE = import.meta.env.VITE_API_BASE_URL;
 export const STREAMS_URL = import.meta.env.VITE_STREAMS_BASE_URL;
@@ -71,7 +72,7 @@ export async function uploadImage(file: File, category: string, filename?: strin
     ).json();
 }
 
-export async function getHopperContent(): Promise<Thumb[]> {
+export async function getHopperContent(): Promise<GridItem[]> {
     const resp = await fetch(HOPPER_LIST_URL);
     if (!resp.ok) throw new Error(`Hopper list request failed with error ${resp.status}`);
     return await resp.json();

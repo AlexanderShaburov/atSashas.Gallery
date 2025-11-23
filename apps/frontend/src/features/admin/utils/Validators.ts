@@ -1,14 +1,13 @@
-import { ArtGerm, ArtItem } from '@/entities/art';
-import { Thumb } from '@/entities/catalog';
-import { FormValues } from '@/features/admin/editorSession/editorTypes';
+import { EditorTarget } from '@/entities/common';
+import { ArtItemForm } from '@/features/admin/editorSession/editorTypes';
 
 // ── Validation helpers (top-level) ───────────────────────────────────────────
-export function hasAnyTitle(v?: FormValues['title']): boolean {
+export function hasAnyTitle(v?: ArtItemForm['title']): boolean {
     if (!v) return false;
     return Object.values(v).some((s) => (s ?? '').trim().length > 0);
 }
 
-export function validDimensions(d?: FormValues['dimensions']): boolean {
+export function validDimensions(d?: ArtItemForm['dimensions']): boolean {
     if (!d) return false;
     // Allow integers/floats; require strictly positive
     const w = Number(d.width);
@@ -16,7 +15,7 @@ export function validDimensions(d?: FormValues['dimensions']): boolean {
     return Number.isFinite(w) && Number.isFinite(h) && w > 0 && h > 0 && !!d.unit;
 }
 
-// export function validateCreateForm(values: FormValues | null): boolean {
+// export function validateCreateForm(values: ArtItemForm | null): boolean {
 //     if (!values) return false;
 
 //     const okId = typeof values.id === 'string' && values.id.trim().length > 0;
@@ -30,20 +29,19 @@ export function validDimensions(d?: FormValues['dimensions']): boolean {
 //     return okId && okDate && okTechnique && okAvailability && okTitleOrAlt && okDims;
 // }
 //min validity: ID + image presence (no mode)
-export function isMinimalValid(form: FormValues | undefined, item: ArtGerm): boolean {
+
+export function isMinimalValid(form: ArtItemForm | undefined, item: EditorTarget): boolean {
     const okId = typeof form?.id === 'string' && form.id.trim().length > 0;
     console.log('isMinimalValid: mode: create, okId is: ', okId);
     let okImage = false;
     switch (item.mode) {
         case 'create': {
-            const thmb = item.item as Thumb;
-            okImage = !!thmb.src;
+            okImage = !!item.item.thumbUrl;
             console.log('isMinimalValid: mode: create, okImage is: ', okImage);
             break;
         }
         case 'edit': {
-            const itm = item.item as ArtItem;
-            okImage = !!itm.images;
+            okImage = !!item.item.images;
             break;
         }
         default:
@@ -54,7 +52,7 @@ export function isMinimalValid(form: FormValues | undefined, item: ArtGerm): boo
 }
 
 // Normalization. Now soft:
-export function sanitizeForm(v: FormValues): FormValues {
+export function sanitizeForm(v: ArtItemForm): ArtItemForm {
     const s = { ...v };
     if (typeof s.id === 'string') s.id = s.id.trim();
     return s;

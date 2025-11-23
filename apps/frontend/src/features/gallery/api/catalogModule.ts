@@ -1,4 +1,4 @@
-import type { ArtItemJSON } from '@/entities/art';
+import type { ArtItemData } from '@/entities/art';
 import type { ArtCatalog } from '@/entities/catalog';
 
 const BASE = import.meta.env.VITE_VAULT_BASE_URL;
@@ -26,6 +26,6 @@ export async function loadCatalogOnce(): Promise<ArtCatalog> {
     return inflight;
 }
 
-export function getFromCatalog(id: string): ArtItemJSON | null {
+export function getFromCatalog(id: string): ArtItemData | null {
     return catalogCache?.items?.[id] ?? null;
 }

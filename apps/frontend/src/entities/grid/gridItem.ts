@@ -1,13 +1,29 @@
-//entities/grid/gridItem.ts:
+// src/entities/grid/gridItem.ts
+import { PreviewPath } from '@/entities/art';
+
+export interface GridItemSources {
+    avif?: PreviewPath;
+    webp?: PreviewPath;
+    jpeg?: PreviewPath;
+}
 
 export interface GridItem {
     id: string;
     thumbUrl: string;
-    sources?: {
-        avif?: string;
-        webp?: string;
-        jpeg?: string;
-    };
+    sources?: GridItemSources;
+    title?: string;
+    badge?: string;
+}
+
+export interface HopperGridItem {
+    id: string;
+    thumbUrl: string;
+    fileName?: string;
+}
+
+export interface CatalogGridItem {
+    id: string;
+    thumbUrl: string;
     title?: string;
     badge?: string;
 }

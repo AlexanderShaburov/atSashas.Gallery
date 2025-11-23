@@ -1,4 +1,4 @@
-import { FormValues } from '@/features/admin/ui/CreateForm/CreateForm';
+import { ArtItemForm } from '@/features/admin/editorSession/editorTypes';
 
 export type FormErrors = Partial<{
     id: string;
@@ -12,12 +12,12 @@ export type FormErrors = Partial<{
     'dimensions.unit': string;
 }>;
 
-function hasAnyLocalized(v?: FormValues['title']): boolean {
+function hasAnyLocalized(v?: ArtItemForm['title']): boolean {
     if (!v) return false;
     return Object.values(v).some((s) => (s ?? '').trim().length > 0);
 }
 
-export function validateErrors(values: FormValues | null): FormErrors {
+export function validateErrors(values: ArtItemForm | null): FormErrors {
     const e: FormErrors = {};
     if (!values) return e;
 
@@ -25,7 +25,7 @@ export function validateErrors(values: FormValues | null): FormErrors {
     if (!values.dateCreated || !/^\d{4}-\d{2}-\d{2}$/.test(values.dateCreated))
         e.dateCreated = 'YYYY-MM-DD required';
 
-    if (!values.technique?.trim()) e.technique = 'Required';
+    if (!values.techniques?.length) e.technique = 'Required';
     if (!values.availability) e.availability = 'Required';
 
     const hasTitle = hasAnyLocalized(values.title);

@@ -47,7 +47,7 @@ export default function CatalogEditorPage() {
         try {
             // TODO: transform FormValues -> ArtItemJSON as your saver expects
             // e.g., call a helper build function and POST to backend:
-            // const payload = buildArtItemJSON({ form: formValues, imageId: activeThumb.current!.id });
+            // const payload = buildArtItemData({ form: formValues, imageId: activeThumb.current!.id });
             // await apiSaveToCatalog(payload);
 
             // For now, just simulate success:

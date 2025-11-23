@@ -1,29 +1,27 @@
-import { ArtGerm, ArtItem } from '@/entities/art';
 import { ArtShipment } from '@/entities/art/shipment';
-import { Thumb } from '@/entities/catalog';
-import { FormValues } from '@/features/admin/editorSession/editorTypes';
+import { EditorTarget } from '@/entities/common';
+import { ArtItemForm } from '@/features/admin/editorSession/editorTypes';
 
-export function buildShipment(idt: ArtGerm, clean: FormValues): ArtShipment {
+export function buildShipment(target: EditorTarget, clean: ArtItemForm): ArtShipment {
     let shipment = undefined;
-    switch (idt.mode) {
+
+    switch (target.mode) {
         case 'edit': {
-            const i = idt.item as ArtItem;
             shipment = {
                 ...clean,
                 images: {
                     kind: 'ready',
-                    image: i.images,
+                    image: target.item.images,
                 },
             };
             break;
         }
         case 'create': {
-            const t = idt.item as Thumb;
             shipment = {
                 ...clean,
                 images: {
                     kind: 'hopper',
-                    hopperSrc: t.src,
+                    hopperSrc: target.item.thumbUrl,
                 },
             };
             break;

@@ -1,4 +1,3 @@
-import { Thumb } from '@/entities/catalog';
 import { GridItem } from '@/entities/grid';
 import { deleteFromHopper, getHopperContent, uploadImage } from '@/features/admin/api';
 import HopperGrid from '@/features/admin/ui/HopperGrid/HopperGrid';
@@ -21,17 +20,9 @@ export default function UploadPage() {
         setSelectedId(item.id);
     };
 
-    function thumbToGridItem(t: Thumb): GridItem {
-        return {
-            id: t.id,
-            thumbUrl: t.src,
-        };
-    }
-
     useEffect(() => {
         (async () => {
-            const t = await getHopperContent();
-            const hopperGrid = t.map(thumbToGridItem);
+            const hopperGrid = await getHopperContent();
             setUploaded(hopperGrid);
         })();
     }, []);

@@ -1,16 +1,15 @@
-import { ArtItemJSON } from '@/entities/art';
+// src/entities/catalog/catalog.ts
 
-export type ArtCatalog = {
+import type { ArtItemData, ItemMode } from '@/entities/art/artUnit';
+
+export interface ArtCatalog {
     catalogVersion: number;
     updatedAt: string;
     order: string[];
-    items: Record<string, ArtItemJSON>;
-};
+    items: Record<string, ArtItemData>;
+}
 
-export type Thumb = {
+export type EditorIdentity = {
+    mode: ItemMode;
     id: string;
-    src: string;
-    alt?: string;
 };
-
-export type EditorIdentity = { mode: 'create' | 'edit'; id: string };

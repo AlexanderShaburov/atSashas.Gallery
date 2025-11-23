@@ -1,4 +1,4 @@
-export type { ArtItem, ArtItemInit } from './ArtItem';
-export type { ArtItemJSON, ArtGerm } from './artUnit';
-export type { ImagesJSON, PreviewSources } from './images';
+export type { ArtItem } from './ArtItem';
+export type { ArtItemData } from './artUnit';
+export type { ImagesJSON, PreviewPath, PreviewSources } from './images';
 export type { TechniquesJson } from './techniques';
