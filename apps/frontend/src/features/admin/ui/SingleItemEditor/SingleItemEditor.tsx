@@ -58,7 +58,7 @@ export default function SingleItemEditor() {
     async function onDelete() {
         switch (mode) {
             case 'edit':
-                deleteFromCatalog();
+                await deleteFromCatalog();
                 break;
             case 'create':
                 if (thumb && thumb.id) {

@@ -95,7 +95,7 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             const cat = await getCatalog();
             setCatalog(cat);
             const hop = await getHopperContent();
-            console.log('Received hopper: ', hop);
+            console.log('[refreshBase]: Received hopper: ', hop);
             setHopper(hop);
         } catch (e) {
             console.error('Failed to load server data: ', e);
@@ -141,6 +141,12 @@ export function EditorSessionProvider({ children }: ProviderProps) {
     useEffect(() => {
         setCanSave(!saving && isDirty && isValid);
     }, [isDirty, isValid, saving]);
+
+    // Debug only:
+    useEffect(() => {
+        console.log(`[refreshBase starter]: mode got ${mode} value`);
+        refreshBase();
+    }, [mode, refreshBase]);
 
     /** Start a new editing session (create/edit) on every identity change */
     useEffect(() => {
@@ -188,6 +194,9 @@ export function EditorSessionProvider({ children }: ProviderProps) {
 
     /** Reset the whole session */
     const exitSession = useCallback(() => {
+        (async () => {
+            await refreshBase();
+        })();
         setIdentity(undefined);
         setValues(undefined);
         setTechniques({});
@@ -198,7 +207,7 @@ export function EditorSessionProvider({ children }: ProviderProps) {
         setThumb(undefined);
         setCanSave(false);
         snapshot.current = undefined;
-    }, []);
+    }, [refreshBase]);
 
     /** Dirty & validity tracking on every form change */
     useEffect(() => {
@@ -214,7 +223,10 @@ export function EditorSessionProvider({ children }: ProviderProps) {
     }, [values, identity]);
 
     /* SAVE procedure: */
-
+    // !!!!! Important!
+    // save to be refactored: It should detect the mode and act depends of it:
+    // if we create new object it should be added to catalog
+    // and correctly removed from hopper
     const save = useCallback(async () => {
         console.log('save function called!');
         if (!values || !canSave) {
@@ -241,7 +253,6 @@ export function EditorSessionProvider({ children }: ProviderProps) {
                 throw new Error(`Catalog  update unsuccessful! Code: ${HTTPCode}`);
 
             await refreshBase();
-
             exitSession();
         } catch (e) {
             console.error('Save failed', e);
@@ -255,8 +266,9 @@ export function EditorSessionProvider({ children }: ProviderProps) {
         if (saving) return;
         console.log('isDirty: ', isDirty);
         if (isDirty && !confirm('Discard unsaved changes?')) return;
+        refreshBase();
         exitSession();
-    }, [saving, isDirty, exitSession]);
+    }, [saving, isDirty, exitSession, refreshBase]);
 
     const value: EditorSession = useMemo(
         () => ({

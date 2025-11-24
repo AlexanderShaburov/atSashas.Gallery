@@ -8,8 +8,8 @@ import SingleItemEditor from '@/features/admin/ui/SingleItemEditor/SingleItemEdi
 import { useEffect, useState } from 'react';
 
 export default function CatalogEditorPage() {
-    const [hopperGrid, setHopperGrid] = useState<GridItem[] | undefined>(undefined);
-    const [catalogGrid, setCatalogGrid] = useState<GridItem[] | undefined>(undefined);
+    const [hopperGrid, setHopperGrid] = useState<GridItem[]>([]);
+    const [catalogGrid, setCatalogGrid] = useState<GridItem[]>([]);
     const [displayGrid, setDisplayGrid] = useState<GridItem[]>([]);
 
     const { identity, setIdentity, editorIsReady, catalog, hopper, loading, mode, setMode } = {
@@ -55,29 +55,29 @@ export default function CatalogEditorPage() {
     }
 
     useEffect(() => {
-        if (hopper && hopper.length) {
-            setHopperGrid(hopper);
-        }
+        setHopperGrid(hopper ?? []);
+
         if (catalog && catalog.items) {
             const c_grid = Object.values(catalog.items).map(artItemToGridItem);
-            setCatalogGrid(c_grid);
+            setCatalogGrid(c_grid ?? []);
         }
     }, [hopper, catalog]);
 
     // Form displayGrid:
 
     useEffect(() => {
+        console.log(`[displayGrid] setter called`);
         switch (mode) {
-            case 'create': {
-                if (hopperGrid) {
-                    setDisplayGrid(hopperGrid);
-                }
+            case 'create':
+                setDisplayGrid(hopperGrid ?? []);
+
+                console.log(`[displayGrid]: hopperGrid set to display`);
+                console.log('[displayGrid]:', hopperGrid);
+                console.log('[displayGrid]: while hopper is: ', hopper);
                 break;
-            }
+
             case 'edit': {
-                if (catalogGrid) {
-                    setDisplayGrid(catalogGrid);
-                }
+                setDisplayGrid(catalogGrid ?? []);
             }
         }
     }, [mode, hopperGrid, catalogGrid]);
@@ -88,13 +88,13 @@ export default function CatalogEditorPage() {
                 <header>
                     {/* SWITCH MODE BUTTONS BLOCK  */}
                     <button
-                        className={mode === 'create' ? 'create' : ''}
+                        className={mode === 'create' ? 'active' : ''}
                         onClick={() => setMode('create')}
                     >
                         Create
                     </button>
                     <button
-                        className={mode === 'edit' ? 'edit' : ''}
+                        className={mode === 'edit' ? 'active' : ''}
                         onClick={() => setMode('edit')}
                     >
                         Edit
