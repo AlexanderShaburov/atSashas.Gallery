@@ -2,9 +2,9 @@ import '@/pages/admin/catalogEditorPage/CatalogEditorPage.css';
 
 import { ArtItemData } from '@/entities/art';
 import { GridItem } from '@/entities/grid';
-import { useEditorSession } from '@/features/admin/editorSession/EditorSession.context';
-import HopperGrid from '@/features/admin/ui/HopperGrid/HopperGrid';
-import SingleItemEditor from '@/features/admin/ui/SingleItemEditor/SingleItemEditor';
+import { useEditorSession } from '@/features/admin/catalogEditor/editorSession/EditorSession.context';
+import SingleItemEditor from '@/features/admin/catalogEditor/ui/SingleItemEditor/SingleItemEditor';
+import HopperGrid from '@/features/admin/shared/ui/HopperGrid/HopperGrid';
 import { useEffect, useState } from 'react';
 
 export default function CatalogEditorPage() {
@@ -70,10 +70,6 @@ export default function CatalogEditorPage() {
         switch (mode) {
             case 'create':
                 setDisplayGrid(hopperGrid ?? []);
-
-                console.log(`[displayGrid]: hopperGrid set to display`);
-                console.log('[displayGrid]:', hopperGrid);
-                console.log('[displayGrid]: while hopper is: ', hopper);
                 break;
 
             case 'edit': {

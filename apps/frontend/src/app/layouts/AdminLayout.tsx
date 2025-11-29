@@ -1,5 +1,5 @@
 import '@/app/layouts/AdminLayout.css';
-import { AdminHeader } from '@/features/admin/ui/adminHeader/AdminHeader';
+import { AdminHeader } from '@/features/admin/shared/ui/adminHeader/AdminHeader';
 import { Outlet } from 'react-router-dom';
 
 export default function AdminLayout() {

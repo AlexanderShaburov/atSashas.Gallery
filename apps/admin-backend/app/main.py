@@ -2,8 +2,12 @@ from fastapi import FastAPI
 import logging
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
+from .routers.hopper import hopper, upload
+
+from .routers.art import catalog
 from .settings import settings
-from .routers import health, json_kv, upload, hopper, catalog
+from .routers import health, json_kv
 from .storage import BASE
 
 #   -----------------------

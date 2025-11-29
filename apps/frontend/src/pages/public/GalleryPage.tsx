@@ -1,7 +1,7 @@
+import { useGallery } from '@/features/public/hooks/useGallery';
+import { GalleryStream } from '@/features/public/ui/GalleryStream/GalleryStream';
 import { JSX } from 'react';
 import { useParams } from 'react-router-dom';
-import { useGallery } from '../../features/gallery/hooks/useGallery';
-import { GalleryStream } from '../../features/gallery/ui/GalleryStream/GalleryStream';
 
 export default function GalleryPage(): JSX.Element {
     const { slug = '' } = useParams();

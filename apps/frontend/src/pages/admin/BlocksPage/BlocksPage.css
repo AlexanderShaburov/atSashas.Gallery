@@ -1,0 +1,369 @@
+/* src/pages/admin/BlocksPage.css */
+
+.blocks-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+}
+
+.blocks-page__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.blocks-page__title {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.blocks-page__mode-switch {
+    display: inline-flex;
+    border-radius: 999px;
+    border: 1px solid #444;
+    overflow: hidden;
+}
+
+.blocks-page__mode-btn {
+    padding: 0.35rem 0.9rem;
+    font-size: 0.9rem;
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.blocks-page__mode-btn--active {
+    background: #2b2b2b;
+}
+
+/* Layout for body */
+
+.blocks-page__body {
+    display: grid;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.blocks-page__body--create {
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(260px, 320px);
+}
+
+.blocks-page__body--edit {
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+}
+
+.blocks-page__column {
+    background: #131313;
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid #222;
+}
+
+.blocks-page__column-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.blocks-page__hint {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+}
+
+/* Layout palette */
+
+.layout-palette {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.layout-icon {
+    width: 100%;
+    border-radius: 0.6rem;
+    border: 1px solid #333;
+    background: #181818;
+    padding: 0.4rem;
+    cursor: pointer;
+    text-align: left;
+}
+
+.layout-icon--active {
+    border-color: #888;
+    box-shadow: 0 0 0 1px #888;
+}
+
+.layout-icon__preview {
+    margin-bottom: 0.25rem;
+}
+
+.layout-icon__slots {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #0e0e0e;
+    border-radius: 0.4rem;
+    overflow: hidden;
+    display: grid;
+    gap: 2px;
+}
+
+/* Approximate geometry via modifiers */
+
+.layout-icon--single .layout-icon__slots {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+}
+
+.layout-icon--pairHorizontal .layout-icon__slots {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+}
+
+.layout-icon--pairVertical .layout-icon__slots {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+.layout-icon--triptychLeft .layout-icon__slots {
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+.layout-icon--triptychRight .layout-icon__slots {
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+.layout-icon--triptychHorizontal .layout-icon__slots {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+}
+
+.layout-icon__slots > * {
+    background: #262626;
+}
+
+/* Block preview */
+
+.block-preview {
+    border-radius: 0.75rem;
+    border: 1px dashed #333;
+    padding: 0.75rem;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.block-preview--empty {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.block-preview__frame {
+    width: 100%;
+    max-width: 480px;
+    aspect-ratio: 16 / 9;
+    background: #050505;
+    border-radius: 0.75rem;
+    border: 1px solid #333;
+}
+
+/* For now we simply reuse the same background; later you can draw real slots */
+
+.block-preview__slots {
+    width: 100%;
+    height: 100%;
+}
+
+/* Sections, meta, actions */
+
+.blocks-page__section {
+    margin-top: 0.75rem;
+}
+
+.blocks-page__section-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+}
+
+.blocks-page__meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.blocks-page__actions {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.blocks-page__primary-btn,
+.blocks-page__ghost-btn,
+.blocks-page__danger-btn {
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+}
+
+.blocks-page__primary-btn {
+    background: #f0f0f0;
+    color: #000;
+}
+
+.blocks-page__primary-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.blocks-page__ghost-btn {
+    border-color: #444;
+}
+
+.blocks-page__danger-btn {
+    border-color: #aa4444;
+    color: #ffaaaa;
+}
+
+/* Tags input */
+
+.tags-input__field {
+    width: 100%;
+    border-radius: 0.4rem;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid #333;
+    background: #111;
+    color: inherit;
+    font-size: 0.85rem;
+}
+
+.tags-input__hint {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+/* Catalog filters */
+
+.catalog-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.catalog-filters__search {
+    width: 100%;
+    border-radius: 0.4rem;
+    padding: 0.3rem 0.5rem;
+    border: 1px solid #333;
+    background: #111;
+    color: inherit;
+    font-size: 0.85rem;
+}
+
+.catalog-filters__row {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.catalog-filters__label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    font-size: 0.75rem;
+}
+
+.catalog-filters__date {
+    border-radius: 0.3rem;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid #333;
+    background: #111;
+    color: inherit;
+    font-size: 0.8rem;
+}
+
+.catalog-filters__reset {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    cursor: pointer;
+}
+
+.catalog-grid-placeholder {
+    border-radius: 0.6rem;
+    border: 1px dashed #333;
+    padding: 0.5rem;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.catalog-grid-placeholder__hint {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* Blocks list for Edit mode */
+
+.blocks-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.blocks-list__item {
+    border-radius: 0.5rem;
+    border: 1px solid #333;
+    padding: 0.35rem 0.5rem;
+    cursor: pointer;
+}
+
+.blocks-list__item--active {
+    border-color: #888;
+    background: #181818;
+}
+
+.blocks-list__title {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.blocks-list__meta {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.blocks-page__empty {
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+.blocks-page__json {
+    font-family:
+        ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+        monospace;
+    font-size: 0.75rem;
+    background: #050505;
+    border-radius: 0.6rem;
+    border: 1px solid #222;
+    padding: 0.5rem;
+    max-height: 320px;
+    overflow: auto;
+}

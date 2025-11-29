@@ -1,6 +1,6 @@
-import { CatalogProvider } from '@/features/gallery/api/CatalogProvider';
-import Footer from '@/shared/footer/BottomBar';
-import Header from '@/shared/header/Header';
+import { CatalogProvider } from '@/features/public/api/CatalogProvider';
+import Footer from '@/pages/public/footer/BottomBar';
+import Header from '@/pages/public/header/Header';
 import { Outlet } from 'react-router-dom';
 
 import '@/app/layouts/PublicLayout.css';

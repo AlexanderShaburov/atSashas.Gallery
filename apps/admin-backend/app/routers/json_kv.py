@@ -18,7 +18,7 @@ def get_json(key: str):
     logger.info(f"JSON endpoint reached with {key} key.")
     payload = read_json(key)
     if payload is None:
-        logger.info("JSON endpoint read nothing wit {key} key.")
+        logger.info("JSON endpoint read nothing with {key} key.")
         raise HTTPException(status_code=404, detail="Not found")
     return {"key": key, "data": payload}
 

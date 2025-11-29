@@ -1,1 +1,1 @@
-export type {StreamData} from './stream'
+export type { LegacyStreamData, LegacyStream, StreamData } from './stream';

@@ -11,13 +11,15 @@ BASE = Path(settings.storage_root)
 
 JSON_DIR = BASE / settings.json_data.replace("/", "")
 UPLOAD_DIR = BASE / settings.upload_media_dir.replace("/", "")
+BLOCKS_DIR = JSON_DIR / settings.blocks.replace("/", "")
 logger.info(f"BASE: {BASE}; UPLOAD_DIR {UPLOAD_DIR}")
 JSON_DIR.mkdir(parents=True, exist_ok=True)
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+BLOCKS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def json_path(key: str) -> Path:
-    safe = "".join(ch for ch in key if ch.isalnum() or ch in ("-", "_"))
+    safe = "".join(ch for ch in key if ch.isalnum() or ch in ("-", "_", "."))
     return JSON_DIR / f"{safe}.json"
 
 

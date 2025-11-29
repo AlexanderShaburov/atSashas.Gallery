@@ -1,6 +1,10 @@
 import { GridItem } from '@/entities/grid';
-import { deleteFromHopper, getHopperContent, uploadImage } from '@/features/admin/api';
-import HopperGrid from '@/features/admin/ui/HopperGrid/HopperGrid';
+import {
+    deleteFromHopper,
+    getHopperContent,
+    uploadImage,
+} from '@/features/admin/catalogEditor/api';
+import HopperGrid from '@/features/admin/shared/ui/HopperGrid/HopperGrid';
 import '@/pages/admin/Upload.css';
 import { useEffect, useState, type DragEvent } from 'react';
 
