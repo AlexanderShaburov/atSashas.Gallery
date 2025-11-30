@@ -1,6 +1,6 @@
 // src/features/admin/blocks/editorSession/blockEditorTypes.ts
 
-import type { Block } from '@/entities/block';
+import type { Block, BlocksCollectionJSON, CollectionsList } from '@/entities/block';
 import type { BlockFormValue } from '@/features/admin/blocks/editorSessionContext/blockFormValueTypes';
 
 export type BlockEditorMode = 'create' | 'edit';
@@ -9,19 +9,22 @@ export type BlockEditorTarget = { mode: 'create' } | { mode: 'edit'; block: Bloc
 
 export type BlockEditorSession = {
     /** Full list of blocks loaded from backend / JSON */
-    blocks: Block[] | undefined;
+    collectionsList: CollectionsList | undefined;
 
     /** Which block we are working with (create or edit existing) */
-    identity: BlockEditorTarget | undefined;
+    identity: Block | undefined;
 
     /** Current mode (mostly mirrors identity.mode, but convenient for UI) */
     mode: BlockEditorMode;
 
     /** Working form values for the block (formValue) */
     values: BlockFormValue | undefined;
+    collection?: BlocksCollectionJSON;
     setValues: React.Dispatch<React.SetStateAction<BlockFormValue | undefined>>;
-    setIdentity: (v: BlockEditorTarget | undefined) => void;
+    setIdentity: (v: Block | undefined) => void;
     setMode: (m: BlockEditorMode) => void;
+    setCollection: (c: BlocksCollectionJSON | undefined) => void;
+    newCollection: (n: string) => void;
 
     /** Editor lifecycle */
     editorIsReady: boolean;

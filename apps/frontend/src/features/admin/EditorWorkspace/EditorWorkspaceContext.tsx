@@ -1,22 +1,28 @@
 // EditorWorkspaceContext.tsx
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 
+export interface BlockRef {
+    collectionId: string;
+    blockId: string;
+}
+
 // Narrow global editor session state
 export interface EditorWorkspaceState {
-    currentStreamId?: string | undefined;
-    currentBlocksCollectionId?: string | undefined;
-    currentBlockId?: string | undefined;
-    currentArtItemId?: string | undefined;
+    currentStreamId?: string;
+    currentBlocksCollectionId?: string; // "which collection is open"
+    currentBlockRef?: BlockRef; // "which block in which collection is selected"
+    currentArtItemId?: string;
 }
 
 // Context value: state + simple setters
 export interface EditorWorkspaceContextValue extends EditorWorkspaceState {
     setStream(id?: string): void;
     setBlocksCollection(id?: string): void;
-    setBlock(id?: string): void;
+    setBlock(ref?: BlockRef): void;
     setArtItem(id?: string): void;
     reset(): void;
 }
+
 const EditorWorkspaceContext = createContext<EditorWorkspaceContextValue | undefined>(undefined);
 
 interface EditorWorkspaceProviderProps {
@@ -27,7 +33,7 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
     const [state, setState] = useState<EditorWorkspaceState>({
         currentStreamId: undefined,
         currentBlocksCollectionId: undefined,
-        currentBlockId: undefined,
+        currentBlockRef: undefined,
         currentArtItemId: undefined,
     });
 
@@ -35,34 +41,42 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
         () => ({
             ...state,
 
-            // Set current stream and optionally reset dependent fields
+            // Set current stream (optionally you may want to reset children)
             setStream(id) {
                 setState((prev) => ({
                     ...prev,
                     currentStreamId: id,
-                    // You can also reset nested context when stream changes:
+                    // Optionally reset lower-level context:
                     // currentBlocksCollectionId: undefined,
-                    // currentBlockId: undefined,
+                    // currentBlockRef: undefined,
                     // currentArtItemId: undefined,
                 }));
             },
 
+            // Open a blocks collection, clear selected block because it may be invalid now
             setBlocksCollection(id) {
                 setState((prev) => ({
                     ...prev,
                     currentBlocksCollectionId: id,
-                    // Optionally reset lower levels:
-                    // currentBlockId: undefined,
-                    // currentArtItemId: undefined,
+                    currentBlockRef: undefined, // block selection does not make sense if collection changed
                 }));
             },
 
-            setBlock(id) {
+            // Set current block with an explicit collection reference
+            setBlock(ref) {
+                if (!ref) {
+                    // Clear selection
+                    setState((prev) => ({
+                        ...prev,
+                        currentBlockRef: undefined,
+                    }));
+                    return;
+                }
+
                 setState((prev) => ({
                     ...prev,
-                    currentBlockId: id,
-                    // Optionally reset art item:
-                    // currentArtItemId: undefined,
+                    currentBlocksCollectionId: ref.collectionId, // keep workspace in sync
+                    currentBlockRef: ref,
                 }));
             },
 
@@ -77,7 +91,7 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
                 setState({
                     currentStreamId: undefined,
                     currentBlocksCollectionId: undefined,
-                    currentBlockId: undefined,
+                    currentBlockRef: undefined,
                     currentArtItemId: undefined,
                 });
             },
@@ -94,7 +108,6 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
 export function useEditorWorkspace(): EditorWorkspaceContextValue {
     const ctx = useContext(EditorWorkspaceContext);
     if (!ctx) {
-        // This helps to catch usage outside of provider at development time
         throw new Error('useEditorWorkspace must be used within EditorWorkspaceProvider');
     }
     return ctx;

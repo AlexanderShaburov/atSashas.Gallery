@@ -1,5 +1,9 @@
 import { Localized } from '@/entities/common';
 
+//*************** Legacy ***************/
+
+/******************* End of Legacy ********************/
+
 export type BlockEditorMode = 'create' | 'edit';
 
 export type BlockKind = 'gallery' | 'text' | 'cta';

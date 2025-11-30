@@ -1,5 +1,7 @@
-import { Block, CtaTarget, GalleryBlockItem, GalleryLayout } from '@/entities/block/Block';
+import type { BlockKind } from '@/entities/block';
+import { Block, CtaTarget, GalleryBlockItem, GalleryLayout } from '@/entities/block';
 import { Localized } from '@/entities/common';
+import { generateArtId } from '@/shared/lib/id/generateArtId';
 
 type GalleryBlockFormValue = {
     id: string;
@@ -15,7 +17,7 @@ type TextBlockFormValue = {
     blockKind: 'text';
     tags: string[];
     dateCreated: string;
-    title: Localized;
+    title?: Localized;
     body: Localized;
     variant?: 'full' | 'narrow' | 'quote' | undefined;
 };
@@ -48,7 +50,7 @@ export function formToBlock(form: BlockFormValue): Block {
             return {
                 id: form.id,
                 blockKind: 'text',
-                tags: form.tags,
+                tags: form.tags ? form.tags : [],
                 dateCreated: form.dateCreated,
                 title: form.title,
                 body: form.body,
@@ -98,6 +100,47 @@ export function blockToForm(block: Block): BlockFormValue {
                 body: block.body ? block.body : { en: '' },
                 buttonLabel: block.buttonLabel ? block.buttonLabel : { en: '' },
                 target: block.target ? block.target : { type: 'stream', slug: '' },
+            };
+    }
+}
+
+function emptyLocalized(): Localized {
+    return { en: '' };
+}
+
+export function createInitialFormForKind(kind: BlockKind, prev?: BlockFormValue): BlockFormValue {
+    const base = {
+        id: prev?.id ?? generateArtId('block'),
+        tags: prev?.tags ?? [],
+        dateCreated: prev?.dateCreated ?? new Date().toISOString(),
+    };
+
+    switch (kind) {
+        case 'gallery':
+            return {
+                ...base,
+                blockKind: 'gallery',
+                layout: prev?.blockKind === 'gallery' ? prev.layout : 'single', // или твой дефолт
+                items: prev?.blockKind === 'gallery' ? prev.items : [],
+            };
+
+        case 'text':
+            return {
+                ...base,
+                blockKind: 'text',
+                title: prev?.blockKind === 'text' ? prev.title : emptyLocalized(),
+                body: prev?.blockKind === 'text' ? prev.body : emptyLocalized(),
+                variant: prev?.blockKind === 'text' ? prev.variant : 'full',
+            };
+
+        case 'cta':
+            return {
+                ...base,
+                blockKind: 'cta',
+                title: prev?.blockKind === 'cta' ? prev.title : emptyLocalized(),
+                body: prev?.blockKind === 'cta' ? prev.body : emptyLocalized(),
+                buttonLabel: prev?.blockKind === 'cta' ? prev.buttonLabel : emptyLocalized(),
+                target: prev?.blockKind === 'cta' ? prev.target : { type: 'stream', slug: '' },
             };
     }
 }

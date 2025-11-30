@@ -1,9 +1,19 @@
 // src/features/admin/blocks/editorSession/BlockEditorSession.context.tsx
 
-import { Block, BlocksCollectionJSON, CollectionsList } from '@/entities/block';
+import type { Block, BlocksCollectionJSON, CollectionsList } from '@/entities/block';
 import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
-import { getCollection, getCollectionsList } from '@/features/admin/blocks/api/blocksApi';
-import { blockToForm } from '@/features/admin/blocks/editorSessionContext/blockFormValueTypes';
+import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import {
+    createCollection,
+    getCollection,
+    getCollectionsList,
+} from '@/features/admin/blocks/api/blocksApi';
+import {
+    blockToForm,
+    type BlockFormValue,
+} from '@/features/admin/blocks/editorSessionContext/blockFormValueTypes';
+import { validateBlockForm } from '@/features/admin/blocks/utils';
+import { deepEqual } from '@/features/admin/catalogEditor/utils/checkers';
 import {
     createContext,
     useCallback,
@@ -14,11 +24,11 @@ import {
     useState,
     type ReactNode,
 } from 'react';
-import type { BlockEditorMode, BlockEditorSession, BlockFormValue } from './blockEditorTypes';
-// TODO: import { getBlocks, updateBlocksCatalog } from '../api/blocksApi';
+import type { BlockEditorMode, BlockEditorSession } from './blockEditorTypes';
 
 const BlockEditorCtx = createContext<BlockEditorSession | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useBlockEditorSession = () => {
     const v = useContext(BlockEditorCtx);
     if (!v) {
@@ -31,7 +41,7 @@ type ProviderProps = { children: ReactNode };
 
 export function BlockEditorSessionProvider({ children }: ProviderProps) {
     // Global context
-    const global: EditorWorkspaceContextValue = useBlockEditorSession();
+    const gCtxt: EditorWorkspaceContextValue = useEditorWorkspace();
 
     // Core state
     // List of available collections:
@@ -55,35 +65,57 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     const snapshot = useRef<BlockFormValue | undefined>(undefined);
     const valuesRef = useRef<BlockFormValue | undefined>(values);
 
+    // Block setter helper -> set both workspace and editor contexts
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const setBlockSelected = (id: string | undefined): boolean => {
+        // Find block with id in current collection
+        if (!id) {
+            gCtxt.setBlock(undefined);
+            setIdentity(undefined);
+            return true;
+        } else {
+            if (collection) {
+                const bl = collection?.blocks.find((block) => block.id === id);
+                if (bl) {
+                    gCtxt.setBlock({
+                        collectionId: collection.collectionId,
+                        blockId: id,
+                    });
+                    setIdentity(bl);
+                    return true;
+                } else {
+                    console.error(
+                        `Block with id: ${gCtxt.currentBlockRef} not found in collection ${collection?.collectionName}`,
+                    );
+                    return false;
+                }
+            }
+            console.error(`Collection not set for block with id: ${id}`);
+            return false;
+        }
+    };
+
+    // ***** Collections preload *****
     const refreshBlocks = useCallback(async () => {
         try {
             setLoading(true);
-            // Download collections list
-            const l = await getCollectionsList();
-            setCollectionsList(l);
 
-            // Check if user has the collection selected
-            if (global.currentBlocksCollectionId) {
-                const cl = await getCollection(global.currentBlocksCollectionId);
+            // Download and set collections list
+            setCollectionsList(await getCollectionsList());
+
+            // Check if workspace has the collection selected
+            if (gCtxt.currentBlocksCollectionId) {
+                const cl = await getCollection(gCtxt.currentBlocksCollectionId);
                 setCollection(cl);
-            }
-            // Check if we got and collection and block id selected already
-            if (global.currentBlocksCollectionId && global.currentBlockId) {
-                const bl = collection?.blocks.find((b) => b.id === global.currentBlockId);
-                if (bl) {
-                    setIdentity(bl);
-                    setValues(blockToForm(bl));
-                    setMode('edit');
-                }
-            } else {
-                // If global stake has no information concerning that session set session as new:
             }
         } catch (e) {
             console.error('Failed to initiate block editor session', e);
+            setCollectionsList([]);
         } finally {
             setLoading(false);
         }
-    }, [collection, global]);
+        return collectionsList;
+    }, [gCtxt]);
 
     // initial load
     useEffect(() => {
@@ -102,44 +134,70 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         setCanSave(!saving && isDirty && isValid);
     }, [saving, isDirty, isValid]);
 
-    // identity → init session
-    useEffect(() => {
-        if (!identity) {
-            setValues(undefined);
-            setEditorIsReady(false);
-            snapshot.current = undefined;
-            setIsDirty(false);
-            setIsValid(false);
-            return;
-        }
-
-        let initial: BlockFormValue;
-
-        if (identity.mode === 'create') {
-            initial = {
-                mode: 'create', // if you add mode inside formValue
-                kind: 'gallery', // default kind, adjust later
-                tags: [],
-            } as BlockFormValue;
-        } else {
-            const b = identity.block;
-            initial = {
-                id: b.id,
-                kind: b.kind,
-                layout: b.layout,
-                tags: b.tags,
-                dateCreated: b.dateCreated,
-            };
-        }
-
-        valuesRef.current = initial;
-        snapshot.current = initial;
-        setValues(initial);
+    // Reset session helper
+    const resetSession = () => {
+        setIdentity(undefined);
+        setValues(undefined);
+        setEditorIsReady(false);
+        snapshot.current = undefined;
         setIsDirty(false);
-        setIsValid(true); // or run validation here
-        setEditorIsReady(true);
-        setMode(identity.mode);
-    }, [identity]);
+        setIsValid(false);
+        setMode('create');
+    };
+
+    // ------------------------------------
+    // *********** INIT SESSION ***********
+    // ------------------------------------
+
+    useEffect(() => {
+        (async () => {
+            try {
+                setLoading(true);
+                // Check if workspace has collection selected
+                if (gCtxt.currentBlocksCollectionId) {
+                    setCollection(await getCollection(gCtxt.currentBlocksCollectionId));
+                    // If collection selected, check block ref:
+                    if (gCtxt.currentBlockRef) {
+                        // Check if BlocRef collection id the same as collection set:
+                        if (gCtxt.currentBlockRef.collectionId != collection?.collectionId) {
+                            console.error(`Workspace context error: collection and block mismatch`);
+                            console.error(
+                                `Block's collection id: ${gCtxt.currentBlockRef.collectionId}`,
+                            );
+                            console.error(
+                                ` while set workspace collection id: ${gCtxt.currentBlocksCollectionId}`,
+                            );
+                            setCollection(undefined);
+                            resetSession();
+                        } else {
+                            // If everything ok, set block and identity:
+                            const bl = collection.blocks.find(
+                                (block) => block.id === gCtxt.currentBlockRef?.blockId,
+                            );
+                            if (bl) {
+                                setIdentity(bl);
+                                setValues(blockToForm(bl));
+                                setMode('edit');
+                            } else {
+                                console.error(
+                                    `Can't find block ${gCtxt.currentBlockRef.blockId} in corresponding collection`,
+                                );
+                                resetSession();
+                            }
+                        }
+                    }
+                } else {
+                    setCollection(undefined);
+                    resetSession();
+                    setMode('create');
+                }
+            } catch (e) {
+                console.error(`Loading error ${e}`);
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [collection, mode, gCtxt]);
 
     // dirty + validity tracking
     useEffect(() => {
@@ -149,11 +207,10 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             return;
         }
 
-        // TODO: deepEqual / validateBlockForm
-        const dirty = JSON.stringify(valuesRef.current) !== JSON.stringify(snapshot.current);
+        const dirty = !deepEqual(snapshot.current, valuesRef.current);
         setIsDirty(dirty);
 
-        const valid = !!valuesRef.current.kind && !!valuesRef.current.layout;
+        const valid = validateBlockForm(valuesRef.current);
         setIsValid(valid);
     }, [values, identity]);
 
@@ -163,6 +220,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         try {
             // TODO: sanitize + build payload + update backend
             // await updateBlocksCatalog(...);
+
             await refreshBlocks();
             // reset baseline
             snapshot.current = values;
@@ -180,16 +238,37 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         refreshBlocks();
         setIdentity(undefined);
     }, [saving, isDirty, refreshBlocks]);
+    // Add new collection
+    const newCollection = useCallback(
+        async (name: string) => {
+            await createCollection(name);
+
+            const list = await refreshBlocks();
+
+            const ncListItem = list?.find((coll) => coll.name === name);
+
+            if (ncListItem?.id) {
+                const nc = await getCollection(ncListItem.id);
+                setCollection(nc);
+            } else {
+                console.error(`Failed to add new collection with name: ${name}`);
+            }
+        },
+        [refreshBlocks, setCollection],
+    );
 
     const value: BlockEditorSession = useMemo(
         () => ({
-            blocks,
+            collectionsList,
             identity,
             mode,
             values,
+            collection,
             setValues,
             setIdentity,
             setMode,
+            setCollection,
+            newCollection,
             editorIsReady,
             isDirty,
             isValid,
@@ -200,16 +279,19 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             exit,
         }),
         [
-            blocks,
+            collectionsList,
             identity,
             mode,
             values,
+            collection,
             editorIsReady,
             isDirty,
             isValid,
             canSave,
             loading,
             saving,
+            setCollection,
+            newCollection,
             save,
             exit,
         ],

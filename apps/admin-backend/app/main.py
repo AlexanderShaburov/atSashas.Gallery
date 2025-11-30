@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from .routers.hopper import hopper, upload
 
 from .routers.art import catalog
+from app.routers.block import blocks
 from .settings import settings
 from .routers import health, json_kv
 from .storage import BASE
@@ -62,3 +63,4 @@ app.include_router(json_kv.router)
 app.include_router(upload.router)
 app.include_router(hopper.router)
 app.include_router(catalog.router)
+app.include_router(blocks.router)

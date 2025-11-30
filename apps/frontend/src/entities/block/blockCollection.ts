@@ -10,6 +10,7 @@ export interface BlocksCollectionJSON {
 }
 
 export interface CollectionsListItem {
+    id: string;
     url: string;
     name: string;
     length: number;

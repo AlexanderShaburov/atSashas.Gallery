@@ -1,0 +1,104 @@
+/* =========================
+   CollectionSelector
+   ========================= */
+
+.collection-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.collection-selector__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.collection-selector__select {
+    border-radius: 0.4rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.85rem;
+}
+
+/* square + button */
+.collection-selector__add-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+}
+
+.collection-selector__add-btn:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: var(--on-accent, var(--card-bg));
+}
+
+/* create form */
+
+.collection-selector__form {
+    margin-top: 0.4rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.collection-selector__input {
+    border-radius: 0.4rem;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.85rem;
+}
+
+.collection-selector__form-actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.collection-selector__create-btn {
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--card-bg);
+    border: 1px solid var(--accent);
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.collection-selector__create-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.collection-selector__cancel-btn {
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.collection-selector__cancel-btn:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: var(--card-bg);
+}

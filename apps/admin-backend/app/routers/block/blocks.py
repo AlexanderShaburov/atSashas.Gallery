@@ -8,11 +8,12 @@ from app.models.block_collections import BlocksCollectionJSON
 
 
 logger = getLogger(__name__)
-router = APIRouter(prefix="/blocks", tags=["blocks"])
+router = APIRouter(prefix="/block", tags=["block"])
 
 
 @router.get("/content")
 def blocks_content():
+    logger.info("[Block/Content]: block/content called")
     exts = ["json"]
     logger.info("Blocks content called.")
     root = BLOCKS_DIR.resolve()
@@ -34,6 +35,7 @@ def blocks_content():
 
         response.append(
             {
+                "id": next_coll.collectionId,
                 "url": p,
                 "name": next_coll.collectionName,
                 "length": len(next_coll.blocks),

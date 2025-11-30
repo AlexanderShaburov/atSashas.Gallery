@@ -1,10 +1,25 @@
 // pages/admin/BlocksPage.tsx
-import { useState } from 'react';
-import BlockEditor from '@/features/admin/blocks/BlockEditor/BlockEditor';
+import { BlockEditor } from '@/features/admin/blocks/BlockEditor/BlockEditor';
+import type { BlockEditorSession } from '@/features/admin/blocks/editorSessionContext';
+import { useBlockEditorSession } from '@/features/admin/blocks/editorSessionContext/BlockEditorSession.context';
+import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+
+import { useEffect } from 'react';
 import './BlocksPage.css';
 
 export default function BlocksPage() {
-    const [mode, setMode] = useState<'edit' | 'create'>('create');
+    const gCtxt: EditorWorkspaceContextValue = useEditorWorkspace();
+    const eCtxt: BlockEditorSession = useBlockEditorSession();
+
+    useEffect(() => {
+        if (gCtxt.currentBlockRef) {
+            eCtxt.setMode('edit');
+        } else {
+            eCtxt.setMode('create');
+        }
+    }, [eCtxt, gCtxt.currentBlockRef]);
+
     return (
         <div className="blocks-page">
             <header className="block-page__header">
@@ -15,9 +30,9 @@ export default function BlocksPage() {
                         type="button"
                         className={
                             'blocks-page__mode-btn' +
-                            (mode === 'create' ? 'blocks-page__mode-btn--active' : '')
+                            (eCtxt.mode === 'create' ? ' blocks-page__mode-btn--active' : '')
                         }
-                        onClick={() => setMode('create')}
+                        onClick={() => eCtxt.setMode('create')}
                     >
                         Create
                     </button>
@@ -25,9 +40,9 @@ export default function BlocksPage() {
                         type="button"
                         className={
                             'blocks-page__mode-btn' +
-                            (mode === 'edit' ? 'blocks-page__mode-btn--active' : '')
+                            (eCtxt.mode === 'edit' ? ' blocks-page__mode-btn--active' : '')
                         }
-                        onClick={() => setMode('edit')}
+                        onClick={() => eCtxt.setMode('edit')}
                     >
                         Edit
                     </button>

@@ -1,3 +1,5 @@
+type idKind = 'art' | 'block' | 'collection' | 'stream';
+
 const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
 function randomBase32(n: number): string {
@@ -21,6 +23,6 @@ function yyyymmdd(d = new Date()): string {
     return `${y}${m}${day}`;
 }
 
-export function generateArtId(now = new Date()): string {
-    return `art-${yyyymmdd(now)}-${randomBase32(6).toLowerCase()}`;
+export function generateArtId(k: idKind, now = new Date()): string {
+    return `${k}-${yyyymmdd(now)}-${randomBase32(6).toLowerCase()}`;
 }
