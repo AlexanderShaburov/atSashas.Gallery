@@ -19,7 +19,7 @@ RUN poetry config virtualenvs.create false \
 COPY app /app/app
 COPY .env /app/.env
 
-RUN mkdir -p /app/storage/json app/storage/uploads
+RUN mkdir -p /app/media/json app/media/uploads
 
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host=0.0.0.0", "--port=8000"]

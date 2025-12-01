@@ -167,7 +167,7 @@ class BlocksCollectionJSON(BaseModel):
             collectionId=generate_block_collection_id(),
             collectionName="",
             version=0,
-            updatedAt=str(datetime.now(timezone.utc)),
+            updatedAt=datetime.now(timezone.utc).date().isoformat(),
             blocks=[],
         )
 
@@ -211,3 +211,8 @@ class BlocksCollectionJSON(BaseModel):
             return False, e
         except json.JSONDecodeError as e:
             return False, e
+
+
+class CollectionSeed(BaseModel):
+    id: str
+    name: str

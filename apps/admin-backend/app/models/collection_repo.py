@@ -1,15 +1,15 @@
 import asyncio
-from pathlib import Path
 import json
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
 from app.models.block_collections import BlocksCollectionJSON
+from app.storage import BLOCKS_DIR
 
 
 class BlockCollectionRepo:
-    def __init__(self, collection: Path):
-        self._path = collection
+    def __init__(self, collection: BlocksCollectionJSON):
+        self._path = BLOCKS_DIR / f"{collection.collectionId}.json"
         self._lock = asyncio.Lock()
 
     def _load(self) -> BlocksCollectionJSON:
@@ -21,7 +21,7 @@ class BlockCollectionRepo:
         data = BlocksCollectionJSON.validate_data(collection_data)
         with self._path.open("w", encoding="utf-8") as f:
             json.dump(
-                data,
+                data.model_dump(),
                 f,
                 ensure_ascii=False,
                 indent=2,

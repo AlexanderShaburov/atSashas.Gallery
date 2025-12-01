@@ -1,6 +1,6 @@
 import { CtaTarget } from '@/entities/block';
 import { Localized } from '@/entities/common';
-import { BlockFormValue } from '@/features/admin/blocks/editorSessionContext';
+import { BlockFormValue } from '@/features/admin/blocks/editorSession';
 
 export function validateBlockForm(form: BlockFormValue): boolean {
     if (!form) return false;

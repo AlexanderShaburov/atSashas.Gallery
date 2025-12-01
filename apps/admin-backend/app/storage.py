@@ -19,7 +19,7 @@ BLOCKS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def json_path(key: str) -> Path:
-    safe = "".join(ch for ch in key if ch.isalnum() or ch in ("-", "_", "."))
+    safe = "".join(ch for ch in key if ch.isalnum() or ch in ("-", "_"))
     return JSON_DIR / f"{safe}.json"
 
 

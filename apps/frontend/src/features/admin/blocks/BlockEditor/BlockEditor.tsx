@@ -3,14 +3,14 @@
 import { useMemo } from 'react';
 
 import type { BlockKind } from '@/entities/block';
-import type { BlockEditorSession } from '@/features/admin/blocks/editorSessionContext';
-import { useBlockEditorSession } from '@/features/admin/blocks/editorSessionContext/BlockEditorSession.context';
-import { createInitialFormForKind } from '@/features/admin/blocks/editorSessionContext/blockFormValueTypes';
+import type { BlockEditorSession } from '@/features/admin/blocks/editorSession';
+import { createInitialFormForKind } from '@/features/admin/blocks/editorSession/blockFormValueTypes';
+import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
+import { BlockKindSelector } from '@/features/admin/blocks/ui/BlockEditor/BlockKindSelector';
+import { CollectionSelector } from '@/features/admin/blocks/ui/CollectionSelector/CollectionSelector';
+import { SingleBlockEditor } from '@/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor';
+import { BlockModeTag } from '@/features/admin/blocks/ui/TagsPanel/BlockModeTag';
 import '@/pages/admin/BlocksPage/BlocksPage.css';
-import { BlockKindSelector } from './BlockKindSelector';
-import { BlockModeTag } from './BlockModeTag';
-import { CollectionSelector } from './CollectionSelector';
-import { SingleBlockEditor } from './SingleBlockEditor';
 export function BlockEditor() {
     const session: BlockEditorSession = useBlockEditorSession();
 
@@ -95,7 +95,6 @@ export function BlockEditor() {
                     <>
                         {mode === 'create' && (
                             <section className="block-editor__section block-editor__section--kind">
-                                <h2 className="block-editor__section-title">Block kind</h2>
                                 <BlockKindSelector
                                     value={currentKind}
                                     onChange={(nextKind) =>

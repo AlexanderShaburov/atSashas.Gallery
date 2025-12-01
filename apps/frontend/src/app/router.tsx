@@ -1,6 +1,6 @@
 import AdminLayout from '@/app/layouts/AdminLayout';
 import PublicLayout from '@/app/layouts/PublicLayout';
-import { BlockEditorSessionProvider } from '@/features/admin/blocks/editorSessionContext/BlockEditorSession.context';
+import { BlockEditorSessionProvider } from '@/features/admin/blocks/editorSession/BlockEditorSession.context';
 import { EditorSessionProvider } from '@/features/admin/catalogEditor/editorSession/EditorSession.context';
 import { EditorWorkspaceProvider } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { lazy } from 'react';

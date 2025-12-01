@@ -1,4 +1,4 @@
-import { ISODate, Localized, Money } from '../common';
+import { ISODate, Localized, Money } from '@/entities/common';
 
 export interface EventMeta {
     id: string;

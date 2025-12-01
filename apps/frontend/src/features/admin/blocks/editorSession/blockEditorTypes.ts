@@ -1,7 +1,7 @@
 // src/features/admin/blocks/editorSession/blockEditorTypes.ts
 
 import type { Block, BlocksCollectionJSON, CollectionsList } from '@/entities/block';
-import type { BlockFormValue } from '@/features/admin/blocks/editorSessionContext/blockFormValueTypes';
+import type { BlockFormValue } from '@/features/admin/blocks/editorSession/blockFormValueTypes';
 
 export type BlockEditorMode = 'create' | 'edit';
 
@@ -24,7 +24,7 @@ export type BlockEditorSession = {
     setIdentity: (v: Block | undefined) => void;
     setMode: (m: BlockEditorMode) => void;
     setCollection: (c: BlocksCollectionJSON | undefined) => void;
-    newCollection: (n: string) => void;
+    newCollection: (n: string) => Promise<void>;
 
     /** Editor lifecycle */
     editorIsReady: boolean;
