@@ -15,6 +15,10 @@ import type { ArtItemForm } from '@/features/admin/catalogEditor/editorSession/e
 import { deepEqual } from '@/features/admin/catalogEditor/utils/checkers';
 import { isMinimalValid, sanitizeForm } from '@/features/admin/catalogEditor/utils/Validators';
 import {
+    useEditorWorkspace,
+    type EditorWorkspaceContextValue,
+} from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import {
     createContext,
     useCallback,
     useContext,
@@ -66,6 +70,8 @@ export const useEditorSession = () => {
 type ProviderProps = { children: React.ReactNode };
 
 export function EditorSessionProvider({ children }: ProviderProps) {
+    const gCtx: EditorWorkspaceContextValue = useEditorWorkspace();
+
     // Core state
     const [identity, setIdentity] = useState<EditorTarget | undefined>(undefined); // Item selected to be edited
     const [values, setValues] = useState<ArtItemForm | undefined>(undefined);
@@ -103,6 +109,16 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             setLoading(false);
         }
     }, []);
+
+    // Check catalog changes and set it to gCtx
+
+    useEffect(() => {
+        if (catalog) {
+            gCtx.setArtCatalog(catalog);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [catalog]);
+
     // Load current catalog and hopper version once at provider creation:
     useEffect(() => {
         (async () => {

@@ -37,7 +37,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     // Editor form values:
     const [values, setValues] = useState<BlockFormValue | undefined>(undefined);
     const [mode, setMode] = useState<BlockEditorMode>('create');
-
     // UI / derived state
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -143,6 +142,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             try {
                 setLoading(true);
                 console.log('[INIT SESSION]: started');
+
                 // Check if workspace has collection selected
                 const collectionId = gCtxt.currentBlocksCollectionId;
                 const blockRef = gCtxt.currentBlockRef;

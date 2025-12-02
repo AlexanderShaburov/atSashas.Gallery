@@ -1,15 +1,15 @@
 import type { Block, ImageBlock, TextBlock } from '@/entities/block';
-import ImageComponent from '@/features/gallery/ui/Image/ImageComponent';
-import TextComponent from '@/features/gallery/ui/Text/TextComponent';
+import ImageComponent from '@/features/public/ui/Image/ImageComponent';
+import TextComponent from '@/features/public/ui/Text/TextComponent';
 import './gallery.css';
 
 type GalleryBlockProps = { block: Block };
 
 export default function GalleryBlock({ block }: GalleryBlockProps) {
-    if (block.type === 'image') {
+    if (block.blockKind === 'gallery') {
         const imageBlock = block as ImageBlock;
         return <ImageComponent block={imageBlock} />;
-    } else if (block.type === 'text') {
+    } else if (block.blockKind === 'text') {
         const textBlock = block as TextBlock;
         return <TextComponent block={textBlock} />;
     } else {

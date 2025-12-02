@@ -1,14 +1,15 @@
 import type { BlockKind } from '@/entities/block';
 import { Block, CtaTarget, GalleryBlockItem, GalleryLayout } from '@/entities/block';
-import { Localized } from '@/entities/common';
+import { ISODate, Localized } from '@/entities/common';
 import { generateArtId } from '@/shared/lib/id/generateArtId';
 
 type GalleryBlockFormValue = {
     id: string;
     blockKind: 'gallery';
     layout: GalleryLayout;
+    caption: Localized;
     tags: string[];
-    dateCreated: string;
+    dateCreated: ISODate;
     items: GalleryBlockItem[];
 };
 
@@ -16,7 +17,7 @@ type TextBlockFormValue = {
     id: string;
     blockKind: 'text';
     tags: string[];
-    dateCreated: string;
+    dateCreated: ISODate;
     title?: Localized;
     body: Localized;
     variant?: 'full' | 'narrow' | 'quote' | undefined;
@@ -26,7 +27,7 @@ type CtaBlockFormValue = {
     id: string;
     blockKind: 'cta';
     tags: string[];
-    dateCreated: string;
+    dateCreated: ISODate;
     title: Localized;
     body: Localized;
     buttonLabel: Localized;
@@ -79,6 +80,7 @@ export function blockToForm(block: Block): BlockFormValue {
                 tags: block.tags ? block.tags : [],
                 dateCreated: block.dateCreated,
                 items: block.items,
+                caption: block.caption ? block.caption : { en: '' },
             };
         case 'text':
             return {
@@ -112,7 +114,7 @@ export function createInitialFormForKind(kind: BlockKind, prev?: BlockFormValue)
     const base = {
         id: prev?.id ?? generateArtId('block'),
         tags: prev?.tags ?? [],
-        dateCreated: prev?.dateCreated ?? new Date().toISOString(),
+        dateCreated: prev?.dateCreated ?? (new Date().toISOString() as ISODate),
     };
 
     switch (kind) {
@@ -122,6 +124,7 @@ export function createInitialFormForKind(kind: BlockKind, prev?: BlockFormValue)
                 blockKind: 'gallery',
                 layout: prev?.blockKind === 'gallery' ? prev.layout : 'single', // или твой дефолт
                 items: prev?.blockKind === 'gallery' ? prev.items : [],
+                caption: prev?.blockKind === 'gallery' ? prev.caption : { en: '' },
             };
 
         case 'text':

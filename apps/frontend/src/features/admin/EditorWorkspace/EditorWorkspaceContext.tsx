@@ -1,6 +1,7 @@
 // EditorWorkspaceContext.tsx
-import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
-
+import { ArtCatalog } from '@/entities/catalog';
+import { getCatalog } from '@/features/admin/catalogEditor/api';
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 export interface BlockRef {
     collectionId: string;
     blockId: string;
@@ -12,6 +13,7 @@ export interface EditorWorkspaceState {
     currentBlocksCollectionId?: string; // "which collection is open"
     currentBlockRef?: BlockRef; // "which block in which collection is selected"
     currentArtItemId?: string;
+    currentArtCatalog?: ArtCatalog;
 }
 
 // Context value: state + simple setters
@@ -20,6 +22,7 @@ export interface EditorWorkspaceContextValue extends EditorWorkspaceState {
     setBlocksCollection(id?: string): void;
     setBlock(ref?: BlockRef): void;
     setArtItem(id?: string): void;
+    setArtCatalog(catalog: ArtCatalog): void;
     reset(): void;
 }
 
@@ -35,8 +38,10 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
         currentBlocksCollectionId: undefined,
         currentBlockRef: undefined,
         currentArtItemId: undefined,
+        currentArtCatalog: undefined,
     });
 
+    useEffect(() => {});
     const value = useMemo<EditorWorkspaceContextValue>(
         () => ({
             ...state,
@@ -87,23 +92,53 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
                 }));
             },
 
+            setArtCatalog(catalog: ArtCatalog) {
+                setState((prev) => ({
+                    ...prev,
+                    currentArtCatalog: catalog,
+                }));
+            },
+
             reset() {
                 setState({
                     currentStreamId: undefined,
                     currentBlocksCollectionId: undefined,
                     currentBlockRef: undefined,
                     currentArtItemId: undefined,
+                    currentArtCatalog: undefined,
                 });
             },
         }),
         [state],
     );
 
+    // Download catalog as context created:
+    useEffect(() => {
+        let cancelled = false;
+
+        const loadCatalog = async () => {
+            try {
+                const catalog = await getCatalog();
+                if (cancelled) return;
+
+                setState((prev) => ({
+                    ...prev,
+                    currentArtCatalog: catalog,
+                }));
+            } catch (error) {
+                console.error('Failed to load catalog in EditorWorkspaceProvider', error);
+            }
+        };
+        loadCatalog();
+        return () => {
+            cancelled = true;
+        };
+    });
+
     return (
         <EditorWorkspaceContext.Provider value={value}>{children}</EditorWorkspaceContext.Provider>
     );
 }
-
 // eslint-disable-next-line react-refresh/only-export-components
 export function useEditorWorkspace(): EditorWorkspaceContextValue {
     const ctx = useContext(EditorWorkspaceContext);

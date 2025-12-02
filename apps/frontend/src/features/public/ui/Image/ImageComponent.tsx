@@ -1,15 +1,15 @@
-import { ImageBlock } from '@/entities/block';
-import { getFromCatalog } from '@/features/gallery/api/catalogModule';
+import { GalleryBlock } from '@/entities/block';
+import { getFromCatalog } from '@/features/public/api/catalogModule';
 
-type ImageComponentProps = { block: ImageBlock };
+type ImageComponentProps = { block: GalleryBlock };
 
 export default function ImageComponent({ block }: ImageComponentProps) {
-    const { layout, itemIds } = { ...block };
+    const { layout, items } = { ...block };
 
     return (
         <figure className={`block ${layout}`}>
-            {itemIds.map((imgId) => {
-                const img = getFromCatalog(imgId);
+            {items.map((item) => {
+                const img = getFromCatalog(item.artId);
                 if (!img) return null;
                 return (
                     <picture

@@ -1,4 +1,4 @@
-import { Localized } from '@/entities/common';
+import { ISODate, Localized } from '@/entities/common';
 
 //*************** Legacy ***************/
 
@@ -16,7 +16,9 @@ export type ItemPosition =
     | 'RS'
     | 'Left'
     | 'Center'
-    | 'Right';
+    | 'Right'
+    | 'Up'
+    | 'Bottom';
 
 export type GalleryLayout =
     | 'single'
@@ -30,12 +32,7 @@ interface BlockBase {
     id: string;
     blockKind: BlockKind;
     tags?: string[] | undefined;
-    dateCreated: string;
-}
-
-export interface GalleryBlockItem {
-    artId: string;
-    position: ItemPosition;
+    dateCreated: ISODate;
     caption?: Localized;
 }
 
@@ -43,6 +40,12 @@ export interface GalleryBlock extends BlockBase {
     blockKind: 'gallery';
     layout: GalleryLayout;
     items: GalleryBlockItem[];
+}
+
+export interface GalleryBlockItem {
+    artId: string;
+    position: ItemPosition;
+    caption?: Localized;
 }
 
 export interface TextBlock extends BlockBase {
