@@ -1,8 +1,11 @@
+//src/app/router.tsx:
+
 import AdminLayout from '@/app/layouts/AdminLayout';
 import PublicLayout from '@/app/layouts/PublicLayout';
 import { BlockEditorSessionProvider } from '@/features/admin/blocks/editorSession/BlockEditorSession.context';
 import { EditorSessionProvider } from '@/features/admin/catalogEditor/editorSession/EditorSession.context';
 import { EditorWorkspaceProvider } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import { ArtCatalogLoader } from '@/shared/ArtCatalogProvider.tsx/ArtCatalogLoader';
 import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 
@@ -16,10 +19,32 @@ const BlocksPage = lazy(() => import('@/pages/admin/BlocksPage/BlocksPage'));
 const StreamsPage = lazy(() => import('@/pages/admin/StreamsPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
+// Public root wrap:
+// eslint-disable-next-line react-refresh/only-export-components
+function PublicRoot() {
+    return (
+        <ArtCatalogLoader mode="public">
+            <PublicLayout />
+        </ArtCatalogLoader>
+    );
+}
+
+// Admin root wrap:
+// eslint-disable-next-line react-refresh/only-export-components
+function AdminRoot() {
+    return (
+        <ArtCatalogLoader mode="admin">
+            <EditorWorkspaceProvider>
+                <AdminLayout />
+            </EditorWorkspaceProvider>
+        </ArtCatalogLoader>
+    );
+}
+
 export const router = createBrowserRouter([
     {
         path: '/',
-        element: <PublicLayout />,
+        element: <PublicRoot />,
         children: [
             { index: true, element: <HomePage /> },
             { path: 'gallery', element: <GalleryPage /> },
@@ -28,11 +53,7 @@ export const router = createBrowserRouter([
     },
     {
         path: '/admin',
-        element: (
-            <EditorWorkspaceProvider>
-                <AdminLayout />
-            </EditorWorkspaceProvider>
-        ),
+        element: <AdminRoot />,
         children: [
             { index: true, element: <AdminIndex /> },
             { path: 'upload', element: <UploadPage /> },

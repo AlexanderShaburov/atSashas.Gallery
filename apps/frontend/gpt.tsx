@@ -1,69 +1,72 @@
-import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
-import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
-import type { BlockEditorSession } from '@/features/admin/blocks/editorSession';
-import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
-import type { GalleryBlock } from '@/entities/block';
-import type { ArtItemJSON } from '@/entities/catalog'; // имя поправь под своё
+return (
+    <figure className={`gc-block-${ctx.identity?.blockKind}`}>
+        {imgPositions.map((pos) => {
+            const blockItem = item.items.find((i) => i.position === pos);
+            const imgId = blockItem?.artId;
 
-export function GalleryComponent() {
-    const ctx: BlockEditorSession = useBlockEditorSession();
-    const gCtx: EditorWorkspaceContextValue = useEditorWorkspace();
+            // хендлер клика по слоту (один на все случаи)
+            const handleSlotClick = (e: React.MouseEvent<HTMLDivElement | HTMLPictureElement>) => {
+                e.stopPropagation();
 
-    const currentBlock = ctx.identity as GalleryBlock;
-    const imgPositions = ITEM_POSITIONS[currentBlock.layout];
-
-    // Guard: если нет позиций или каталога — ничего не рисуем
-    if (!imgPositions || !gCtx.currentArtCatalog) {
-        return null;
-    }
-
-    const catalogItems = gCtx.currentArtCatalog.items;
-
-    return (
-        <figure className={`gc-block-${ctx.identity?.blockKind}`}>
-            {imgPositions.map((pos) => {
-                const blockItem = currentBlock.items.find((item) => item.position === pos);
-                const imgId = blockItem?.artId;
-
-                if (!imgId) {
-                    // Empty slot for this position
-                    return (
-                        <div
-                            key={pos}
-                            className={`gc-slot gc-slot-empty gc-slot-${pos.toLowerCase()}`}
-                            role="button"
-                            onClick={() => positionClicked(pos)}
-                        />
+                // если есть onHit (редактор) — отдаём hit
+                if (onHit) {
+                    onHit(
+                        Hit.galleryImage(pos), // slot = pos
+                        e,
                     );
+                    return;
                 }
 
-                const img = catalogItems[imgId] as ArtItemJSON | undefined;
-                if (!img) {
-                    // Art not found in catalog (defensive)
-                    return (
-                        <div
-                            key={`${imgId}-${pos}`}
-                            className={`gc-slot gc-slot-missing gc-slot-${pos.toLowerCase()}`}
-                            role="button"
-                            onClick={() => positionClicked(pos)}
-                        >
-                            Missing art: {imgId}
-                        </div>
-                    );
+                // если есть onSelectBlock (грид) — выбираем блок
+                if (onSelectBlock) {
+                    onSelectBlock(item);
                 }
+            };
 
+            if (!imgId) {
+                // Empty slot for this position
                 return (
-                    <picture
-                        key={img.id ?? `${imgId}-${pos}`}
+                    <div
+                        key={pos}
+                        className={`gc-slot gc-slot-empty gc-slot-${pos.toLowerCase()}`}
                         role="button"
-                        className={`gc-slot gc-slot-${pos.toLowerCase()}`}
-                        onClick={() => positionClicked(pos)}
-                    >
-                        {/* Replace src/alt with your real fields from ArtItemJSON */}
-                        <img src={img.previewSrc ?? img.fullSrc} alt={img.title?.en ?? ''} />
-                    </picture>
+                        onClick={handleSlotClick}
+                    />
                 );
-            })}
-        </figure>
-    );
-}
+            }
+
+            const img = gCtx.currentArtCatalog?.items[imgId] as ArtItemData | undefined;
+
+            if (!img) {
+                // Art not found in catalog
+                return (
+                    <div
+                        key={`${imgId}-${pos}`}
+                        className={`gc-slot gc-slot-missing gc-slot-${pos.toLowerCase()}`}
+                        role="button"
+                        onClick={handleSlotClick}
+                    >
+                        Missing art: {imgId}
+                    </div>
+                );
+            }
+
+            return (
+                <picture
+                    key={imgId ?? `${imgId}-${pos}`}
+                    role="button"
+                    className={`gc-slot gc-slot-${pos.toLowerCase()}`}
+                    onClick={handleSlotClick}
+                >
+                    <source type="image/avif" srcSet={img.images.preview.avif} />
+                    <source type="image/webp" srcSet={img.images.preview.webp} />
+                    <img
+                        src={img.images.preview.jpeg}
+                        alt={img.images.alt.en || ''}
+                        loading="lazy"
+                    />
+                </picture>
+            );
+        })}
+    </figure>
+);

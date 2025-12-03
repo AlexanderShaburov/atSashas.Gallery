@@ -1,5 +1,5 @@
-import type { GalleryBlock, GalleryLayout } from '@/entities/block';
-import { ISODate } from '@/entities/common';
+import type { CtaBlock, GalleryBlock, GalleryLayout, TextBlock } from '@/entities/block';
+import { todayISO } from '@/shared/lib/date/Today';
 
 type TemplateBlock =
     | { kind: 'gallery'; layout: GalleryLayout; label: string }
@@ -22,15 +22,36 @@ export const TEMPLATE_BLOCKS: TemplateBlock[] = [
     { kind: 'cta', label: 'CTA' },
 ];
 export function createGalleryTemplateBlock(layout: GalleryLayout): GalleryBlock {
-    const now = new Date(0).toISOString() as ISODate; // or real now if you want
-
     return {
-        id: `__template-${layout}`,
+        id: `__template-gallery-${layout}`,
         blockKind: 'gallery',
         layout,
-        items: [], // no art yet, so all slots will be "empty"
-        dateCreated: now,
+        items: [],
+        dateCreated: todayISO(),
         caption: undefined,
         tags: [],
+    };
+}
+export function createTextTemplateBlock(): TextBlock {
+    return {
+        id: `__template-text`,
+        blockKind: 'text',
+        dateCreated: todayISO(),
+        caption: { en: 'Caption place here' },
+        title: { en: 'Template' },
+        body: { en: 'Place your text here' },
+    };
+}
+
+export function createCtaTemplateBlock(): CtaBlock {
+    return {
+        id: `__template-cta`,
+        blockKind: 'cta',
+        dateCreated: todayISO(),
+        caption: { en: 'Caption place here' },
+        title: { en: 'Action title here' },
+        body: { en: 'Description here' },
+        buttonLabel: { en: 'Button label' },
+        target: { type: 'event', eventId: '' },
     };
 }

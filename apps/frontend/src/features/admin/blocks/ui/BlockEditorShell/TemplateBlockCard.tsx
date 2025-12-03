@@ -4,14 +4,34 @@ import {
     GalleryComponent,
     TextBlockComponent,
 } from '@/features/admin/blocks/ui/BlockPreview';
-import { TEMPLATE_BLOCKS, createGalleryTemplateBlock } from './templateTypes';
+import {
+    TEMPLATE_BLOCKS,
+    createCtaTemplateBlock,
+    createGalleryTemplateBlock,
+    createTextTemplateBlock,
+} from './templateTypes';
 
-type TemplateBlockCardProps = {
-    kind: BlockKind;
-    layout?: GalleryLayout;
+type TemplateGalleryBlockCardProps = {
+    kind: 'gallery';
+    layout: GalleryLayout;
     label: string;
     onClick: () => void;
 };
+type TemplateTextBlockCardProps = {
+    kind: 'text';
+    label: string;
+    onClick: () => void;
+};
+type TemplateCtaBlockCardProps = {
+    kind: 'cta';
+    label: string;
+    onClick: () => void;
+};
+
+type TemplateBlockCardProps =
+    | TemplateGalleryBlockCardProps
+    | TemplateTextBlockCardProps
+    | TemplateCtaBlockCardProps;
 
 // Template Raw component:
 type TemplateRawProps = {
@@ -21,25 +41,28 @@ type TemplateRawProps = {
 export function TemplateRaw({ onSelectKind }: TemplateRawProps) {
     return (
         <>
-            {TEMPLATE_BLOCKS.map((tpl, index) => (
-                <TemplateBlockCard
-                    key={
-                        tpl.kind === 'gallery'
-                            ? `${tpl.kind}-${tpl.layout}`
-                            : tpl.kind + '-' + index
-                    }
-                    kind={tpl.kind}
-                    layout={tpl.kind === 'gallery' ? tpl.layout : undefined}
-                    label={tpl.label}
-                    onClick={() => {
-                        if (tpl.kind === 'gallery') {
-                            onSelectKind('gallery', tpl.layout);
-                        } else {
-                            onSelectKind(tpl.kind);
-                        }
-                    }}
-                />
-            ))}
+            {TEMPLATE_BLOCKS.map((tpl, index) => {
+                if (tpl.kind === 'gallery') {
+                    return (
+                        <TemplateBlockCard
+                            key={`${tpl.kind}-${tpl.layout}`}
+                            kind="gallery"
+                            layout={tpl.layout}
+                            label={tpl.label}
+                            onClick={() => onSelectKind('gallery', tpl.layout)}
+                        />
+                    );
+                } else {
+                    return (
+                        <TemplateBlockCard
+                            key={tpl.kind + '-' + index}
+                            kind={tpl.kind}
+                            label={tpl.label}
+                            onClick={() => onSelectKind(tpl.kind)}
+                        />
+                    );
+                }
+            })}
         </>
     );
 }
@@ -50,13 +73,18 @@ export function TemplateBlockCard(props: TemplateBlockCardProps) {
     const content = (() => {
         switch (props.kind) {
             case 'gallery':
-                return <GalleryComponent isTemplate layout={props.layout} />;
+                return (
+                    <GalleryComponent
+                        item={createGalleryTemplateBlock(props.layout)}
+                        onClick={() => onClick()}
+                    />
+                );
             case 'text':
-                return <TextBlockComponent isTemplate />;
+                return <TextBlockComponent item={createTextTemplateBlock()} onClick={onClick} />;
             case 'cta':
-                return <CtaBlockComponent isTemplate />;
+                return <CtaBlockComponent item={createCtaTemplateBlock()} onClick={onClick} />;
             default:
-                return <div>Template {props.kind}</div>;
+                return <div>Unrecognized Template Kind</div>;
         }
     })();
 

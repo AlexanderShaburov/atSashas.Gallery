@@ -6,6 +6,7 @@ import {
     GalleryComponent,
     TextBlockComponent,
 } from '@/features/admin/blocks/ui/BlockPreview/';
+import { TemplateRaw } from '../BlockEditorShell/TemplateBlockCard';
 
 export function CollectionGrid() {
     const ctx: BlockEditorSession = useBlockEditorSession();
@@ -19,6 +20,10 @@ export function CollectionGrid() {
     }
     return (
         <div className="collection-grid">
+            {ctx.mode === 'create' && (
+                <TemplateRaw
+                    onSelectKind={processClick}
+            )}
             {ctx.collection.blocks.map((item) => {
                 switch (item.blockKind) {
                     case 'gallery':

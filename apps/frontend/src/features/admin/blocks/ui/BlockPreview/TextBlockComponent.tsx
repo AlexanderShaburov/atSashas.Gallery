@@ -1,7 +1,6 @@
 import { TextBlock } from '@/entities/block';
 
 type Props = {
-    isTemplate: boolean;
     item: TextBlock;
     onClick: (item: TextBlock) => void;
 };

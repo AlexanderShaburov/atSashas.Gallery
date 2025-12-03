@@ -57,12 +57,12 @@ export interface TextBlock extends BlockBase {
 
 interface CtaTargetStream {
     type: 'stream';
-    slug: string; // например, 'mixart' или 'event-rome-workshop'
+    slug?: string; // например, 'mixart' или 'event-rome-workshop'
 }
 
 interface CtaTargetExternal {
     type: 'external';
-    url: string; // например, ссылка на оплату
+    url?: string; // например, ссылка на оплату
 }
 
 interface CtaTargetEvent {

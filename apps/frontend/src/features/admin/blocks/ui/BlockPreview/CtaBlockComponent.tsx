@@ -1,7 +1,6 @@
 import { CtaBlock } from '@/entities/block';
 
 type Props = {
-    isTemplate: boolean;
     item: CtaBlock;
     onClick: (item: CtaBlock) => void;
 };
