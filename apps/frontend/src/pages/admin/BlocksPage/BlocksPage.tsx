@@ -6,6 +6,9 @@ import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspa
 import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 
 import { useEffect } from 'react';
+import './block-cta.core.css';
+import './block-gallery.core.css';
+import './block-text.core.css';
 import './BlocksPage.css';
 
 export default function BlocksPage() {

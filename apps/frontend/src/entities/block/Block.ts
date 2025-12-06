@@ -31,6 +31,7 @@ export type GalleryLayout =
 interface BlockBase {
     id: string;
     blockKind: BlockKind;
+    isTemplate?: boolean;
     tags?: string[] | undefined;
     dateCreated: ISODate;
     caption?: Localized;

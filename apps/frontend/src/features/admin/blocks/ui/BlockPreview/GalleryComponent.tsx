@@ -1,7 +1,8 @@
 //src/features/admin/blocks/ue/BlockPreview/GalleryComponent.tsx
 
 import { GalleryBlock, GalleryLayout, ItemPosition } from '@/entities/block';
-import { BlockHitEvent, Hit } from '@/features/admin/blocks/ui/BlockEditorShell/editorTypes';
+import { BlockHitEvent, Hit } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
+import { TEMPLATE_BLOCKS } from '@/features/admin/blocks/ui/BlockTemplates/templateTypes';
 import { useResolveArt } from '@/shared/ArtCatalogProvider.tsx/CatalogHook';
 const ITEM_POSITIONS: Record<GalleryLayout, ItemPosition[]> = {
     single: ['Center'],
@@ -20,10 +21,16 @@ type Props = {
 
 export function GalleryComponent({ item, onHit }: Props) {
     const imgPositions = ITEM_POSITIONS[item.layout];
+    // Getting ArtItemData by its artItemId resolver instance:
     const resolveArt = useResolveArt();
+    const tpl = TEMPLATE_BLOCKS.find(
+        (tpl) => tpl.kind === item.blockKind && tpl.layout === item.layout,
+    );
+    const label = tpl?.label;
+
     return (
         <>
-            <figure className={`gc-block-${item.blockKind}`}>
+            <figure className={`blk-${item.blockKind}`}>
                 {imgPositions.map((pos) => {
                     const blockItem = item.items.find((i) => i.position === pos);
                     const imgId = blockItem?.artId;
@@ -33,7 +40,9 @@ export function GalleryComponent({ item, onHit }: Props) {
                         return (
                             <div
                                 key={pos}
-                                className={`gc-slot gs-slot-empty gc-slot-${pos.toLowerCase()}`}
+                                className={`blk-gallery__slot blk-gallery__slot-empty blk-gallery__slot-${pos.toLowerCase()}${
+                                    item.layout === 'triptychHorizontal' ? '-horizontal' : ''
+                                }`}
                                 role="button"
                                 onClick={(e) =>
                                     onHit({
@@ -51,7 +60,9 @@ export function GalleryComponent({ item, onHit }: Props) {
                         return (
                             <div
                                 key={`${imgId}-${pos}`}
-                                className={`gc-slot gc-slot-missing gc-slot-${pos.toLowerCase()}`}
+                                className={`blk-gallery__slot blk-gallery__slot-missing blk-gallery__slot-${pos.toLowerCase()}${
+                                    item.layout === 'triptychHorizontal' ? '-horizontal' : ''
+                                }`}
                                 role="button"
                                 onClick={(e) =>
                                     onHit({
@@ -66,11 +77,14 @@ export function GalleryComponent({ item, onHit }: Props) {
                         );
                     }
                     return (
-                        <>
+                        <div
+                            key={imgId ?? `${imgId}-${pos}`}
+                            className={`blk-gallery__slot blk-gallery__slot-${pos.toLowerCase()}${
+                                item.layout === 'triptychHorizontal' ? '-horizontal' : ''
+                            }`}
+                        >
                             <picture
-                                key={imgId ?? `${imgId}-${pos}`}
                                 role="button"
-                                className={`gc-slot gc-slot-${pos.toLowerCase()}`}
                                 onClick={(e) =>
                                     onHit({
                                         block: item,
@@ -89,7 +103,7 @@ export function GalleryComponent({ item, onHit }: Props) {
                             </picture>
                             {blockItem?.caption && (
                                 <div
-                                    className="gc-slot-caption"
+                                    className="blk-gallery__slot-caption"
                                     role="button"
                                     onClick={(e) =>
                                         onHit({
@@ -98,22 +112,23 @@ export function GalleryComponent({ item, onHit }: Props) {
                                             nativeEvent: e,
                                         })
                                     }
-                                ></div>
+                                >
+                                    {blockItem.caption.en}
+                                </div>
                             )}
-                        </>
+                        </div>
                     );
                 })}
+                <figcaption
+                    role="button"
+                    className={`blk-gallery blk-gallery_caption`}
+                    onClick={(e) =>
+                        onHit({ block: item, hit: Hit.galleryBlockCaption(), nativeEvent: e })
+                    }
+                >
+                    {item.isTemplate ? (label ?? tpl?.kind) : (item.caption?.en ?? '')}
+                </figcaption>
             </figure>
-            <caption
-                key={item.id ?? `${item.id}-block-caption`}
-                role="button"
-                className={`gc-block gc-block-caption`}
-                onClick={(e) =>
-                    onHit({ block: item, hit: Hit.galleryBlockCaption(), nativeEvent: e })
-                }
-            >
-                {item.caption?.en ? item.caption.en : ''}
-            </caption>
         </>
     );
 }

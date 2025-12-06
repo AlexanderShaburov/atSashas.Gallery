@@ -1,0 +1,110 @@
+.blk-tpl {
+    border-style: dashed;
+    border-color: var(--accent);
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--card-bg) 85%, var(--accent) 15%);
+}
+.blk-gallery.blk-tpl .blk-gallery__caption {
+    text-align: center;
+    min-height: 1em;
+}
+.blk-gallery.blk-tpl .blk-gallery__caption:empty::before {
+    content: 'Gallery block';
+    opacity: 0.7;
+}
+
+/* 
+   =========================
+   Template gallery block
+   ========================= 
+*/
+
+.blk-gallery.blk-tpl .blk-gallery__slot {
+    border-radius: 0.5rem;
+    border: 1px dashed var(--border);
+    background: color-mix(in srgb, var(--tile-title) 80%, var(--card-bg) 20%);
+
+    min-height: 0px; /* still keeps template readable */
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 0.7rem;
+    color: var(--muted);
+}
+
+.blk-gallery .blk-gallery__slot-empty {
+    background: color-mix(in srgb, var(--accent) 35%, var(--card-bg) 65%);
+    border: 1px dashed color-mix(in srgb, var(--accent) 65%, var(--border) 35%);
+}
+
+/* Template bottom main caption */
+.blk-gallery.blk-tpl .blk-gallery__caption {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text);
+    text-align: center;
+
+    min-height: 1.4em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Every tile in the grid - 4:3 "screen" */
+.block-editor .grid-collection > .blk-tpl {
+    aspect-ratio: 4 / 3;
+    /* min-height: 60px; */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    overflow: hidden;
+}
+
+/* All content stretch to all container aria  */
+.grid-collection > .blk-tpl > * {
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+}
+.blk-tpl .blk-text__body {
+    background: color-mix(in srgb, var(--accent) 35%, var(--card-bg) 65%);
+    border-radius: 0.5rem;
+    flex: 1 1 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.4;
+
+    overflow: hidden;
+}
+
+.blk-tpl .blk-text__caption p {
+    margin: 0;
+    font-size: 1em;
+    max-height: 4.2em; /* 3–4 строки */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.blk-cta {
+    background: color-mix(in srgb, var(--accent) 35%, var(--card-bg) 65%);
+    border-radius: 0.5rem;
+    flex: 1 1 auto;
+    gap: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.4;
+
+    overflow: hidden;
+}

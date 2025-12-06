@@ -43,7 +43,7 @@ export function CollectionSelector({ collections, selectedId, loading }: Props) 
         try {
             await session.newCollection(name);
 
-            setNewName('');
+            // setNewName('');
             setIsCreating(false);
         } finally {
             setCreateLoading(false);

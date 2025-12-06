@@ -1,3 +1,4 @@
+//src/features/admin/blocks/ui/BlockEditorShell/templateTypes.ts
 import type { CtaBlock, GalleryBlock, GalleryLayout, TextBlock } from '@/entities/block';
 import { todayISO } from '@/shared/lib/date/Today';
 
@@ -25,7 +26,7 @@ export function createGalleryTemplateBlock(layout: GalleryLayout): GalleryBlock 
     return {
         id: `__template-gallery-${layout}`,
         blockKind: 'gallery',
-        layout,
+        layout: layout,
         items: [],
         dateCreated: todayISO(),
         caption: undefined,
@@ -37,7 +38,7 @@ export function createTextTemplateBlock(): TextBlock {
         id: `__template-text`,
         blockKind: 'text',
         dateCreated: todayISO(),
-        caption: { en: 'Caption place here' },
+        caption: { en: 'Caption' },
         title: { en: 'Template' },
         body: { en: 'Place your text here' },
     };
@@ -48,7 +49,7 @@ export function createCtaTemplateBlock(): CtaBlock {
         id: `__template-cta`,
         blockKind: 'cta',
         dateCreated: todayISO(),
-        caption: { en: 'Caption place here' },
+        caption: { en: 'Caption' },
         title: { en: 'Action title here' },
         body: { en: 'Description here' },
         buttonLabel: { en: 'Button label' },

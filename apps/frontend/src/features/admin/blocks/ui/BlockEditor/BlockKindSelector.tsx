@@ -1,6 +1,7 @@
 // src/features/admin/blocks/BlockEditor/BlockKindSelector.tsx
 
 import type { BlockKind } from '@/entities/block';
+import '@/features/admin/blocks/ui/BlockPreview/index';
 
 type Props = {
     value: BlockKind | undefined;

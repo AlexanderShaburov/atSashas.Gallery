@@ -1,0 +1,165 @@
+.blk-gallery {
+    position: relative;
+    margin: 0;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* 2 rows for images, 1 row for block caption */
+    grid-template-rows: 2.5fr 2.5fr 2.5fr;
+    grid-auto-rows: 0; /* do not grow extra rows */
+
+    gap: 4px;
+
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+    box-sizing: border-box;
+}
+/* Базовый вид слота (ячейки) */
+.blk-gallery__slot {
+    position: relative;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: var(--tile-title);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 0.7rem;
+    color: var(--muted);
+}
+.blk-gallery__empty,
+.blk-gallery__missing {
+    border: 1px dashed var(--border);
+}
+.blk-gallery__slot picture,
+.blk-gallery__slot img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.blk-gallery__slot img {
+    object-fit: cover;
+}
+
+/* Single slot caption */
+.blk-gallery__slot-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    padding: 0.25rem 0.35rem;
+    font-size: 0.5rem;
+    color: var(--card-bg);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
+
+    max-height: 2.4em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Main block caption (figcaption) */
+.blk-gallery_caption {
+    grid-column: 1 / -1;
+    grid-row: 3 / 4;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+
+    margin: 0; /* we don't want extra height from margin */
+
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.3;
+
+    max-height: 8em;
+    /* overflow: hidden; */
+    text-overflow: ellipsis;
+}
+/* =========================
+   Slots layout by position
+   ========================= */
+
+/* single: Center — во всю область */
+.blk-gallery__slot-center {
+    grid-column: 1 / 4;
+    grid-row: 1 / 3;
+}
+
+/* pairHorizontal: Left + Right — две вертикальные полосы */
+.blk-gallery__slot-left {
+    grid-column: 1 / 2;
+    grid-row: 1 / 3;
+}
+
+.blk-gallery__slot-right {
+    grid-column: 2 / 4;
+    grid-row: 1 / 3;
+}
+
+/* pairVertical: Up + Bottom — две горизонтальные полосы */
+.blk-gallery__slot-up {
+    grid-column: 1 / 4;
+    grid-row: 1 / 2;
+}
+
+.blk-gallery__slot-bottom {
+    grid-column: 1 / 4;
+    grid-row: 2 / 3;
+}
+
+/* triptychLeft: LS (большой слева), RUC, RBC (два справа) */
+.blk-gallery__slot-ls {
+    grid-column: 1 / 3;
+    grid-row: 1 / 3;
+}
+
+.blk-gallery__slot-ruc {
+    grid-column: 3 / 4;
+    grid-row: 1 / 2;
+}
+
+.blk-gallery__slot-rbc {
+    grid-column: 3 / 4;
+    grid-row: 2 / 3;
+}
+
+/* triptychRight: RS (большой справа), LUC, LBC (два слева) */
+.blk-gallery__slot-rs {
+    grid-column: 2 / 4;
+    grid-row: 1 / 3;
+}
+
+.blk-gallery__slot-luc {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+}
+
+.blk-gallery__slot-lbc {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+}
+
+.blk-gallery__slot-left.tri-horizontal,
+.blk-gallery__slot-left-horizontal {
+    grid-column: 1 / 2;
+    grid-row: 1 / 3;
+}
+
+.blk-gallery__slot-center.tri-horizontal,
+.blk-gallery__slot-center-horizontal {
+    grid-column: 2 / 3;
+    grid-row: 1 / 3;
+}
+
+.blk-gallery__slot-right.tri-horizontal,
+.blk-gallery__slot-right-horizontal {
+    grid-column: 3 / 4;
+    grid-row: 1 / 3;
+}

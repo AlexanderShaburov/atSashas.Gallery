@@ -1,25 +1,21 @@
-// src/features/admin/blocks/BlockEditor/BlockEditor.tsx
-
-import { useMemo } from 'react';
-
-import type { BlockKind } from '@/entities/block';
+//@/features/admin/blocks/BlockEditor/BlockEditor.tsx
 import type { BlockEditorSession } from '@/features/admin/blocks/editorSession';
-import { createInitialFormForKind } from '@/features/admin/blocks/editorSession/blockFormValueTypes';
 import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
-import { BlockKindSelector } from '@/features/admin/blocks/ui/BlockEditor/BlockKindSelector';
+import '@/features/admin/blocks/ui/BlockPreview/index';
+import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
+import { CollectionGrid } from '@/features/admin/blocks/ui/CollectionGrid/CollectionGrid';
 import { CollectionSelector } from '@/features/admin/blocks/ui/CollectionSelector/CollectionSelector';
-import { SingleBlockEditor } from '@/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor';
 import { BlockModeTag } from '@/features/admin/blocks/ui/TagsPanel/BlockModeTag';
 import '@/pages/admin/BlocksPage/BlocksPage.css';
+
 export function BlockEditor() {
     const session: BlockEditorSession = useBlockEditorSession();
 
     const {
         collectionsList,
+        collection,
         mode,
         identity,
-        values,
-        setValues,
         loading,
         saving,
         isDirty,
@@ -32,13 +28,9 @@ export function BlockEditor() {
     // Current collection is stored in workspace context
     const selectedCollection = session.collection;
 
-    // Current block kind taken from form (for create mode)
-    const currentKind: BlockKind | undefined = useMemo(
-        () => (values?.blockKind as BlockKind | undefined) ?? undefined,
-        [values],
-    );
-
-    const editorAvailable = !!selectedCollection && !loading;
+    function onHit(hit: BlockHitEvent) {
+        console.dir(`Hit occur ${hit}`);
+    }
 
     return (
         <div className="block-editor">
@@ -91,26 +83,7 @@ export function BlockEditor() {
                     </p>
                 )}
 
-                {editorAvailable && (
-                    <>
-                        {mode === 'create' && (
-                            <section className="block-editor__section block-editor__section--kind">
-                                <BlockKindSelector
-                                    value={currentKind}
-                                    onChange={(nextKind) =>
-                                        setValues((prev) =>
-                                            createInitialFormForKind(nextKind, prev),
-                                        )
-                                    }
-                                />
-                            </section>
-                        )}
-
-                        <section className="block-editor__section block-editor__section--editor">
-                            <SingleBlockEditor />
-                        </section>
-                    </>
-                )}
+                {collection && <CollectionGrid collection={collection} onHit={onHit} />}
             </div>
         </div>
     );

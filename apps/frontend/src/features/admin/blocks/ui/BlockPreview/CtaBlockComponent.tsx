@@ -1,14 +1,25 @@
 import { CtaBlock } from '@/entities/block';
-
+import '@/features/admin/blocks/ui/BlockTemplates/block.templates.css';
+import { BlockHitEvent, Hit } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 type Props = {
     item: CtaBlock;
-    onClick: (item: CtaBlock) => void;
+    onHit: (hit: BlockHitEvent) => void;
 };
 
-export function CtaBlockComponent({ item, onClick }: Props) {
+export function CtaBlockComponent({ item, onHit }: Props) {
     return (
-        <div role="button" className="cta-block-placeholder" onClick={() => onClick(item)}>
-            Cta Block Component {item.blockKind}
+        <div
+            role="button"
+            className={`blk-cta-${item.target?.type} blk-cta`}
+            onClick={(e) =>
+                onHit({
+                    block: item,
+                    hit: Hit.ctaButton(),
+                    nativeEvent: e,
+                })
+            }
+        >
+            <div>{item.target?.type}</div>
         </div>
     );
 }

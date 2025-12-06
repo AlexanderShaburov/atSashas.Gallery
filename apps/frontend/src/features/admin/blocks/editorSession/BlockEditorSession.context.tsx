@@ -42,6 +42,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     const [loading, setLoading] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
     const [isValid, setIsValid] = useState(false);
+    // editorIsReady is to identify if now a block is under editing!!!
     const [editorIsReady, setEditorIsReady] = useState(false);
     const [canSave, setCanSave] = useState(false);
 
@@ -103,7 +104,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         } finally {
             setLoading(false);
         }
-    }, [gCtxt]);
+    }, [gCtxt.currentBlocksCollectionId]);
 
     // initial load
     useEffect(() => {
@@ -196,7 +197,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 setLoading(false);
             }
         })();
-    }, [mode, gCtxt]);
+    }, [mode, gCtxt.currentBlocksCollectionId, gCtxt.currentBlockRef]);
 
     // dirty + validity tracking
     useEffect(() => {
@@ -252,6 +253,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             if (ncListItem?.id) {
                 const nc = await getCollection(ncListItem.id);
                 setCollection(nc);
+                console.log(`Current collection set to ${nc}`);
             } else {
                 console.error(`Failed to add new collection with name: ${name}`);
             }

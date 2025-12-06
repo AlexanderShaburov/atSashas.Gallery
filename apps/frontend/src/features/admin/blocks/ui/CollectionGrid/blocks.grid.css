@@ -1,0 +1,22 @@
+.grid-collection {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+
+    /* Phone 4 columns */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* Tabs 6 columns */
+@media (min-width: 768px) {
+    .grid-collection {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+}
+
+/* Desktop 8 columns */
+@media (min-width: 1280px) {
+    .grid-collection {
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+}
