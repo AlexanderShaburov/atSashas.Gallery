@@ -5,6 +5,7 @@ import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspa
 import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import {
     createCollection,
+    deleteCollection,
     getCollection,
     getCollectionsList,
 } from '@/features/admin/blocks/api/blocksApi';
@@ -261,6 +262,24 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         [refreshBlocks, setCollection],
     );
 
+    const removeCollection = useCallback(async () => {
+        if (!collection) return;
+        setSaving(true);
+        try {
+            // TODO: sanitize + build payload + update backend
+            // await updateBlocksCatalog(...);
+
+            await deleteCollection(collection);
+            // refresh Collection list
+            setCollection(undefined);
+            refreshBlocks();
+        } catch (e) {
+            console.error('Failed to delete collection', e);
+        } finally {
+            setSaving(false);
+        }
+    }, [setCollection, collection, setSaving, refreshBlocks]);
+
     const value: BlockEditorSession = useMemo(
         () => ({
             collectionsList,
@@ -273,6 +292,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             setMode,
             setCollection,
             newCollection,
+            removeCollection,
             editorIsReady,
             isDirty,
             isValid,
@@ -296,6 +316,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             saving,
             setCollection,
             newCollection,
+            removeCollection,
             save,
             exit,
         ],

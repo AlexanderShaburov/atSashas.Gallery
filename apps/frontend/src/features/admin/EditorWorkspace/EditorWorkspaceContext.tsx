@@ -41,7 +41,6 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
         currentArtCatalog: undefined,
     });
 
-    useEffect(() => {});
     const value = useMemo<EditorWorkspaceContextValue>(
         () => ({
             ...state,
@@ -108,6 +107,8 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
                     currentArtCatalog: undefined,
                 });
             },
+
+            removeCollection() {},
         }),
         [state],
     );
@@ -133,7 +134,7 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
         return () => {
             cancelled = true;
         };
-    });
+    }, []);
 
     return (
         <EditorWorkspaceContext.Provider value={value}>{children}</EditorWorkspaceContext.Provider>

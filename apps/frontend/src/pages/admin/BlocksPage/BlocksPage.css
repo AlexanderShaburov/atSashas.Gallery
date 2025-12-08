@@ -134,6 +134,15 @@
     border-color: var(--accent);
 }
 
+.block-editor__btn--delete {
+    background: #e53935;
+    border: none;
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
 .block-editor__btn:disabled {
     opacity: 0.4;
     cursor: default;

@@ -23,6 +23,7 @@ export function BlockEditor() {
         canSave,
         save,
         exit,
+        removeCollection,
     } = session;
 
     // Current collection is stored in workspace context
@@ -31,6 +32,14 @@ export function BlockEditor() {
     function onHit(hit: BlockHitEvent) {
         console.dir(`Hit occur ${hit}`);
     }
+    const handleDelete = async () => {
+        if (!collection) return;
+        const confirmed = window.confirm(
+            `Delete collection «${collection.collectionName ?? collection.collectionId}»? This action is irreversible.`,
+        );
+        if (!confirmed) return;
+        await removeCollection(collection);
+    };
 
     return (
         <div className="block-editor">
@@ -55,6 +64,18 @@ export function BlockEditor() {
                 </div>
 
                 <div className="block-editor__toolbar-right">
+                    {collection && (
+                        <div>
+                            <button
+                                type="button"
+                                className="block-editor__btn block-editor__btn--delete"
+                                disabled={saving}
+                                onClick={handleDelete}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    )}
                     <button
                         type="button"
                         className="block-editor__btn block-editor__btn--primary"

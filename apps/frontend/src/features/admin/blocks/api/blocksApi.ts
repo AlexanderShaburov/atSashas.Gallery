@@ -40,3 +40,24 @@ export async function createCollection(name: string) {
     if (!resp.ok) throw new Error(`Failed to create new collection ${name}`);
     return await resp.json();
 }
+
+export async function deleteCollection(collection: BlocksCollectionJSON) {
+    try {
+        const url = BLOCK_COLLECTION + `/${collection.collectionId}`;
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            console.error('Failed to delete collection file: ' < collection.collectionName);
+        }
+
+        return true;
+    } catch (err) {
+        console.error('Network error while deleting collection file: ', err);
+        return false;
+    }
+}

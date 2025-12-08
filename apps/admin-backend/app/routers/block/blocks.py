@@ -1,11 +1,13 @@
 import json
 from logging import getLogger
+import os
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, status
 
 from app.storage import BLOCKS_DIR
 from app.models.block_collections import BlocksCollectionJSON, CollectionSeed
 from app.models.collection_repo import BlockCollectionRepo
+from app.storage import BLOCKS_DIR
 
 
 logger = getLogger(__name__)
@@ -86,3 +88,28 @@ def create_collection(data: CollectionSeed):
         f"New collection {data.name} successfuly created on {str(session._path)}"
     )
     return new_collection
+
+
+@router.delete("/collection/{id}")
+def del_collection(id: str):
+    """
+    Delete a blocks collection.
+    ID == file name (e.g. 'img_00123.json')
+    """
+    logger.info(f"[DEL COLLECTION]: delete collection id: {id} called ")
+
+    #   Full path: storage_root / json / file_id
+    collection_path = BLOCKS_DIR / f"{id}.json"
+    if not collection_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Collection file '{id}' not found",
+        )
+    try:
+        os.remove(collection_path)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete collection file {id}.json",
+        )
+    return

@@ -25,6 +25,7 @@ export type BlockEditorSession = {
     setMode: (m: BlockEditorMode) => void;
     setCollection: (c: BlocksCollectionJSON | undefined) => void;
     newCollection: (n: string) => Promise<void>;
+    removeCollection: (c: BlocksCollectionJSON) => Promise<void>;
 
     /** Editor lifecycle */
     editorIsReady: boolean;
