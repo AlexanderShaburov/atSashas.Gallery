@@ -1,3 +1,4 @@
+export { BLOCK_KINDS, CTA_TYPES, GALLERY_LAYOUTS } from './Block';
 export type {
     Block,
     BlockKind,
@@ -6,7 +7,6 @@ export type {
     GalleryBlock,
     GalleryBlockItem,
     GalleryLayout,
-    ImageBlock,
     ItemPosition,
     TextBlock,
 } from './Block';

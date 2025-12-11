@@ -5,8 +5,12 @@ import { ISODate, Localized } from '@/entities/common';
 /******************* End of Legacy ********************/
 
 export type BlockEditorMode = 'create' | 'edit';
+export const CTA_TYPES = ['stream', 'external', 'event'];
+export type CtaTypes = (typeof CTA_TYPES)[number];
 
-export type BlockKind = 'gallery' | 'text' | 'cta';
+export const BLOCK_KINDS = ['gallery', 'text', 'cta'];
+export type BlockKind = (typeof BLOCK_KINDS)[number];
+
 export type ItemPosition =
     | 'LUC'
     | 'LBC'
@@ -20,13 +24,15 @@ export type ItemPosition =
     | 'Up'
     | 'Bottom';
 
-export type GalleryLayout =
-    | 'single'
-    | 'pairHorizontal'
-    | 'pairVertical'
-    | 'triptychLeft'
-    | 'triptychRight'
-    | 'triptychHorizontal';
+export const GALLERY_LAYOUTS = [
+    'single',
+    'pairHorizontal',
+    'pairVertical',
+    'triptychLeft',
+    'triptychRight',
+    'triptychHorizontal',
+];
+export type GalleryLayout = (typeof GALLERY_LAYOUTS)[number];
 
 interface BlockBase {
     id: string;

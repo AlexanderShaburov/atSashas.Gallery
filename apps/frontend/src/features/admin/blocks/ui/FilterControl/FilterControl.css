@@ -1,0 +1,22 @@
+.filter-control__mode {
+    display: inline-flex;
+    border-radius: 6px;
+    background: var(--card-bg);
+    padding: 2px;
+}
+
+.filter-control__mode button {
+    padding: 4px 10px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 13px;
+    opacity: 0.6;
+}
+
+.filter-control__mode button.active {
+    background: var(--tile-title);
+    color: white;
+    opacity: 1;
+}

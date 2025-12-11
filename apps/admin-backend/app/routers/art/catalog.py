@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from logging import getLogger
 from app.deps import require_admin_token
 from app.services.catalog_service import update_catalog
-from app.models.catalog_repo import catalog_repo
+from app.repos.catalog_repo import catalog_repo
 from app.models.shipment import ArtShipmentModel
 
 

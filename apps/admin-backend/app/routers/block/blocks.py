@@ -1,115 +1,111 @@
-import json
-from logging import getLogger
-import os
-from pathlib import Path
+# app/routers/blocks.py
+
+
 from fastapi import APIRouter, HTTPException, status
 
-from app.storage import BLOCKS_DIR
-from app.models.block_collections import BlocksCollectionJSON, CollectionSeed
-from app.models.collection_repo import BlockCollectionRepo
-from app.storage import BLOCKS_DIR
+# поправь пути под свой проект:
+from app.models.block_collection import BlockCollection, Block
+from app.repos.collection_repo import block_collection_repo
+from app.services.block_collection_service import generate_block_id
+
+router = APIRouter(
+    prefix="/blocks",
+    tags=["admin-blocks"],
+)
 
 
-logger = getLogger(__name__)
-router = APIRouter(prefix="/block", tags=["block"])
-
-# BLOCKS_DIR = /media/json/block_collection
-
-
-@router.get("/content")
-def blocks_content():
-    logger.info("[Block/Content]: block/content called")
-    exts = [".json"]
-    logger.info("Blocks content called.")
-    logger.info(
-        f"We are going watch collection in the {str(BLOCKS_DIR)} directory"
-    )
-    root = BLOCKS_DIR.resolve()
-    if not root.is_dir():
-        logger.info("Blocks library not is a dir")
-        return
-    logger.info(f"Blocks collection root is {str(root)}")
-    files = root.rglob("*")
-    logger.info(f"Raw rglob at {str(BLOCKS_DIR)} is {files}")
-    response: list[dict] = []
-    for p in files:
-        if not p.is_file():
-            continue
-        if p.suffix.lower() not in exts:
-            continue
-
-        with p.open("r", encoding="utf-8") as f:
-            data = json.load(f)
-            next_coll = BlocksCollectionJSON.validate_data(data)
-
-        response.append(
-            {
-                "id": next_coll.collectionId,
-                "url": p,
-                "name": next_coll.collectionName,
-                "length": len(next_coll.blocks),
-            }
-        )
-    logger.info(f"Blocks collection read with length {len(response)}")
-    return response
-
-
-@router.get("/collection/{id}")
-async def get_collection(id: str) -> BlocksCollectionJSON:
-    p = Path(BLOCKS_DIR) / f"{id}.json"
-    if not p.exists():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Collection file '{id}' not found",
-        )
-    (_, e) = BlocksCollectionJSON.try_load_from_file(p)
-    if not _:
-        raise HTTPException(
-            status_code=status.HTTP_204_NO_CONTENT,
-            detail=f"Error occure wile reading collection with {e}",
-        )
-    collection = BlocksCollectionJSON.load_from_file(p)
-
-    logger.info(f"Collection with name: {collection.collectionName}")
-    return collection
-
-
-@router.put("/new_collection")
-def create_collection(data: CollectionSeed):
-    logger.info(
-        f"Create collection called with {data.name} name, and {data.id} id"
-    )
-    new_collection = BlocksCollectionJSON.create_empty()
-    new_collection.collectionName = data.name
-    new_collection.collectionId = data.id
-    session = BlockCollectionRepo(new_collection)
-    session._save(new_collection)
-    logger.info(
-        f"New collection {data.name} successfuly created on {str(session._path)}"
-    )
-    return new_collection
-
-
-@router.delete("/collection/{id}")
-def del_collection(id: str):
+@router.get(
+    "/collection",
+    response_model=BlockCollection,
+    summary="Download block collection",
+)
+async def get_block_collection() -> BlockCollection:
     """
-    Delete a blocks collection.
-    ID == file name (e.g. 'img_00123.json')
-    """
-    logger.info(f"[DEL COLLECTION]: delete collection id: {id} called ")
+    Complete collection of blocks.
 
-    #   Full path: storage_root / json / file_id
-    collection_path = BLOCKS_DIR / f"{id}.json"
-    if not collection_path.exists():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Collection file '{id}' not found",
-        )
-    try:
-        os.remove(collection_path)
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete collection file {id}.json",
-        )
-    return
+    На первом этапе просто возвращаем весь BlockCollection как есть.
+    При желании можно потом сделать "лёгкую" версию, отдающую только blocks.
+    """
+    async with block_collection_repo.session() as collection:
+        # Здесь мы ничего не модифицируем, просто возвращаем текущее состояние.
+        # Репо сам сохранит коллекцию на выходе из контекста.
+        return collection
+
+
+@router.post(
+    "",
+    response_model=Block,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create new block (genterate IDr)",
+)
+async def create_block(block_payload: Block) -> Block:
+    """
+    Creating a new block in the collection.
+
+    Важно:
+    - ID генерируется на бэкенде.
+    - Если в payload пришёл id, он игнорируется и перезаписывается.
+    """
+    async with block_collection_repo.session() as collection:
+        block_id = generate_block_id(block_payload)
+
+        # Pydantic v2: model_copy, в v1 было бы block.copy(...)
+        new_block = block_payload.model_copy(update={"id": block_id})
+
+        collection.add_or_update(new_block)
+
+        # На выходе репо сохранит обновлённую коллекцию.
+        return new_block
+
+
+@router.put(
+    "/{block_id}",
+    response_model=Block,
+    summary="Renew existing block",
+)
+async def update_block(block_id: str, block_payload: Block) -> Block:
+    """
+    Обновление существующего блока по id.
+
+    Поведение:
+    - Если блока нет в коллекции → 404.
+    - В случае рассинхрона block_payload.id и block_id из URL:
+      мы принудительно подставляем id из URL.
+    """
+    async with block_collection_repo.session() as collection:
+        if block_id not in collection.blocks:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Block '{block_id}' not found",
+            )
+
+        updated_block = block_payload.model_copy(update={"id": block_id})
+
+        collection.add_or_update(updated_block)
+
+        return updated_block
+
+
+@router.delete(
+    "/{block_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete block",
+)
+async def delete_block(block_id: str) -> None:
+    """
+    Удаление блока из BlockCollection.
+
+    Поведение:
+    - Если блок не найден → 404.
+    - Успех → 204 No Content.
+    """
+    async with block_collection_repo.session() as collection:
+        if block_id not in collection.blocks:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Block '{block_id}' not found",
+            )
+
+        collection.remove(block_id)
+        # Ничего не возвращаем — статус 204
+        return None
