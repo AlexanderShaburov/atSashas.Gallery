@@ -1,22 +1,204 @@
-.filter-control__mode {
+/* FilterControl.css */
+
+/* =========================
+   BASIC ROW
+   ========================= */
+.filter-control__basic {
+    width: 100%;
+    min-width: 0;
+
+    display: grid;
+    /* IMPORTANT: allow columns to shrink (minmax(0, ...)) */
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.9fr) auto;
+
+    gap: 10px;
+    align-items: center;
+
+    padding: 10px;
+    border: 1px solid var(--form-border);
+    border-radius: 12px;
+    background: var(--form-bg);
+    box-shadow: var(--form-shadow);
+}
+
+/* =========================
+   ADVANCED ROW
+   (looks like BASIC but without the mode switch)
+   ========================= */
+.filter-control__advanced {
+    width: 100%;
+    min-width: 0;
+
+    display: grid;
+    /* two inputs in one row */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+    gap: 10px;
+    align-items: center;
+
+    margin-top: 10px;
+
+    padding: 10px;
+    border: 1px solid var(--form-border);
+    border-radius: 12px;
+    background: var(--form-bg);
+    box-shadow: var(--form-shadow);
+}
+
+/* If advanced has only one input (e.g. text kind) */
+.filter-control__advanced > .filter-control__input:only-child {
+    grid-column: 1 / -1;
+}
+
+/* =========================
+   INPUTS
+   ========================= */
+.filter-control__input {
+    width: 100%;
+    min-width: 0; /* IMPORTANT for grid shrink */
+    height: 38px;
+    min-height: 38px;
+    padding: 0 12px;
+
+    border-radius: 10px;
+    border: 1px solid var(--form-border);
+    background: var(--form-bg);
+    color: var(--text);
+
+    outline: none;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
+    position: relative;
+    z-index: 1;
+}
+
+.filter-control__input::placeholder {
+    color: var(--form-placeholder);
+}
+
+.filter-control__input:hover {
+    border-color: var(--form-border-hover);
+}
+
+.filter-control__input:focus {
+    border-color: var(--form-border-hover);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* Keep native datalist UI working on WebKit */
+.filter-control__input[list] {
+    -webkit-appearance: textfield;
+    appearance: textfield;
+}
+
+/* =========================
+   MODE SWITCH (pill)
+   ========================= */
+.filter-control__mode-selector {
     display: inline-flex;
-    border-radius: 6px;
-    background: var(--card-bg);
-    padding: 2px;
+    align-items: stretch;
+
+    height: 38px;
+    min-width: 0;
+    flex: 0 0 auto;
+
+    border: 1px solid var(--form-border);
+    border-radius: 999px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--form-bg) 92%, var(--accent) 8%);
+}
+
+/* Two equal segments */
+.filter-control__mode {
+    display: flex;
+    flex: 1 1 0;
 }
 
 .filter-control__mode button {
-    padding: 4px 10px;
-    border: none;
+    appearance: none;
+    border: 0;
     background: transparent;
+
+    height: 38px;
+    line-height: 38px;
+
+    /* IMPORTANT: no fixed width, allow shrink evenly */
+    width: auto;
+    flex: 1 1 0;
+
+    padding: 0 12px;
+    min-width: 84px; /* prevents "Advanced" collapsing to 0 */
+
+    text-align: center;
+    white-space: nowrap;
+
+    color: var(--muted);
     cursor: pointer;
-    border-radius: 6px;
-    font-size: 13px;
-    opacity: 0.6;
+    font-size: 0.92rem;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.filter-control__mode button:hover {
+    opacity: 0.92;
+    color: var(--text);
 }
 
 .filter-control__mode button.active {
-    background: var(--tile-title);
-    color: white;
-    opacity: 1;
+    background: var(--accent);
+    color: var(--on-accent);
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+/* At smaller widths reduce the minimum so the pill doesn't break early */
+@media (max-width: 870px) {
+    .filter-control__mode button {
+        min-width: 72px;
+        padding: 0 10px;
+    }
+}
+
+/* "Tablet": keep two inputs, move pill to next line */
+@media (max-width: 740px) {
+    .filter-control__basic {
+        grid-template-columns: 1fr 1fr;
+        grid-auto-rows: auto;
+    }
+
+    .filter-control__mode-selector {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    /* Advanced row still 2 columns on this breakpoint */
+    .filter-control__advanced {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* "Phone": stack everything */
+@media (max-width: 520px) {
+    .filter-control__basic {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-control__mode-selector {
+        width: 100%;
+    }
+
+    .filter-control__mode button {
+        min-width: 0;
+    }
+
+    .filter-control__advanced {
+        grid-template-columns: 1fr;
+    }
 }

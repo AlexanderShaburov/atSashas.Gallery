@@ -4,6 +4,7 @@ import { BLOCK_KINDS, CTA_TYPES, GALLERY_LAYOUTS } from '@/entities/block/Block'
 import { BlockFilterState } from '@/features/admin/blocks//BlockEditor/BlockEditor';
 import { useBlockEditorSession } from '@/features/admin/blocks//hooks/useBlocksEditor';
 import { useEffect, useState } from 'react';
+import './FilterControl.css';
 
 /* 
 What should do filter control?
@@ -43,9 +44,12 @@ type Props = {
 };
 export function FilterControl({ filter, updateFilter }: Props) {
     const ctx = useBlockEditorSession();
-    const { tags, kind, layout, ctaType, artName, extended } = filter;
-
+    const { kind, layout, ctaType, artName, extended } = filter;
+    const [tagDraft, setTagDraft] = useState('');
     const [tagsList, setTagsList] = useState<string[]>([]);
+
+    const tagsListId = 'fc-tags';
+    const kindListId = 'fc-block-kind';
 
     useEffect(() => {
         if (!ctx.collection) return;
@@ -59,79 +63,82 @@ export function FilterControl({ filter, updateFilter }: Props) {
             });
         });
         setTagsList(tags);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-    const updateTags = (t: string) => {
-        const newTags = [...filter.tags, t];
-        updateFilter({ tags: newTags });
+    }, [ctx.collection]);
+
+    const commitTag = (v: string) => {
+        const t = v.trim();
+        if (!t) return;
+        if (filter.tags.includes(t)) return;
+        updateFilter({ tags: [...filter.tags, t] });
     };
+
     return (
         <>
             <div className="filter-control__basic">
                 {/* tags input section: */}
                 <input
-                    id="tags"
-                    list="tags-list"
+                    list={tagsListId}
                     className="filter-control__input"
-                    value={tags.join(', ') ?? ''}
-                    onChange={(e) => updateTags(e.target.value)}
+                    value={tagDraft}
+                    onChange={(e) => setTagDraft(e.target.value)}
+                    onBlur={() => commitTag(tagDraft)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ',') {
+                            e.preventDefault();
+                            commitTag(tagDraft);
+                        }
+                    }}
                     placeholder="Select tags to filter"
                 />
-                <datalist id="tags">
+                <datalist id={tagsListId}>
                     {tagsList.map((t) => (
                         <option key={t} value={t} />
                     ))}
                 </datalist>
                 {/* BlockKind input section: */}
                 <input
-                    id="block-kind"
-                    list="block-kind-list"
+                    list={kindListId}
                     className="filter-control__input"
                     value={kind}
                     onChange={(e) => updateFilter({ kind: e.target.value })}
                     placeholder="Select block kind to filter"
                 />
-                <datalist id="block-kind-list">
+                <datalist id={kindListId}>
                     {BLOCK_KINDS.map((t) => (
                         <option key={t} value={t} />
                     ))}
                 </datalist>
-                {/* BlockKind input section: */}
-                <div className="filter-control__mode">
-                    <button
-                        className={!extended ? 'active' : ''}
-                        onClick={() => updateFilter({ extended: false })}
-                    >
-                        Basic
-                    </button>
-                </div>
-                <div className="filter-control__mode">
-                    <button
-                        className={extended ? 'active' : ''}
-                        onClick={() => updateFilter({ extended: true })}
-                    >
-                        Advanced
-                    </button>
+                {/* Filter mode selector: */}
+                <div className="filter-control__mode-selector">
+                    <div className="filter-control__mode">
+                        <button
+                            type="button"
+                            className={!extended ? 'active' : ''}
+                            onClick={() => updateFilter({ extended: false })}
+                        >
+                            Basic
+                        </button>
+                    </div>
+                    <div className="filter-control__mode">
+                        <button
+                            type="button"
+                            className={extended ? 'active' : ''}
+                            onClick={() => updateFilter({ extended: true })}
+                        >
+                            Advanced
+                        </button>
+                    </div>
                 </div>
             </div>
             {extended && (
-                <>
-                    <div className="filter-control__basic">
-                        <input
-                            id="block-kind"
-                            list="block-kind-list"
-                            className="filter-control__input"
-                            value={kind}
-                            onChange={(e) => updateFilter({ kind: e.target.value })}
-                            placeholder="Select block kind"
-                        />
-                        <datalist id="block-kind-list">
-                            {BLOCK_KINDS.map((k) => (
-                                <option key={k} value={k} />
-                            ))}
-                        </datalist>
-                    </div>
-
+                <div className="filter-control__advanced">
+                    <input
+                        id="name-search"
+                        className="filter-control__input"
+                        value={artName ?? ''}
+                        placeholder="Enter art name"
+                        onChange={(e) => updateFilter({ artName: e.target.value })}
+                    />
                     {kind === 'gallery' && (
                         <>
                             <input
@@ -166,14 +173,7 @@ export function FilterControl({ filter, updateFilter }: Props) {
                             </datalist>
                         </>
                     )}
-                    <input
-                        id="name-search"
-                        className="filter-control__input"
-                        value={artName ?? ''}
-                        placeholder="Enter art name"
-                        onChange={(e) => updateFilter({ artName: e.target.value })}
-                    />
-                </>
+                </div>
             )}
         </>
     );
