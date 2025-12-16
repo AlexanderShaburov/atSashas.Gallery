@@ -1,17 +1,22 @@
 // EditorWorkspaceContext.tsx
+import type { BlocksCollectionJSON } from '@/entities/block';
 import { ArtCatalog } from '@/entities/catalog';
+
+import { getCollection } from '@/features/admin/blocks/api/blocksApi';
 import { getCatalog } from '@/features/admin/catalogEditor/api';
+
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
-export interface BlockRef {
-    collectionId: string;
-    blockId: string;
-}
 
 // Narrow global editor session state
 export interface EditorWorkspaceState {
     currentStreamId?: string;
-    currentBlocksCollectionId?: string; // "which collection is open"
-    currentBlockRef?: BlockRef; // "which block in which collection is selected"
+
+    // Single blocks collection (no collectionId anymore)
+    currentBlocksCollection?: BlocksCollectionJSON;
+
+    // Selected block (no BlockRef anymore)
+    currentBlockId?: string;
+
     currentArtItemId?: string;
     currentArtCatalog?: ArtCatalog;
 }
@@ -19,10 +24,16 @@ export interface EditorWorkspaceState {
 // Context value: state + simple setters
 export interface EditorWorkspaceContextValue extends EditorWorkspaceState {
     setStream(id?: string): void;
-    setBlocksCollection(id?: string): void;
-    setBlock(ref?: BlockRef): void;
+
+    // Set/replace current blocks collection (or clear it)
+    setBlocksCollection(collection?: BlocksCollectionJSON): void;
+
+    // Select a block by id (or clear selection)
+    setBlock(id?: string): void;
+
     setArtItem(id?: string): void;
     setArtCatalog(catalog: ArtCatalog): void;
+
     reset(): void;
 }
 
@@ -35,8 +46,8 @@ interface EditorWorkspaceProviderProps {
 export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderProps) {
     const [state, setState] = useState<EditorWorkspaceState>({
         currentStreamId: undefined,
-        currentBlocksCollectionId: undefined,
-        currentBlockRef: undefined,
+        currentBlocksCollection: undefined,
+        currentBlockId: undefined,
         currentArtItemId: undefined,
         currentArtCatalog: undefined,
     });
@@ -45,42 +56,26 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
         () => ({
             ...state,
 
-            // Set current stream (optionally you may want to reset children)
             setStream(id) {
                 setState((prev) => ({
                     ...prev,
                     currentStreamId: id,
-                    // Optionally reset lower-level context:
-                    // currentBlocksCollectionId: undefined,
-                    // currentBlockRef: undefined,
-                    // currentArtItemId: undefined,
                 }));
             },
 
-            // Open a blocks collection, clear selected block because it may be invalid now
-            setBlocksCollection(id) {
+            // Replace current blocks collection and clear selected block (selection may become invalid)
+            setBlocksCollection(collection) {
                 setState((prev) => ({
                     ...prev,
-                    currentBlocksCollectionId: id,
-                    currentBlockRef: undefined, // block selection does not make sense if collection changed
+                    currentBlocksCollection: collection,
+                    currentBlockId: undefined,
                 }));
             },
 
-            // Set current block with an explicit collection reference
-            setBlock(ref) {
-                if (!ref) {
-                    // Clear selection
-                    setState((prev) => ({
-                        ...prev,
-                        currentBlockRef: undefined,
-                    }));
-                    return;
-                }
-
+            setBlock(id) {
                 setState((prev) => ({
                     ...prev,
-                    currentBlocksCollectionId: ref.collectionId, // keep workspace in sync
-                    currentBlockRef: ref,
+                    currentBlockId: id,
                 }));
             },
 
@@ -101,36 +96,41 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
             reset() {
                 setState({
                     currentStreamId: undefined,
-                    currentBlocksCollectionId: undefined,
-                    currentBlockRef: undefined,
+                    currentBlocksCollection: undefined,
+                    currentBlockId: undefined,
                     currentArtItemId: undefined,
                     currentArtCatalog: undefined,
                 });
             },
-
-            removeCollection() {},
         }),
         [state],
     );
 
-    // Download catalog as context created:
+    // Download art catalog + blocks collection on provider mount
     useEffect(() => {
         let cancelled = false;
 
-        const loadCatalog = async () => {
+        const load = async () => {
             try {
-                const catalog = await getCatalog();
+                const [catalog, blocksCollection] = await Promise.all([
+                    getCatalog(),
+                    getCollection(),
+                ]);
+
                 if (cancelled) return;
 
                 setState((prev) => ({
                     ...prev,
                     currentArtCatalog: catalog,
+                    currentBlocksCollection: blocksCollection,
                 }));
             } catch (error) {
-                console.error('Failed to load catalog in EditorWorkspaceProvider', error);
+                console.error('Failed to load workspace data in EditorWorkspaceProvider', error);
             }
         };
-        loadCatalog();
+
+        load();
+
         return () => {
             cancelled = true;
         };
@@ -140,6 +140,7 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
         <EditorWorkspaceContext.Provider value={value}>{children}</EditorWorkspaceContext.Provider>
     );
 }
+
 // eslint-disable-next-line react-refresh/only-export-components
 export function useEditorWorkspace(): EditorWorkspaceContextValue {
     const ctx = useContext(EditorWorkspaceContext);

@@ -35,7 +35,7 @@ export type EditorSession = {
     mode: 'create' | 'edit';
     values: ArtItemForm | undefined;
     setValues: React.Dispatch<React.SetStateAction<ArtItemForm | undefined>>;
-    setIdentity: (v: EditorTarget | undefined) => void;
+    setSelectedBlock: (v: EditorTarget | undefined) => void;
     setMode: (m: 'edit' | 'create') => void;
 
     /** Start a new session from a hopper unit or existing item */

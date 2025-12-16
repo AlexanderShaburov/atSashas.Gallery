@@ -1,23 +1,19 @@
 // src/features/admin/blocks/editorSession/BlockEditorSession.context.tsx
 
-import type { Block, BlocksCollectionJSON, CollectionsList } from '@/entities/block';
+import type {
+    Block,
+    BlockEditorMode,
+    BlockEditorScreenMode,
+    BlocksCollectionJSON,
+} from '@/entities/block';
+import type { UiErrorState } from '@/entities/common';
 import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
-import {
-    createCollection,
-    deleteCollection,
-    getCollection,
-    getCollectionsList,
-} from '@/features/admin/blocks/api/blocksApi';
-import type {
-    BlockEditorMode,
-    BlockEditorSession,
-} from '@/features/admin/blocks/editorSession/blockEditorTypes';
-import {
-    blockToForm,
-    type BlockFormValue,
-} from '@/features/admin/blocks/editorSession/blockFormValueTypes';
+import { getCollection } from '@/features/admin/blocks/api/blocksApi';
+import { blockToForm, type BlockFormValue } from '@/features/admin/blocks/editorSession';
+import type { BlockEditorSession } from '@/features/admin/blocks/editorSession/blockEditorTypes';
 import { BlockEditorCtx } from '@/features/admin/blocks/hooks/useBlocksEditor';
+import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { validateBlockForm } from '@/features/admin/blocks/utils';
 import { deepEqual } from '@/features/admin/catalogEditor/utils/checkers';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -27,17 +23,20 @@ type ProviderProps = { children: ReactNode };
 export function BlockEditorSessionProvider({ children }: ProviderProps) {
     // Global context
     const gCtxt: EditorWorkspaceContextValue = useEditorWorkspace();
-
-    // Core state
-    // List of available collections:
-    const [collectionsList, setCollectionsList] = useState<CollectionsList | undefined>(undefined);
-    // Selected collection:
+    //*******************************************************/
+    // Core state:
+    // Editor mode
+    const [mode, setMode] = useState<BlockEditorMode>('create');
+    // Blocks collection
     const [collection, setCollection] = useState<BlocksCollectionJSON | undefined>(undefined);
     // Selected block
-    const [identity, setIdentity] = useState<Block | undefined>(undefined);
+    const [selectedBlock, setSelectedBlock] = useState<Block | undefined>(undefined);
     // Editor form values:
     const [values, setValues] = useState<BlockFormValue | undefined>(undefined);
-    const [mode, setMode] = useState<BlockEditorMode>('create');
+    // Editor mode:
+    const [screenMode, setScreenMode] = useState<BlockEditorScreenMode>('select');
+
+    //*******************************************************/
     // UI / derived state
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -47,72 +46,43 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     const [editorIsReady, setEditorIsReady] = useState(false);
     const [canSave, setCanSave] = useState(false);
 
+    const [uiError, setUiError] = useState<UiErrorState | undefined>(undefined);
+
     const snapshot = useRef<BlockFormValue | undefined>(undefined);
     const valuesRef = useRef<BlockFormValue | undefined>(values);
-
-    // Block setter helper -> set both workspace and editor contexts
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const setBlockSelected = (id: string | undefined): boolean => {
-        // Find block with id in current collection
-        if (!id) {
-            gCtxt.setBlock(undefined);
-            setIdentity(undefined);
-            return true;
-        } else {
-            if (collection) {
-                const bl = collection?.blocks.find((block) => block.id === id);
-                if (bl) {
-                    gCtxt.setBlock({
-                        collectionId: collection.collectionId,
-                        blockId: id,
-                    });
-                    setIdentity(bl);
-                    return true;
-                } else {
-                    console.error(
-                        `Block with id: ${gCtxt.currentBlockRef} not found in collection ${collection?.collectionName}`,
-                    );
-                    return false;
-                }
-            }
-            console.error(`Collection not set for block with id: ${id}`);
-            return false;
-        }
-    };
+    //*******************************************************/
 
     // ***** Collections preload *****
-    const refreshBlocks = useCallback(async () => {
+    const refreshCollection = useCallback(async (): Promise<BlocksCollectionJSON> => {
         try {
             setLoading(true);
 
             // Download and set collections list
-            const list = await getCollectionsList();
-            setCollectionsList(list);
+            const cl = await getCollection();
+            console.dir(`[BlockEditorSession.context][refreshCollection] cl: ${cl}`);
+            setCollection(cl);
 
-            // Check if workspace has the collection selected
-            let currentCollection: BlocksCollectionJSON | undefined = undefined;
-            if (gCtxt.currentBlocksCollectionId) {
-                currentCollection = await getCollection(gCtxt.currentBlocksCollectionId);
-                setCollection(currentCollection);
-            }
-            console.log(`Collection list is: ${list}`);
-            console.dir(list);
-            return { list, currentCollection };
+            return cl;
         } catch (e) {
-            console.error('Failed to initiate block editor session', e);
-            setCollectionsList([]);
-            return { list: [], currentCollection: undefined };
+            setUiError({
+                title: 'Collection not found',
+                message: 'Blocks collection was not loaded. ' + 'Admin app will be reloaded.',
+                onConfirm: () => {
+                    resetSession();
+                },
+            });
+            throw new Error(`Failed download block collection ${e}`);
         } finally {
             setLoading(false);
         }
-    }, [gCtxt.currentBlocksCollectionId]);
+    }, []);
 
     // initial load
     useEffect(() => {
         (async () => {
-            await refreshBlocks();
+            await refreshCollection();
         })();
-    }, [refreshBlocks]);
+    }, [refreshCollection]);
 
     // keep ref in sync
     useEffect(() => {
@@ -121,19 +91,21 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
     // recompute canSave
     useEffect(() => {
+        console.log('CanSave changed.');
         setCanSave(!saving && isDirty && isValid);
     }, [saving, isDirty, isValid]);
 
     // Reset session helper
-    const resetSession = () => {
-        setIdentity(undefined);
+    const resetSession = useCallback(() => {
+        setSelectedBlock(undefined);
         setValues(undefined);
         setEditorIsReady(false);
         snapshot.current = undefined;
         setIsDirty(false);
         setIsValid(false);
         setMode('create');
-    };
+        setScreenMode('select');
+    }, []);
 
     // ------------------------------------
     // *********** INIT SESSION ***********
@@ -144,65 +116,48 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             try {
                 setLoading(true);
                 console.log('[INIT SESSION]: started');
+                // Refresh collection state
+                const cl = await refreshCollection();
 
-                // Check if workspace has collection selected
-                const collectionId = gCtxt.currentBlocksCollectionId;
-                const blockRef = gCtxt.currentBlockRef;
-
-                // 1) If collection id not selected in workspace -> total reset
-                if (!collectionId) {
-                    setCollection(undefined);
-                    resetSession();
-                    setMode('create');
-                    return;
-                }
-
-                // 2) If collection id saved -> load collection from backend
-                const nextCollection = await getCollection(collectionId);
-                setCollection(nextCollection);
-
-                // 3) If in workspace not block selected -> open collection to create new block
-                if (!blockRef) {
-                    resetSession();
-                    setMode('create');
-                    return;
-                }
-
-                // 4) Check blockRef and collection compliance
-                if (blockRef.collectionId !== collectionId) {
-                    console.error('Workspace context error: collection and block mismatch');
-                    console.error(`Block's collection id: ${blockRef.collectionId}`);
-                    console.error(`Workspace collection id: ${collectionId}`);
-                    setCollection(undefined);
+                // Check if workspace has block id selected
+                // If not reset Editor session to initial empty values
+                if (!gCtxt.currentBlockId) {
                     resetSession();
                     return;
                 }
 
-                // 5) Find block in downloaded collection
-                const bl = nextCollection?.blocks.find((block) => block.id === blockRef.blockId);
+                // If block id selected -> find block in collection and set its data to form values
+                const bl = cl.blocks.find((block) => block.id === gCtxt.currentBlockId);
 
                 if (!bl) {
-                    console.error(
-                        `Can't find block ${blockRef.blockId} in corresponding collection`,
-                    );
+                    setUiError({
+                        title: 'Block not found',
+                        message:
+                            `Block "${gCtxt.currentBlockId}" was not found. ` +
+                            `The editor will be opened in create mode.`,
+                        onConfirm: () => {
+                            gCtxt.setBlock(undefined);
+                            resetSession();
+                        },
+                    });
                     resetSession();
                     return;
                 }
 
-                setIdentity(bl);
+                setSelectedBlock(bl);
                 setValues(blockToForm(bl));
                 setMode('edit');
             } catch (e) {
-                console.error(`Loading error ${e}`);
+                console.error(`BlockEditorSession error: ${e}`);
             } finally {
                 setLoading(false);
             }
         })();
-    }, [mode, gCtxt.currentBlocksCollectionId, gCtxt.currentBlockRef]);
+    }, [refreshCollection]);
 
     // dirty + validity tracking
     useEffect(() => {
-        if (!valuesRef.current || !snapshot.current || !identity) {
+        if (!valuesRef.current || !snapshot.current || !selectedBlock) {
             setIsDirty(false);
             setIsValid(false);
             return;
@@ -213,7 +168,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
         const valid = validateBlockForm(valuesRef.current);
         setIsValid(valid);
-    }, [values, identity]);
+    }, [values, selectedBlock]);
 
     const save = useCallback(async () => {
         if (!values || !canSave) return;
@@ -222,7 +177,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             // TODO: sanitize + build payload + update backend
             // await updateBlocksCatalog(...);
 
-            await refreshBlocks();
+            await refreshCollection();
             // reset baseline
             snapshot.current = values;
             setIsDirty(false);
@@ -231,94 +186,83 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         } finally {
             setSaving(false);
         }
-    }, [values, canSave, refreshBlocks]);
+    }, [values, canSave, refreshCollection]);
 
     const exit = useCallback(() => {
         if (saving) return;
         if (isDirty && !confirm('Discard unsaved block changes?')) return;
-        refreshBlocks();
-        setIdentity(undefined);
-    }, [saving, isDirty, refreshBlocks]);
+        resetSession();
+    }, [saving, isDirty, resetSession]);
 
-    // Add new collection handler
-    const newCollection = useCallback(
-        async (name: string) => {
-            console.log(`NewCollection called wit "${name}" name`);
-            await createCollection(name);
+    const onHit = useCallback(
+        (hit: BlockHitEvent) => {
+            console.log(`[onHit]: edit mode hit detected`);
+            console.dir(hit);
 
-            const { list } = await refreshBlocks();
-            console.dir(list);
-
-            const ncListItem = list?.find((col) => col.name === name);
-
-            if (ncListItem?.id) {
-                const nc = await getCollection(ncListItem.id);
-                setCollection(nc);
-                console.log(`Current collection set to ${nc}`);
-            } else {
-                console.error(`Failed to add new collection with name: ${name}`);
-            }
+            if (screenMode === 'select') handleSelectHit(hit);
+            else handleEditHit(hit);
         },
-        [refreshBlocks, setCollection],
+        [screenMode],
     );
 
-    const removeCollection = useCallback(async () => {
-        if (!collection) return;
-        setSaving(true);
-        try {
-            // TODO: sanitize + build payload + update backend
-            // await updateBlocksCatalog(...);
+    const onDelete = useCallback(() => {
+        console.log(`onDelete called for block ${selectedBlock}`);
+    }, [selectedBlock]);
 
-            await deleteCollection(collection);
-            // refresh Collection list
-            setCollection(undefined);
-            refreshBlocks();
-        } catch (e) {
-            console.error('Failed to delete collection', e);
-        } finally {
-            setSaving(false);
-        }
-    }, [setCollection, collection, setSaving, refreshBlocks]);
+    function handleSelectHit(hit: BlockHitEvent) {
+        setSelectedBlock(hit.block);
+        setValues(blockToForm(hit.block));
+        setScreenMode('edit');
+    }
+
+    function handleEditHit(hit: BlockHitEvent) {
+        console.log(`[onHit]: edit mode hit detected`);
+        console.dir(hit);
+    }
 
     const value: BlockEditorSession = useMemo(
         () => ({
-            collectionsList,
-            identity,
+            selectedBlock,
             mode,
             values,
             collection,
+            screenMode,
             setValues,
-            setIdentity,
+            setSelectedBlock,
             setMode,
+            setScreenMode,
             setCollection,
-            newCollection,
-            removeCollection,
             editorIsReady,
             isDirty,
             isValid,
             canSave,
             loading,
             saving,
+            uiError,
             save,
             exit,
+            onHit,
+            onDelete,
         }),
         [
-            collectionsList,
-            identity,
+            selectedBlock,
             mode,
             values,
             collection,
+            screenMode,
             editorIsReady,
             isDirty,
             isValid,
             canSave,
             loading,
             saving,
+            uiError,
             setCollection,
-            newCollection,
-            removeCollection,
+            setScreenMode,
             save,
             exit,
+            onHit,
+            onDelete,
         ],
     );
 

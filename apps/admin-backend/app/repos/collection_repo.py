@@ -2,21 +2,16 @@
 
 import asyncio
 import json
-from pathlib import Path
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
-from app.settings import settings
 from app.models.block_collection import BlockCollection
+from app.storage import BLOCKS_DIR
 
 
 class BlockCollectionRepo:
     def __init__(self) -> None:
-        self._path = (
-            Path(settings.storage_root)
-            / settings.json_data.strip("/")
-            / "block_collection.json"  # или как ты решишь назвать
-        )
+        self._path = BLOCKS_DIR / "block_collection.json"
         self._lock = asyncio.Lock()
 
     def _load(self) -> BlockCollection:

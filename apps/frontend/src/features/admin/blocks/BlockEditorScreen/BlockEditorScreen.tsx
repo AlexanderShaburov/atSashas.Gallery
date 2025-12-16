@@ -9,6 +9,7 @@ import { CollectionGrid } from '@/features/admin/blocks/ui/CollectionGrid/Collec
 import { FilterControl } from '@/features/admin/blocks/ui/FilterControl/FilterControl';
 import '@/pages/admin/BlocksPage/BlocksPage.css';
 import { useState } from 'react';
+import { SingleBlockEditor } from '../ui/SingleBlockEditor/SingleBlockEditor';
 
 export type BlockFilterState = {
     tags: string[];
@@ -29,10 +30,17 @@ export function BlockEditor() {
         artName: '',
         extended: false,
     });
-
     // Updated filter setter:
     const updateFilter = (patch: Partial<BlockFilterState>) => {
         setFilter((prev) => ({ ...prev, ...patch }));
+    };
+
+    const toolbarProps = {
+        canSave: session.canSave,
+        saving: session.saving,
+        save: session.save,
+        exit: session.exit,
+        onDelete: session.onDelete,
     };
 
     const {
@@ -51,6 +59,8 @@ export function BlockEditor() {
 
     function onHit(hit: BlockHitEvent) {
         console.dir(`Hit occur ${hit}`);
+        console.dir(hit);
+        session.onHit(hit);
     }
 
     return (
@@ -63,7 +73,16 @@ export function BlockEditor() {
             <div className="block-editor__body">
                 {loading && <p className="block-editor__status">Loading collections…</p>}
 
-                {collection && <CollectionGrid collection={collection} onHit={onHit} />}
+                {session.screenMode === 'select' && (
+                    <CollectionGrid collection={collection} onHit={onHit} />
+                )}
+                {session.screenMode === 'edit' && session.values && (
+                    <SingleBlockEditor
+                        item={session.values}
+                        onHit={session.onHit}
+                        toolbarProps={toolbarProps}
+                    />
+                )}
             </div>
         </div>
     );

@@ -12,7 +12,6 @@ const ITEM_POSITIONS: Record<GalleryLayout, ItemPosition[]> = {
     triptychRight: ['LUC', 'LBC', 'RS'],
     triptychHorizontal: ['Left', 'Center', 'Right'],
 };
-
 type Props = {
     item: GalleryBlock;
 
@@ -123,7 +122,11 @@ export function GalleryComponent({ item, onHit }: Props) {
                     role="button"
                     className={`blk-gallery blk-gallery_caption`}
                     onClick={(e) =>
-                        onHit({ block: item, hit: Hit.galleryBlockCaption(), nativeEvent: e })
+                        onHit({
+                            block: item,
+                            hit: Hit.galleryBlockCaption(),
+                            nativeEvent: e,
+                        })
                     }
                 >
                     {item.isTemplate ? (label ?? tpl?.kind) : (item.caption?.en ?? '')}

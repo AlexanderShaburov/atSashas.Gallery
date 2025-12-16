@@ -8,7 +8,7 @@ export type BlockEditorMode = 'create' | 'edit';
 export const CTA_TYPES = ['stream', 'external', 'event'];
 export type CtaTypes = (typeof CTA_TYPES)[number];
 
-export const BLOCK_KINDS = ['gallery', 'text', 'cta'];
+export const BLOCK_KINDS = ['gallery', 'text', 'cta'] as const;
 export type BlockKind = (typeof BLOCK_KINDS)[number];
 
 export type ItemPosition =
@@ -31,7 +31,7 @@ export const GALLERY_LAYOUTS = [
     'triptychLeft',
     'triptychRight',
     'triptychHorizontal',
-];
+] as const;
 export type GalleryLayout = (typeof GALLERY_LAYOUTS)[number];
 
 interface BlockBase {

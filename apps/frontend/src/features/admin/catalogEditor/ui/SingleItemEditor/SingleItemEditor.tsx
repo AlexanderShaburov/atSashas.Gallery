@@ -2,6 +2,7 @@ import { deleteFromHopper } from '@/features/admin/catalogEditor/api';
 import { useEditorSession } from '@/features/admin/catalogEditor/editorSession/EditorSession.context';
 import { CreateForm } from '@/features/admin/catalogEditor/ui/CreateForm/CreateForm';
 import '@/features/admin/catalogEditor/ui/SingleItemEditor/SingleItemEditor.css';
+import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
 import { useEffect } from 'react';
 export default function SingleItemEditor() {
     const { thumb, save, values, isDirty, isValid, exit, canSave, saving, mode } = {
@@ -106,43 +107,13 @@ export default function SingleItemEditor() {
             <section className="sie-form-col" aria-label="Metadata form">
                 <div className="sie-form-wrap">
                     <CreateForm />
-
-                    <div className="sie-toolbar">
-                        <div className="sie-actions sie-actions--left">
-                            <button
-                                type="button"
-                                className="sie-btn sie-btn--danger"
-                                onClick={onDelete}
-                            >
-                                🗑 Delete
-                            </button>
-                        </div>
-
-                        <div className="sie-actions sie-actions--right">
-                            <button
-                                type="button"
-                                className="sie-btn sie-btn--secondary"
-                                onClick={() => exit()}
-                            >
-                                ✖ Exit
-                            </button>
-                            <button
-                                type="button"
-                                className="sie-btn sie-btn--primary"
-                                disabled={!canSave || saving}
-                                onClick={() => !saving && canSave && save()}
-                                title={
-                                    !canSave
-                                        ? 'Complete required fields'
-                                        : saving
-                                          ? 'Saving...'
-                                          : 'Save'
-                                }
-                            >
-                                {canSave ? '💾 Save' : 'Saving…'}
-                            </button>
-                        </div>
-                    </div>
+                    <SingleEditorToolbar
+                        canSave={canSave}
+                        saving={saving}
+                        save={save}
+                        exit={exit}
+                        onDelete={onDelete}
+                    />
                 </div>
             </section>
         </div>

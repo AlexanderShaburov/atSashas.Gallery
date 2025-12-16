@@ -1,5 +1,5 @@
 // pages/admin/BlocksPage.tsx
-import { BlockEditor } from '@/features/admin/blocks/BlockEditor/BlockEditor';
+import { BlockEditor } from '@/features/admin/blocks/BlockEditorScreen/BlockEditorScreen';
 import type { BlockEditorSession } from '@/features/admin/blocks/editorSession';
 import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';

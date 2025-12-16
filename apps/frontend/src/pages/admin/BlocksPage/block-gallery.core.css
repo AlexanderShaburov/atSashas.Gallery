@@ -1,3 +1,4 @@
+/* src/pages/admin/BlocksPage/block-gallery.core.css */
 .blk-gallery {
     position: relative;
     margin: 0;
@@ -29,8 +30,8 @@
     font-size: 0.7rem;
     color: var(--muted);
 }
-.blk-gallery__empty,
-.blk-gallery__missing {
+.blk-gallery__slot-empty,
+.blk-gallery__slot-missing {
     border: 1px dashed var(--border);
 }
 .blk-gallery__slot picture,

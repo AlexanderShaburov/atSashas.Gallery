@@ -1,18 +1,20 @@
 // src/features/admin/blocks/editorSession/blockEditorTypes.ts
 
-import type { Block, BlocksCollectionJSON, CollectionsList } from '@/entities/block';
+import type {
+    Block,
+    BlockEditorMode,
+    BlockEditorScreenMode,
+    BlocksCollectionJSON,
+} from '@/entities/block';
+import type { UiErrorState } from '@/entities/common';
 import type { BlockFormValue } from '@/features/admin/blocks/editorSession/blockFormValueTypes';
-
-export type BlockEditorMode = 'create' | 'edit';
+import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 
 export type BlockEditorTarget = { mode: 'create' } | { mode: 'edit'; block: Block };
 
 export type BlockEditorSession = {
-    /** Full list of blocks loaded from backend / JSON */
-    collectionsList: CollectionsList | undefined;
-
     /** Which block we are working with (create or edit existing) */
-    identity: Block | undefined;
+    selectedBlock: Block | undefined;
 
     /** Current mode (mostly mirrors identity.mode, but convenient for UI) */
     mode: BlockEditorMode;
@@ -20,12 +22,14 @@ export type BlockEditorSession = {
     /** Working form values for the block (formValue) */
     values: BlockFormValue | undefined;
     collection?: BlocksCollectionJSON;
+    screenMode: BlockEditorScreenMode;
     setValues: React.Dispatch<React.SetStateAction<BlockFormValue | undefined>>;
-    setIdentity: (v: Block | undefined) => void;
+    setSelectedBlock: (v: Block | undefined) => void;
     setMode: (m: BlockEditorMode) => void;
+    setScreenMode: (m: BlockEditorScreenMode) => void;
     setCollection: (c: BlocksCollectionJSON | undefined) => void;
-    newCollection: (n: string) => Promise<void>;
-    removeCollection: (c: BlocksCollectionJSON) => Promise<void>;
+    onHit: (h: BlockHitEvent) => void;
+    onDelete: () => void;
 
     /** Editor lifecycle */
     editorIsReady: boolean;
@@ -42,5 +46,7 @@ export type BlockEditorSession = {
     exit: () => void;
 
     /** UI helpers (optional, can extend later) */
+    // UI error state:
+    uiError: UiErrorState | undefined;
     // currentLayoutPreview?: Block['layout'];
 };

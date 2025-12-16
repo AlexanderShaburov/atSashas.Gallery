@@ -1,8 +1,8 @@
 //src/features/admin/blocks/ui/FilterControl/FilterControl.tsx:
 
 import { BLOCK_KINDS, CTA_TYPES, GALLERY_LAYOUTS } from '@/entities/block/Block';
-import { BlockFilterState } from '@/features/admin/blocks//BlockEditor/BlockEditor';
 import { useBlockEditorSession } from '@/features/admin/blocks//hooks/useBlocksEditor';
+import { BlockFilterState } from '@/features/admin/blocks/BlockEditorScreen/BlockEditorScreen';
 import { useEffect, useState } from 'react';
 import './FilterControl.css';
 

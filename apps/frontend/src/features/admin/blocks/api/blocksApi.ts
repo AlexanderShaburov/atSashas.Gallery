@@ -1,25 +1,18 @@
-import type { BlocksCollectionJSON, CollectionsList } from '@/entities/block';
+//src/features/admin/blocks/api/blocksApi.ts:
+
+import type { BlocksCollectionJSON } from '@/entities/block';
 import { generateArtId } from '@/shared/lib/id/generateArtId';
 
 export const API_BASE = import.meta.env.VITE_API_BASE_URL;
-export const BLOCK_VAULT = `${API_BASE}/block`;
+export const BLOCK_VAULT = `${API_BASE}/blocks`;
 export const BLOCK_COLLECTIONS_CONTENT = `${BLOCK_VAULT}/content`;
 export const BLOCK_COLLECTION = `${BLOCK_VAULT}/collection`;
 const BLOCK_NEW_COLLECTION = `${BLOCK_VAULT}/new_collection`;
 
-export async function getCollectionsList(): Promise<CollectionsList> {
-    const resp = await fetch(BLOCK_COLLECTIONS_CONTENT);
-    if (!resp.ok)
-        throw new Error(`Block Collections list request failed with error ${resp.status}`);
-    const list = await resp.json();
-    console.dir(`[getCollectionsList] received object: ${list}`);
-    return await list;
-}
-
-export async function getCollection(id: string): Promise<BlocksCollectionJSON | undefined> {
-    const resp = await fetch(`${BLOCK_COLLECTION}/${id}`);
+export async function getCollection(): Promise<BlocksCollectionJSON> {
+    const resp = await fetch(BLOCK_COLLECTION);
     console.dir(resp);
-    if (!resp.ok) throw new Error(`Failed to read ${id} collection`);
+    if (!resp.ok) throw new Error(`Failed to read collection`);
     return await resp.json();
 }
 

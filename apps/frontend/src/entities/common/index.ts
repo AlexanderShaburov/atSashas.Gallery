@@ -7,3 +7,4 @@ export type { CurrencyName, Money } from './money';
 export type { ISODate } from './primitives';
 export type { Tags } from './Tags';
 export type { Theme_Types } from './themes';
+export type { UiErrorState } from './uiErrors';

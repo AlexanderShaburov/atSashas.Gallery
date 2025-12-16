@@ -10,4 +10,5 @@ export type {
     ItemPosition,
     TextBlock,
 } from './Block';
-export type { BlocksCollectionJSON, CollectionsList, CollectionsListItem } from './blockCollection';
+export type { BlocksCollectionJSON } from './blockCollection';
+export type { BlockEditorMode, BlockEditorScreenMode } from './BlockEditorScreenTypes';

@@ -1,0 +1,100 @@
+/* src/shared/ui/SingleEditorToolbar/SingleEditorToolbar.css */
+
+/* Row wrapper: left (Delete) + right (Exit/Save) in one line */
+.set-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    width: 100%;
+    min-width: 0; /* важно для flex-детей, чтобы не ломали контейнер */
+}
+
+/* both sides stay in a row */
+.set-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+/* prevent the right group from wrapping into 2 lines */
+.set-actions--right {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+/* left group may shrink if needed (optional) */
+.set-actions--left {
+    flex: 0 0 auto;
+}
+
+/* optional: keep buttons themselves from splitting emoji/text */
+.set-btn {
+    white-space: nowrap;
+}
+
+.set-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+.set-btn {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: none; /* never show a dropdown arrow */
+    border: 1px solid var(--form-border, #d0d0d0);
+    background: var(--card-bg, #ffffff);
+    color: var(--text, #111);
+    border-radius: 10px;
+
+    /* match CreateForm buttons: */
+    min-height: 44px;
+    padding: 0.6rem 0.7rem;
+    font: inherit;
+    font-size: 1rem;
+    line-height: 1.4;
+
+    cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease,
+        transform 0.02s ease;
+}
+.set-btn:hover,
+.set-btn:focus-visible {
+    outline: none;
+    border-color: var(--form-border-hover, #888);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #6366f1) 20%, transparent);
+}
+.set-btn:active {
+    transform: translateY(1px);
+}
+.set-btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.set-btn--danger {
+    background: #e53935;
+    border: none;
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.set-btn--danger:hover {
+    background: #c62828;
+}
+
+/* Optional subtle variants (all neutral) */
+.set-btn--primary {
+    background: color-mix(in srgb, var(--accent, #6366f1) 12%, var(--card-bg, #fff));
+    border-color: color-mix(in srgb, var(--accent, #6366f1) 45%, var(--form-border, #d0d0d0));
+    color: var(--text, #111);
+}
+.set-btn--ghost {
+    background: transparent;
+    border-color: var(--form-border, #d0d0d0);
+}

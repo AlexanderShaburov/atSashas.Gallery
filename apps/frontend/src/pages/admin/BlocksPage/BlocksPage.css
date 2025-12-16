@@ -1,3 +1,10 @@
+/*
+//src/pages/admin/BlocksPage/BlocksPage.css
+*/
+@import './block-cta.core.css';
+@import './block-gallery.core.css';
+@import './block-text.core.css';
+
 /* =========================
    Blocks Page Layout
    ========================= */

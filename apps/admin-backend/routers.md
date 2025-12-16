@@ -1,6 +1,6 @@
 ### All router paths:
 1. /json - /media/json - catalog on the server: base of our database.
-2. /json/bloks - blocks control endpoints:
+2. /bloks - blocks control endpoints, /media/json/block_collection/block_collection.json:
     - GET /collection - : get complete collection of blocks
     - POST : create new block
     - PUT/{block_id}: renew existing block

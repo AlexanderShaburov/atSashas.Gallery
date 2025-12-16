@@ -37,7 +37,7 @@ type CtaBlockFormValue = {
 export type BlockFormValue = GalleryBlockFormValue | TextBlockFormValue | CtaBlockFormValue;
 
 export function formToBlock(form: BlockFormValue): Block {
-    switch (form.blockKind) {
+    switch (form?.blockKind) {
         case 'gallery':
             return {
                 id: form.id,
@@ -110,6 +110,10 @@ function emptyLocalized(): Localized {
     return { en: '' };
 }
 
+function assertNever(x: never): never {
+    throw new Error(`Unhandled BlockKind: ${String(x)}`);
+}
+
 export function createInitialFormForKind(kind: BlockKind, prev?: BlockFormValue): BlockFormValue {
     const base = {
         id: prev?.id ?? generateArtId('block'),
@@ -122,7 +126,7 @@ export function createInitialFormForKind(kind: BlockKind, prev?: BlockFormValue)
             return {
                 ...base,
                 blockKind: 'gallery',
-                layout: prev?.blockKind === 'gallery' ? prev.layout : 'single', // или твой дефолт
+                layout: prev?.blockKind === 'gallery' ? prev.layout : 'single',
                 items: prev?.blockKind === 'gallery' ? prev.items : [],
                 caption: prev?.blockKind === 'gallery' ? prev.caption : { en: '' },
             };
@@ -145,5 +149,7 @@ export function createInitialFormForKind(kind: BlockKind, prev?: BlockFormValue)
                 buttonLabel: prev?.blockKind === 'cta' ? prev.buttonLabel : emptyLocalized(),
                 target: prev?.blockKind === 'cta' ? prev.target : { type: 'stream', slug: '' },
             };
+        default:
+            return assertNever(kind);
     }
 }
