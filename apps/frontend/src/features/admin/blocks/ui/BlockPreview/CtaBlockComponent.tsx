@@ -1,9 +1,10 @@
-import { CtaBlock } from '@/entities/block';
+import { BlockParent, CtaBlock } from '@/entities/block';
 import '@/features/admin/blocks/ui/BlockTemplates/block.templates.css';
 import { BlockHitEvent, Hit } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 type Props = {
     item: CtaBlock;
     onHit: (hit: BlockHitEvent) => void;
+    parent: BlockParent;
 };
 
 export function CtaBlockComponent({ item, onHit }: Props) {

@@ -1,4 +1,10 @@
-export { BLOCK_KINDS, CTA_TYPES, GALLERY_LAYOUTS } from './Block';
+export type { BlocksCollectionJSON } from './block-collection.types';
+export type {
+    BlockEditorMode,
+    BlockEditorScreenMode,
+    BlockParent,
+} from './block-editor-screen.types';
+export { BLOCK_KINDS, CTA_TYPES, GALLERY_LAYOUTS } from './block.types';
 export type {
     Block,
     BlockKind,
@@ -9,6 +15,4 @@ export type {
     GalleryLayout,
     ItemPosition,
     TextBlock,
-} from './Block';
-export type { BlocksCollectionJSON } from './blockCollection';
-export type { BlockEditorMode, BlockEditorScreenMode } from './BlockEditorScreenTypes';
+} from './block.types';

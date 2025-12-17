@@ -30,6 +30,7 @@ export type BlockEditorSession = {
     setCollection: (c: BlocksCollectionJSON | undefined) => void;
     onHit: (h: BlockHitEvent) => void;
     onDelete: () => void;
+    updateTags: (t: string[]) => void;
 
     /** Editor lifecycle */
     editorIsReady: boolean;

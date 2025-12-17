@@ -29,6 +29,7 @@ export function TemplateRaw({ onSelectKind }: TemplateRawProps) {
                                         isTemplate: true,
                                     }}
                                     onHit={onSelectKind}
+                                    parent="grid"
                                 />
                             </div>
                         );
@@ -38,6 +39,7 @@ export function TemplateRaw({ onSelectKind }: TemplateRawProps) {
                                 <CtaBlockComponent
                                     item={{ ...createCtaTemplateBlock(), isTemplate: true }}
                                     onHit={onSelectKind}
+                                    parent="grid"
                                 />
                             </div>
                         );
@@ -47,6 +49,7 @@ export function TemplateRaw({ onSelectKind }: TemplateRawProps) {
                                 <TextBlockComponent
                                     item={{ ...createTextTemplateBlock(), isTemplate: true }}
                                     onHit={onSelectKind}
+                                    parent="grid"
                                 />
                             </div>
                         );

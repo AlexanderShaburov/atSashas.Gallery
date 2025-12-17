@@ -37,7 +37,7 @@ export default function NumericInput({
             enterKeyHint="done"
             className={className}
             placeholder={placeholder}
-            value={text}
+            value={text ?? ''}
             onChange={(e) => {
                 const t = e.target.value.trim();
                 if (t === '' || allowed.test(t)) {

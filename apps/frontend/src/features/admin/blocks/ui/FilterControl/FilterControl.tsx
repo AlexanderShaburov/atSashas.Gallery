@@ -1,6 +1,12 @@
 //src/features/admin/blocks/ui/FilterControl/FilterControl.tsx:
 
-import { BLOCK_KINDS, CTA_TYPES, GALLERY_LAYOUTS } from '@/entities/block/Block';
+import {
+    BLOCK_KINDS,
+    BlockKind,
+    CTA_TYPES,
+    GALLERY_LAYOUTS,
+    GalleryLayout,
+} from '@/entities/block/block.types';
 import { useBlockEditorSession } from '@/features/admin/blocks//hooks/useBlocksEditor';
 import { BlockFilterState } from '@/features/admin/blocks/BlockEditorScreen/BlockEditorScreen';
 import { useEffect, useState } from 'react';
@@ -79,7 +85,7 @@ export function FilterControl({ filter, updateFilter }: Props) {
                 <input
                     list={tagsListId}
                     className="filter-control__input"
-                    value={tagDraft}
+                    value={tagDraft ?? ''}
                     onChange={(e) => setTagDraft(e.target.value)}
                     onBlur={() => commitTag(tagDraft)}
                     onKeyDown={(e) => {
@@ -99,8 +105,12 @@ export function FilterControl({ filter, updateFilter }: Props) {
                 <input
                     list={kindListId}
                     className="filter-control__input"
-                    value={kind}
-                    onChange={(e) => updateFilter({ kind: e.target.value })}
+                    value={kind ?? ''}
+                    onChange={(e) =>
+                        updateFilter({
+                            kind: e.target.value === '' ? undefined : (e.target.value as BlockKind),
+                        })
+                    }
                     placeholder="Select block kind to filter"
                 />
                 <datalist id={kindListId}>
@@ -145,8 +155,14 @@ export function FilterControl({ filter, updateFilter }: Props) {
                                 id="layout-style"
                                 list="layouts-list"
                                 className="filter-control__input"
-                                value={layout}
-                                onChange={(e) => updateFilter({ layout: e.target.value })}
+                                value={layout ?? ''}
+                                onChange={(e) =>
+                                    updateFilter({
+                                        layout: e.target.value
+                                            ? (e.target.value as GalleryLayout)
+                                            : undefined,
+                                    })
+                                }
                                 placeholder="Select Layout style"
                             />
                             <datalist id="layouts-list">
@@ -162,7 +178,7 @@ export function FilterControl({ filter, updateFilter }: Props) {
                                 id="cta-type"
                                 list="cta-types-list"
                                 className="filter-control__input"
-                                value={ctaType}
+                                value={ctaType ?? ''}
                                 onChange={(e) => updateFilter({ ctaType: e.target.value })}
                                 placeholder="Select CTA type"
                             />

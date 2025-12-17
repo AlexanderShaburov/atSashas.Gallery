@@ -1,4 +1,4 @@
-import { normalizeStream } from '@/entities/block/Block';
+import { normalizeStream } from '@/entities/block/block.types';
 import type { LegacyStreamData, StreamData } from '@/entities/stream';
 import { useEffect, useState } from 'react';
 

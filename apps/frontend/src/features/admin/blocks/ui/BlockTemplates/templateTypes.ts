@@ -39,7 +39,7 @@ export function createTextTemplateBlock(): TextBlock {
         blockKind: 'text',
         dateCreated: todayISO(),
         caption: { en: 'Caption' },
-        title: { en: 'Template' },
+        title: { en: 'Place your title here' },
         body: { en: 'Place your text here' },
     };
 }

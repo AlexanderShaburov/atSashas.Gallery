@@ -1,46 +1,64 @@
-import { TextBlock } from '@/entities/block';
+import { BlockParent, TextBlock } from '@/entities/block';
 import { BlockHitEvent, Hit } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 
 type Props = {
     item: TextBlock;
     onHit: (hit: BlockHitEvent) => void;
+    parent: BlockParent; // 'grid' | 'editor'
 };
 
-export function TextBlockComponent({ item, onHit }: Props) {
-    const bodyText = item.body?.en?.trim() || 'Place your text here';
-    const captionText = item.caption?.en?.trim() || 'Caption';
+export function TextBlockComponent({ item, onHit, parent }: Props) {
+    const isEditor = parent === 'editor';
+
+    const titleText = item.title?.en?.trim() ?? '';
+    const bodyText = item.body?.en?.trim() ?? '';
+
+    // In editor we always render fields (with placeholders),
+    // in grid we render only when there is content.
+    const showTitle = isEditor || !!titleText;
+    const showBody = isEditor || !!bodyText;
 
     return (
-        <div className={`blk-text`}>
-            {/* Body */}
-            <div
-                role="button"
-                className="blk-text__body"
-                onClick={(e) =>
-                    onHit({
-                        block: item,
-                        hit: Hit.textBody(),
-                        nativeEvent: e,
-                    })
-                }
-            >
-                <p>{bodyText}</p>
-            </div>
+        <div className={`blk-text ${isEditor ? 'blk--editor' : ''}`}>
+            {/* Title (top) */}
+            {showTitle && (
+                <div
+                    role="button"
+                    className={[
+                        isEditor ? 'blk-field blk-field--text-title' : 'blk-text__title',
+                        !titleText ? 'is-empty' : '',
+                    ].join(' ')}
+                    onClick={(e) =>
+                        onHit({
+                            block: item,
+                            hit: Hit.textTitle(),
+                            nativeEvent: e,
+                        })
+                    }
+                >
+                    {titleText || 'Title'}
+                </div>
+            )}
 
-            {/* Caption */}
-            <div
-                role="button"
-                className="blk-text__caption"
-                onClick={(e) =>
-                    onHit({
-                        block: item,
-                        hit: Hit.textTitle(),
-                        nativeEvent: e,
-                    })
-                }
-            >
-                {captionText}
-            </div>
+            {/* Body (below) */}
+            {showBody && (
+                <div
+                    role="button"
+                    className={[
+                        isEditor ? 'blk-field blk-field--text-body' : 'blk-text__body',
+                        !bodyText ? 'is-empty' : '',
+                    ].join(' ')}
+                    onClick={(e) =>
+                        onHit({
+                            block: item,
+                            hit: Hit.textBody(),
+                            nativeEvent: e,
+                        })
+                    }
+                >
+                    {bodyText ? <p>{bodyText}</p> : <p>Place your text here</p>}
+                </div>
+            )}
         </div>
     );
 }

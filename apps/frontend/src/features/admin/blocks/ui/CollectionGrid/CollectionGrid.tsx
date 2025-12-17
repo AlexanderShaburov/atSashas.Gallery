@@ -43,11 +43,15 @@ export function CollectionGrid({ collection, onHit }: Props) {
                 const b = safeCollection.blocks[item];
                 switch (b?.blockKind) {
                     case 'gallery':
-                        return <GalleryComponent key={b.id} item={b} onHit={onHit} />;
+                        return <GalleryComponent key={b.id} item={b} onHit={onHit} parent="grid" />;
                     case 'text':
-                        return <TextBlockComponent key={b.id} item={b} onHit={onHit} />;
+                        return (
+                            <TextBlockComponent key={b.id} item={b} onHit={onHit} parent="grid" />
+                        );
                     case 'cta':
-                        return <CtaBlockComponent key={b.id} item={b} onHit={onHit} />;
+                        return (
+                            <CtaBlockComponent key={b.id} item={b} onHit={onHit} parent="grid" />
+                        );
                     default:
                         return null;
                 }

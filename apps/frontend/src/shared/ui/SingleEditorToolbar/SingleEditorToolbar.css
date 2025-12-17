@@ -98,3 +98,55 @@
     background: transparent;
     border-color: var(--form-border, #d0d0d0);
 }
+/* ---- TAGS (center) ---- */
+
+.set-tags {
+    display: flex;
+    align-items: center;
+    min-width: 240px;
+    max-width: 420px;
+    padding: 0 12px;
+}
+
+.set-tags__view {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+
+    border: 1px dashed color-mix(in srgb, var(--tile-title) 65%, var(--card-bg) 35%);
+}
+
+.set-tags__view:hover {
+    border-style: solid;
+}
+
+.set-tags__view.is-empty {
+    opacity: 0.6;
+    font-style: italic;
+}
+
+.set-tags__label {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.set-tags__value {
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.set-tags__input {
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--tile-title);
+    background: var(--card-bg);
+    font-size: 0.85rem;
+    outline: none;
+}

@@ -1,5 +1,5 @@
 import { ISODate } from '@/entities/common';
-import { Block } from './Block';
+import { Block } from './block.types';
 
 export interface BlocksCollectionJSON {
     kind: 'BlockCollection';

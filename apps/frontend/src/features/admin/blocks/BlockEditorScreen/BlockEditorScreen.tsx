@@ -1,6 +1,6 @@
 //@/features/admin/blocks/BlockEditor/BlockEditor.tsx
 import { BlockKind } from '@/entities/block';
-import { CtaTypes, GalleryLayout } from '@/entities/block/Block';
+import { CtaTypes, GalleryLayout } from '@/entities/block/block.types';
 import type { BlockEditorSession } from '@/features/admin/blocks/editorSession';
 import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import '@/features/admin/blocks/ui/BlockPreview/index';
@@ -41,6 +41,8 @@ export function BlockEditor() {
         save: session.save,
         exit: session.exit,
         onDelete: session.onDelete,
+        tags: session.values?.tags,
+        onChangeTags: session.updateTags,
     };
 
     const {

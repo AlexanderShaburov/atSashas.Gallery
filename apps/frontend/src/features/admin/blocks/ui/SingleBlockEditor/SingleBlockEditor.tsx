@@ -21,19 +21,39 @@ type Props = {
         save: () => void;
         exit: () => void;
         onDelete: () => void;
+        tags?: string[];
+        onChangeTags?: (tags: string[]) => void;
     };
 };
 export function SingleBlockEditor({ item, onHit, toolbarProps }: Props) {
     let content: JSX.Element | undefined = undefined;
     switch (item.blockKind) {
         case 'gallery':
-            content = <GalleryComponent item={formToBlock(item) as GalleryBlock} onHit={onHit} />;
+            content = (
+                <GalleryComponent
+                    item={formToBlock(item) as GalleryBlock}
+                    onHit={onHit}
+                    parent="editor"
+                />
+            );
             break;
         case 'cta':
-            content = <CtaBlockComponent item={formToBlock(item) as CtaBlock} onHit={onHit} />;
+            content = (
+                <CtaBlockComponent
+                    item={formToBlock(item) as CtaBlock}
+                    onHit={onHit}
+                    parent="editor"
+                />
+            );
             break;
         case 'text':
-            content = <TextBlockComponent item={formToBlock(item) as TextBlock} onHit={onHit} />;
+            content = (
+                <TextBlockComponent
+                    item={formToBlock(item) as TextBlock}
+                    onHit={onHit}
+                    parent="editor"
+                />
+            );
             break;
         default:
             content = undefined;

@@ -25,15 +25,15 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     const gCtxt: EditorWorkspaceContextValue = useEditorWorkspace();
     //*******************************************************/
     // Core state:
-    // Editor mode
+    // 1. Editor mode
     const [mode, setMode] = useState<BlockEditorMode>('create');
-    // Blocks collection
+    // 2. Blocks collection
     const [collection, setCollection] = useState<BlocksCollectionJSON | undefined>(undefined);
-    // Selected block
+    // 3. Selected block
     const [selectedBlock, setSelectedBlock] = useState<Block | undefined>(undefined);
-    // Editor form values:
+    // 4. Editor form values:
     const [values, setValues] = useState<BlockFormValue | undefined>(undefined);
-    // Editor mode:
+    // 5. Editor mode:
     const [screenMode, setScreenMode] = useState<BlockEditorScreenMode>('select');
 
     //*******************************************************/
@@ -219,6 +219,24 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         console.log(`[onHit]: edit mode hit detected`);
         console.dir(hit);
     }
+    const updateTags = useCallback((next: string[]) => {
+        const normalized = next.map((t) => t.trim()).filter(Boolean);
+
+        const seen = new Set<string>();
+        const uniq: string[] = [];
+        for (const t of normalized) {
+            const key = t.toLowerCase();
+            if (seen.has(key)) continue;
+            seen.add(key);
+            uniq.push(t);
+        }
+        setValues((prev) => {
+            if (!prev) return prev;
+            return { ...prev, tags: uniq };
+        });
+        setIsDirty(true);
+        setCanSave(true);
+    }, []);
 
     const value: BlockEditorSession = useMemo(
         () => ({
@@ -243,6 +261,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             exit,
             onHit,
             onDelete,
+            updateTags,
         }),
         [
             selectedBlock,
@@ -263,6 +282,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             exit,
             onHit,
             onDelete,
+            updateTags,
         ],
     );
 
