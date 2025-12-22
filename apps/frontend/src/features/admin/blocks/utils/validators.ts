@@ -1,8 +1,7 @@
-import { CtaTarget } from '@/entities/block';
+import { Block, CtaTarget } from '@/entities/block';
 import { Localized } from '@/entities/common';
-import { BlockFormValue } from '@/features/admin/blocks/editorSession';
 
-export function validateBlockForm(form: BlockFormValue): boolean {
+export function validateBlockForm(form: Block): boolean {
     if (!form) return false;
 
     switch (form.blockKind) {

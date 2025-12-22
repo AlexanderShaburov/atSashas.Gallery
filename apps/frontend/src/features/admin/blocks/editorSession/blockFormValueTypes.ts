@@ -3,7 +3,7 @@ import { Block, CtaTarget, GalleryBlockItem, GalleryLayout } from '@/entities/bl
 import { ISODate, Localized } from '@/entities/common';
 import { generateArtId } from '@/shared/lib/id/generateArtId';
 
-type GalleryBlockFormValue = {
+export type GalleryBlockFormValue = {
     id: string;
     blockKind: 'gallery';
     layout: GalleryLayout;
@@ -11,9 +11,10 @@ type GalleryBlockFormValue = {
     tags: string[];
     dateCreated: ISODate;
     items: GalleryBlockItem[];
+    isTemplate: boolean;
 };
 
-type TextBlockFormValue = {
+export type TextBlockFormValue = {
     id: string;
     blockKind: 'text';
     tags: string[];
@@ -21,9 +22,10 @@ type TextBlockFormValue = {
     title?: Localized;
     body: Localized;
     variant?: 'full' | 'narrow' | 'quote' | undefined;
+    isTemplate: boolean;
 };
 
-type CtaBlockFormValue = {
+export type CtaBlockFormValue = {
     id: string;
     blockKind: 'cta';
     tags: string[];
@@ -32,6 +34,7 @@ type CtaBlockFormValue = {
     body: Localized;
     buttonLabel: Localized;
     target: CtaTarget;
+    isTemplate: boolean;
 };
 
 export type BlockFormValue = GalleryBlockFormValue | TextBlockFormValue | CtaBlockFormValue;
@@ -46,6 +49,7 @@ export function formToBlock(form: BlockFormValue): Block {
                 dateCreated: form.dateCreated,
                 layout: form.layout,
                 items: form.items,
+                isTemplate: false,
             };
         case 'text':
             return {
@@ -56,6 +60,7 @@ export function formToBlock(form: BlockFormValue): Block {
                 title: form.title,
                 body: form.body,
                 variant: form.variant,
+                isTemplate: false,
             };
         case 'cta':
             return {
@@ -67,10 +72,11 @@ export function formToBlock(form: BlockFormValue): Block {
                 body: form.body,
                 buttonLabel: form.buttonLabel,
                 target: form.target,
+                isTemplate: false,
             };
     }
 }
-export function blockToForm(block: Block): BlockFormValue {
+export function normalizeBlock(block: Block): Block {
     switch (block.blockKind) {
         case 'gallery':
             return {
@@ -81,6 +87,7 @@ export function blockToForm(block: Block): BlockFormValue {
                 dateCreated: block.dateCreated,
                 items: block.items,
                 caption: block.caption ? block.caption : { en: '' },
+                isTemplate: block.isTemplate ?? false,
             };
         case 'text':
             return {
@@ -91,6 +98,7 @@ export function blockToForm(block: Block): BlockFormValue {
                 title: block.title ? block.title : { en: '' },
                 body: block.body ? block.body : { en: '' },
                 variant: block.variant,
+                isTemplate: block.isTemplate ?? false,
             };
         case 'cta':
             return {
@@ -102,6 +110,7 @@ export function blockToForm(block: Block): BlockFormValue {
                 body: block.body ? block.body : { en: '' },
                 buttonLabel: block.buttonLabel ? block.buttonLabel : { en: '' },
                 target: block.target ? block.target : { type: 'stream', slug: '' },
+                isTemplate: block.isTemplate ?? false,
             };
     }
 }
@@ -119,6 +128,7 @@ export function createInitialFormForKind(kind: BlockKind, prev?: BlockFormValue)
         id: prev?.id ?? generateArtId('block'),
         tags: prev?.tags ?? [],
         dateCreated: prev?.dateCreated ?? (new Date().toISOString() as ISODate),
+        isTemplate: false,
     };
 
     switch (kind) {

@@ -5,12 +5,13 @@ import type {
     BlockEditorMode,
     BlockEditorScreenMode,
     BlocksCollectionJSON,
+    EditTarget,
 } from '@/entities/block';
 import type { UiErrorState } from '@/entities/common';
 import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { getCollection } from '@/features/admin/blocks/api/blocksApi';
-import { blockToForm, type BlockFormValue } from '@/features/admin/blocks/editorSession';
+import { normalizeBlock } from '@/features/admin/blocks/editorSession';
 import type { BlockEditorSession } from '@/features/admin/blocks/editorSession/blockEditorTypes';
 import { BlockEditorCtx } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
@@ -25,17 +26,18 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     const gCtxt: EditorWorkspaceContextValue = useEditorWorkspace();
     //*******************************************************/
     // Core state:
-    // 1. Editor mode
+    // 1. Editor mode, used to decide if show templates(????)
     const [mode, setMode] = useState<BlockEditorMode>('create');
     // 2. Blocks collection
     const [collection, setCollection] = useState<BlocksCollectionJSON | undefined>(undefined);
     // 3. Selected block
     const [selectedBlock, setSelectedBlock] = useState<Block | undefined>(undefined);
     // 4. Editor form values:
-    const [values, setValues] = useState<BlockFormValue | undefined>(undefined);
-    // 5. Editor mode:
+    const [values, setValues] = useState<Block | undefined>(undefined);
+    // 5. Editor mode, used to decide if show grid or single block editor:
     const [screenMode, setScreenMode] = useState<BlockEditorScreenMode>('select');
-
+    // 6. Target used to choose if input has to shown on place of text in inlineEditor
+    const [currentTarget, setCurrentTarget] = useState<EditTarget | undefined>(undefined);
     //*******************************************************/
     // UI / derived state
     const [saving, setSaving] = useState(false);
@@ -48,8 +50,8 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
     const [uiError, setUiError] = useState<UiErrorState | undefined>(undefined);
 
-    const snapshot = useRef<BlockFormValue | undefined>(undefined);
-    const valuesRef = useRef<BlockFormValue | undefined>(values);
+    const snapshot = useRef<Block | undefined>(undefined);
+    const valuesRef = useRef<Block | undefined>(values);
     //*******************************************************/
 
     // ***** Collections preload *****
@@ -75,7 +77,23 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         } finally {
             setLoading(false);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    const isEditingTarget = useCallback(
+        (t: EditTarget) => {
+            if (!currentTarget || !t) return false;
+
+            if (currentTarget.blockKind !== t.blockKind) return false;
+            if (currentTarget.kind !== t.kind) return false;
+
+            if ('slot' in currentTarget || 'slot' in t) {
+                return 'slot' in currentTarget && 'slot' in t && currentTarget.slot === t.slot;
+            }
+            return true;
+        },
+        [currentTarget],
+    );
 
     // initial load
     useEffect(() => {
@@ -119,6 +137,8 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 // Refresh collection state
                 const cl = await refreshCollection();
 
+                if (!cl) throw new Error('Collection is empty');
+
                 // Check if workspace has block id selected
                 // If not reset Editor session to initial empty values
                 if (!gCtxt.currentBlockId) {
@@ -127,7 +147,8 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 }
 
                 // If block id selected -> find block in collection and set its data to form values
-                const bl = cl.blocks.find((block) => block.id === gCtxt.currentBlockId);
+
+                const bl = cl.blocks[gCtxt.currentBlockId];
 
                 if (!bl) {
                     setUiError({
@@ -145,7 +166,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 }
 
                 setSelectedBlock(bl);
-                setValues(blockToForm(bl));
+                setValues(normalizeBlock(bl));
                 setMode('edit');
             } catch (e) {
                 console.error(`BlockEditorSession error: ${e}`);
@@ -153,6 +174,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 setLoading(false);
             }
         })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refreshCollection]);
 
     // dirty + validity tracking
@@ -202,8 +224,12 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             if (screenMode === 'select') handleSelectHit(hit);
             else handleEditHit(hit);
         },
-        [screenMode],
+        [screenMode, handleEditHit],
     );
+
+    const unHit = useCallback(() => {
+        setCurrentTarget(undefined);
+    }, []);
 
     const onDelete = useCallback(() => {
         console.log(`onDelete called for block ${selectedBlock}`);
@@ -211,14 +237,68 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
     function handleSelectHit(hit: BlockHitEvent) {
         setSelectedBlock(hit.block);
-        setValues(blockToForm(hit.block));
+        setValues(normalizeBlock(hit.block));
         setScreenMode('edit');
     }
 
-    function handleEditHit(hit: BlockHitEvent) {
+    const hitToTarget = (e: BlockHitEvent): EditTarget => {
+        switch (e.hit.blockKind) {
+            case 'gallery': {
+                switch (e.hit.kind) {
+                    case 'image':
+                    case 'imageCaption':
+                        return {
+                            blockKind: 'gallery',
+                            kind: e.hit.kind,
+                            slot: e.hit.slot,
+                        };
+
+                    case 'blockCaption':
+                        return {
+                            blockKind: 'gallery',
+                            kind: 'blockCaption',
+                            slot: undefined,
+                        };
+                }
+                break;
+            }
+
+            case 'text': {
+                switch (e.hit.kind) {
+                    case 'textTitle':
+                        return { blockKind: 'text', kind: 'title' };
+                    case 'textBody':
+                        return { blockKind: 'text', kind: 'body' };
+                }
+                break;
+            }
+
+            case 'cta': {
+                switch (e.hit.kind) {
+                    case 'ctaTitle':
+                        return { blockKind: 'cta', kind: 'label' };
+                    case 'ctaBody':
+                        return { blockKind: 'cta', kind: 'url' };
+                    case 'ctaButton':
+                        return { blockKind: 'cta', kind: 'label' };
+                }
+                break;
+            }
+        }
+    };
+    const handleEditHit = useCallback((hit: BlockHitEvent) => {
         console.log(`[onHit]: edit mode hit detected`);
         console.dir(hit);
-    }
+        if (screenMode !== 'edit') return;
+        const tg = hitToTarget(hit);
+        console.log(`[onHit]: target calculated as:`);
+        console.dir(tg);
+        setCurrentTarget(tg);
+    }, []);
+    useEffect(() => {
+        console.log(`[onHit]: currentTarget set to: ${currentTarget}`);
+        console.dir(currentTarget);
+    }, [currentTarget]);
     const updateTags = useCallback((next: string[]) => {
         const normalized = next.map((t) => t.trim()).filter(Boolean);
 
@@ -260,8 +340,10 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             save,
             exit,
             onHit,
+            unHit,
             onDelete,
             updateTags,
+            isEditingTarget,
         }),
         [
             selectedBlock,
@@ -281,8 +363,10 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             save,
             exit,
             onHit,
+            unHit,
             onDelete,
             updateTags,
+            isEditingTarget,
         ],
     );
 

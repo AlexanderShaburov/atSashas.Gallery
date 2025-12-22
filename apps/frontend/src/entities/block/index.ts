@@ -4,6 +4,7 @@ export type {
     BlockEditorScreenMode,
     BlockParent,
 } from './block-editor-screen.types';
+export { EditTarget } from './block-targets.types';
 export { BLOCK_KINDS, CTA_TYPES, GALLERY_LAYOUTS } from './block.types';
 export type {
     Block,

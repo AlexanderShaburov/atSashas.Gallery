@@ -1,7 +1,5 @@
 //src/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor.tsx
-import { CtaBlock, GalleryBlock, TextBlock } from '@/entities/block';
-import { BlockFormValue } from '@/features/admin/blocks/editorSession';
-import { formToBlock } from '@/features/admin/blocks/editorSession/';
+import { Block, CtaBlock, GalleryBlock, TextBlock } from '@/entities/block';
 import {
     CtaBlockComponent,
     GalleryComponent,
@@ -9,12 +7,13 @@ import {
 } from '@/features/admin/blocks/ui/BlockPreview';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
-import { JSX } from 'react';
+import { Dispatch, JSX, SetStateAction } from 'react';
 import './SingleBlockEditor.css';
 
 type Props = {
-    item: BlockFormValue;
+    item: Block;
     onHit: (e: BlockHitEvent) => void;
+    setValue: Dispatch<SetStateAction<Block | undefined>>;
     toolbarProps: {
         canSave: boolean;
         saving: boolean;
@@ -25,33 +24,36 @@ type Props = {
         onChangeTags?: (tags: string[]) => void;
     };
 };
-export function SingleBlockEditor({ item, onHit, toolbarProps }: Props) {
+export function SingleBlockEditor({ item, onHit, setValue, toolbarProps }: Props) {
     let content: JSX.Element | undefined = undefined;
     switch (item.blockKind) {
         case 'gallery':
             content = (
                 <GalleryComponent
-                    item={formToBlock(item) as GalleryBlock}
+                    item={item as GalleryBlock}
                     onHit={onHit}
                     parent="editor"
+                    setValue={setValue}
                 />
             );
             break;
         case 'cta':
             content = (
                 <CtaBlockComponent
-                    item={formToBlock(item) as CtaBlock}
+                    item={item as CtaBlock}
                     onHit={onHit}
                     parent="editor"
+                    setValue={setValue}
                 />
             );
             break;
         case 'text':
             content = (
                 <TextBlockComponent
-                    item={formToBlock(item) as TextBlock}
+                    item={item as TextBlock}
                     onHit={onHit}
                     parent="editor"
+                    setValue={setValue}
                 />
             );
             break;

@@ -1,10 +1,12 @@
-import { BlockParent, TextBlock } from '@/entities/block';
+import { Block, BlockParent, TextBlock } from '@/entities/block';
 import { BlockHitEvent, Hit } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
+import { Dispatch, SetStateAction } from 'react';
 
 type Props = {
     item: TextBlock;
     onHit: (hit: BlockHitEvent) => void;
     parent: BlockParent; // 'grid' | 'editor'
+    setValue: Dispatch<SetStateAction<Block | undefined>>; // to set new value session.setValue()
 };
 
 export function TextBlockComponent({ item, onHit, parent }: Props) {

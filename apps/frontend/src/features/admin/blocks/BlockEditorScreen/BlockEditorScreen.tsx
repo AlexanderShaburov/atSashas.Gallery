@@ -82,6 +82,7 @@ export function BlockEditor() {
                     <SingleBlockEditor
                         item={session.values}
                         onHit={session.onHit}
+                        setValue={session.setValues}
                         toolbarProps={toolbarProps}
                     />
                 )}
