@@ -3,7 +3,7 @@
 import AdminLayout from '@/app/layouts/AdminLayout';
 import PublicLayout from '@/app/layouts/PublicLayout';
 import { BlockEditorSessionProvider } from '@/features/admin/blocks/editorSession/BlockEditorSession.context';
-import { EditorSessionProvider } from '@/features/admin/catalogEditor/editorSession/EditorSession.context';
+import { CatalogEditorSessionProvider } from '@/features/admin/catalogEditor/editorSession/CatalogEditorSession.context';
 import { EditorWorkspaceProvider } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { ArtCatalogLoader } from '@/shared/ArtCatalogProvider.tsx/ArtCatalogLoader';
 import { lazy } from 'react';
@@ -16,7 +16,7 @@ const AdminIndex = lazy(() => import('@/pages/admin/AdminIndexPage'));
 const UploadPage = lazy(() => import('@/pages/admin/UploadPage'));
 const CatalogEditorPage = lazy(() => import('@/pages/admin/catalogEditorPage/CatalogEditorPage'));
 const BlocksPage = lazy(() => import('@/pages/admin/BlocksPage/BlocksPage'));
-const StreamsPage = lazy(() => import('@/pages/admin/StreamsPage'));
+const StreamsPage = lazy(() => import('@/pages/admin/StreamPage/StreamsPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 // Public root wrap:
@@ -60,9 +60,9 @@ export const router = createBrowserRouter([
             {
                 path: 'catalog',
                 element: (
-                    <EditorSessionProvider>
+                    <CatalogEditorSessionProvider>
                         <CatalogEditorPage />
-                    </EditorSessionProvider>
+                    </CatalogEditorSessionProvider>
                 ),
             },
             {
@@ -73,7 +73,7 @@ export const router = createBrowserRouter([
                     </BlockEditorSessionProvider>
                 ),
             },
-            { path: 'stream', element: <StreamsPage /> },
+            { path: 'streams', element: <StreamsPage /> },
         ],
     },
     { path: '*', element: <NotFound /> },

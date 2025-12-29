@@ -4,7 +4,7 @@ import {
     getHopperContent,
     uploadImage,
 } from '@/features/admin/catalogEditor/api';
-import HopperGrid from '@/features/admin/shared/ui/HopperGrid/HopperGrid';
+import ArtItemGrid from '@/features/admin/shared/ui/ArtItemGrid/ArtItemGrid';
 import '@/pages/admin/Upload.css';
 import { useEffect, useState, type DragEvent } from 'react';
 
@@ -23,15 +23,13 @@ export default function UploadPage() {
         }
         setSelectedId(item.id);
     };
-
+    // Download hopper content once at page load
     useEffect(() => {
         (async () => {
-            const hopperGrid = await getHopperContent();
-            console.log(`Hopper content we got:`);
-            console.dir(hopperGrid);
-            setUploaded(hopperGrid);
-            console.log(`Hopper content saved`);
-            console.dir(uploaded);
+            const artItemGrid = await getHopperContent();
+            console.log(`[UploadPage]: artItemGrid (Hopper) is: `);
+            console.dir(artItemGrid);
+            setUploaded(artItemGrid);
         })();
     }, []);
 
@@ -161,7 +159,7 @@ export default function UploadPage() {
                     </button>
                 </div>
 
-                <HopperGrid hopper={uploaded} setIdentity={handleSelect} />
+                <ArtItemGrid artCollection={uploaded} setIdentity={handleSelect} />
             </section>
         </div>
     );

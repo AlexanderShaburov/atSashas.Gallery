@@ -33,10 +33,12 @@ export const GALLERY_LAYOUTS = [
     'triptychHorizontal',
 ] as const;
 export type GalleryLayout = (typeof GALLERY_LAYOUTS)[number];
+export type BlockLifecycle = 'template' | 'draft' | 'saved';
 
 interface BlockBase {
     id: string;
     blockKind: BlockKind;
+    lifecycle: BlockLifecycle;
     isTemplate?: boolean;
     tags?: string[] | undefined;
     dateCreated: ISODate;

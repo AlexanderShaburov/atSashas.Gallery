@@ -1,10 +1,98 @@
 {
   "kind": "BlockCollection",
-  "version": 1,
+  "version": 7,
   "generatedAt": "2025-12-14",
-  "updatedAt": "2025-12-14",
-  "blocks": {},
-  "order": [],
+  "updatedAt": "2025-12-27",
+  "blocks": {
+    "block-gallery-single-466e6378": {
+      "id": "block-gallery-single-466e6378",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [
+        "two"
+      ],
+      "dateCreated": "2025-12-27",
+      "caption": {
+        "en": "eye",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "single",
+      "items": [
+        {
+          "artId": "art-20251226-tk5nhr",
+          "position": "Center",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-triptychleft-0b23cbfd": {
+      "id": "block-gallery-triptychleft-0b23cbfd",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [
+        "one"
+      ],
+      "dateCreated": "2025-12-27",
+      "caption": {
+        "en": "natur",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "triptychLeft",
+      "items": [
+        {
+          "artId": "art-20251120-jcsrbr",
+          "position": "LS",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-t1y5qn",
+          "position": "RUC",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-tfemnz",
+          "position": "RBC",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    }
+  },
+  "order": [
+    "block-gallery-triptychleft-0b23cbfd",
+    "block-gallery-single-466e6378"
+  ],
   "stats": null,
   "tagsIndex": null,
   "kindIndex": null

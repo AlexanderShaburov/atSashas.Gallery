@@ -1,24 +1,21 @@
 //@/features/admin/blocks/BlockEditor/BlockEditor.tsx
-import { BlockKind } from '@/entities/block';
-import { CtaTypes, GalleryLayout } from '@/entities/block/block.types';
 import type { BlockEditorSession } from '@/features/admin/blocks/editorSession';
 import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import '@/features/admin/blocks/ui/BlockPreview/index';
-import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { CollectionGrid } from '@/features/admin/blocks/ui/CollectionGrid/CollectionGrid';
-import { FilterControl } from '@/features/admin/blocks/ui/FilterControl/FilterControl';
+import { FilterControl, type BlockFilterState } from '@/features/admin/blocks/ui/FilterControl';
+import {
+    applyArtCatalogFilter,
+    ArtCatalogFilterControl,
+    type ArtCatalogFilterState,
+} from '@/features/admin/shared/ui/ArtCatalogFilterControl/';
+import ArtItemGrid from '@/features/admin/shared/ui/ArtItemGrid/ArtItemGrid';
 import '@/pages/admin/BlocksPage/BlocksPage.css';
-import { useState } from 'react';
-import { SingleBlockEditor } from '../ui/SingleBlockEditor/SingleBlockEditor';
+import { useArtCatalog } from '@/shared/ArtCatalogProvider.tsx/CatalogHook';
+import { useEffect, useState } from 'react';
+import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
+import { SingleBlockEditor } from '@/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor';
 
-export type BlockFilterState = {
-    tags: string[];
-    kind?: BlockKind;
-    layout?: GalleryLayout;
-    ctaType?: CtaTypes;
-    artName?: string;
-    extended: boolean;
-};
 export function BlockEditor() {
     const session: BlockEditorSession = useBlockEditorSession();
 
@@ -47,9 +44,10 @@ export function BlockEditor() {
 
     const {
         collection,
+        currentStack,
         // mode,
         // identity,
-        loading,
+        // loading,
         // saving,
         // isDirty,
         // isValid,
@@ -57,36 +55,94 @@ export function BlockEditor() {
         // save,
         // exit,
         // removeCollection,
+        onHit,
+        setSelectedArtItem,
     } = session;
 
-    function onHit(hit: BlockHitEvent) {
-        console.dir(`Hit occur ${hit}`);
-        console.dir(hit);
+    const { screenMode, onEscape } = currentStack;
+    const catalog = useArtCatalog();
+
+    const [artFilter, setArtFilter] = useState<ArtCatalogFilterState>({
+        query: '',
+        tags: [],
+        technique: undefined,
+        availability: undefined,
+        series: undefined,
+        hasPrice: false,
+        extended: false,
+    });
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onEscape();
+            }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [onEscape]);
+
+    const testHit = (hit: BlockHitEvent) => {
+        console.log(`[BlockEditor]: hit detected`);
         session.onHit(hit);
+    };
+
+    const updateArtFilter = (patch: Partial<ArtCatalogFilterState>) => {
+        setArtFilter((prev) => ({ ...prev, ...patch }));
+    };
+
+    switch (screenMode) {
+        case 'edit':
+            if (!session.values)
+                throw new Error(`[BlockEditor]: Try edit nonexistent block values`);
+            return (
+                <div className="block-editor">
+                    <div className="block-editor__body">
+                        <SingleBlockEditor
+                            item={session.values}
+                            onHit={testHit}
+                            setValue={session.setValues}
+                            toolbarProps={toolbarProps}
+                        />
+                    </div>
+                </div>
+            );
+        case 'select':
+            return (
+                <div className="block-editor">
+                    <div className="block-editor__toolbar">
+                        <FilterControl filter={filter} updateFilter={updateFilter} />
+                    </div>
+                    <div className="block-editor__body">
+                        <CollectionGrid
+                            collection={collection}
+                            onHit={onHit}
+                            setValue={session.setValues}
+                        />
+                    </div>
+                </div>
+            );
+        case 'pickArt': {
+            const artCollection = applyArtCatalogFilter(catalog.items, artFilter);
+            console.log(`[BlockEditor]: artCollection is: `);
+            console.dir(artCollection);
+            return (
+                <div className="block-editor">
+                    <div className="block-editor__toolbar">
+                        <ArtCatalogFilterControl
+                            items={catalog?.items}
+                            filter={artFilter}
+                            updateFilter={updateArtFilter}
+                            onBack={onEscape}
+                        />
+                    </div>
+                    <div className="block-editor__body">
+                        <ArtItemGrid
+                            artCollection={artCollection}
+                            setIdentity={setSelectedArtItem}
+                        />
+                    </div>
+                </div>
+            );
+        }
     }
-
-    return (
-        <div className="block-editor">
-            {/* Top toolbar: collection + mode tag + save/exit */}
-            <div className="block-editor__toolbar">
-                <FilterControl filter={filter} updateFilter={updateFilter} />
-            </div>
-
-            <div className="block-editor__body">
-                {loading && <p className="block-editor__status">Loading collections…</p>}
-
-                {session.screenMode === 'select' && (
-                    <CollectionGrid collection={collection} onHit={onHit} />
-                )}
-                {session.screenMode === 'edit' && session.values && (
-                    <SingleBlockEditor
-                        item={session.values}
-                        onHit={session.onHit}
-                        setValue={session.setValues}
-                        toolbarProps={toolbarProps}
-                    />
-                )}
-            </div>
-        </div>
-    );
 }

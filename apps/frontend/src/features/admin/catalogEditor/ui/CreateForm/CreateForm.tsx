@@ -1,6 +1,6 @@
 // CreateForm.tsx
 import type { Availability, ISODate } from '@/entities/common';
-import { useEditorSession } from '@/features/admin/catalogEditor/editorSession/EditorSession.context';
+import { useEditorSession } from '@/features/admin/catalogEditor/editorSession/CatalogEditorSession.context';
 import '@/features/admin/catalogEditor/ui/CreateForm/CreateForm.css';
 import DimensionsInput from '@/features/admin/catalogEditor/ui/CreateForm/UX/DimensionsInput';
 import LangInput from '@/features/admin/catalogEditor/ui/CreateForm/UX/LangInput';

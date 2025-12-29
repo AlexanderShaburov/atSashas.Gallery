@@ -45,20 +45,17 @@ export function GalleryComponent({ item, onHit, parent, setValue }: Props) {
 
     const tpl = TEMPLATE_BLOCKS.find((t) => t.kind === item.blockKind && t.layout === item.layout);
     const label = tpl?.label;
-    console.log(`[GalleryComponent]: Render`);
+
     const renderItemCaption = (pos: ItemPosition, blockItem?: GalleryBlockItem) => {
-        if (isEditor && !!blockItem) return null;
+        const current = blockItem?.caption?.en ?? '';
+        const shouldShow = isEditor || !!current;
+        if (!shouldShow) return null;
 
         const target: EditTarget = {
             blockKind: 'gallery',
             slot: pos,
             kind: 'imageCaption',
         };
-        console.log('[GalleryComponent]: target calculated as:');
-        console.dir(target);
-
-        const current = blockItem?.caption?.en ?? '';
-
         return (
             <InlineEditableText
                 block={item}
@@ -110,7 +107,7 @@ export function GalleryComponent({ item, onHit, parent, setValue }: Props) {
                                 }
                             />
 
-                            {/* Item caption field: always visible in editor, optional in grid */}
+                            {renderItemCaption(pos, blockItem)}
                         </div>
                     );
                 }
@@ -139,8 +136,7 @@ export function GalleryComponent({ item, onHit, parent, setValue }: Props) {
                                 Missing art: {imgId}
                             </div>
 
-                            {(isEditor || !!blockItem?.caption?.en) &&
-                                renderItemCaption(pos, blockItem)}
+                            {renderItemCaption(pos, blockItem)}
                         </div>
                     );
                 }
@@ -163,7 +159,7 @@ export function GalleryComponent({ item, onHit, parent, setValue }: Props) {
                             <source type="image/webp" srcSet={img.images.preview.webp} />
                             <img
                                 src={img.images.preview.jpeg}
-                                alt={img.images.alt.en || ''}
+                                alt={img.images.alt?.en || ''}
                                 loading="lazy"
                             />
                         </picture>
@@ -202,8 +198,8 @@ export function GalleryComponent({ item, onHit, parent, setValue }: Props) {
                 {(p) => (
                     <figcaption {...p}>
                         {item.isTemplate
-                            ? (label ?? tpl?.kind ?? 'Gallery template')
-                            : (item.caption?.en ?? 'Block caption')}
+                            ? label || tpl?.kind || 'Gallery template'
+                            : item.caption?.en || 'Block caption'}
                     </figcaption>
                 )}
             </InlineEditableText>

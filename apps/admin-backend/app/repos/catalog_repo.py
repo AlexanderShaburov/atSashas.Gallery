@@ -15,7 +15,7 @@ class CatalogRepo:
         self._path = (
             Path(settings.storage_root)
             / settings.json_data.strip("/")
-            / "catalog.json"
+            / "art_catalog.json"
         )
 
         self._lock = asyncio.Lock()

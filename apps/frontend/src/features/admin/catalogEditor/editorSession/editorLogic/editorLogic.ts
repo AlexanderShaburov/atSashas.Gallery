@@ -1,12 +1,12 @@
 import { EditorTarget, ISODate } from '@/entities/common';
 import type { ArtItemForm } from '@/features/admin/catalogEditor/editorSession/editorTypes';
-import { generateArtId } from '@/shared/lib/id/generateArtId';
+import { generateId } from '@/shared/lib/id/generateId';
 
 export function prepareEditorForm(unit: EditorTarget): ArtItemForm {
     switch (unit.mode) {
         case 'create':
             return {
-                id: generateArtId('art') as string,
+                id: generateId('art') as string,
                 dateCreated: todayISO() as ISODate,
                 title: undefined,
                 techniques: undefined,

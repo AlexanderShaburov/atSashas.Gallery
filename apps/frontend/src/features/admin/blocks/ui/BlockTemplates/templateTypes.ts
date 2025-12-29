@@ -26,6 +26,7 @@ export function createGalleryTemplateBlock(layout: GalleryLayout): GalleryBlock 
     return {
         id: `__template-gallery-${layout}`,
         blockKind: 'gallery',
+        lifecycle: 'template',
         layout: layout,
         items: [],
         dateCreated: todayISO(),
@@ -37,6 +38,7 @@ export function createTextTemplateBlock(): TextBlock {
     return {
         id: `__template-text`,
         blockKind: 'text',
+        lifecycle: 'template',
         dateCreated: todayISO(),
         caption: { en: 'Caption' },
         title: { en: 'Place your title here' },
@@ -48,6 +50,7 @@ export function createCtaTemplateBlock(): CtaBlock {
     return {
         id: `__template-cta`,
         blockKind: 'cta',
+        lifecycle: 'template',
         dateCreated: todayISO(),
         caption: { en: 'Caption' },
         title: { en: 'Action title here' },

@@ -1,1 +1,1 @@
-export type { LegacyStreamData, LegacyStream, StreamData } from './stream';
+export type { StreamData, StreamStatus, StreamIndexItem, StreamsIndex } from './stream.types';

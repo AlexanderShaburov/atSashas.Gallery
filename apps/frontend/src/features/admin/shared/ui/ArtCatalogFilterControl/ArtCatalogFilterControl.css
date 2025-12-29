@@ -1,0 +1,300 @@
+/* src/features/admin/artCatalog/ui/ArtCatalogFilterControl/ArtCatalogFilterControl.css */
+
+/* =========================================================
+   BASIC ROW
+   ========================================================= */
+
+.art-filter-control__basic {
+    width: 100%;
+    min-width: 0;
+
+    display: grid;
+    /* Slightly shrink inputs to give more room to the mode pill */
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.35fr) minmax(0, 0.85fr) auto;
+    gap: 10px;
+    align-items: center;
+
+    padding: 10px;
+    border: 1px solid var(--form-border);
+    border-radius: 12px;
+    background: var(--form-bg);
+    box-shadow: var(--form-shadow);
+}
+
+/* =========================================================
+   ADVANCED ROW
+   ========================================================= */
+
+.art-filter-control__advanced {
+    width: 100%;
+    min-width: 0;
+
+    display: grid;
+    /* Availability / Series are full inputs, HasPrice is compact toggle */
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    align-items: center;
+
+    margin-top: 10px;
+
+    padding: 10px;
+    border: 1px solid var(--form-border);
+    border-radius: 12px;
+    background: var(--form-bg);
+    box-shadow: var(--form-shadow);
+}
+
+/* =========================================================
+   INPUTS
+   ========================================================= */
+
+.art-filter-control__input {
+    width: 100%;
+    min-width: 0;
+    height: 38px;
+    min-height: 38px;
+    padding: 0 12px;
+
+    border-radius: 10px;
+    border: 1px solid var(--form-border);
+    background: var(--form-bg);
+    color: var(--text);
+
+    outline: none;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.art-filter-control__input::placeholder {
+    color: var(--form-placeholder);
+}
+
+.art-filter-control__input:hover {
+    border-color: var(--form-border-hover);
+}
+
+.art-filter-control__input:focus {
+    border-color: var(--form-border-hover);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.art-filter-control__input[list] {
+    -webkit-appearance: textfield;
+    appearance: textfield;
+}
+
+/* =========================================================
+   TAGS: INPUT + CHIPS
+   ========================================================= */
+
+.art-filter-control__tags {
+    min-width: 0;
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: 6px;
+}
+
+.art-filter-control__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
+
+.art-filter-control__chip {
+    border: 1px solid var(--form-border);
+    background: color-mix(in srgb, var(--form-bg) 88%, var(--accent) 12%);
+    color: var(--text);
+
+    border-radius: 999px;
+    padding: 4px 10px;
+    height: 26px;
+    line-height: 18px;
+
+    cursor: pointer;
+    font-size: 0.86rem;
+    white-space: nowrap;
+}
+
+.art-filter-control__chip:hover {
+    border-color: var(--form-border-hover);
+}
+
+.art-filter-control__chip--muted {
+    opacity: 0.75;
+}
+
+/* =========================================================
+   MODE PILL: BASIC / ADVANCED / BACK
+   ========================================================= */
+
+.art-filter-control__mode-selector {
+    display: flex;
+    width: fit-content;
+    justify-self: end;
+    align-items: stretch;
+    height: 38px;
+
+    border: 1px solid var(--form-border);
+    border-radius: 999px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--form-bg) 92%, var(--accent) 8%);
+}
+
+/* Each segment is a flex item */
+.art-filter-control__mode {
+    display: flex;
+    min-width: 0;
+}
+
+/* Basic segment */
+.art-filter-control__mode--basic {
+    flex: 1 1 0;
+}
+
+/* Advanced segment: intentionally wider so the label never collides */
+.art-filter-control__mode--advanced {
+    flex: 1.35 1 0;
+}
+
+/* Back segment: fixed on the right */
+.art-filter-control__mode--back {
+    flex: 0 0 auto;
+    margin-left: auto;
+    border-left: 1px solid var(--form-border);
+}
+
+/* Buttons must fill their segment (this fixes “button is only 60% of the div”) */
+.art-filter-control__mode button,
+.art-filter-control__back {
+    appearance: none;
+    border: 0;
+    background: transparent;
+
+    height: 38px;
+    line-height: 38px;
+
+    width: 100%;
+    display: block;
+    min-width: 0;
+
+    padding: 0 10px;
+
+    text-align: center;
+    white-space: nowrap;
+
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.92rem;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        opacity 0.2s ease;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.art-filter-control__mode button:hover,
+.art-filter-control__back:hover {
+    opacity: 0.92;
+    color: var(--text);
+}
+
+.art-filter-control__mode button.active {
+    background: var(--accent);
+    color: var(--on-accent);
+}
+
+/* =========================================================
+   ADVANCED: HAS PRICE TOGGLE (BOOL)
+   ========================================================= */
+
+.art-filter-control__toggle {
+    height: 38px;
+    padding: 0 14px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    border-radius: 999px;
+    border: 1px solid var(--form-border);
+    background: color-mix(in srgb, var(--form-bg) 92%, var(--accent) 8%);
+    color: var(--muted);
+
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 0.9rem;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.art-filter-control__toggle::before {
+    content: '○';
+    font-size: 0.9em;
+    opacity: 0.6;
+}
+
+.art-filter-control__toggle:hover {
+    border-color: var(--form-border-hover);
+    color: var(--text);
+}
+
+.art-filter-control__toggle.on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+}
+
+.art-filter-control__toggle.on::before {
+    content: '●';
+    opacity: 1;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .art-filter-control__basic {
+        grid-template-columns: 1fr 1fr;
+        grid-auto-rows: auto;
+    }
+
+    .art-filter-control__mode-selector {
+        width: 100%;
+        justify-self: stretch;
+    }
+
+    /* In tight layouts give equal weight to Basic/Advanced */
+    .art-filter-control__mode--advanced {
+        flex: 1 1 0;
+    }
+
+    .art-filter-control__advanced {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .art-filter-control__toggle {
+        grid-column: 1 / -1;
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 540px) {
+    .art-filter-control__basic {
+        grid-template-columns: 1fr;
+    }
+
+    .art-filter-control__advanced {
+        grid-template-columns: 1fr;
+    }
+}

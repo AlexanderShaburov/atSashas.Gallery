@@ -6,18 +6,24 @@ import type {
     BlockEditorScreenMode,
     BlocksCollectionJSON,
     EditTarget,
+    GalleryBlockItem,
 } from '@/entities/block';
 import type { UiErrorState } from '@/entities/common';
+import { GridItem } from '@/entities/grid';
 import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
-import { getCollection } from '@/features/admin/blocks/api/blocksApi';
+import { addNewBlock, getCollection, updateBlock } from '@/features/admin/blocks/api/blocksApi';
 import { normalizeBlock } from '@/features/admin/blocks/editorSession';
-import type { BlockEditorSession } from '@/features/admin/blocks/editorSession/blockEditorTypes';
+import type {
+    BlockEditorSession,
+    ScreenModeStack,
+} from '@/features/admin/blocks/editorSession/block-editor.types';
 import { BlockEditorCtx } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { validateBlockForm } from '@/features/admin/blocks/utils';
 import { deepEqual } from '@/features/admin/catalogEditor/utils/checkers';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { hitToTarget, instantiateFromTemplate } from './blockEditorSession.utils';
 
 type ProviderProps = { children: ReactNode };
 
@@ -35,24 +41,61 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     // 4. Editor form values:
     const [values, setValues] = useState<Block | undefined>(undefined);
     // 5. Editor mode, used to decide if show grid or single block editor:
-    const [screenMode, setScreenMode] = useState<BlockEditorScreenMode>('select');
+    const [modeStack, setModeStack] = useState<BlockEditorScreenMode[]>(['select']);
     // 6. Target used to choose if input has to shown on place of text in inlineEditor
     const [currentTarget, setCurrentTarget] = useState<EditTarget | undefined>(undefined);
+    // 7. Art catalog:
     //*******************************************************/
     // UI / derived state
+    // 8
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [isDirty, setIsDirty] = useState(false);
-    const [isValid, setIsValid] = useState(false);
     // editorIsReady is to identify if now a block is under editing!!!
     const [editorIsReady, setEditorIsReady] = useState(false);
-    const [canSave, setCanSave] = useState(false);
+    const [pendingSelection, setPendingSelection] = useState<BlockHitEvent | undefined>(undefined);
 
     const [uiError, setUiError] = useState<UiErrorState | undefined>(undefined);
 
     const snapshot = useRef<Block | undefined>(undefined);
-    const valuesRef = useRef<Block | undefined>(values);
+    // const valuesRef = useRef<Block | undefined>(values);
     //*******************************************************/
+
+    // !!!!!!!!!!!!! TRACERS !!!!!!!!!!!!!!
+    useEffect(() => {
+        console.log(`[pendingSelection TRACER]: state changed to:`);
+        console.dir(pendingSelection);
+    }, [pendingSelection]);
+    // !!!!!!!!!!!!! TRACERS END !!!!!!!!!!!!!!
+
+    // ************** LOGICS **************
+
+    const isValid = useMemo(() => (values ? validateBlockForm(values) : false), [values]);
+
+    const isDirty = useMemo(() => {
+        if (!values) return false;
+        if (!selectedBlock) return true;
+        return !deepEqual(snapshot.current, values);
+    }, [values, selectedBlock]);
+
+    const canSave = useMemo(() => !saving && isDirty && isValid, [saving, isDirty, isValid]);
+
+    // ************** LOGICS END **************
+
+    // ************** STACK CONTROL **************
+
+    const pushMode = (next: BlockEditorScreenMode) => {
+        setModeStack((s) => (s[s.length - 1] === next ? s : [...s, next]));
+    };
+    const onEscape = useCallback(() => {
+        setModeStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
+    }, []);
+    const currentStack: ScreenModeStack = useMemo(() => {
+        return {
+            screenMode: modeStack[modeStack.length - 1] ?? 'select',
+            onEscape: onEscape,
+        };
+    }, [modeStack, onEscape]);
+    // ************** STACK CONTROL END **************
 
     // ***** Collections preload *****
     const refreshCollection = useCallback(async (): Promise<BlocksCollectionJSON> => {
@@ -102,27 +145,14 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         })();
     }, [refreshCollection]);
 
-    // keep ref in sync
-    useEffect(() => {
-        valuesRef.current = values;
-    }, [values]);
-
-    // recompute canSave
-    useEffect(() => {
-        console.log('CanSave changed.');
-        setCanSave(!saving && isDirty && isValid);
-    }, [saving, isDirty, isValid]);
-
     // Reset session helper
     const resetSession = useCallback(() => {
         setSelectedBlock(undefined);
         setValues(undefined);
         setEditorIsReady(false);
         snapshot.current = undefined;
-        setIsDirty(false);
-        setIsValid(false);
         setMode('create');
-        setScreenMode('select');
+        pushMode('select');
     }, []);
 
     // ------------------------------------
@@ -177,38 +207,28 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refreshCollection]);
 
-    // dirty + validity tracking
-    useEffect(() => {
-        if (!valuesRef.current || !snapshot.current || !selectedBlock) {
-            setIsDirty(false);
-            setIsValid(false);
-            return;
-        }
-
-        const dirty = !deepEqual(snapshot.current, valuesRef.current);
-        setIsDirty(dirty);
-
-        const valid = validateBlockForm(valuesRef.current);
-        setIsValid(valid);
-    }, [values, selectedBlock]);
-
     const save = useCallback(async () => {
         if (!values || !canSave) return;
         setSaving(true);
         try {
-            // TODO: sanitize + build payload + update backend
-            // await updateBlocksCatalog(...);
+            if (!selectedBlock && !!values) {
+                addNewBlock(values);
+            }
+            if (!!selectedBlock && !!values) {
+                updateBlock(values);
+            }
 
             await refreshCollection();
-            // reset baseline
-            snapshot.current = values;
-            setIsDirty(false);
+            pushMode('select');
+            setSelectedBlock(undefined);
+            setValues(undefined);
+            snapshot.current = undefined;
         } catch (e) {
             console.error('Failed to save block:', e);
         } finally {
             setSaving(false);
         }
-    }, [values, canSave, refreshCollection]);
+    }, [values, canSave, refreshCollection, selectedBlock]);
 
     const exit = useCallback(() => {
         if (saving) return;
@@ -216,85 +236,131 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         resetSession();
     }, [saving, isDirty, resetSession]);
 
-    const onHit = useCallback(
+    const handleEditHit = useCallback(
         (hit: BlockHitEvent) => {
-            console.log(`[onHit]: edit mode hit detected`);
+            console.log(`[handleEditHit]: edit mode hit detected`);
             console.dir(hit);
 
-            if (screenMode === 'select') handleSelectHit(hit);
+            if (currentStack.screenMode !== 'edit') return;
+            const tg = hitToTarget(hit);
+
+            if (tg.blockKind === 'gallery' && tg.kind == 'image') {
+                setPendingSelection(hit);
+                pushMode('pickArt');
+                console.log(`[handleEditHit]: pendingSelection set to hit`);
+                console.log(`[handleEditHit]: screenMode set to pickArt`);
+            } else {
+                setCurrentTarget(tg);
+                console.log(`[handleEditHit]: currentTarget set to th:`);
+                console.dir(tg);
+            }
+        },
+        [currentStack.screenMode],
+    );
+    const handleSelectHit = useCallback((hit: BlockHitEvent) => {
+        switch (hit.block.lifecycle) {
+            case 'draft':
+                console.warn(
+                    `[handleSelectHit]: Block ${hit.block.id} has inappropriate lifecycle type 'draft'!`,
+                );
+                setValues(hit.block);
+                setSelectedBlock(undefined);
+                break;
+            case 'saved':
+                setSelectedBlock(hit.block);
+                setValues(normalizeBlock(hit.block));
+                break;
+            case 'template':
+                setSelectedBlock(undefined);
+                setValues(instantiateFromTemplate(hit.block));
+                break;
+        }
+        pushMode('edit');
+    }, []);
+
+    const onHit = useCallback(
+        (hit: BlockHitEvent) => {
+            console.log(`[BlockEditorSessionProvider]: edit mode hit detected`);
+            console.dir(hit);
+
+            if (currentStack.screenMode === 'select') handleSelectHit(hit);
             else handleEditHit(hit);
         },
-        [screenMode, handleEditHit],
+        [currentStack.screenMode, handleEditHit, handleSelectHit],
     );
 
     const unHit = useCallback(() => {
+        console.log('[unHit]: Called.');
         setCurrentTarget(undefined);
     }, []);
+
+    const setSelectedArtItem = useCallback(
+        (item: GridItem | undefined) => {
+            console.log(`[setSelectedArtItem]: Called wit item:`);
+            console.dir(item);
+
+            if (!item || !item.id) {
+                setPendingSelection(undefined);
+                unHit();
+                return;
+            }
+            console.log(`[setSelectedArtItem]: Called with status:`);
+
+            console.dir('item:');
+            console.dir(item);
+            console.dir('pendingSelection:');
+            console.dir(pendingSelection);
+            if (!gCtxt.currentArtCatalog)
+                throw new Error('[setSelectedArtItem]: Catalog not loaded yet');
+            if (!gCtxt.currentArtCatalog.items[item.id])
+                throw new Error(
+                    '[setSelectedArtItem]: Selected ArtItem not found in current catalog',
+                );
+            if (
+                pendingSelection &&
+                pendingSelection.hit.blockKind === 'gallery' &&
+                pendingSelection.hit.kind === 'image' &&
+                pendingSelection.block.blockKind === 'gallery'
+            ) {
+                console.log(`[setSelectedArtItem]: All conditions met`);
+                const next: GalleryBlockItem = {
+                    artId: item.id,
+                    position: pendingSelection.hit.slot,
+                    caption: { en: '' },
+                };
+                const idx = pendingSelection.block.items.findIndex(
+                    (it) => it.position === next.position,
+                );
+                let nextItems = [];
+                console.log(`[setSelectedArtItem]: Selected blockItem found with index ${idx}`);
+
+                // If block item with pos not found ?????
+                if (idx === -1) {
+                    nextItems = [...pendingSelection.block.items, next];
+                } else {
+                    nextItems = pendingSelection.block.items.map((it, i) =>
+                        i === idx ? next : it,
+                    );
+                }
+                const nextBlock = { ...pendingSelection.block, items: nextItems };
+
+                setValues(normalizeBlock(nextBlock));
+                console.log(`[setSelectedArtItem]: Updated block set to:`);
+                console.dir(nextBlock);
+                pushMode('edit');
+                setPendingSelection(undefined);
+                unHit();
+            } else {
+                throw new Error(`[pendingSelected]: Received data doesn't match expected`);
+            }
+        },
+        [pendingSelection, gCtxt.currentArtCatalog, unHit],
+    );
 
     const onDelete = useCallback(() => {
         console.log(`onDelete called for block ${selectedBlock}`);
     }, [selectedBlock]);
 
-    function handleSelectHit(hit: BlockHitEvent) {
-        setSelectedBlock(hit.block);
-        setValues(normalizeBlock(hit.block));
-        setScreenMode('edit');
-    }
-
-    const hitToTarget = (e: BlockHitEvent): EditTarget => {
-        switch (e.hit.blockKind) {
-            case 'gallery': {
-                switch (e.hit.kind) {
-                    case 'image':
-                    case 'imageCaption':
-                        return {
-                            blockKind: 'gallery',
-                            kind: e.hit.kind,
-                            slot: e.hit.slot,
-                        };
-
-                    case 'blockCaption':
-                        return {
-                            blockKind: 'gallery',
-                            kind: 'blockCaption',
-                            slot: undefined,
-                        };
-                }
-                break;
-            }
-
-            case 'text': {
-                switch (e.hit.kind) {
-                    case 'textTitle':
-                        return { blockKind: 'text', kind: 'title' };
-                    case 'textBody':
-                        return { blockKind: 'text', kind: 'body' };
-                }
-                break;
-            }
-
-            case 'cta': {
-                switch (e.hit.kind) {
-                    case 'ctaTitle':
-                        return { blockKind: 'cta', kind: 'label' };
-                    case 'ctaBody':
-                        return { blockKind: 'cta', kind: 'url' };
-                    case 'ctaButton':
-                        return { blockKind: 'cta', kind: 'label' };
-                }
-                break;
-            }
-        }
-    };
-    const handleEditHit = useCallback((hit: BlockHitEvent) => {
-        console.log(`[onHit]: edit mode hit detected`);
-        console.dir(hit);
-        if (screenMode !== 'edit') return;
-        const tg = hitToTarget(hit);
-        console.log(`[onHit]: target calculated as:`);
-        console.dir(tg);
-        setCurrentTarget(tg);
-    }, []);
     useEffect(() => {
         console.log(`[onHit]: currentTarget set to: ${currentTarget}`);
         console.dir(currentTarget);
@@ -314,8 +380,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             if (!prev) return prev;
             return { ...prev, tags: uniq };
         });
-        setIsDirty(true);
-        setCanSave(true);
     }, []);
 
     const value: BlockEditorSession = useMemo(
@@ -324,12 +388,11 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             mode,
             values,
             collection,
-            screenMode,
             setValues,
-            setSelectedBlock,
             setMode,
-            setScreenMode,
+            currentStack,
             setCollection,
+            setSelectedArtItem,
             editorIsReady,
             isDirty,
             isValid,
@@ -350,7 +413,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             mode,
             values,
             collection,
-            screenMode,
             editorIsReady,
             isDirty,
             isValid,
@@ -359,7 +421,8 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             saving,
             uiError,
             setCollection,
-            setScreenMode,
+            setSelectedArtItem,
+            currentStack,
             save,
             exit,
             onHit,

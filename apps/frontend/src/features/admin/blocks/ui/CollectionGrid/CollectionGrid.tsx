@@ -1,4 +1,4 @@
-import { BlocksCollectionJSON } from '@/entities/block';
+import { Block, BlocksCollectionJSON } from '@/entities/block';
 import { BlockEditorSession } from '@/features/admin/blocks/editorSession';
 import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import {
@@ -11,13 +11,15 @@ import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorT
 import { todayISO } from '@/shared/lib/date/Today';
 import { createGalleryTemplateBlock } from '../BlockTemplates';
 import './blocks.grid.css';
+import { Dispatch, SetStateAction } from 'react';
 
 type Props = {
     collection: BlocksCollectionJSON | undefined;
     onHit: (hit: BlockHitEvent) => void;
+    setValue: Dispatch<SetStateAction<Block | undefined>>;
 };
 
-export function CollectionGrid({ collection, onHit }: Props) {
+export function CollectionGrid({ collection, onHit, setValue }: Props) {
     const ctx: BlockEditorSession = useBlockEditorSession();
 
     let safeCollection: BlocksCollectionJSON;
@@ -38,19 +40,39 @@ export function CollectionGrid({ collection, onHit }: Props) {
 
     return (
         <div className="grid-collection">
-            {ctx.mode === 'create' && <TemplateRaw onSelectKind={onHit} />}
+            {ctx.mode === 'create' && <TemplateRaw onSelectKind={onHit} setValue={setValue} />}
             {safeCollection.order.map((item) => {
                 const b = safeCollection.blocks[item];
                 switch (b?.blockKind) {
                     case 'gallery':
-                        return <GalleryComponent key={b.id} item={b} onHit={onHit} parent="grid" />;
+                        return (
+                            <GalleryComponent
+                                key={b.id}
+                                item={b}
+                                onHit={onHit}
+                                parent="grid"
+                                setValue={setValue}
+                            />
+                        );
                     case 'text':
                         return (
-                            <TextBlockComponent key={b.id} item={b} onHit={onHit} parent="grid" />
+                            <TextBlockComponent
+                                key={b.id}
+                                item={b}
+                                onHit={onHit}
+                                parent="grid"
+                                setValue={setValue}
+                            />
                         );
                     case 'cta':
                         return (
-                            <CtaBlockComponent key={b.id} item={b} onHit={onHit} parent="grid" />
+                            <CtaBlockComponent
+                                key={b.id}
+                                item={b}
+                                onHit={onHit}
+                                parent="grid"
+                                setValue={setValue}
+                            />
                         );
                     default:
                         return null;

@@ -28,14 +28,14 @@ import {
     useState,
 } from 'react';
 
-export type EditorSession = {
+export type CatalogEditorSession = {
+    mode: 'create' | 'edit';
     catalog: ArtCatalog | undefined;
     hopper: CatalogGridItem[];
     identity: EditorTarget | undefined; // matches state
-    mode: 'create' | 'edit';
     values: ArtItemForm | undefined;
+    setIdentity: React.Dispatch<React.SetStateAction<EditorTarget | undefined>>;
     setValues: React.Dispatch<React.SetStateAction<ArtItemForm | undefined>>;
-    setSelectedBlock: (v: EditorTarget | undefined) => void;
     setMode: (m: 'edit' | 'create') => void;
 
     /** Start a new session from a hopper unit or existing item */
@@ -58,18 +58,18 @@ export type EditorSession = {
     seriesOptions: string[];
 };
 
-const Ctx = createContext<EditorSession | undefined>(undefined);
+const Ctx = createContext<CatalogEditorSession | undefined>(undefined);
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useEditorSession = () => {
     const v = useContext(Ctx);
-    if (!v) throw new Error('useEditorSession must be used within EditorSessionProvider');
+    if (!v) throw new Error('useEditorSession must be used within CatalogEditorSessionProvider');
     return v;
 };
 
 type ProviderProps = { children: React.ReactNode };
 
-export function EditorSessionProvider({ children }: ProviderProps) {
+export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     const gCtx: EditorWorkspaceContextValue = useEditorWorkspace();
 
     // Core state
@@ -99,6 +99,8 @@ export function EditorSessionProvider({ children }: ProviderProps) {
         try {
             setLoading(true);
             const cat = await getCatalog();
+            console.log(`[CatalogEditorSessionProvider]: Current catalog received as:`);
+            console.dir(cat);
             setCatalog(cat);
             const hop = await getHopperContent();
             console.log('[refreshBase]: Received hopper: ', hop);
@@ -286,15 +288,16 @@ export function EditorSessionProvider({ children }: ProviderProps) {
         exitSession();
     }, [saving, isDirty, exitSession, refreshBase]);
 
-    const value: EditorSession = useMemo(
+    const value: CatalogEditorSession = useMemo(
         () => ({
             mode,
             catalog,
             hopper,
             identity,
             values,
-            setValues,
             setIdentity,
+            setValues,
+            setMode,
             editorIsReady,
             isDirty,
             isValid,
@@ -306,7 +309,6 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             techniques,
             seriesOptions,
             loading,
-            setMode,
         }),
         [
             mode,
@@ -314,6 +316,9 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             hopper,
             identity,
             values,
+            setIdentity,
+            setValues,
+            setMode,
             editorIsReady,
             isDirty,
             isValid,
@@ -325,7 +330,6 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             techniques,
             seriesOptions,
             loading,
-            setMode,
         ],
     );
 

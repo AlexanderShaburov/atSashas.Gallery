@@ -1,32 +1,32 @@
 import { GridItem } from '@/entities/grid';
 import { useEffect, useState } from 'react';
-import './HopperGrid.css';
+import './ArtItemGrid.css';
 
-interface HopperGridProps {
-    hopper: GridItem[];
+interface ArtItemGridProps {
+    artCollection: GridItem[];
     setIdentity: (item: GridItem | undefined) => void;
 }
 
-export default function HopperGrid({ hopper, setIdentity }: HopperGridProps) {
+export default function ArtItemGrid({ artCollection, setIdentity }: ArtItemGridProps) {
     const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
 
     // Handle click on tile: toggle selection
     function handleClick(item: GridItem): void {
         setSelectedId((prev) => (prev === item.id ? undefined : item.id));
-        console.log(`Current hopper is: ${hopper}`);
-        console.dir(hopper);
+        console.log(`Current artCollection is: ${artCollection}`);
+        console.dir(artCollection);
     }
 
     // Sync selectedId -> identity (inform parent) AFTER render
     useEffect(() => {
         if (!selectedId) {
-            setIdentity(undefined);
+            // setIdentity(undefined);
             return;
         }
 
-        const item = hopper.find((i) => i.id === selectedId);
+        const item = artCollection.find((i) => i.id === selectedId);
         setIdentity(item);
-    }, [selectedId, hopper, setIdentity]);
+    }, [selectedId, artCollection, setIdentity]);
 
     // Handle Escape: clear selection
     useEffect(() => {
@@ -41,13 +41,13 @@ export default function HopperGrid({ hopper, setIdentity }: HopperGridProps) {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [setIdentity]);
 
-    if (!hopper.length) {
+    if (!artCollection || !artCollection.length) {
         return <div className="hopper-grid hopper-grid--empty">No items yet</div>;
     }
 
     return (
         <div className="hopper-grid">
-            {hopper.map((item) => (
+            {artCollection.map((item) => (
                 <button
                     key={item.id}
                     type="button"

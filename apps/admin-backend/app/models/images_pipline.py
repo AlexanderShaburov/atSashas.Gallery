@@ -13,7 +13,7 @@ from app.models.common import Localized, PreviewSources
 
 class ImagesJSON(BaseModel):
     full: str
-    previews: PreviewSources
+    preview: PreviewSources
     alt: Optional[Localized] = None
 
     @classmethod
@@ -186,7 +186,7 @@ class ImagesJSON(BaseModel):
 
         return cls(
             full=full_json_path,
-            previews=previews,
+            preview=previews,
             alt=None,  # can be filled later
         )
 

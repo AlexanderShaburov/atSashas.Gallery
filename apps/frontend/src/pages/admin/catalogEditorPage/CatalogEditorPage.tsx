@@ -1,29 +1,20 @@
 import '@/pages/admin/catalogEditorPage/CatalogEditorPage.css';
 
-import { ArtItemData } from '@/entities/art';
 import { GridItem } from '@/entities/grid';
-import { useEditorSession } from '@/features/admin/catalogEditor/editorSession/EditorSession.context';
+import { useEditorSession } from '@/features/admin/catalogEditor/editorSession/CatalogEditorSession.context';
 import SingleItemEditor from '@/features/admin/catalogEditor/ui/SingleItemEditor/SingleItemEditor';
-import HopperGrid from '@/features/admin/shared/ui/HopperGrid/HopperGrid';
+import ArtItemGrid from '@/features/admin/shared/ui/ArtItemGrid/ArtItemGrid';
+import { artItemToGridItem } from '@/features/admin/shared/ui/ArtItemGrid/utils';
 import { useEffect, useState } from 'react';
 
 export default function CatalogEditorPage() {
-    const [hopperGrid, setHopperGrid] = useState<GridItem[]>([]);
+    const [artItemGrid, setArtItemGrid] = useState<GridItem[]>([]);
     const [catalogGrid, setCatalogGrid] = useState<GridItem[]>([]);
     const [displayGrid, setDisplayGrid] = useState<GridItem[]>([]);
 
     const { identity, setIdentity, editorIsReady, catalog, hopper, loading, mode, setMode } = {
         ...useEditorSession(),
     };
-
-    function artItemToGridItem(a: ArtItemData): GridItem {
-        const thumbUrl = a.images.full as string;
-        return {
-            id: a.id,
-            thumbUrl: thumbUrl,
-            title: a.title?.en ?? a.title?.ru ?? '',
-        };
-    }
 
     function onClickHandler(t: GridItem | undefined) {
         if (!t) {
@@ -55,7 +46,7 @@ export default function CatalogEditorPage() {
     }
 
     useEffect(() => {
-        setHopperGrid(hopper ?? []);
+        setArtItemGrid(hopper ?? []);
 
         if (catalog && catalog.items) {
             const c_grid = Object.values(catalog.items).map(artItemToGridItem);
@@ -69,14 +60,14 @@ export default function CatalogEditorPage() {
         console.log(`[displayGrid] setter called`);
         switch (mode) {
             case 'create':
-                setDisplayGrid(hopperGrid ?? []);
+                setDisplayGrid(artItemGrid ?? []);
                 break;
 
             case 'edit': {
                 setDisplayGrid(catalogGrid ?? []);
             }
         }
-    }, [mode, hopperGrid, catalogGrid]);
+    }, [mode, artItemGrid, catalogGrid]);
 
     return (
         <>
@@ -101,7 +92,7 @@ export default function CatalogEditorPage() {
                 ) : (
                     !identity && (
                         <div /*className="grid"*/>
-                            <HopperGrid hopper={displayGrid} setIdentity={onClickHandler} />
+                            <ArtItemGrid artCollection={displayGrid} setIdentity={onClickHandler} />
                         </div>
                     )
                 )}

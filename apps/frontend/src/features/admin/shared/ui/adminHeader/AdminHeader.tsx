@@ -38,20 +38,20 @@ export function AdminHeader() {
                             Catalog
                         </NavLink>
                         <NavLink
-                            to="/admin/streams"
-                            className={({ isActive }) =>
-                                'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
-                            }
-                        >
-                            Streams
-                        </NavLink>
-                        <NavLink
                             to="/admin/blocks"
                             className={({ isActive }) =>
                                 'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
                             }
                         >
                             Blocks
+                        </NavLink>
+                        <NavLink
+                            to="/admin/streams"
+                            className={({ isActive }) =>
+                                'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
+                            }
+                        >
+                            Streams
                         </NavLink>
                     </nav>
                 </nav>

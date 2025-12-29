@@ -8,7 +8,7 @@ import {
     GalleryLayout,
 } from '@/entities/block/block.types';
 import { useBlockEditorSession } from '@/features/admin/blocks//hooks/useBlocksEditor';
-import { BlockFilterState } from '@/features/admin/blocks/BlockEditorScreen/BlockEditorScreen';
+import { BlockFilterState } from '@/features/admin/blocks/ui/FilterControl';
 import { useEffect, useState } from 'react';
 import './FilterControl.css';
 

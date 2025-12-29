@@ -1,13 +1,13 @@
 {
-  "catalogVersion": 59,
-  "updatedAt": "2025-11-24T11:24:08.399420+00:00",
+  "catalogVersion": 65,
+  "updatedAt": "2025-12-26T18:01:11.283119+00:00",
   "items": {
     "art-20251118-4gpfj3": {
       "id": "art-20251118-4gpfj3",
       "dateCreated": "2025-11-18",
       "images": {
         "full": "/media/arts/fullsize/art-20251118-4gpfj3.png",
-        "previews": {
+        "preview": {
           "avif": "/media/arts/previews/art-20251118-4gpfj3.avif",
           "webp": "/media/arts/previews/art-20251118-4gpfj3.webp",
           "jpeg": "/media/arts/previews/art-20251118-4gpfj3.jpeg"
@@ -37,7 +37,7 @@
       "dateCreated": "2025-11-20",
       "images": {
         "full": "/media/arts/fullsize/art-20251120-jcsrbr.png",
-        "previews": {
+        "preview": {
           "avif": "/media/arts/previews/art-20251120-jcsrbr.avif",
           "webp": "/media/arts/previews/art-20251120-jcsrbr.webp",
           "jpeg": "/media/arts/previews/art-20251120-jcsrbr.jpeg"
@@ -67,7 +67,7 @@
       "dateCreated": "2025-11-20",
       "images": {
         "full": "/media/arts/fullsize/art-20251120-9td10a.png",
-        "previews": {
+        "preview": {
           "avif": "/media/arts/previews/art-20251120-9td10a.avif",
           "webp": "/media/arts/previews/art-20251120-9td10a.webp",
           "jpeg": "/media/arts/previews/art-20251120-9td10a.jpeg"
@@ -91,9 +91,183 @@
       "series": null,
       "tags": null,
       "notes": null
+    },
+    "art-20251226-vs1ped": {
+      "id": "art-20251226-vs1ped",
+      "dateCreated": "2025-12-26",
+      "images": {
+        "full": "/media/arts/fullsize/art-20251226-vs1ped.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20251226-vs1ped.avif",
+          "webp": "/media/arts/previews/art-20251226-vs1ped.webp",
+          "jpeg": "/media/arts/previews/art-20251226-vs1ped.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": null,
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "hue",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
+    },
+    "art-20251226-52p602": {
+      "id": "art-20251226-52p602",
+      "dateCreated": "2025-12-26",
+      "images": {
+        "full": "/media/arts/fullsize/art-20251226-52p602.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20251226-52p602.avif",
+          "webp": "/media/arts/previews/art-20251226-52p602.webp",
+          "jpeg": "/media/arts/previews/art-20251226-52p602.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": null,
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "leaves",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
+    },
+    "art-20251226-t1y5qn": {
+      "id": "art-20251226-t1y5qn",
+      "dateCreated": "2025-12-26",
+      "images": {
+        "full": "/media/arts/fullsize/art-20251226-t1y5qn.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20251226-t1y5qn.avif",
+          "webp": "/media/arts/previews/art-20251226-t1y5qn.webp",
+          "jpeg": "/media/arts/previews/art-20251226-t1y5qn.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": null,
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "window",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
+    },
+    "art-20251226-7vqxmz": {
+      "id": "art-20251226-7vqxmz",
+      "dateCreated": "2025-12-26",
+      "images": {
+        "full": "/media/arts/fullsize/art-20251226-7vqxmz.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20251226-7vqxmz.avif",
+          "webp": "/media/arts/previews/art-20251226-7vqxmz.webp",
+          "jpeg": "/media/arts/previews/art-20251226-7vqxmz.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": null,
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "major lazer",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
+    },
+    "art-20251226-tfemnz": {
+      "id": "art-20251226-tfemnz",
+      "dateCreated": "2025-12-26",
+      "images": {
+        "full": "/media/arts/fullsize/art-20251226-tfemnz.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20251226-tfemnz.avif",
+          "webp": "/media/arts/previews/art-20251226-tfemnz.webp",
+          "jpeg": "/media/arts/previews/art-20251226-tfemnz.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": null,
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "jey lo",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
+    },
+    "art-20251226-tk5nhr": {
+      "id": "art-20251226-tk5nhr",
+      "dateCreated": "2025-12-26",
+      "images": {
+        "full": "/media/arts/fullsize/art-20251226-tk5nhr.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20251226-tk5nhr.avif",
+          "webp": "/media/arts/previews/art-20251226-tk5nhr.webp",
+          "jpeg": "/media/arts/previews/art-20251226-tk5nhr.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": null,
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "peggy lee",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
     }
   },
   "order": [
+    "art-20251226-tk5nhr",
+    "art-20251226-tfemnz",
+    "art-20251226-7vqxmz",
+    "art-20251226-t1y5qn",
+    "art-20251226-52p602",
+    "art-20251226-vs1ped",
     "art-20251120-9td10a",
     "art-20251120-jcsrbr",
     "art-20251118-4gpfj3"

@@ -23,6 +23,6 @@ function yyyymmdd(d = new Date()): string {
     return `${y}${m}${day}`;
 }
 
-export function generateArtId(k: idKind, now = new Date()): string {
+export function generateId(k: idKind, now = new Date()): string {
     return `${k}-${yyyymmdd(now)}-${randomBase32(6).toLowerCase()}`;
 }

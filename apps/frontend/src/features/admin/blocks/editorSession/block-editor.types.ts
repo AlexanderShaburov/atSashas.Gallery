@@ -8,9 +8,15 @@ import type {
     EditTarget,
 } from '@/entities/block';
 import type { UiErrorState } from '@/entities/common';
+import { GridItem } from '@/entities/grid';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 
 export type BlockEditorTarget = { mode: 'create' } | { mode: 'edit'; block: Block };
+
+export interface ScreenModeStack {
+    screenMode: BlockEditorScreenMode;
+    onEscape: () => void;
+}
 
 export type BlockEditorSession = {
     /** Which block we are working with (create or edit existing) */
@@ -22,12 +28,11 @@ export type BlockEditorSession = {
     /** Working form values for the block (formValue) */
     values: Block | undefined;
     collection?: BlocksCollectionJSON;
-    screenMode: BlockEditorScreenMode;
     setValues: React.Dispatch<React.SetStateAction<Block | undefined>>;
-    setSelectedBlock: (v: Block | undefined) => void;
     setMode: (m: BlockEditorMode) => void;
-    setScreenMode: (m: BlockEditorScreenMode) => void;
+    currentStack: ScreenModeStack;
     setCollection: (c: BlocksCollectionJSON | undefined) => void;
+    setSelectedArtItem: (i: GridItem | undefined) => void;
     onHit: (h: BlockHitEvent) => void;
     unHit: () => void;
     onDelete: () => void;

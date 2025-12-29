@@ -11,11 +11,14 @@ import {
     createGalleryTemplateBlock,
     createTextTemplateBlock,
 } from './templateTypes';
+import { Dispatch, SetStateAction } from 'react';
+import { Block } from '@/entities/block';
 type TemplateRawProps = {
     onSelectKind: (hit: BlockHitEvent) => void;
+    setValue: Dispatch<SetStateAction<Block | undefined>>;
 };
 
-export function TemplateRaw({ onSelectKind }: TemplateRawProps) {
+export function TemplateRaw({ onSelectKind, setValue }: TemplateRawProps) {
     return (
         <>
             {TEMPLATE_BLOCKS.map((tpl, index) => {
@@ -30,6 +33,7 @@ export function TemplateRaw({ onSelectKind }: TemplateRawProps) {
                                     }}
                                     onHit={onSelectKind}
                                     parent="grid"
+                                    setValue={setValue}
                                 />
                             </div>
                         );
@@ -40,6 +44,7 @@ export function TemplateRaw({ onSelectKind }: TemplateRawProps) {
                                     item={{ ...createCtaTemplateBlock(), isTemplate: true }}
                                     onHit={onSelectKind}
                                     parent="grid"
+                                    setValue={setValue}
                                 />
                             </div>
                         );
@@ -50,6 +55,7 @@ export function TemplateRaw({ onSelectKind }: TemplateRawProps) {
                                     item={{ ...createTextTemplateBlock(), isTemplate: true }}
                                     onHit={onSelectKind}
                                     parent="grid"
+                                    setValue={setValue}
                                 />
                             </div>
                         );

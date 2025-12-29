@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     admin_token: str | None = None
     json_data: str = "/json"
     blocks: str = "/block_collection"
-    catalog_file: str = "catalog.json"
+    catalog_file: str = "art_catalog.json"
 
     class Config:
         env_prefix = ""

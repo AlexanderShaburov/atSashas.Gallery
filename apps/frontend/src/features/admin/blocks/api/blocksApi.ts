@@ -1,7 +1,7 @@
 //src/features/admin/blocks/api/blocksApi.ts:
 
-import type { BlocksCollectionJSON } from '@/entities/block';
-import { generateArtId } from '@/shared/lib/id/generateArtId';
+import type { Block, BlocksCollectionJSON } from '@/entities/block';
+import { generateId } from '@/shared/lib/id/generateId';
 
 export const API_BASE = import.meta.env.VITE_API_BASE_URL;
 export const BLOCK_VAULT = `${API_BASE}/blocks`;
@@ -17,7 +17,7 @@ export async function getCollection(): Promise<BlocksCollectionJSON> {
 }
 
 export async function createCollection(name: string) {
-    const collectionId = generateArtId('collection');
+    const collectionId = generateId('collection');
     console.log(`CreateCollection name: ${name}`);
     console.log(`CreateCollection id: ${collectionId}`);
     const data = {
@@ -53,4 +53,29 @@ export async function deleteCollection(collection: BlocksCollectionJSON) {
         console.error('Network error while deleting collection file: ', err);
         return false;
     }
+}
+
+export async function addNewBlock(block: Block) {
+    console.log(`[addNewBlock]: Called`);
+    const res = await fetch(BLOCK_VAULT, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(block),
+    });
+    if (!res.ok) throw new Error(`Add new block error: ${res.status}`);
+    return res.status;
+}
+
+export async function updateBlock(block: Block) {
+    console.log('[updateBlock]: Called');
+    const URL = `${BLOCK_VAULT}/${block.id}`;
+    const res = await fetch(URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(block),
+    });
+    if (!res.ok) throw new Error(`Update block error: ${res.status}`);
+    return res.status;
 }

@@ -26,12 +26,18 @@ type Props = {
 };
 export function SingleBlockEditor({ item, onHit, setValue, toolbarProps }: Props) {
     let content: JSX.Element | undefined = undefined;
+
+    const testHit = (hit: BlockHitEvent) => {
+        console.log(`[SingleBlockEditor]: hit detected`);
+        onHit(hit);
+    };
+
     switch (item.blockKind) {
         case 'gallery':
             content = (
                 <GalleryComponent
                     item={item as GalleryBlock}
-                    onHit={onHit}
+                    onHit={testHit}
                     parent="editor"
                     setValue={setValue}
                 />
@@ -41,7 +47,7 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps }: Props
             content = (
                 <CtaBlockComponent
                     item={item as CtaBlock}
-                    onHit={onHit}
+                    onHit={testHit}
                     parent="editor"
                     setValue={setValue}
                 />
@@ -51,7 +57,7 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps }: Props
             content = (
                 <TextBlockComponent
                     item={item as TextBlock}
-                    onHit={onHit}
+                    onHit={testHit}
                     parent="editor"
                     setValue={setValue}
                 />

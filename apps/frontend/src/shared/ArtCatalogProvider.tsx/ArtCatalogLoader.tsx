@@ -15,6 +15,8 @@ async function getCatalog(): Promise<ArtCatalog> {
     const res = await fetch(request);
     if (!res.ok) throw new Error(`Catalog ${res.status}`);
     const raw = (await res.json()) as ApiResponse<ArtCatalog>;
+    console.log(`[ArtCatalogProvider]: Catalog loaded as:`);
+    console.dir(raw.data);
     return raw.data;
 }
 

@@ -1,5 +1,5 @@
 import { deleteFromHopper } from '@/features/admin/catalogEditor/api';
-import { useEditorSession } from '@/features/admin/catalogEditor/editorSession/EditorSession.context';
+import { useEditorSession } from '@/features/admin/catalogEditor/editorSession/CatalogEditorSession.context';
 import { CreateForm } from '@/features/admin/catalogEditor/ui/CreateForm/CreateForm';
 import '@/features/admin/catalogEditor/ui/SingleItemEditor/SingleItemEditor.css';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';

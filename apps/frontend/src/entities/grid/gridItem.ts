@@ -15,7 +15,7 @@ export interface GridItem {
     badge?: string;
 }
 
-export interface HopperGridItem {
+export interface ArtItemGridItem {
     id: string;
     thumbUrl: string;
     fileName?: string;

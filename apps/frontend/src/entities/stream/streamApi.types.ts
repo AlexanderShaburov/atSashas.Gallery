@@ -1,0 +1,18 @@
+// src/entities/stream/StreamApi.ts
+import type { StreamData, StreamIndexItem } from './stream.types';
+
+export type CreateStreamRequest = {
+    streamId: string;
+    title: string;
+    tags?: string[];
+    description?: string;
+};
+
+export type CreateStreamResponse = StreamData;
+
+export type ListStreamsResponse = StreamIndexItem[];
+
+export type UpdateStreamRequest = StreamData; // Full replace with version check
+export type UpdateStreamResponse = StreamData;
+
+export type DeleteStreamResponse = { ok: true };
