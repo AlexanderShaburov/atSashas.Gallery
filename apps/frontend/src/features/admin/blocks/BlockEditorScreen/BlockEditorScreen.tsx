@@ -1,20 +1,20 @@
 //@/features/admin/blocks/BlockEditor/BlockEditor.tsx
 import type { BlockEditorSession } from '@/features/admin/blocks/editorSession';
 import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
-import '@/features/admin/blocks/ui/BlockPreview/index';
+import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 import { CollectionGrid } from '@/features/admin/blocks/ui/CollectionGrid/CollectionGrid';
 import { FilterControl, type BlockFilterState } from '@/features/admin/blocks/ui/FilterControl';
+import { SingleBlockEditor } from '@/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor';
 import {
     applyArtCatalogFilter,
     ArtCatalogFilterControl,
     type ArtCatalogFilterState,
 } from '@/features/admin/shared/ui/ArtCatalogFilterControl/';
 import ArtItemGrid from '@/features/admin/shared/ui/ArtItemGrid/ArtItemGrid';
+import '@/features/admin/shared/ui/BlockPreview/index';
 import '@/pages/admin/BlocksPage/BlocksPage.css';
 import { useArtCatalog } from '@/shared/ArtCatalogProvider.tsx/CatalogHook';
 import { useEffect, useState } from 'react';
-import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
-import { SingleBlockEditor } from '@/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor';
 
 export function BlockEditor() {
     const session: BlockEditorSession = useBlockEditorSession();

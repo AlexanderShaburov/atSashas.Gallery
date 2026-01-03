@@ -44,6 +44,7 @@ class StreamIndexItem(BaseModel):
     title: str
     status: StreamStatus
     tags: List[str] = Field(default_factory=list)
+    description: str
     updatedAt: str
 
 

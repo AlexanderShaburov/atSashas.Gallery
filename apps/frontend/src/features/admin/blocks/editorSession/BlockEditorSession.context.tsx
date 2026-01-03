@@ -21,7 +21,7 @@ import type {
 import { BlockEditorCtx } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { validateBlockForm } from '@/features/admin/blocks/utils';
-import { deepEqual } from '@/features/admin/catalogEditor/utils/checkers';
+import { deepEqual } from '@/shared/lib/checkers/checkers';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { hitToTarget, instantiateFromTemplate } from './blockEditorSession.utils';
 

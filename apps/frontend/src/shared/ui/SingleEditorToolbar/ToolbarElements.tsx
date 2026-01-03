@@ -1,0 +1,125 @@
+// src/shared/ui/SingleEditorToolbar/ToolbarElements.tsx
+
+import { useState } from 'react';
+
+export function AddBlockButton({ onClick }: { onClick: () => void }) {
+    return (
+        <div className="set-actions">
+            <button type="button" className="set-btn" onClick={onClick}>
+                Add Block
+            </button>
+        </div>
+    );
+}
+export function DeleteButton({ exit }: { exit: () => void }) {
+    return (
+        <>
+            {/* LEFT */}
+            <div className="set-actions set-actions--left">
+                <button type="button" className="set-btn set-btn--danger" onClick={exit}>
+                    🗑 Delete
+                </button>
+            </div>
+        </>
+    );
+}
+export function ExitButton({ exit }: { exit: () => void }) {
+    return (
+        <button type="button" className="set-btn set-btn--secondary" onClick={exit}>
+            ✖ Exit
+        </button>
+    );
+}
+export function SaveButton({
+    onClick,
+    canSave,
+    saving,
+}: {
+    onClick: () => void;
+    canSave: boolean;
+    saving: boolean;
+}) {
+    return (
+        <button
+            type="button"
+            className="set-btn set-btn--primary"
+            disabled={!canSave}
+            onClick={() => !saving && canSave && onClick()}
+            title={saving ? 'Saving...' : 'Save'}
+        >
+            {!saving ? '💾 Save' : 'Saving…'}
+        </button>
+    );
+}
+export function TagsEditor({
+    onCommit,
+    tags,
+}: {
+    onCommit: (tags: string[]) => void;
+    tags: string[];
+}) {
+    const trueTags = tags ? tags : [];
+
+    const [editing, setEditing] = useState(false);
+    const [draft, setDraft] = useState<string>(trueTags.join(', '));
+
+    const hasTags = trueTags.length > 0;
+
+    function startEdit() {
+        if (!onCommit) return;
+        setDraft(trueTags.join(', '));
+        setEditing(true);
+    }
+
+    function commit() {
+        if (!onCommit) return;
+
+        const next = draft
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean);
+
+        onCommit(next);
+        setEditing(false);
+    }
+
+    function cancel() {
+        setDraft(trueTags.join(', '));
+        setEditing(false);
+    }
+
+    function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (e.key === 'Enter') commit();
+        if (e.key === 'Escape') cancel();
+    }
+    return (
+        <>
+            {
+                <div className="set-tags">
+                    {!editing ? (
+                        <div
+                            className={`set-tags__view ${!hasTags ? 'is-empty' : ''}`}
+                            role="button"
+                            onClick={startEdit}
+                        >
+                            <span className="set-tags__label">Tags:</span>
+                            <span className="set-tags__value">
+                                {hasTags ? trueTags.join(', ') : 'Add tags…'}
+                            </span>
+                        </div>
+                    ) : (
+                        <input
+                            className="set-tags__input"
+                            autoFocus
+                            value={draft}
+                            onChange={(e) => setDraft(e.target.value)}
+                            onKeyDown={onKeyDown}
+                            onBlur={commit}
+                            placeholder="tag1, tag2, tag3"
+                        />
+                    )}
+                </div>
+            }
+        </>
+    );
+}

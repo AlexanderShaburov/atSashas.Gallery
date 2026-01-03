@@ -1,0 +1,190 @@
+/* src/features/admin/streams/ui/StreamFilterControl/StreamFilterControl.css */
+
+/* BASIC ROW */
+.stream-filter__basic {
+    width: 100%;
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr) auto;
+
+    gap: 10px;
+    align-items: center;
+
+    padding: 10px;
+    border: 1px solid var(--form-border);
+    border-radius: 12px;
+    background: var(--form-bg);
+    box-shadow: var(--form-shadow);
+}
+
+/* ADVANCED ROW */
+.stream-filter__advanced {
+    width: 100%;
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1fr);
+
+    gap: 10px;
+    align-items: center;
+
+    margin-top: 10px;
+
+    padding: 10px;
+    border: 1px solid var(--form-border);
+    border-radius: 12px;
+    background: var(--form-bg);
+    box-shadow: var(--form-shadow);
+}
+
+.stream-filter__input {
+    width: 100%;
+    min-width: 0;
+    height: 38px;
+    min-height: 38px;
+    padding: 0 12px;
+
+    border-radius: 10px;
+    border: 1px solid var(--form-border);
+    background: var(--form-bg);
+    color: var(--text);
+
+    outline: none;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
+    position: relative;
+    z-index: 1;
+}
+
+.stream-filter__input::placeholder {
+    color: var(--form-placeholder);
+}
+
+.stream-filter__input:hover {
+    border-color: var(--form-border-hover);
+}
+
+.stream-filter__input:focus {
+    border-color: var(--form-border-hover);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.stream-filter__input[list] {
+    -webkit-appearance: textfield;
+    appearance: textfield;
+}
+
+/* MODE SWITCH */
+.stream-filter__mode-selector {
+    display: inline-flex;
+    align-items: stretch;
+    height: 38px;
+    flex: 0 0 auto;
+
+    border: 1px solid var(--form-border);
+    border-radius: 999px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--form-bg) 92%, var(--accent) 8%);
+}
+
+.stream-filter__mode {
+    display: flex;
+    flex: 1 1 0;
+}
+
+.stream-filter__mode button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+
+    height: 38px;
+    line-height: 38px;
+
+    width: auto;
+    flex: 1 1 0;
+
+    padding: 0 12px;
+    min-width: 84px;
+
+    text-align: center;
+    white-space: nowrap;
+
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.92rem;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.stream-filter__mode button:hover {
+    opacity: 0.92;
+    color: var(--text);
+}
+
+.stream-filter__mode button.active {
+    background: var(--accent);
+    color: var(--on-accent);
+}
+
+/* CHIPS (optional) */
+.stream-filter__chips {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.stream-filter__chip {
+    border: 1px solid var(--form-border);
+    background: var(--form-bg);
+    color: var(--text);
+
+    border-radius: 999px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.stream-filter__chip--clear {
+    opacity: 0.85;
+}
+
+/* RESPONSIVE */
+@media (max-width: 740px) {
+    .stream-filter__basic {
+        grid-template-columns: 1fr 1fr;
+        grid-auto-rows: auto;
+    }
+
+    .stream-filter__mode-selector {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .stream-filter__advanced {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .stream-filter__basic {
+        grid-template-columns: 1fr;
+    }
+
+    .stream-filter__mode-selector {
+        width: 100%;
+    }
+
+    .stream-filter__mode button {
+        min-width: 0;
+    }
+
+    .stream-filter__advanced {
+        grid-template-columns: 1fr;
+    }
+}

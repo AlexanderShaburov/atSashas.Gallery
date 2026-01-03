@@ -9,9 +9,9 @@ import {
     GalleryLayout,
     ItemPosition,
 } from '@/entities/block';
-import { InlineEditableText } from '@/features/admin/blocks/ui/BlockPreview';
 import { BlockHitEvent, Hit } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { TEMPLATE_BLOCKS } from '@/features/admin/blocks/ui/BlockTemplates/templateTypes';
+import { InlineEditableText } from '@/features/admin/shared/ui/BlockPreview';
 import { useResolveArt } from '@/shared/ArtCatalogProvider.tsx/CatalogHook';
 import { Dispatch, SetStateAction } from 'react';
 const ITEM_POSITIONS: Record<GalleryLayout, ItemPosition[]> = {

@@ -1,0 +1,106 @@
+/* Root container: feed сверху, toolbar снизу */
+.sse {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0; /* важно, чтобы скролл работал внутри */
+}
+
+/* Feed area */
+.sse__feed {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    /* чтобы последний блок не прятался под нижним тулбаром */
+    padding-bottom: calc(12px + var(--sse-toolbar-h, 64px));
+}
+
+/* One block slot in feed (по желанию) */
+.sse__block {
+    width: 100%;
+}
+
+/* Not found */
+.sse__not_found {
+    padding: 12px;
+    border: 1px dashed color-mix(in srgb, var(--text) 25%, transparent);
+    border-radius: 12px;
+    opacity: 0.8;
+}
+
+/* Toolbar pinned to bottom */
+.set__toolbar {
+    position: sticky;
+    bottom: 0;
+    z-index: 50;
+
+    /* визуально отделить от фида */
+    padding: 10px 12px;
+    border-top: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
+
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(10px);
+
+    /* чтобы удобно было настроить нижний отступ у фида */
+    --sse-toolbar-h: 64px;
+}
+
+/* Wrapper around each block (your BlockWrapper root) */
+.bw_wrapper {
+    position: relative;
+    border-radius: 14px;
+
+    /* легкая “карточка”, чтобы было похоже на прод */
+    background: var(--card-bg);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+
+    /* место под кнопку, чтобы она не перекрывала контент */
+    padding: 10px;
+}
+
+/* Three dots button */
+.bw__three-dot {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+
+    display: grid;
+    place-items: center;
+
+    font-size: 18px;
+    line-height: 1;
+    letter-spacing: 1px;
+
+    color: var(--text);
+    background: color-mix(in srgb, var(--card-bg) 80%, var(--text) 8%);
+    border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
+
+    cursor: pointer;
+    user-select: none;
+
+    z-index: 5;
+}
+
+/* Hover/focus states */
+.bw__three-dot:hover {
+    background: color-mix(in srgb, var(--card-bg) 70%, var(--text) 12%);
+}
+
+.bw__three-dot:active {
+    transform: translateY(1px);
+}
+
+.bw__three-dot:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--text) 35%, transparent);
+    outline-offset: 2px;
+}

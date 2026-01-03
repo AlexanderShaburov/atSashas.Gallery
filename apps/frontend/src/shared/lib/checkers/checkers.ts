@@ -1,3 +1,5 @@
+// src/shared/lib/checkers/checkers.ts
+
 export function normalizeForCompare(v: unknown): unknown {
     if (Array.isArray(v)) {
         return v.map(normalizeForCompare);

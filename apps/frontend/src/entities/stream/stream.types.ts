@@ -5,7 +5,7 @@ export type StreamStatus = 'draft' | 'ready' | 'archived';
 export type StreamData = {
     streamId: string; // Slug/id, also filename (e.g., "home")
     title: string; // Human-readable name shown in the UI
-    status: StreamStatus;
+    status?: StreamStatus;
 
     tags: string[]; // For filtering in the stream list
     description: string; // Optional short text for admin/SEO
@@ -20,8 +20,10 @@ export type StreamData = {
 export type StreamIndexItem = {
     streamId: string;
     title: string;
+    thumbnail: string;
     status: StreamStatus;
     tags: string[];
+    description: string;
     updatedAt: string;
 };
 

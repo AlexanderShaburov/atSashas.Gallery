@@ -150,3 +150,18 @@
     font-size: 0.85rem;
     outline: none;
 }
+.set__toolbar {
+    position: sticky;
+    bottom: 0;
+    z-index: 50;
+
+    /* визуально отделить от фида */
+    padding: 10px 12px;
+    border-top: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
+
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(10px);
+
+    /* чтобы удобно было настроить нижний отступ у фида */
+    --sse-toolbar-h: 64px;
+}

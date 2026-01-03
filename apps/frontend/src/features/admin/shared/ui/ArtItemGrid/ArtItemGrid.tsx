@@ -1,3 +1,5 @@
+// src/features/admin/shared/ui/ArtItemGrid/ArtItemGrid.tsx
+
 import { GridItem } from '@/entities/grid';
 import { useEffect, useState } from 'react';
 import './ArtItemGrid.css';

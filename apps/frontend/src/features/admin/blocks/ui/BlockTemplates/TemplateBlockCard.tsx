@@ -1,8 +1,10 @@
+import { Block } from '@/entities/block';
 import {
     CtaBlockComponent,
     GalleryComponent,
     TextBlockComponent,
-} from '@/features/admin/blocks/ui/BlockPreview';
+} from '@/features/admin/shared/ui/BlockPreview';
+import { Dispatch, SetStateAction } from 'react';
 import './block.templates.css';
 import { BlockHitEvent } from './editorTypes';
 import {
@@ -11,8 +13,6 @@ import {
     createGalleryTemplateBlock,
     createTextTemplateBlock,
 } from './templateTypes';
-import { Dispatch, SetStateAction } from 'react';
-import { Block } from '@/entities/block';
 type TemplateRawProps = {
     onSelectKind: (hit: BlockHitEvent) => void;
     setValue: Dispatch<SetStateAction<Block | undefined>>;

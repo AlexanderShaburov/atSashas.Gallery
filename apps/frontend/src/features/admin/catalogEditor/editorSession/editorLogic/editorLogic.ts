@@ -1,6 +1,7 @@
 import { EditorTarget, ISODate } from '@/entities/common';
 import type { ArtItemForm } from '@/features/admin/catalogEditor/editorSession/editorTypes';
 import { generateId } from '@/shared/lib/id/generateId';
+import { todayISO } from '@/shared/lib/date/Today';
 
 export function prepareEditorForm(unit: EditorTarget): ArtItemForm {
     switch (unit.mode) {
@@ -33,12 +34,4 @@ export function prepareEditorForm(unit: EditorTarget): ArtItemForm {
                 notes: unit.item.notes,
             };
     }
-}
-
-export function todayISO(): ISODate {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}` as ISODate;
 }

@@ -80,6 +80,7 @@ class StreamRepo:
                     title=stream.title,
                     status=stream.status,
                     tags=list(stream.tags),
+                    description=stream.description,
                     updatedAt=stream.updatedAt,
                 )
                 break
@@ -90,6 +91,7 @@ class StreamRepo:
                     title=stream.title,
                     status=stream.status,
                     tags=list(stream.tags),
+                    description=stream.description,
                     updatedAt=stream.updatedAt,
                 )
             )

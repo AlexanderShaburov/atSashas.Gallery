@@ -12,12 +12,12 @@ import {
 import { prepareEditorForm } from '@/features/admin/catalogEditor/editorSession/editorLogic/';
 import { buildShipment } from '@/features/admin/catalogEditor/editorSession/editorLogic/buildShipment';
 import type { ArtItemForm } from '@/features/admin/catalogEditor/editorSession/editorTypes';
-import { deepEqual } from '@/features/admin/catalogEditor/utils/checkers';
 import { isMinimalValid, sanitizeForm } from '@/features/admin/catalogEditor/utils/Validators';
 import {
     useEditorWorkspace,
     type EditorWorkspaceContextValue,
 } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import { deepEqual } from '@/shared/lib/checkers/checkers';
 import {
     createContext,
     useCallback,

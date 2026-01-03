@@ -19,6 +19,8 @@ export interface EditorWorkspaceState {
 
     currentArtItemId?: string;
     currentArtCatalog?: ArtCatalog;
+
+    currentStack?: GlobalStack;
 }
 
 // Context value: state + simple setters

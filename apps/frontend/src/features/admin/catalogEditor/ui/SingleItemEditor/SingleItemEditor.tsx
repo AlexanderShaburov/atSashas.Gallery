@@ -2,15 +2,14 @@ import { deleteFromHopper } from '@/features/admin/catalogEditor/api';
 import { useEditorSession } from '@/features/admin/catalogEditor/editorSession/CatalogEditorSession.context';
 import { CreateForm } from '@/features/admin/catalogEditor/ui/CreateForm/CreateForm';
 import '@/features/admin/catalogEditor/ui/SingleItemEditor/SingleItemEditor.css';
+import { ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
 import { useEffect } from 'react';
+
 export default function SingleItemEditor() {
     const { thumb, save, values, isDirty, isValid, exit, canSave, saving, mode } = {
         ...useEditorSession(),
     };
-    console.log(`Current thumb is: `);
-    console.log(`current thumb.thumbUrl: ${thumb?.thumbUrl}`);
-    console.dir(thumb);
 
     // TODO:
     // When Blocks and Streams are implemented:
@@ -91,6 +90,15 @@ export default function SingleItemEditor() {
         return () => window.removeEventListener('keydown', onKey);
     }, [isValid, exit, save, isDirty, values, canSave]);
 
+    const tbCtx = {
+        canSave: canSave,
+        saving: saving,
+        save: save,
+        exit: exit,
+        onDelete: onDelete,
+    };
+    const tbTools = ['delButton', 'exit', 'save'] as ToolKey[];
+
     return (
         <div className="sie-layout">
             {/* Thumbnail column */}
@@ -107,13 +115,7 @@ export default function SingleItemEditor() {
             <section className="sie-form-col" aria-label="Metadata form">
                 <div className="sie-form-wrap">
                     <CreateForm />
-                    <SingleEditorToolbar
-                        canSave={canSave}
-                        saving={saving}
-                        save={save}
-                        exit={exit}
-                        onDelete={onDelete}
-                    />
+                    <SingleEditorToolbar tools={tbTools} ctx={tbCtx} />
                 </div>
             </section>
         </div>
