@@ -3,14 +3,14 @@
 import { Block, BlocksCollectionJSON } from '@/entities/block';
 import { BlockEditorSession } from '@/features/admin/blocks/editorSession';
 import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
+import { createGalleryTemplateBlock } from '@/features/admin/blocks/ui/BlockTemplates';
 import { TemplateRaw } from '@/features/admin/blocks/ui/BlockTemplates/TemplateBlockCard';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
-import { createGalleryTemplateBlock } from '@/features/admin/blocks/ui/BlockTemplates';
 
-import { todayISO } from '@/shared/lib/date/Today';
+import { BlockRenderer } from '@/features/admin/shared/ui/BlockPreview/BlockRenderer';
+import { todayISO } from '@/shared/lib/dateAndLabels/Today';
 import { Dispatch, SetStateAction } from 'react';
 import './blocks.grid.css';
-import { BlockRenderer } from '@/features/admin/shared/ui/BlockPreview/BlockRenderer';
 
 type Props = {
     collection: BlocksCollectionJSON | undefined;

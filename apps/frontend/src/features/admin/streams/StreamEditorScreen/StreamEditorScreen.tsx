@@ -6,10 +6,10 @@ import { StreamFilterState } from '@/features/admin/streams/ui/FilterControl/str
 import { DEFAULT_STREAM_FILTER } from '@/features/admin/streams/ui/FilterControl/streamFilter.defaults';
 import { StreamFilterControl } from '@/features/admin/streams/ui/FilterControl/StreamFilterControl';
 import { NewStreamComponent } from '@/features/admin/streams/ui/NewStreamComponent/NewStreamComponent';
+import { SingleStreamEditor } from '@/features/admin/streams/ui/SingleStreamEditor/SingleStreamEditor';
+import { ToolbarCtx } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import './StreamEditorScreen.css';
-import { SingleStreamEditor } from '../ui/SingleStreamEditor/SingleStreameEditor';
-import { ToolbarCtx } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 
 export function StreamEditor() {
     const session = useStreamEditorSession();
@@ -109,6 +109,8 @@ export function StreamEditor() {
                     />
                 </div>
             );
+        default:
+            return null;
     }
 }
 // We have two ways to handle streams:

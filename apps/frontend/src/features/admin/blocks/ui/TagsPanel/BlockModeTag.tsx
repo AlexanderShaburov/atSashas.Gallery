@@ -1,6 +1,6 @@
 // src/features/admin/blocks/BlockEditor/BlockModeTag.tsx
 
-import type { BlockEditorMode } from '@/features/admin/blocks/editorSession/block-editor.types';
+import type { BlockEditorMode } from '@/entities/block/block-editor-screen.types';
 
 type Props = {
     mode: BlockEditorMode;

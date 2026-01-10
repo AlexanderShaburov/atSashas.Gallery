@@ -1,6 +1,6 @@
 //src/features/admin/blocks/ui/BlockEditorShell/templateTypes.ts
 import type { CtaBlock, GalleryBlock, GalleryLayout, TextBlock } from '@/entities/block';
-import { todayISO } from '@/shared/lib/date/Today';
+import { todayISO } from '@/shared/lib/dateAndLabels/Today';
 
 type TemplateBlock =
     | { kind: 'gallery'; layout: GalleryLayout; label: string }

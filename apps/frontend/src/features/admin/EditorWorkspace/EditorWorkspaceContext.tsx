@@ -19,8 +19,6 @@ export interface EditorWorkspaceState {
 
     currentArtItemId?: string;
     currentArtCatalog?: ArtCatalog;
-
-    currentStack?: GlobalStack;
 }
 
 // Context value: state + simple setters
@@ -98,7 +96,6 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
             reset() {
                 setState({
                     currentStreamId: undefined,
-                    currentBlocksCollection: undefined,
                     currentBlockId: undefined,
                     currentArtItemId: undefined,
                     currentArtCatalog: undefined,

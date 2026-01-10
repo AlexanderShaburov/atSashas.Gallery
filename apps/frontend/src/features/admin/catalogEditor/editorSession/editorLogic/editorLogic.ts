@@ -1,7 +1,7 @@
 import { EditorTarget, ISODate } from '@/entities/common';
 import type { ArtItemForm } from '@/features/admin/catalogEditor/editorSession/editorTypes';
+import { todayISO } from '@/shared/lib/dateAndLabels/Today';
 import { generateId } from '@/shared/lib/id/generateId';
-import { todayISO } from '@/shared/lib/date/Today';
 
 export function prepareEditorForm(unit: EditorTarget): ArtItemForm {
     switch (unit.mode) {

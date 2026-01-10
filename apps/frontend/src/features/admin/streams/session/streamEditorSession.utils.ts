@@ -7,7 +7,7 @@ import {
     UpdateStreamResponse,
 } from '@/entities/stream/streamApi.types';
 import { streamsApi } from '@/features/admin/streams/api';
-import { todayISO } from '@/shared/lib/date/Today';
+import { todayISO } from '@/shared/lib/dateAndLabels/Today';
 import { generateId } from '@/shared/lib/id/generateId';
 
 export function createNewStreamDraft(): StreamData {

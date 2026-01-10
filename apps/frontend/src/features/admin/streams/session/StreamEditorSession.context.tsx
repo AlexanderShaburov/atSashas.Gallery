@@ -5,6 +5,8 @@ import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorks
 import { StreamEditorCtx } from '@/features/admin/streams/hooks/useStreamEditor';
 import { validateStreamForm } from '@/features/admin/streams/utils';
 import { deepEqual } from '@/shared/lib/checkers/checkers';
+import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
+import { Address, JourneyTicket, ReturnCommand } from '@/shared/nav/journeyStack.types';
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { StreamEditorSession } from './stream-editor-session.types';
 import {
@@ -13,18 +15,21 @@ import {
     loadStreamsIndex,
     openStream,
 } from './streamEditorSession.utils';
-
 type ProviderProps = { children: ReactNode };
+
+const SELECT_MODE: StreamScreenMode = { kind: 'select' };
 
 export function StreamEditorSessionProvider({ children }: ProviderProps) {
     const gCtxt: EditorWorkspaceContextValue = useEditorWorkspace();
-
     // Mode of stream screen
     // const [screenMode, setScreenMode] = useState<StreamScreenMode>({ kind: 'select' });
     // Id of selected stream:
     const [selectedStreamId, setSelectedStreamId] = useState<string | undefined>(undefined);
+
     // Current unsaved stream under edition
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!
     const [draft, setDraft] = useState<StreamData>(createNewStreamDraft());
+
     // Streams list object
     const [streamsIndex, setStreamsIndex] = useState<StreamIndexItem[]>([]);
     // Saving lifecycle
@@ -33,18 +38,13 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     const [modeStack, setModeStack] = useState<StreamScreenMode[]>([{ kind: 'select' }]);
     // isLoading flag
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
     // Stream state picture on last save (?? the same as base)
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!
     const snapshot = useRef<StreamData>(createNewStreamDraft());
 
-    // UI driven states:
-    const [focusedStreamIndex, setFocusedStreamIndex] = useState<number | undefined>(undefined);
-    const [selectedStreamBlockIds, setSelectedStreamBlockIds] = useState<Set<string>>();
-    const [hoveredStreamBlockId, setHoveredStreamBlockId] = useState<string | undefined>(undefined);
-
-    const [insertAtIndex, setInsertAtIndex] = useState<number | undefined>(undefined);
-    const [insertMode, setInsertMode] = useState<'before' | 'after' | 'replace'>('before');
-    // Undo / Redo:
-    const [history, setHistory] = useState<StreamData[]>([]);
+    // used tickets:
+    const appliedNoncesRef = useRef<Set<string>>(new Set());
 
     // Save lifecycle state:
 
@@ -71,9 +71,10 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     const onEscape = useCallback(() => {
         setModeStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
     }, []);
+
     const currentStack: StreamScreenModeStack = useMemo(() => {
         return {
-            mode: modeStack[modeStack.length - 1] ?? { kind: 'select' },
+            mode: modeStack[modeStack.length - 1] ?? SELECT_MODE,
             onEscape: onEscape,
         };
     }, [modeStack, onEscape]);
@@ -81,19 +82,16 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     // ************** STACK CONTROL END **************
 
     // Reset session helper:
-    const resetSession = useCallback(() => {
+    const resetSelectSession = useCallback(() => {
         setSelectedStreamId(undefined);
-        setDraft(createNewStreamDraft());
-        snapshot.current = createNewStreamDraft();
         pushMode({ kind: 'select' });
-    }, []);
+    }, [pushMode]);
 
     const renewStreamsIndex = useCallback(async () => {
         try {
             setIsLoading(true);
             const lst = await loadStreamsIndex();
             if (!lst) throw new Error('Streams list loading error');
-            resetSession();
             setStreamsIndex(lst);
         } catch (err) {
             console.error(`StreamEditorSession error: ${err}`);
@@ -102,14 +100,26 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         }
     }, []);
 
-    // *************** INITIATE ***************
+    // *************** MOUNT BOOTSTRAP ***************
+    /* 
+    What should be done:
+        - check cache store for ReturnCommand
+        - if cache has value for 'stream': 
+            - set selectedStreamId;
+            - assign methods for selected stream
+            - set modeStack to 'edit'
+        - if cache has not value for 'stream':
+            - renewStreamsList
+            - check current mode is 'select' and if not -> clear it and set to 'select'
 
+*/
     useEffect(() => {
         (async () => {
-            resetSession();
             await renewStreamsIndex();
         })();
     }, [resetSession, renewStreamsIndex]);
+
+    // *************** INITIATE END ***************
 
     const selectStream = useCallback(
         async (id: string) => {
@@ -157,7 +167,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
                 const res = await deleteStream(streamId);
                 if (!res.ok) throw new Error(`Error deleting stream with id: ${streamId}`);
                 renewStreamsIndex();
-                resetSession();
+                resetSession(); //!!!!!!!!!!!!!!!!!!!!!
             } catch (err) {
                 pushMode({
                     kind: 'error',
@@ -170,7 +180,25 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         },
         [renewStreamsIndex, resetSession, pushMode],
     );
-
+    // CONSTRUCTION YARD:
+    const jumpToBlockEditor = useCallback((ad: Address, rc: ReturnCommand) => {
+        let returnPath: Address = { kind: 'streamsIndex' };
+        if (!currentStack.mode.kind || !selectedStreamId) return;
+        if (currentStack.mode.kind === 'edit') {
+            returnPath = {
+                kind: 'streamEditor',
+                streamId: selectedStreamId,
+            };
+        }
+        // const returnPath = currentStack.mode.kind === 'edit' ? 'streamEditor' : (currentStack.mode.kind === 'select' ? 'streamsIndex' : undefined)
+        if (!returnPath) return;
+        const returnTicket: JourneyTicket = {
+            returnTo: returnPath,
+            command: rc,
+            nonce: createNonce(),
+            createdAt: nowIso(),
+        };
+    }, []);
     const createNewStream = useCallback(() => {
         const stream = createNewStreamDraft();
         setSelectedStreamId(stream.streamId);
