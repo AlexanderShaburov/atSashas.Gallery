@@ -26,6 +26,20 @@ class JourneyStackStore {
         this.emit();
     }
 
+    checkInLuggage(id: string, luggage: JumpResult): boolean {
+        const topIndex = this.stack.length - 1;
+        const top = this.stack[topIndex];
+
+        if (top && top.journeyId === id) {
+            this.stack[topIndex] = {
+                ...top,
+                loot: luggage,
+            };
+            return true;
+        }
+        return false;
+    }
+
     _snapshot(): JourneyTicket[] {
         return [...this.stack];
     }

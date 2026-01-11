@@ -1,7 +1,11 @@
-import { Address, JourneyLeg, journeyStackStore, JourneyTicket, JumpResult } from '@/shared/nav';
+// src/features/admin/shared/transporter/transporter.ts
+
+import { Address, journeyStackStore, JourneyTicket, JumpResult } from '@/shared/nav';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+type DispatchFn = (ticket: JourneyTicket, luggage: JumpResult) => void;
+type ReturnFn = ()
 function routeFromTarget(to: Address): string {
     switch (to.kind) {
         case 'streamsIndex':
@@ -17,39 +21,27 @@ function routeFromTarget(to: Address): string {
 
 function currentLeg(ticket: JourneyTicket): Address {
     switch (ticket.phase) {
-        case 'created':
+        case 'outbound':
             return ticket.destination;
-        case 'arrived': {
-            throw new Error(`Transportation error: bad ticket with id; ${ticket.journeyId}`)
-            break
-        }
-        case 'returning':
+        case 'return':
             return ticket.returnTo;
-        case 'completed': {
-            throw new Error(`Transportation error: bad ticket with id; ${ticket.journeyId}`)
-            break
-        }
-            
     }
 }
 
-export function useTransporter() {
+export function useDispatch(): DispatchFn {
     const navigate = useNavigate();
-
-    const transport = useCallback((ticket: JourneyTicket, luggage?: JumpResult) => {
-        switch (ticket.phase) {
-            case 'created': {
-                if (!journeyStackStore.checkTicket(ticket.journeyId)) {
-                    
-                }
-            }
-
-        }
-    }, deps)
-
-    return (ticket: JourneyTicket, luggage?: JumpResult) => {
-        if 
-        journeyStackStore.push(ticket);
-        navigate(routeFromTarget(currentLeg(ticket)));
-    };
+    //
+    const transport = useCallback(
+        (ticket: JourneyTicket, luggage?: JumpResult) => {
+            if (luggage && ticket.phase === 'return')
+                journeyStackStore.checkInLuggage(ticket.journeyId, luggage);
+            const dest = currentLeg(ticket);
+            journeyStackStore.push(ticket);
+            navigate(routeFromTarget(dest));
+        },
+        [navigate],
+    );
+    return transport;
 }
+
+export function useReturn

@@ -29,7 +29,7 @@ export type ReturnCommand =
           position: ItemPosition;
       };
 
-export type JourneyLeg = 'created' | 'arrived' | 'returning' | 'completed';
+export type JourneyLeg = 'outbound' | 'return';
 
 export type JumpResult =
     | { ok: true; id: string }
