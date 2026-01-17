@@ -1,25 +1,22 @@
 // src/features/admin/shared/transporter/transporter.ts
 
-import { Address, journeyStackStore, JourneyTicket, JumpResult } from '@/shared/nav';
+import { EditorKind, journeyStackStore, JourneyTicket, JumpResult } from '@/shared/nav';
+import { ReturnAddress, ToAddress } from '@/shared/nav/journeyStack.types';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-type DispatchFn = (ticket: JourneyTicket, luggage: JumpResult) => void;
-type ReturnFn = ()
-function routeFromTarget(to: Address): string {
-    switch (to.kind) {
-        case 'streamsIndex':
-            return `/admin/streams`;
-        case 'streamEditor':
-            return `/admin/streams`;
-        case 'blockEditor':
-            return '/admin/blocks';
-        case 'catalogEditor':
-            return '/admin/catalog';
-    }
-}
+type DispatchFn = (ticket: JourneyTicket) => void;
+type ReturnFn = (ticketId: string, luggage: JumpResult) => void;
+type ArrivalFn = (destination: EditorKind) => JourneyTicket | undefined;
 
-function currentLeg(ticket: JourneyTicket): Address {
+const ROUTS: Record<EditorKind, string> = {
+    stream: `/admin/streams`,
+    block: '/admin/blocks',
+    catalog: '/admin/catalog',
+    hopper: '/admin/hopper',
+};
+
+function currentLeg(ticket: JourneyTicket): ToAddress | ReturnAddress {
     switch (ticket.phase) {
         case 'outbound':
             return ticket.destination;
@@ -32,16 +29,50 @@ export function useDispatch(): DispatchFn {
     const navigate = useNavigate();
     //
     const transport = useCallback(
-        (ticket: JourneyTicket, luggage?: JumpResult) => {
-            if (luggage && ticket.phase === 'return')
-                journeyStackStore.checkInLuggage(ticket.journeyId, luggage);
-            const dest = currentLeg(ticket);
+        (ticket: JourneyTicket) => {
+            // Save new ticket to stack:
             journeyStackStore.push(ticket);
-            navigate(routeFromTarget(dest));
+            // Define dest address and jump:
+            const dest = currentLeg(ticket);
+            navigate(ROUTS[dest.editor]);
         },
         [navigate],
     );
     return transport;
 }
 
-export function useReturn
+export function useReturnHome(): ReturnFn {
+    const navigate = useNavigate();
+
+    return useCallback(
+        (ticketId: string, luggage: JumpResult) => {
+            // Get ticket from the stack:
+            const top = journeyStackStore.pickOrThrow();
+            // Check ticket if meet to stack:
+            if (ticketId !== top.journeyId || top.phase !== 'return')
+                throw new Error(
+                    `Attempt to use wrong ticket ${ticketId} while expected ${top.journeyId}`,
+                );
+            // Check in luggage:
+            journeyStackStore.checkInLuggage(top.journeyId, luggage);
+            // jump:
+            navigate(ROUTS[top.returnTo.editor]);
+        },
+        [navigate],
+    );
+}
+
+export function useArrival(): ArrivalFn {
+    return useCallback((destination: EditorKind) => {
+        const top = journeyStackStore.peek();
+        if (!top) return undefined;
+
+        const expected = currentLeg(top).editor;
+        if (expected !== destination)
+            throw new Error(
+                `Arrival on unexpected destination ${destination} instead of ${expected}`,
+            );
+
+        return journeyStackStore.consumeLeg();
+    }, []);
+}

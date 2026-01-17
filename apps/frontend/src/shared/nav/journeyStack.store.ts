@@ -1,6 +1,6 @@
 // src/shared/nav/ReturnStack.store.ts
 
-import type { JourneyLeg, JourneyTicket, JumpResult } from './journeyStack.types';
+import type { JourneyTicket, JumpResult } from './journeyStack.types';
 
 type Listener = () => void;
 
@@ -21,6 +21,22 @@ class JourneyStackStore {
         this.emit();
         return v;
     }
+
+    consumeLeg(): JourneyTicket | undefined {
+        const topIndex = this.stack.length - 1;
+        const top = this.stack[topIndex];
+        if (!top) throw new Error('[JourneyStackStore]: ConsumeLeg nonexisting ticket');
+        if (top.phase === 'outbound') {
+            this.stack[topIndex] = {
+                ...top,
+                phase: 'return',
+            };
+            this.emit();
+            return this.stack[topIndex];
+        }
+        return this.pop();
+    }
+
     clear(): void {
         this.stack = [];
         this.emit();
@@ -35,6 +51,7 @@ class JourneyStackStore {
                 ...top,
                 loot: luggage,
             };
+            this.emit();
             return true;
         }
         return false;
@@ -44,9 +61,12 @@ class JourneyStackStore {
         return [...this.stack];
     }
 
-    checkTicket(id: string): JourneyLeg | undefined {
-        const index = this.stack.findIndex((t) => t.journeyId === id);
-        return index === -1 ? undefined : this.stack[index]?.phase;
+    pickOrThrow(): JourneyTicket {
+        const top = this.peek();
+        if (!top) {
+            throw new Error('[JourneyStackStore]: expected journey ticket, but stack is empty');
+        }
+        return top;
     }
     subscribe(fn: Listener): () => void {
         this.listeners.add(fn);
@@ -58,8 +78,3 @@ class JourneyStackStore {
     }
 }
 export const journeyStackStore = new JourneyStackStore();
-
-export function resolveReturn(result: JumpResult): { target?: JourneyTicket; result: JumpResult } {
-    const target = journeyStackStore.pop();
-    return { target, result };
-}

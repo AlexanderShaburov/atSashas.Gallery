@@ -1,4 +1,4 @@
-type idKind = 'art' | 'block' | 'collection' | 'stream';
+type idKind = 'art' | 'block' | 'collection' | 'stream' | 'travel';
 
 const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 

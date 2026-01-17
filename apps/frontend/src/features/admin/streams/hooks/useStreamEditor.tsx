@@ -1,4 +1,4 @@
-import { StreamEditorSession } from '@/features/admin/streams/session/stream-editor-session.types';
+import { StreamEditorSession } from '@/features/admin/streams/streamEditorSession/stream-editor-session.types';
 import { createContext, useContext } from 'react';
 
 export const StreamEditorCtx = createContext<StreamEditorSession | undefined>(undefined);

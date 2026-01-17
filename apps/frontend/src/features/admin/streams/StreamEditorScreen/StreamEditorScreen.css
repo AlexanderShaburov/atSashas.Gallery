@@ -198,3 +198,7 @@
         font-size: 0.82rem;
     }
 }
+.sse__block--focus {
+    outline: 2px solid currentColor;
+    outline-offset: 6px;
+}

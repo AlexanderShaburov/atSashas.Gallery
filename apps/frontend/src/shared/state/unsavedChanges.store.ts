@@ -1,14 +1,12 @@
 // src/shared/state/unsavedChanges.store.ts
 
-type Listener = () => void;
+import type { EditorKey } from '@/shared/nav';
+import { BaseStore } from './baseStore';
 
-type DirtyScope = 'blocks' | 'streams' | 'catalog' | 'hopper' | string;
+class UnsavedChangesStore extends BaseStore {
+    private dirty = new Map<EditorKey, boolean>();
 
-class UnsavedChangesStore {
-    private dirty = new Map<DirtyScope, boolean>(); // ??????
-    private listeners = new Set<Listener>();
-
-    setDirty(scope: DirtyScope, v: boolean): void {
+    setDirty(scope: EditorKey, v: boolean): void {
         const prev = this.dirty.get(scope) ?? false;
         if (prev === v) return;
 
@@ -16,7 +14,7 @@ class UnsavedChangesStore {
         this.emit();
     }
 
-    isDirty(scope?: DirtyScope): boolean {
+    isDirty(scope?: EditorKey): boolean {
         if (!scope) {
             for (const v of this.dirty.values()) if (v) return true;
             return false;
@@ -24,19 +22,10 @@ class UnsavedChangesStore {
         return this.dirty.get(scope) ?? false;
     }
 
-    clear(scope?: DirtyScope): void {
+    clear(scope?: EditorKey): void {
         if (!scope) this.dirty.clear();
         else this.dirty.delete(scope);
         this.emit();
-    }
-
-    subscribe(fn: Listener): () => void {
-        this.listeners.add(fn);
-        return () => this.listeners.delete(fn);
-    }
-
-    private emit(): void {
-        for (const fn of this.listeners) fn();
     }
 }
 

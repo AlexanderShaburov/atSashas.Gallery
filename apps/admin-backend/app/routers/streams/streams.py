@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
 
 from app.models.streams import StreamData, StreamIndexItem, StreamStatus
 from app.repos.stream_repo import StreamRepo
@@ -17,7 +18,6 @@ class CreateStreamBody(
 
 
 # Keep Create as a small DTO (not full StreamData)
-from pydantic import BaseModel, Field
 
 
 class CreateStreamRequest(BaseModel):

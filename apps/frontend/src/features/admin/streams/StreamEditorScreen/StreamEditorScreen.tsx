@@ -13,46 +13,92 @@ import './StreamEditorScreen.css';
 
 export function StreamEditor() {
     const session = useStreamEditorSession();
+    const {
+        draft,
+        isDirty,
+        isLoading,
+        isValid,
+        isSaving,
+        save,
+        onEscape,
+        delStream,
+        selectedStreamId,
+        addBlock,
+        updateTags,
+        streamsIndex,
+        selectStream,
+        createNewStream,
+        threeDotHandler,
+        editBlock,
+        currentStack,
+    } = session;
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                session.onEscape();
+                if (e.defaultPrevented) return;
+                onEscape();
             }
         };
         window.addEventListener('keydown', onKeyDown);
         return () => window.removeEventListener('keydown', onKeyDown);
-    }, [session]);
+    }, [onEscape]);
 
-    const currentMode = useMemo(() => session.currentStack.mode.kind, [session.currentStack]);
+    const currentMode = currentStack.mode.kind;
 
-    const toolbarProps: ToolbarCtx = {
-        canSave: session.isDirty && !session.isLoading && session.isValid,
-        saving: session.isSaving,
-        save: session.save,
-        exit: session.onEscape,
-        onDelete: () => session.delStream(session.selectedStreamId ?? ''),
-        addBlock: session.addBlock,
-        tags: session.draft.tags,
-        onChangeTags: session.updateTags,
-    };
+    useEffect(() => {
+        if (currentMode === 'edit' && !draft) {
+            onEscape();
+        }
+    }, [currentMode, onEscape, draft]);
+
+    const toolbarProps: ToolbarCtx | null = useMemo(() => {
+        if (!draft) return null;
+        return {
+            canSave: isDirty && !isLoading && isValid,
+            saving: isSaving,
+            save,
+            exit: onEscape,
+            onDelete: () => delStream(selectedStreamId ?? ''),
+            addBlock,
+            tags: draft.tags,
+            onChangeTags: updateTags,
+        };
+    }, [
+        draft,
+        isDirty,
+        isLoading,
+        isValid,
+        isSaving,
+        save,
+        onEscape,
+        delStream,
+        selectedStreamId,
+        addBlock,
+        updateTags,
+    ]);
 
     const [filter, setFilter] = useState<StreamFilterState>(DEFAULT_STREAM_FILTER);
 
-    const updateFilter = (patch: Partial<StreamFilterState>) => {
+    const updateFilter = useCallback((patch: Partial<StreamFilterState>) => {
         setFilter((prev) => ({ ...prev, ...patch }));
-    };
+    }, []);
 
-    const filtered = useMemo(
-        () => applyStreamFilter(session.streamsIndex, filter),
-        [session.streamsIndex, filter],
-    );
+    const filtered = useMemo(() => applyStreamFilter(streamsIndex, filter), [streamsIndex, filter]);
     const handleOnClick = useCallback(
         (id: string) => {
-            session.selectStream(id);
+            selectStream(id);
         },
-        [session],
+        [selectStream],
     );
+    // Reduce blinking:
+    if (!draft || !toolbarProps) {
+        return (
+            <div className="se">
+                <div className="se__loading">Loading</div>
+            </div>
+        );
+    }
 
     switch (currentMode) {
         case 'select':
@@ -63,7 +109,7 @@ export function StreamEditor() {
                         right={<StreamFilterControl filter={filter} updateFilter={updateFilter} />}
                     />
                     <div className="se__grid">
-                        <NewStreamComponent createNewStream={session.createNewStream} />
+                        <NewStreamComponent createNewStream={createNewStream} />
                         {filtered.map((s) => (
                             <figure
                                 key={s.streamId}
@@ -88,40 +134,32 @@ export function StreamEditor() {
                 <div className="se">
                     <div className="se__error-screen">
                         <p className="se__error-message">
-                            {session.currentStack.mode.kind === 'error'
-                                ? session.currentStack.mode.message
-                                : ''}
+                            {currentStack.mode.kind === 'error' ? currentStack.mode.message : ''}
                         </p>
-                        <button className="se__error-ok" onClick={session.onEscape}>
+                        <button className="se__error-ok" onClick={onEscape}>
                             OK
                         </button>
                     </div>
                 </div>
             );
-        case 'edit':
+        case 'edit': {
+            if (!draft || !toolbarProps) {
+                // optional: show loading/placeholder instead of null
+                return null;
+            }
+
             return (
                 <div className="se">
                     <SingleStreamEditor
-                        stream={session.draft}
-                        threeDotMenu={session.threeDotHandler}
-                        editBlock={session.editBlock}
+                        stream={draft}
+                        threeDotMenu={threeDotHandler}
+                        editBlock={editBlock}
                         toolbarProps={toolbarProps}
                     />
                 </div>
             );
+        }
         default:
             return null;
     }
 }
-// We have two ways to handle streams:
-// 1. Select stream from list to edit (however create new one)
-//      Here we need control panel create and list of existing streams to select
-// !!!! We need stream metadata editor form:
-//          - title
-//          - status
-//          - tags
-//          - description
-// 2. Threat to selected stream: add/insert/change order/delete blocks/edit metadata
-//          - add -> on the end/position number by button or
-//                -> on the insert tag on the stream feed
-//      reorder could be subMode of edit

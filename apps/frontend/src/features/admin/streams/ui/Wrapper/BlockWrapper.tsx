@@ -2,18 +2,26 @@
 
 import { ReactNode } from 'react';
 
+export type ThreeDotUiApi = {
+    toggle: (el: HTMLElement) => void;
+    close: () => void;
+};
+
 type WrapperProps = {
-    blockId: string;
-    threeDotMenu: (id: string) => void;
+    threeDotMenu: ThreeDotUiApi;
     children: ReactNode;
 };
 
-export function BlockWrapper({ blockId, threeDotMenu, children }: WrapperProps) {
+export function BlockWrapper({ threeDotMenu, children }: WrapperProps) {
     return (
-        <div className="bw_wrapper">
-            <div className="bw__three-dot" role="button" onClick={() => threeDotMenu(blockId)}>
-                ...
-            </div>
+        <div className="bw">
+            <button
+                type="button"
+                className="bw__threeDot"
+                onClick={(e) => threeDotMenu.toggle(e.currentTarget)}
+            >
+                ⋯
+            </button>
             {children}
         </div>
     );

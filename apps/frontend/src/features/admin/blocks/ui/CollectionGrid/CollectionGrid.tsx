@@ -8,7 +8,7 @@ import { TemplateRaw } from '@/features/admin/blocks/ui/BlockTemplates/TemplateB
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 
 import { BlockRenderer } from '@/features/admin/shared/ui/BlockPreview/BlockRenderer';
-import { todayISO } from '@/shared/lib/dateAndLabels/Today';
+import { todayISO } from '@/shared/lib/dateAndLabels/today';
 import { Dispatch, SetStateAction } from 'react';
 import './blocks.grid.css';
 
