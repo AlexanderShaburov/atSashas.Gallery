@@ -8,6 +8,7 @@ import { validateStreamForm } from '@/features/admin/streams/utils';
 import { deepEqual } from '@/shared/lib/checkers/checkers';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { generateId } from '@/shared/lib/id/generateId';
+import { EditorKey } from '@/shared/nav';
 import {
     JourneyTicket,
     ReturnAddress,
@@ -15,6 +16,7 @@ import {
     ToAddress,
 } from '@/shared/nav/journeyStack.types';
 import { useUnsavedChanges } from '@/shared/state';
+import { DraftSnapshot, editSessionsDataStore } from '@/shared/state/editorSessionsData.store';
 import { unsavedChangesStore } from '@/shared/state/unsavedChanges.store';
 import { useSessionDataStore } from '@/shared/state/useEditorSessionsDataStore';
 import { ThreeDotCommand } from '@/shared/ui/ThreeDotMenu/threeDot.types';
@@ -33,7 +35,6 @@ import {
 } from './data/streamEditorSession.utils';
 import { assertReturnCommand } from './guards/streamEditorSession.guards';
 import type { StreamEditorSession } from './stream-editor-session.types';
-import { EditorKey } from '@/shared/nav';
 
 type ProviderProps = { children: ReactNode };
 type PendingFocus = { kind: 'blockId'; id: string } | null;
@@ -141,8 +142,11 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
 
     const renewStreamsIndex = useCallback(async () => {
         try {
+            console.error(`[renewStreamsIndex]: Called`);
+
             setIsLoading(true);
             const lst = await loadStreamsIndex();
+            console.error(`[renewStreamsIndex]: streams index loaded`);
             if (!lst) throw new Error('Streams list loading error');
             setStreamsIndex(lst);
         } catch (err) {
@@ -425,12 +429,21 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     );
 
     const createNewStream = useCallback(() => {
+        console.log(`[StreamEditorSession]: Create new stream called`);
         const stream = createNewStreamDraft();
+        console.log(`[StreamEditorSession]: new stream draft created:`);
+        console.dir(stream);
         setSelectedStreamId(stream.streamId);
-        setDraft(stream);
-        commit();
+        const key: EditorKey = { kind: 'stream', id: stream.streamId };
+        const draftSnapshot: DraftSnapshot<StreamData> = {
+            snapshot: stream,
+            draft: stream,
+            updatedAt: new Date().toISOString(),
+        };
+
+        editSessionsDataStore.ensure<StreamData>(key, draftSnapshot);
         pushMode({ kind: 'edit' });
-    }, [pushMode, commit, setDraft]);
+    }, [pushMode]);
 
     const updateTags = useCallback(
         (next: string[]) => {

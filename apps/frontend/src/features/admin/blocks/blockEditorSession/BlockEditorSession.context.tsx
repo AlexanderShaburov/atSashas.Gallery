@@ -13,11 +13,11 @@ import { GridItem } from '@/entities/grid';
 import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { addNewBlock, getCollection, updateBlock } from '@/features/admin/blocks/api/blocksApi';
-import { normalizeBlock } from '@/features/admin/blocks/editorSession';
+import { normalizeBlock } from '@/features/admin/blocks/blockEditorSession';
 import type {
     BlockEditorSession,
     ScreenModeStack,
-} from '@/features/admin/blocks/editorSession/block-editor.types';
+} from '@/features/admin/blocks/blockEditorSession/block-editor.types';
 import { BlockEditorCtx } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { validateBlockForm } from '@/features/admin/blocks/utils';

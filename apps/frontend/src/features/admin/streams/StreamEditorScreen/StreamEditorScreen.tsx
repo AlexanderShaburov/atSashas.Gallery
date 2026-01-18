@@ -92,13 +92,13 @@ export function StreamEditor() {
         [selectStream],
     );
     // Reduce blinking:
-    if (!draft || !toolbarProps) {
-        return (
-            <div className="se">
-                <div className="se__loading">Loading</div>
-            </div>
-        );
-    }
+    // if (!draft || !toolbarProps) {
+    //     return (
+    //         <div className="se">
+    //             <div className="se__loading">Loading</div>
+    //         </div>
+    //     );
+    // }
 
     switch (currentMode) {
         case 'select':

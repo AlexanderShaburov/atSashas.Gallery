@@ -2,11 +2,11 @@
 
 import AdminLayout from '@/app/layouts/AdminLayout';
 import PublicLayout from '@/app/layouts/PublicLayout';
-import { BlockEditorSessionProvider } from '@/features/admin/blocks/editorSession/BlockEditorSession.context';
-import { CatalogEditorSessionProvider } from '@/features/admin/catalogEditor/editorSession/CatalogEditorSession.context';
+import { BlockEditorSessionProvider } from '@/features/admin/blocks/blockEditorSession/BlockEditorSession.context';
+import { CatalogEditorSessionProvider } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
 import { EditorWorkspaceProvider } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { StreamEditorSessionProvider } from '@/features/admin/streams/streamEditorSession/StreamEditorSession.context';
-import { ArtCatalogLoader } from '@/shared/ArtCatalogProvider.tsx/ArtCatalogLoader';
+import { ArtCatalogLoader } from '@/shared/ArtCatalogProvider/ArtCatalogLoader';
 import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 

@@ -9,9 +9,11 @@ import {
     getTechniques,
     updateCatalog,
 } from '@/features/admin/catalogEditor/api';
-import { prepareEditorForm } from '@/features/admin/catalogEditor/editorSession/editorLogic/';
-import { buildShipment } from '@/features/admin/catalogEditor/editorSession/editorLogic/buildShipment';
-import type { ArtItemForm } from '@/features/admin/catalogEditor/editorSession/editorTypes';
+import {
+    buildShipment,
+    prepareEditorForm,
+} from '@/features/admin/catalogEditor/catalogEditorSession/editorLogic';
+import type { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/editorTypes';
 import { isMinimalValid, sanitizeForm } from '@/features/admin/catalogEditor/utils/Validators';
 import {
     useEditorWorkspace,

@@ -1,0 +1,77 @@
+/* src/shared/ui/ThreeDotMenu/ThreeDotMenuOverlay.css */
+
+.tdm__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    /* Transparent overlay: it exists only to capture outside clicks */
+    background: transparent;
+}
+
+.tdm__menu {
+    z-index: 1001;
+
+    min-width: 180px;
+    max-width: 280px;
+
+    padding: 6px;
+    border-radius: 10px;
+
+    background: #1b1b1f;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    box-shadow:
+        0 14px 40px rgba(0, 0, 0, 0.35),
+        0 2px 10px rgba(0, 0, 0, 0.2);
+
+    /* Make it feel like a popup */
+    transform: translate(6px, 6px);
+}
+
+.tdm__item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    padding: 10px 10px;
+    border-radius: 8px;
+
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.92);
+
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.2;
+    text-align: left;
+
+    cursor: pointer;
+    user-select: none;
+}
+
+.tdm__item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.tdm__item:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.25);
+    outline-offset: 2px;
+}
+
+.tdm__item:active {
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.tdm__item--danger {
+    color: #ff6b6b;
+}
+
+.tdm__item--danger:hover {
+    background: rgba(255, 107, 107, 0.12);
+}
+
+.tdm__item:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}

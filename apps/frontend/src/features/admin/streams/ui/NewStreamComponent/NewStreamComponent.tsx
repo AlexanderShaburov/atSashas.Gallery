@@ -5,6 +5,7 @@ export type Props = {
 };
 export function NewStreamComponent({ createNewStream }: Props) {
     function handleOnClick() {
+        console.log(`Create new stream placeholder clicked`);
         createNewStream();
     }
     return (

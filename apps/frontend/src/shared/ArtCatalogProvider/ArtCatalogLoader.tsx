@@ -1,7 +1,7 @@
 // src/shared/entities/art/ArtCatalogLoader.tsx
 import type { ArtCatalog } from '@/entities/catalog';
 import { ApiResponse } from '@/entities/common';
-import { ArtCatalogProvider } from '@/shared/ArtCatalogProvider.tsx/ArtCatalogProvider';
+import { ArtCatalogProvider } from '@/shared/ArtCatalogProvider/ArtCatalogProvider';
 import { useEffect, useState } from 'react';
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 const JSON_VAULT = `${API_BASE}/json`;

@@ -1,5 +1,5 @@
 //@/features/admin/blocks/BlockEditor/BlockEditor.tsx
-import type { BlockEditorSession } from '@/features/admin/blocks/editorSession';
+import type { BlockEditorSession } from '@/features/admin/blocks/blockEditorSession';
 import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 import { CollectionGrid } from '@/features/admin/blocks/ui/CollectionGrid/CollectionGrid';
@@ -13,7 +13,7 @@ import {
 import ArtItemGrid from '@/features/admin/shared/ui/ArtItemGrid/ArtItemGrid';
 import '@/features/admin/shared/ui/BlockPreview/index';
 import '@/pages/admin/BlocksPage/BlocksPage.css';
-import { useArtCatalog } from '@/shared/ArtCatalogProvider.tsx/CatalogHook';
+import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
 import { useEffect, useState } from 'react';
 
 export function BlockEditor() {

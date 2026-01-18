@@ -34,7 +34,10 @@ class EditSessionsDataStore extends BaseStore {
         return initial;
     }
     saveDraft<T>(key: EditorKey, draft: T): void {
+        console.log(`[EditSessionsDataStore][saveDraft]: saveDraft called`);
+
         const k = keyToString(key);
+        console.log(`[EditSessionsDataStore][saveDraft]: key calculated as ${k}`);
         const entry = this.sessions.get(k);
         if (!entry) return;
 
@@ -43,6 +46,8 @@ class EditSessionsDataStore extends BaseStore {
             draft,
             updatedAt: new Date().toISOString(),
         } as DraftSnapshot<unknown>;
+        console.log(`[EditSessionsDataStore][saveDraft]: current draftSnapshot is:`);
+        console.dir(this.sessions.get(k));
         this.emit();
     }
     setSnapshot<T>(key: EditorKey, snapshot: T): void {
@@ -55,6 +60,9 @@ class EditSessionsDataStore extends BaseStore {
             draft: snapshot, //  snapshot == draft
             updatedAt: new Date().toISOString(),
         } as DraftSnapshot<unknown>;
+        console.log(`[EditSessionsDataStore][setSnapshot]: setSnapshot called`);
+        console.log(`[EditSessionsDataStore][setSnapshot]: current draftSnapshot is:`);
+        console.dir(this.sessions.get(k));
 
         this.emit();
     }

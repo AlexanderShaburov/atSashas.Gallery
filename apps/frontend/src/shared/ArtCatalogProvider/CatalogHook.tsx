@@ -1,6 +1,6 @@
 import { ArtItemData } from '@/entities/art';
 import { ArtCatalog } from '@/entities/catalog';
-import { ArtCatalogContext } from '@/shared/ArtCatalogProvider.tsx/ArtCatalogProvider';
+import { ArtCatalogContext } from '@/shared/ArtCatalogProvider/ArtCatalogProvider';
 import { useContext } from 'react';
 
 export function useArtCatalog(): ArtCatalog {
