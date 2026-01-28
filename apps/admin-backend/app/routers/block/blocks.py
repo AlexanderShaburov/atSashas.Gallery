@@ -50,7 +50,9 @@ async def create_block(block_payload: Block) -> Block:
         block_id = generate_block_id(block_payload)
 
         # Pydantic v2: model_copy, в v1 было бы block.copy(...)
-        new_block = block_payload.model_copy(update={"id": block_id})
+        new_block = block_payload.model_copy(
+            update={"id": block_id, "lifecycle": "saved"}
+        )
 
         collection.add_or_update(new_block)
 

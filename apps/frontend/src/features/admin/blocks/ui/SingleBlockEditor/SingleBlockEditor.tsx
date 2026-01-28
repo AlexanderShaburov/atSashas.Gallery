@@ -6,30 +6,38 @@ import {
     GalleryComponent,
     TextBlockComponent,
 } from '@/features/admin/shared/ui/BlockPreview';
-import { ToolbarCtx, ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
+import { ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
-import { Dispatch, JSX, SetStateAction } from 'react';
+import { JSX } from 'react';
 import './SingleBlockEditor.css';
 
 type Props = {
     item: Block;
     onHit: (e: BlockHitEvent) => void;
-    setValue: Dispatch<SetStateAction<Block | undefined>>;
+    setValue: (next: Block) => void;
     toolbarProps: {
         canSave: boolean;
         saving: boolean;
+        isJourney: boolean;
         save: () => void;
         exit: () => void;
         onDelete: () => void;
         tags?: string[];
         onChangeTags?: (tags: string[]) => void;
+        onApply: () => void;
     };
 };
 export function SingleBlockEditor({ item, onHit, setValue, toolbarProps }: Props) {
     let content: JSX.Element | undefined = undefined;
+    const { isJourney, ...tbCtx } = toolbarProps;
 
-    const tbCtx = toolbarProps as ToolbarCtx;
-    const tbContent = ['delButton', 'tags', 'exit', 'save'] as ToolKey[];
+    const tbContent: ToolKey[] = [
+        'delButton',
+        'tags',
+        'exit',
+        ...(isJourney ? (['apply'] as const) : []),
+        'save',
+    ];
 
     switch (item.blockKind) {
         case 'gallery':

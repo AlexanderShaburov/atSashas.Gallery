@@ -1,6 +1,6 @@
 import { ArtShipment } from '@/entities/art/shipment';
 import { EditorTarget } from '@/entities/common';
-import { ArtItemForm } from '@/features/admin/editorSession/editorTypes';
+import { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/editorTypes';
 
 export function buildShipment(target: EditorTarget, clean: ArtItemForm): ArtShipment {
     let shipment = undefined;

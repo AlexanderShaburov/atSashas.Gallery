@@ -2,7 +2,7 @@
 
 import type {
     Block,
-    BlockEditorMode,
+    // BlockEditorMode,
     BlockEditorScreenMode,
     BlocksCollectionJSON,
     EditTarget,
@@ -19,17 +19,11 @@ export interface ScreenModeStack {
 }
 
 export type BlockEditorSession = {
-    /** Which block we are working with (create or edit existing) */
-    selectedBlock: Block | undefined;
-
-    /** Current mode (mostly mirrors identity.mode, but convenient for UI) */
-    mode: BlockEditorMode;
-
     /** Working form values for the block (formValue) */
-    values: Block | undefined;
+    draft: Block | undefined;
     collection?: BlocksCollectionJSON;
-    setValues: React.Dispatch<React.SetStateAction<Block | undefined>>;
-    setMode: (m: BlockEditorMode) => void;
+    setDraft: (next: Block) => void;
+    // setMode: (m: BlockEditorMode) => void;
     currentStack: ScreenModeStack;
     setCollection: (c: BlocksCollectionJSON | undefined) => void;
     setSelectedArtItem: (i: GridItem | undefined) => void;
@@ -37,9 +31,10 @@ export type BlockEditorSession = {
     unHit: () => void;
     onDelete: () => void;
     updateTags: (t: string[]) => void;
+    onApply: () => void;
 
     /** Editor lifecycle */
-    editorIsReady: boolean;
+    // editorIsReady: boolean;
     isEditingTarget: (t: EditTarget) => boolean;
 
     /** Derived flags */
@@ -47,10 +42,11 @@ export type BlockEditorSession = {
     isValid: boolean;
     canSave: boolean;
     loading: boolean;
+    isJourney: boolean;
 
     /** Persistence controls */
     saving: boolean;
-    save: () => Promise<void> | void;
+    onSaveClick: () => Promise<void> | void;
     exit: () => void;
 
     /** UI helpers (optional, can extend later) */

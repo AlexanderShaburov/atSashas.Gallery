@@ -1,12 +1,7 @@
 // src/shared/api/streamsApi.ts
 import type { StreamData, StreamIndexItem } from '@/entities/stream/';
+import { StreamMetadata } from '@/entities/stream/streamApi.types';
 
-export type CreateStreamRequest = {
-    streamId: string;
-    title: string;
-    tags?: string[];
-    description?: string;
-};
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 async function http<T>(url: string, init?: RequestInit): Promise<T> {
@@ -36,7 +31,7 @@ export const streamsApi = {
         return http<StreamIndexItem[]>(`/admin/streams${suffix}`);
     },
 
-    create: (body: CreateStreamRequest) =>
+    create: (body: StreamMetadata) =>
         http<StreamData>(`/admin/streams`, { method: 'POST', body: JSON.stringify(body) }),
 
     get: (streamId: string) => http<StreamData>(`/admin/streams/${encodeURIComponent(streamId)}`),
@@ -48,6 +43,7 @@ export const streamsApi = {
         }),
 
     remove: (streamId: string, hard = false) => {
+        console.log(`[streamsApi][remove] called with id: ${streamId}`);
         const suffix = hard ? `?hard=true` : '';
         return http<{ ok: true }>(`/admin/streams/${encodeURIComponent(streamId)}${suffix}`, {
             method: 'DELETE',

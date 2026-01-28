@@ -1,5 +1,5 @@
 // src/shared/nav/ReturnStack.types.ts
-import { ItemPosition } from '@/entities/block';
+import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 import { EditorKind } from './editorKey.types';
 
 export type EditorKey =
@@ -8,17 +8,13 @@ export type EditorKey =
     | { kind: 'catalog'; id: 'main' }
     | { kind: 'hopper'; id: 'main' };
 
-type StreamInsertAt =
-    | { kind: 'afterBlockId'; afterBlockId: string }
-    | { kind: 'index'; index: number };
-
 // What editor should do as return on parent editor
 // created entity id is in the JumpResult type data (loot)
 export type ReturnCommand =
     | {
           kind: 'streamInsertBlock';
           streamId: string;
-          insertAt: StreamInsertAt;
+          insertAt: number;
           focus?: { blockId: string };
       }
     | {
@@ -36,12 +32,12 @@ export type ReturnCommand =
     | {
           kind: 'blockInsertArt';
           blockId: string;
-          position: ItemPosition;
+          pendingSelection: BlockHitEvent;
       }
     | {
           kind: 'blockUpdateArt';
           blockId: string;
-          position: ItemPosition;
+          pendingSelection: BlockHitEvent;
       };
 
 // Phase of journey:

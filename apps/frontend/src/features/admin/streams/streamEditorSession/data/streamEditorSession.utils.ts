@@ -1,11 +1,11 @@
-import { StreamData } from '@/entities/stream';
 import {
-    CreateStreamRequest,
     CreateStreamResponse,
     DeleteStreamResponse,
     ListStreamsResponse,
+    StreamData,
+    StreamMetadata,
     UpdateStreamResponse,
-} from '@/entities/stream/streamApi.types';
+} from '@/entities/stream';
 import { streamsApi } from '@/features/admin/streams/api';
 import { todayISO } from '@/shared/lib/dateAndLabels/today';
 import { generateId } from '@/shared/lib/id/generateId';
@@ -13,7 +13,7 @@ import { generateId } from '@/shared/lib/id/generateId';
 export function createNewStreamDraft(): StreamData {
     return {
         streamId: generateId('stream'),
-        title: '',
+        title: 'untitled stream',
         status: 'draft',
         tags: [],
         description: '',
@@ -24,7 +24,7 @@ export function createNewStreamDraft(): StreamData {
     };
 }
 
-export async function createNewStream(body: CreateStreamRequest): Promise<CreateStreamResponse> {
+export async function requestNewStream(body: StreamMetadata): Promise<CreateStreamResponse> {
     return await streamsApi.create(body);
 }
 
@@ -37,7 +37,8 @@ export async function openStream(id: string): Promise<StreamData> {
 }
 
 export async function deleteStream(streamId: string): Promise<DeleteStreamResponse> {
-    return await streamsApi.remove(streamId);
+    console.log(`[Stream API][deleteStream] called`);
+    return await streamsApi.remove(streamId, true);
 }
 
 export async function updateStream(stream: StreamData): Promise<UpdateStreamResponse> {

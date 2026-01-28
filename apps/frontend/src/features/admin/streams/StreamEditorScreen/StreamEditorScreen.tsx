@@ -5,11 +5,15 @@ import { applyStreamFilter } from '@/features/admin/streams/ui/FilterControl/app
 import { StreamFilterState } from '@/features/admin/streams/ui/FilterControl/stream-filter.types';
 import { DEFAULT_STREAM_FILTER } from '@/features/admin/streams/ui/FilterControl/streamFilter.defaults';
 import { StreamFilterControl } from '@/features/admin/streams/ui/FilterControl/StreamFilterControl';
-import { NewStreamComponent } from '@/features/admin/streams/ui/NewStreamComponent/NewStreamComponent';
+import {
+    NewStreamComponent,
+    StreamMetaComponent,
+} from '@/features/admin/streams/ui/NewStreamComponent';
 import { SingleStreamEditor } from '@/features/admin/streams/ui/SingleStreamEditor/SingleStreamEditor';
 import { ToolbarCtx } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import './StreamEditorScreen.css';
+import { StreamMetadata } from '@/entities/stream';
 
 export function StreamEditor() {
     const session = useStreamEditorSession();
@@ -31,6 +35,8 @@ export function StreamEditor() {
         threeDotHandler,
         editBlock,
         currentStack,
+        commitMetaEditor,
+        editMetadata,
     } = session;
 
     useEffect(() => {
@@ -46,23 +52,28 @@ export function StreamEditor() {
 
     const currentMode = currentStack.mode.kind;
 
-    useEffect(() => {
-        if (currentMode === 'edit' && !draft) {
-            onEscape();
-        }
-    }, [currentMode, onEscape, draft]);
+    const addBlockFromToolbar = useCallback(() => {
+        const length = draft?.blockIds.length ?? 0;
+        addBlock(length);
+    }, [addBlock, draft?.blockIds]);
 
     const toolbarProps: ToolbarCtx | null = useMemo(() => {
         if (!draft) return null;
+        console.log(`[StreamEditor] toolbarProps calculator. `);
+        console.log(`[StreamEditor] isDirty: ${isDirty} `);
+        console.log(`[StreamEditor] isLoading: ${isLoading} `);
+        console.log(`[StreamEditor] isValid: ${isValid} `);
+
         return {
             canSave: isDirty && !isLoading && isValid,
             saving: isSaving,
             save,
             exit: onEscape,
             onDelete: () => delStream(selectedStreamId ?? ''),
-            addBlock,
+            addBlock: addBlockFromToolbar,
             tags: draft.tags,
             onChangeTags: updateTags,
+            onEditMetadata: editMetadata,
         };
     }, [
         draft,
@@ -74,9 +85,17 @@ export function StreamEditor() {
         onEscape,
         delStream,
         selectedStreamId,
-        addBlock,
         updateTags,
+        addBlockFromToolbar,
+        editMetadata,
     ]);
+
+    const initial: StreamMetadata = {
+        streamId: draft?.streamId ?? '',
+        title: draft?.title ?? '',
+        tags: draft?.tags ?? [],
+        description: draft?.description ?? '',
+    };
 
     const [filter, setFilter] = useState<StreamFilterState>(DEFAULT_STREAM_FILTER);
 
@@ -86,11 +105,12 @@ export function StreamEditor() {
 
     const filtered = useMemo(() => applyStreamFilter(streamsIndex, filter), [streamsIndex, filter]);
     const handleOnClick = useCallback(
-        (id: string) => {
-            selectStream(id);
+        async (id: string) => {
+            await selectStream(id);
         },
         [selectStream],
     );
+
     // Reduce blinking:
     // if (!draft || !toolbarProps) {
     //     return (
@@ -99,6 +119,10 @@ export function StreamEditor() {
     //         </div>
     //     );
     // }
+    console.log(`[StreamEditor]: draft currently is:`);
+    console.dir(draft);
+    console.log(`[StreamEditor]: toolbarProps currently is:`);
+    console.dir(toolbarProps);
 
     switch (currentMode) {
         case 'select':
@@ -145,7 +169,11 @@ export function StreamEditor() {
         case 'edit': {
             if (!draft || !toolbarProps) {
                 // optional: show loading/placeholder instead of null
-                return null;
+                return (
+                    <div className="se">
+                        <div className="se__loading">Loading…</div>
+                    </div>
+                );
             }
 
             return (
@@ -159,6 +187,18 @@ export function StreamEditor() {
                 </div>
             );
         }
+        case 'meta':
+            return (
+                <div className="se">
+                    <ScreenHeaderRow left={<h1 className="se__title">Streams</h1>} right={null} />
+                    <StreamMetaComponent
+                        initial={initial}
+                        onCancel={onEscape}
+                        onSubmit={commitMetaEditor}
+                        isLoading={isLoading}
+                    />
+                </div>
+            );
         default:
             return null;
     }

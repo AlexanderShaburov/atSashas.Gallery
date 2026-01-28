@@ -11,6 +11,24 @@ export function AddBlockButton({ onClick }: { onClick: () => void }) {
         </div>
     );
 }
+export function EditMetadata({ onEdit }: { onEdit: () => void }) {
+    return (
+        <div className="set-actions">
+            <button type="button" className="set-btn" onClick={onEdit}>
+                Edit Meta
+            </button>
+        </div>
+    );
+}
+export function ApplyButton({ onApply }: { onApply: () => void }) {
+    return (
+        <div className="set-actions">
+            <button type="button" className="set-btn" onClick={onApply}>
+                Apply
+            </button>
+        </div>
+    );
+}
 export function DeleteButton({ exit }: { exit: () => void }) {
     return (
         <>

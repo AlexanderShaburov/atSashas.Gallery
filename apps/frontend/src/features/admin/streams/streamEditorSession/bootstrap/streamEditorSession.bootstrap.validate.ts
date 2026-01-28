@@ -1,12 +1,12 @@
 // streamEditorSession.bootstrap.validate.ts
 import type { StreamData } from '@/entities/stream';
 import type { JourneyTicket } from '@/shared/nav';
+import { type OkJumpResult } from '@/shared/nav';
 import type { DraftSnapshot } from '@/shared/state/editorSessionsData.store';
 import {
     STREAM_RETURN_KINDS,
-    type StreamReturnCommand,
     type StreamReturnBootstrapValidated,
-    type OkJumpResult,
+    type StreamReturnCommand,
 } from './streamEditorSession.bootstrap.types';
 
 function isStreamReturnKind(kind: string): kind is (typeof STREAM_RETURN_KINDS)[number] {

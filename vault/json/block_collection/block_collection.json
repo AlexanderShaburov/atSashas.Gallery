@@ -1,8 +1,8 @@
 {
   "kind": "BlockCollection",
-  "version": 8,
+  "version": 125,
   "generatedAt": "2025-12-14",
-  "updatedAt": "2026-01-18",
+  "updatedAt": "2026-01-28",
   "blocks": {
     "block-gallery-single-466e6378": {
       "id": "block-gallery-single-466e6378",
@@ -54,7 +54,7 @@
       "layout": "triptychLeft",
       "items": [
         {
-          "artId": "art-20251120-jcsrbr",
+          "artId": "art-20251226-t1y5qn",
           "position": "LS",
           "caption": {
             "en": "",
@@ -87,9 +87,922 @@
           }
         }
       ]
+    },
+    "block-gallery-pairvertical-2b10d2a6": {
+      "id": "block-gallery-pairvertical-2b10d2a6",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-21",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairVertical",
+      "items": [
+        {
+          "artId": "art-20251226-52p602",
+          "position": "Up",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-t1y5qn",
+          "position": "Bottom",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-pairvertical-fd88d79e": {
+      "id": "block-gallery-pairvertical-fd88d79e",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-23",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairVertical",
+      "items": [
+        {
+          "artId": "art-20251118-4gpfj3",
+          "position": "Up",
+          "caption": {
+            "en": "Дама",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-vs1ped",
+          "position": "Bottom",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-pairhorizontal-fcda4039": {
+      "id": "block-gallery-pairhorizontal-fcda4039",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-24",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairHorizontal",
+      "items": [
+        {
+          "artId": "art-20251226-tfemnz",
+          "position": "Left",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-52p602",
+          "position": "Right",
+          "caption": {
+            "en": "sssd",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-single-e39ec931": {
+      "id": "block-gallery-single-e39ec931",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-24",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "single",
+      "items": [
+        {
+          "artId": "art-20251226-7vqxmz",
+          "position": "Center",
+          "caption": {
+            "en": "major Tom",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-pairhorizontal-5314cf4f": {
+      "id": "block-gallery-pairhorizontal-5314cf4f",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-24",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairHorizontal",
+      "items": [
+        {
+          "artId": "art-20251120-9td10a",
+          "position": "Left",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251118-4gpfj3",
+          "position": "Right",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-single-b3386b84": {
+      "id": "block-gallery-single-b3386b84",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-24",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "single",
+      "items": [
+        {
+          "artId": "art-20251226-t1y5qn",
+          "position": "Center",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-triptychleft-743e2561": {
+      "id": "block-gallery-triptychleft-743e2561",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-24",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "triptychLeft",
+      "items": [
+        {
+          "artId": "art-20251226-tfemnz",
+          "position": "LS",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-7vqxmz",
+          "position": "RBC",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-52p602",
+          "position": "RUC",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-pairvertical-73ea50ee": {
+      "id": "block-gallery-pairvertical-73ea50ee",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-24",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairVertical",
+      "items": [
+        {
+          "artId": "art-20251226-7vqxmz",
+          "position": "Up",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20260124-6h8d4s",
+          "position": "Bottom",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-triptychleft-05cb0d6f": {
+      "id": "block-gallery-triptychleft-05cb0d6f",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-24",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "triptychLeft",
+      "items": [
+        {
+          "artId": "art-20260124-1v8tvf",
+          "position": "LS",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20260124-34455x",
+          "position": "RBC",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251118-4gpfj3",
+          "position": "RUC",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-pairhorizontal-aad34566": {
+      "id": "block-gallery-pairhorizontal-aad34566",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-25",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairHorizontal",
+      "items": [
+        {
+          "artId": "art-20260124-h205d1",
+          "position": "Left",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20260124-6h8d4s",
+          "position": "Right",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-triptychhorizontal-bdbb22ca": {
+      "id": "block-gallery-triptychhorizontal-bdbb22ca",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-25",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "triptychHorizontal",
+      "items": [
+        {
+          "artId": "art-20251226-tk5nhr",
+          "position": "Left",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20260124-h205d1",
+          "position": "Center",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20260124-6h8d4s",
+          "position": "Right",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-triptychright-48c437d7": {
+      "id": "block-gallery-triptychright-48c437d7",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-26",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "triptychRight",
+      "items": [
+        {
+          "artId": "art-20251226-vs1ped",
+          "position": "LUC",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-t1y5qn",
+          "position": "RS",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20260124-1v8tvf",
+          "position": "LBC",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-pairhorizontal-d316b608": {
+      "id": "block-gallery-pairhorizontal-d316b608",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-27",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairHorizontal",
+      "items": [
+        {
+          "artId": "art-20251226-7vqxmz",
+          "position": "Right",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-tfemnz",
+          "position": "Left",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-single-7bbd7b1b": {
+      "id": "block-gallery-single-7bbd7b1b",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-27",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "single",
+      "items": [
+        {
+          "artId": "art-20260124-h205d1",
+          "position": "Center",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-pairvertical-eec1df8d": {
+      "id": "block-gallery-pairvertical-eec1df8d",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-27",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairVertical",
+      "items": [
+        {
+          "artId": "art-20251226-vs1ped",
+          "position": "Up",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-t1y5qn",
+          "position": "Bottom",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-pairvertical-3ec4bee6": {
+      "id": "block-gallery-pairvertical-3ec4bee6",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-27",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairVertical",
+      "items": [
+        {
+          "artId": "art-20251120-jcsrbr",
+          "position": "Up",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20260124-34455x",
+          "position": "Bottom",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-pairhorizontal-61efd06e": {
+      "id": "block-gallery-pairhorizontal-61efd06e",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-27",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairHorizontal",
+      "items": [
+        {
+          "artId": "art-20251226-t1y5qn",
+          "position": "Left",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-t1y5qn",
+          "position": "Right",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-single-6a44f3ec": {
+      "id": "block-gallery-single-6a44f3ec",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-27",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "single",
+      "items": [
+        {
+          "artId": "art-20260124-est8wp",
+          "position": "Center",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-pairhorizontal-c348c9f4": {
+      "id": "block-gallery-pairhorizontal-c348c9f4",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-27",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairHorizontal",
+      "items": [
+        {
+          "artId": "art-20260124-34455x",
+          "position": "Left",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20260124-34455x",
+          "position": "Right",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-pairvertical-aa570e9b": {
+      "id": "block-gallery-pairvertical-aa570e9b",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-27",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairVertical",
+      "items": [
+        {
+          "artId": "art-20251226-tk5nhr",
+          "position": "Up",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20260124-h205d1",
+          "position": "Bottom",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-pairhorizontal-a9f7a7d5": {
+      "id": "block-gallery-pairhorizontal-a9f7a7d5",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-28",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairHorizontal",
+      "items": [
+        {
+          "artId": "art-20251226-vs1ped",
+          "position": "Left",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-vs1ped",
+          "position": "Right",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
+    },
+    "block-gallery-triptychhorizontal-aed36295": {
+      "id": "block-gallery-triptychhorizontal-aed36295",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-01-28",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "triptychHorizontal",
+      "items": [
+        {
+          "artId": "art-20251226-t1y5qn",
+          "position": "Left",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-52p602",
+          "position": "Center",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        },
+        {
+          "artId": "art-20251226-t1y5qn",
+          "position": "Right",
+          "caption": {
+            "en": "",
+            "ru": null,
+            "it": null,
+            "es": null,
+            "pt": null
+          }
+        }
+      ]
     }
   },
   "order": [
+    "block-gallery-triptychhorizontal-aed36295",
+    "block-gallery-pairhorizontal-a9f7a7d5",
+    "block-gallery-pairvertical-aa570e9b",
+    "block-gallery-pairhorizontal-c348c9f4",
+    "block-gallery-single-6a44f3ec",
+    "block-gallery-pairhorizontal-61efd06e",
+    "block-gallery-pairvertical-3ec4bee6",
+    "block-gallery-pairvertical-eec1df8d",
+    "block-gallery-single-7bbd7b1b",
+    "block-gallery-pairhorizontal-d316b608",
+    "block-gallery-triptychright-48c437d7",
+    "block-gallery-triptychhorizontal-bdbb22ca",
+    "block-gallery-pairhorizontal-aad34566",
+    "block-gallery-triptychleft-05cb0d6f",
+    "block-gallery-pairvertical-73ea50ee",
+    "block-gallery-triptychleft-743e2561",
+    "block-gallery-single-b3386b84",
+    "block-gallery-pairhorizontal-5314cf4f",
+    "block-gallery-single-e39ec931",
+    "block-gallery-pairhorizontal-fcda4039",
+    "block-gallery-pairvertical-fd88d79e",
+    "block-gallery-pairvertical-2b10d2a6",
     "block-gallery-triptychleft-0b23cbfd",
     "block-gallery-single-466e6378"
   ],

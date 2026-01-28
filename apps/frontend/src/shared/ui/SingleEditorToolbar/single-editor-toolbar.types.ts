@@ -1,4 +1,4 @@
-export type ToolKey = 'delButton' | 'tags' | 'addBlock' | 'exit' | 'save';
+export type ToolKey = 'delButton' | 'tags' | 'addBlock' | 'exit' | 'save' | 'editMeta' | 'apply';
 
 export type ToolbarCtx = {
     canSave: boolean;
@@ -6,8 +6,9 @@ export type ToolbarCtx = {
     save: () => void;
     exit: () => void;
     onDelete: () => void;
-
-    addBlock?: (pos: number) => void;
+    onEditMetadata?: () => void;
+    addBlock?: () => void;
     tags?: string[];
     onChangeTags?: (tags: string[]) => void;
+    onApply?: () => void;
 };

@@ -82,7 +82,6 @@ async def update_stream(stream_id: str, body: StreamData) -> StreamData:
         raise HTTPException(
             status_code=400, detail="streamId in body must match path param"
         )
-
     try:
         return await repo.update_stream(body)
     except FileNotFoundError:

@@ -1,5 +1,5 @@
 import { EditorTarget } from '@/entities/common';
-import { ArtItemForm } from '@/features/admin/catalogEditor/editorSession/editorTypes';
+import { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/editorTypes';
 
 // ── Validation helpers (top-level) ───────────────────────────────────────────
 export function hasAnyTitle(v?: ArtItemForm['title']): boolean {

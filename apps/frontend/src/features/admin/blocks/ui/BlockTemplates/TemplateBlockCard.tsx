@@ -4,7 +4,6 @@ import {
     GalleryComponent,
     TextBlockComponent,
 } from '@/features/admin/shared/ui/BlockPreview';
-import { Dispatch, SetStateAction } from 'react';
 import './block.templates.css';
 import { BlockHitEvent } from './editorTypes';
 import {
@@ -15,7 +14,7 @@ import {
 } from './templateTypes';
 type TemplateRawProps = {
     onSelectKind: (hit: BlockHitEvent) => void;
-    setValue: Dispatch<SetStateAction<Block | undefined>>;
+    setValue: (next: Block) => void;
 };
 
 export function TemplateRaw({ onSelectKind, setValue }: TemplateRawProps) {

@@ -1,0 +1,190 @@
+/* src/features/admin/streams/ui/StreamMetaComponent/StreamMetaComponent.css */
+
+.csc {
+    /* Align with StreamEditorScreen page rhythm */
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 12px 14px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+
+    /* subtle depth */
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.csc__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.csc__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.csc__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.csc__actions button {
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 8px;
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+    color: inherit;
+
+    cursor: pointer;
+    user-select: none;
+}
+
+.csc__actions button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.24);
+}
+
+.csc__actions button:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.csc__actions button:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+/* Form layout */
+.csc__form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.csc__field {
+    display: grid;
+    gap: 6px;
+}
+
+.csc__label {
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0.92;
+}
+
+.csc__hint {
+    font-size: 12px;
+    opacity: 0.65;
+    line-height: 1.25;
+}
+
+.csc input,
+.csc textarea {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 10px 11px;
+    border-radius: 9px;
+
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.22);
+    color: inherit;
+
+    outline: none;
+}
+
+.csc textarea {
+    resize: vertical;
+    min-height: 96px;
+}
+
+.csc input::placeholder,
+.csc textarea::placeholder {
+    opacity: 0.55;
+}
+
+.csc input:focus,
+.csc textarea:focus {
+    border-color: rgba(255, 255, 255, 0.28);
+    background: rgba(0, 0, 0, 0.28);
+}
+
+/* Disabled fields should still look decent */
+.csc input:disabled,
+.csc textarea:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Tags chips */
+.csc__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 2px;
+}
+
+.csc__chip {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 9px;
+
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+
+    font-size: 12px;
+    opacity: 0.95;
+}
+
+/* Validation / Error blocks */
+.csc__validation,
+.csc__error {
+    padding: 10px 12px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 120, 120, 0.35);
+    background: rgba(255, 80, 80, 0.08);
+}
+
+.csc__validationTitle {
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.csc__validation ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.csc__validation li {
+    margin: 2px 0;
+}
+
+/* Small responsive polishing */
+@media (max-width: 520px) {
+    .csc {
+        padding: 10px 10px;
+        border-radius: 10px;
+    }
+
+    .csc__header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .csc__actions {
+        justify-content: flex-end;
+    }
+}

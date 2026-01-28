@@ -20,3 +20,11 @@
         grid-template-columns: repeat(8, minmax(0, 1fr));
     }
 }
+.grid-collection > * {
+    aspect-ratio: 4 / 3;
+    width: 100%;
+}
+
+.grid-collection > * > * {
+    height: 100%;
+}

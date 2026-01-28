@@ -1,5 +1,5 @@
 import { EditorTarget, ISODate } from '@/entities/common';
-import type { ArtItemForm } from '@/features/admin/catalogEditor/editorSession/editorTypes';
+import type { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/editorTypes';
 import { todayISO } from '@/shared/lib/dateAndLabels/today';
 import { generateId } from '@/shared/lib/id/generateId';
 

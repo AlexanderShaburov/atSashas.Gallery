@@ -1,0 +1,18 @@
+{
+  "streamId": "stream-20260124-50ypmm",
+  "title": "Second one",
+  "status": "draft",
+  "tags": [],
+  "description": "",
+  "version": 6,
+  "createdAt": "2026-01-24T05:45:39.648429+00:00",
+  "updatedAt": "2026-01-24T14:43:14.333620+00:00",
+  "blockIds": [
+    "block-gallery-pairvertical-2b10d2a6",
+    "block-gallery-pairvertical-0d788bd9",
+    "block-gallery-pairhorizontal-fcda4039",
+    "block-gallery-single-466e6378",
+    "block-gallery-single-e39ec931",
+    "block-gallery-pairhorizontal-5314cf4f"
+  ]
+}

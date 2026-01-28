@@ -1,6 +1,6 @@
 {
-  "catalogVersion": 65,
-  "updatedAt": "2025-12-26T18:01:11.283119+00:00",
+  "catalogVersion": 70,
+  "updatedAt": "2026-01-24T17:05:15.942300+00:00",
   "items": {
     "art-20251118-4gpfj3": {
       "id": "art-20251118-4gpfj3",
@@ -259,9 +259,154 @@
       "series": null,
       "tags": null,
       "notes": null
+    },
+    "art-20260124-h205d1": {
+      "id": "art-20260124-h205d1",
+      "dateCreated": "2026-01-24",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260124-h205d1.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260124-h205d1.avif",
+          "webp": "/media/arts/previews/art-20260124-h205d1.webp",
+          "jpeg": "/media/arts/previews/art-20260124-h205d1.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": null,
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "baba",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
+    },
+    "art-20260124-34455x": {
+      "id": "art-20260124-34455x",
+      "dateCreated": "2026-01-24",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260124-34455x.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260124-34455x.avif",
+          "webp": "/media/arts/previews/art-20260124-34455x.webp",
+          "jpeg": "/media/arts/previews/art-20260124-34455x.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": null,
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "another baba",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
+    },
+    "art-20260124-6h8d4s": {
+      "id": "art-20260124-6h8d4s",
+      "dateCreated": "2026-01-24",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260124-6h8d4s.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260124-6h8d4s.avif",
+          "webp": "/media/arts/previews/art-20260124-6h8d4s.webp",
+          "jpeg": "/media/arts/previews/art-20260124-6h8d4s.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": null,
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "frog",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
+    },
+    "art-20260124-est8wp": {
+      "id": "art-20260124-est8wp",
+      "dateCreated": "2026-01-24",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260124-est8wp.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260124-est8wp.avif",
+          "webp": "/media/arts/previews/art-20260124-est8wp.webp",
+          "jpeg": "/media/arts/previews/art-20260124-est8wp.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": null,
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "sea",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
+    },
+    "art-20260124-1v8tvf": {
+      "id": "art-20260124-1v8tvf",
+      "dateCreated": "2026-01-24",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260124-1v8tvf.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260124-1v8tvf.avif",
+          "webp": "/media/arts/previews/art-20260124-1v8tvf.webp",
+          "jpeg": "/media/arts/previews/art-20260124-1v8tvf.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": null,
+      "availability": null,
+      "dimensions": null,
+      "alt": null,
+      "title": {
+        "en": "fraud",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": null,
+      "notes": null
     }
   },
   "order": [
+    "art-20260124-1v8tvf",
+    "art-20260124-est8wp",
+    "art-20260124-6h8d4s",
+    "art-20260124-34455x",
+    "art-20260124-h205d1",
     "art-20251226-tk5nhr",
     "art-20251226-tfemnz",
     "art-20251226-7vqxmz",

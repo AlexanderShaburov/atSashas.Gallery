@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "updatedAt": "2026-01-27T18:18:24.183402+00:00",
+  "streams": [
+    {
+      "streamId": "stream-20260124-50ypmm",
+      "title": "Second one",
+      "status": "draft",
+      "tags": [],
+      "description": "",
+      "updatedAt": "2026-01-24T14:43:14.333620+00:00"
+    },
+    {
+      "streamId": "stream-20260124-gzy15k",
+      "title": "opplala",
+      "status": "draft",
+      "tags": [],
+      "description": "",
+      "updatedAt": "2026-01-24T14:42:54.181662+00:00"
+    },
+    {
+      "streamId": "stream-20260124-3jt4bb",
+      "title": "sdfasfd",
+      "status": "draft",
+      "tags": [
+        "lopez"
+      ],
+      "description": "",
+      "updatedAt": "2026-01-24T17:01:05.073476+00:00"
+    },
+    {
+      "streamId": "stream-20260125-vchkav",
+      "title": "pps",
+      "status": "draft",
+      "tags": [],
+      "description": "",
+      "updatedAt": "2026-01-27T18:18:24.179858+00:00"
+    }
+  ]
+}

@@ -3,7 +3,6 @@
 import { Block, BlockParent } from '@/entities/block';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 import { resolveSetter } from '@/shared/lib/resolvers/resolvers';
-import { Dispatch, SetStateAction } from 'react';
 import { CtaBlockComponent } from './CtaBlockComponent';
 import { GalleryComponent } from './GalleryComponent';
 import { TextBlockComponent } from './TextBlockComponent';
@@ -13,10 +12,11 @@ export type BlockProps = {
     block: Block;
     onHit: (hit: BlockHitEvent) => void;
     parent: BlockParent;
-    setValue?: Dispatch<SetStateAction<Block | undefined>>;
+    setValue?: (next: Block) => void;
+    readOnly?: boolean;
 };
 
-export function BlockRenderer({ block, onHit, parent, setValue }: BlockProps) {
+export function BlockRenderer({ block, onHit, parent, setValue, readOnly }: BlockProps) {
     switch (block.blockKind) {
         case 'gallery':
             return (
@@ -26,6 +26,7 @@ export function BlockRenderer({ block, onHit, parent, setValue }: BlockProps) {
                     onHit={onHit}
                     parent={parent}
                     setValue={resolveSetter(setValue)}
+                    readOnly={readOnly}
                 />
             );
         case 'text':
@@ -36,6 +37,7 @@ export function BlockRenderer({ block, onHit, parent, setValue }: BlockProps) {
                     onHit={onHit}
                     parent={parent}
                     setValue={resolveSetter(setValue)}
+                    readOnly={readOnly}
                 />
             );
         case 'cta':
@@ -46,6 +48,7 @@ export function BlockRenderer({ block, onHit, parent, setValue }: BlockProps) {
                     onHit={onHit}
                     parent={parent}
                     setValue={resolveSetter(setValue)}
+                    readOnly={readOnly}
                 />
             );
         default:

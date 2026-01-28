@@ -1,11 +1,11 @@
 // src/entities/stream/StreamApi.ts
 import type { StreamData, StreamIndexItem } from './stream.types';
 
-export type CreateStreamRequest = {
+export type StreamMetadata = {
     streamId: string;
     title: string;
-    tags?: string[];
-    description?: string;
+    tags: string[];
+    description: string;
 };
 
 export type CreateStreamResponse = StreamData;

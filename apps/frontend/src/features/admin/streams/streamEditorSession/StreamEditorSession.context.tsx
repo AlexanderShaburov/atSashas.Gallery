@@ -1,13 +1,17 @@
 // src/features/admin/streams/streamEditorSession/StreamEditorSession.context.tsx
 
+import { MetaIntent } from '@/entities/common/lifecycle';
+import type { StreamMetadata } from '@/entities/stream';
 import { StreamData, StreamIndexItem, type StreamScreenMode } from '@/entities/stream';
 import { SaveLifecycle, StreamScreenModeStack } from '@/entities/stream/stream-editor-screen.types';
+import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { useArrival, useDispatch } from '@/features/admin/shared/transporter/transporter';
 import { StreamEditorCtx } from '@/features/admin/streams/hooks/useStreamEditor';
 import { validateStreamForm } from '@/features/admin/streams/utils';
 import { deepEqual } from '@/shared/lib/checkers/checkers';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { generateId } from '@/shared/lib/id/generateId';
+import type { OkJumpResult } from '@/shared/nav';
 import { EditorKey } from '@/shared/nav';
 import {
     JourneyTicket,
@@ -16,21 +20,17 @@ import {
     ToAddress,
 } from '@/shared/nav/journeyStack.types';
 import { useUnsavedChanges } from '@/shared/state';
-import { DraftSnapshot, editSessionsDataStore } from '@/shared/state/editorSessionsData.store';
+import { editSessionsDataStore } from '@/shared/state/editorSessionsData.store';
 import { unsavedChangesStore } from '@/shared/state/unsavedChanges.store';
 import { useSessionDataStore } from '@/shared/state/useEditorSessionsDataStore';
 import { ThreeDotCommand } from '@/shared/ui/ThreeDotMenu/threeDot.types';
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { resolveStreamBootstrapData, validateStreamReturnBootstrap } from './bootstrap';
 import {
-    OkJumpResult,
-    resolveStreamBootstrapData,
-    validateStreamReturnBootstrap,
-} from './bootstrap';
-import {
-    createNewStreamDraft,
     deleteStream,
     loadStreamsIndex,
     openStream,
+    requestNewStream,
     updateStream,
 } from './data/streamEditorSession.utils';
 import { assertReturnCommand } from './guards/streamEditorSession.guards';
@@ -60,6 +60,8 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [pendingFocus, setPendingFocus] = useState<PendingFocus>(null);
 
+    const metaIntent = useRef<MetaIntent>({ action: 'idle' });
+
     // ****************** EDITOR DATA EXTRACTION (EXTERNAL STORE) ******************
 
     // Read saved editor values from the store:
@@ -71,13 +73,17 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     const draft = storeData?.draft;
     const snapshot = storeData?.snapshot;
 
+    //  ?????????????? TO CHANGE ??????????????
+    const gCtx = useEditorWorkspace();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const collection = gCtx.currentBlocksCollection?.blocks ?? {};
+    //  ?????????????? TO CHANGE END ??????????????
+
     // ************* NAVIGATION *************
 
     // read ticket getter
     const arrival = useArrival();
     const dispatch = useDispatch();
-    //
-    //
 
     // ************* STATE LOGIC *************
 
@@ -121,10 +127,12 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     }, []);
 
     const onEscape = useCallback(() => {
+        console.log(`[onEscape]: Called`);
         setModeStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
     }, []);
 
     const currentStack: StreamScreenModeStack = useMemo(() => {
+        console.log(`[currentStack]: current mode is: ${modeStack.length - 1}`);
         return {
             mode: modeStack[modeStack.length - 1] ?? SELECT_MODE,
             onEscape: onEscape,
@@ -136,17 +144,18 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     // Reset session helpers:
 
     const resetSelectSession = useCallback(() => {
+        // If external data store has to be cleaned here ??????
         setSelectedStreamId(undefined);
         pushMode({ kind: 'select' });
     }, [pushMode]);
 
     const renewStreamsIndex = useCallback(async () => {
         try {
-            console.error(`[renewStreamsIndex]: Called`);
+            console.log(`[renewStreamsIndex]: Called`);
 
             setIsLoading(true);
             const lst = await loadStreamsIndex();
-            console.error(`[renewStreamsIndex]: streams index loaded`);
+            console.log(`[renewStreamsIndex]: streams index loaded`);
             if (!lst) throw new Error('Streams list loading error');
             setStreamsIndex(lst);
         } catch (err) {
@@ -156,6 +165,14 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         }
     }, []);
 
+    // while hooks are undefined
+    const streamStoreDirectSave = (draft: StreamData, snapshot?: StreamData) => {
+        const key = { kind: 'stream', id: draft.streamId } as EditorKey;
+        editSessionsDataStore.saveDraft<StreamData>(key, draft);
+        if (snapshot) editSessionsDataStore.setSnapshot<StreamData>(key, draft);
+        unsavedChangesStore.setDirty(key, false);
+    };
+
     const applyInsertBlock = (
         draft: StreamData,
         command: ReturnCommand,
@@ -163,32 +180,15 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     ): void => {
         assertReturnCommand('streamInsertBlock', command, luggage);
 
-        let index = -1;
-        switch (command.insertAt.kind) {
-            case 'afterBlockId': {
-                const targetId = command.insertAt.afterBlockId;
-                index = draft.blockIds.findIndex((b) => b === targetId);
-                if (index < 0) {
-                    throw new Error(`afterBlockId not found: ${targetId}`);
-                }
-                index = index + 1;
-                break;
-            }
-            case 'index': {
-                index = command.insertAt.index;
-                break;
-            }
-        }
-        if (index < 0 || index > draft.blockIds.length) {
-            throw new Error(`applyInsertBlock can't define new block position`);
-        }
-
-        const newBlocks = [
-            ...draft.blockIds.slice(0, index),
+        const { insertAt } = command;
+        const clampedIdex = Math.max(0, Math.min(insertAt, draft.blockIds.length));
+        const nextBlocks = [
+            ...draft.blockIds.slice(0, clampedIdex),
             luggage.id,
-            ...draft.blockIds.slice(index),
+            ...draft.blockIds.slice(clampedIdex),
         ];
-        setDraft({ ...draft, blockIds: newBlocks });
+
+        streamStoreDirectSave({ ...draft, blockIds: nextBlocks });
     };
 
     const applyReplaceBlock = (
@@ -205,57 +205,62 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
                 `Replaced block with id: ${replaceBlockId} not found in the current stream`,
             );
         }
-
-        const newBlocks = [
+        const nextBlocks = [
             ...draft.blockIds.slice(0, index),
             newBlockId,
             ...draft.blockIds.slice(index + 1),
         ];
-        setDraft({ ...draft, blockIds: newBlocks });
+        streamStoreDirectSave({ ...draft, blockIds: nextBlocks });
     };
 
     // *************** MOUNT BOOTSTRAP ***************
-    /* 
-    What should be done:
-        - check JourneyStack useArrival for current JourneyTicket:
 
-            - if there no ticket -> newSession
-            - if 
-        - if cache has value for 'stream': 
-            - set selectedStreamId;
-            - assign methods for selected stream
-            - set modeStack to 'edit'
-        - if cache has not value for 'stream':
-            - renewStreamsList
-            - check current mode is 'select' and if not -> clear it and set to 'select'
-
-*/
     useEffect(() => {
         (async () => {
             // Renew streams list:
             await renewStreamsIndex();
             // check ticket if we just return from the journey
-            const ticket = arrival('stream');
+            const arrivalTicket = arrival('stream');
             // if no ticket -> it is new session form zero
-            if (!ticket) {
+            if (!arrivalTicket) {
                 // IMPORTANT
                 // ??????????????????????????????????????????? !!!!!!!!!!!!!!!!!!!!!!!!!
                 // If we reset session shouldn't we reset editorSessionData.store values?
                 resetSelectSession();
                 return;
             }
+            console.log(`[BOOTSTRAP]: Got ticket:`);
+            console.dir(arrivalTicket);
+            const bootstrapId: string = arrivalTicket.returnTo.objectId;
+            const key =
+                (selectedStreamId ?? bootstrapId)
+                    ? ({ kind: 'stream', id: selectedStreamId ?? bootstrapId } as EditorKey)
+                    : undefined;
 
-            const tempId: string = ticket.returnTo.objectId;
-            const bootstrapDataSet = await resolveStreamBootstrapData(tempId);
+            setSelectedStreamId(bootstrapId);
+            let storeData;
+            storeData = editSessionsDataStore.get<StreamData>(key);
+            if (!storeData) {
+                storeData = await resolveStreamBootstrapData(bootstrapId);
+            }
+            console.log(`[BOOTSTRAP]: Got stored data:`);
+            console.dir(storeData);
+
             // Get validated context data:
 
-            const v = validateStreamReturnBootstrap(ticket, bootstrapDataSet);
+            const v = validateStreamReturnBootstrap(arrivalTicket, storeData);
 
+            console.log(`[BOOTSTRAP]: Got validated values:`);
+            console.dir(v);
             // Before complete earlier started actions we have to
             // check statStore and journeyStore matching (checked in validateStreamReturnTicket)
 
             const id = v.streamId;
-            if (id && streamsIndex.some((s) => s.streamId === id)) setSelectedStreamId(id);
+            if (id) {
+                setSelectedStreamId(id);
+                console.log(`[BOOTSTRAP]: selected stream id set to : ${id}`);
+            }
+
             // set screenMode to 'edit' state:
             pushMode({ kind: 'edit' });
 
@@ -263,14 +268,19 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             // when ticket is valid let's finish command started before dispatch:
             switch (v.command.kind) {
                 case 'streamInsertBlock':
+                    console.log(`[BOOTSTRAP]: streamInsertBlock branch selected`);
+                    console.log('[BOOTSTRAP] selectedStreamId BEFORE set:', selectedStreamId);
+                    console.log('[BOOTSTRAP] will setSelectedStreamId:', v.streamId);
                     applyInsertBlock(v.storeData.draft, v.command, v.loot);
                     focusBlockId = v.loot.id;
                     break;
                 case 'streamReplaceBlock':
+                    console.log(`[BOOTSTRAP]: streamReplaceBlock branch selected`);
                     applyReplaceBlock(v.storeData.draft, v.command, v.loot);
                     focusBlockId = v.loot.id;
                     break;
                 case 'streamUpdateBlock':
+                    console.log(`[BOOTSTRAP]: streamUpdateBlock branch selected`);
                     focusBlockId = v.loot.id ? v.loot.id : v.command.blockId;
                     break;
             }
@@ -282,7 +292,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // *************** INITIATE END ***************
+    // *************** BOOTSTRAP END ***************
 
     // *************** SCROLLER ***************
     useEffect(() => {
@@ -307,6 +317,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
 
     const selectStream = useCallback(
         async (id: string) => {
+            console.log(`[StreamEditorSessionProvider][selectStream]: Called`);
             if (!streamsIndex) {
                 pushMode({
                     kind: 'error',
@@ -326,13 +337,25 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
                 });
                 return;
             }
+            console.log(
+                `[StreamEditorSessionProvider][selectStream]: Clicked stream with id: ${s.streamId} successfully found`,
+            );
+
             try {
                 setIsLoading(true);
                 const stream = await openStream(s.streamId);
+                console.log(
+                    `[StreamEditorSessionProvider][selectStream]: Selected stream successfully downloaded`,
+                );
+
                 setSelectedStreamId(stream.streamId);
-                setDraft(stream);
-                commit();
+                console.log(`[StreamEditorSessionProvider][selectStream]: Selected stream id set`);
+                streamStoreDirectSave(stream, stream);
+                console.log('[selectStream] after setDraft, streamId=', stream.streamId);
+                console.log(`[StreamEditorSessionProvider][selectStream]: Stream saved to store`);
                 pushMode({ kind: 'edit' });
+                setModeStack((s) => [...s]); // force render
+                console.log(`[StreamEditorSessionProvider][selectStream]: Mode set to edit`);
             } catch (err) {
                 pushMode({
                     kind: 'error',
@@ -341,17 +364,23 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
                 });
             } finally {
                 setIsLoading(false);
+                console.log(`[StreamEditorSessionProvider][selectStream]: Completed`);
             }
         },
-        [streamsIndex, pushMode, commit, setDraft],
+        [streamsIndex, pushMode, setSelectedStreamId],
     );
     // *************** DELETE STREAM ***************
 
     const delStream = useCallback(
         async (streamId: string) => {
+            if (!confirm('Delete stream?')) return;
+
+            console.log(`[StreamEditorSessionProvider][delStream]: Called`);
             try {
                 setLifecycle({ saveState: 'saving' });
+
                 const res = await deleteStream(streamId);
+                console.log(`[StreamEditorSessionProvider][delStream]: deleteStream api called`);
                 if (!res.ok) throw new Error(`Error deleting stream with id: ${streamId}`);
                 renewStreamsIndex();
                 resetSelectSession(); //!!!!!!!!!!!!!!!!!!!!!
@@ -369,7 +398,13 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     );
 
     // *************** SAVE STREAM ***************
-
+    const popIfTopIs = useCallback((kind: StreamScreenMode['kind']) => {
+        setModeStack((s) => {
+            if (s.length <= 1) return s;
+            const top = s[s.length - 1];
+            return top?.kind === kind ? s.slice(0, -1) : s;
+        });
+    }, []);
     const save = useCallback(async () => {
         if (!draft) return;
 
@@ -382,11 +417,12 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             return;
         }
 
+        setLifecycle({ saveState: 'saving' });
         try {
-            setLifecycle({ saveState: 'saving' });
             await updateStream(draft);
             commit();
             await renewStreamsIndex();
+            popIfTopIs('meta');
         } catch (err) {
             pushMode({
                 kind: 'error',
@@ -396,7 +432,8 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         } finally {
             setLifecycle({ saveState: 'idle' });
         }
-    }, [draft, isValid, pushMode, commit, renewStreamsIndex]);
+    }, [draft, isValid, pushMode, commit, popIfTopIs, renewStreamsIndex]);
+
     // **************** END OF CRUD ***************
 
     // **************** TRAVEL PART ***************
@@ -428,22 +465,102 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         [dispatch, selectedStreamId],
     );
 
+    // ************* METADATA EDITOR ************
+
+    const editMetadata = useCallback(() => {
+        console.log(`[StreamEditorSession][editMetadata]j: Called`);
+        metaIntent.current = { action: 'edit' };
+        pushMode({ kind: 'meta' });
+    }, [pushMode]);
+
+    // Switch UI to new Stream form:
     const createNewStream = useCallback(() => {
         console.log(`[StreamEditorSession]: Create new stream called`);
-        const stream = createNewStreamDraft();
-        console.log(`[StreamEditorSession]: new stream draft created:`);
-        console.dir(stream);
-        setSelectedStreamId(stream.streamId);
-        const key: EditorKey = { kind: 'stream', id: stream.streamId };
-        const draftSnapshot: DraftSnapshot<StreamData> = {
-            snapshot: stream,
-            draft: stream,
-            updatedAt: new Date().toISOString(),
-        };
+        resetSelectSession();
+        metaIntent.current = { action: 'create' };
+        pushMode({ kind: 'meta' });
+    }, [pushMode, resetSelectSession]);
 
-        editSessionsDataStore.ensure<StreamData>(key, draftSnapshot);
-        pushMode({ kind: 'edit' });
-    }, [pushMode]);
+    const submitCreateStream = useCallback(
+        async (req: StreamMetadata) => {
+            console.log(`[submitCreateStream]: Called`);
+            try {
+                setIsLoading(true);
+                const created = await requestNewStream(req);
+
+                const createdId = created.streamId ?? req.streamId;
+
+                await renewStreamsIndex();
+
+                const stream = await openStream(createdId);
+
+                setSelectedStreamId(stream.streamId);
+                streamStoreDirectSave(stream);
+                commit();
+                popIfTopIs('meta');
+                pushMode({ kind: 'edit' });
+            } catch (err) {
+                const msg = String(err);
+                pushMode({
+                    kind: 'error',
+                    message: `Create stream failed: ${msg}`,
+                    canRetry: true,
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [commit, pushMode, renewStreamsIndex, popIfTopIs],
+    );
+
+    const applyStreamMetadata = useCallback(
+        (data: StreamMetadata) => {
+            if (!draft) return;
+            const nextDraft = {
+                ...draft,
+                title: data.title,
+                tags: data.tags,
+                description: data.description,
+            };
+            setDraft(nextDraft);
+            popIfTopIs('meta');
+            metaIntent.current = { action: 'idle' };
+        },
+        [setDraft, draft, popIfTopIs],
+    );
+
+    const commitMetaEditor = useCallback(
+        async (data: StreamMetadata) => {
+            console.log(`[StreamEditorSessionProvider][commitMetaEditor] Called`);
+            switch (metaIntent.current.action) {
+                case 'create': {
+                    console.log(
+                        `[StreamEditorSessionProvider][commitMetaEditor] Create stream selected`,
+                    );
+                    await submitCreateStream(data);
+                    break;
+                }
+                case 'edit': {
+                    console.log(
+                        `[StreamEditorSessionProvider][commitMetaEditor] Edit meta selected`,
+                    );
+                    applyStreamMetadata(data);
+                    break;
+                }
+                default: {
+                    throw new Error(
+                        `[commitMetaEditor]: commit unexpected metaIntent ${metaIntent.current.action} `,
+                    );
+                }
+            }
+
+            metaIntent.current = { action: 'idle' };
+            console.log(`[StreamEditorSessionProvider][commitMetaEditor] metaIntent set to 'idle'`);
+            pushMode({ kind: 'edit' });
+            console.log(`[StreamEditorSessionProvider][commitMetaEditor] screenMode set to'edit'`);
+        },
+        [submitCreateStream, applyStreamMetadata, pushMode],
+    );
 
     const updateTags = useCallback(
         (next: string[]) => {
@@ -488,7 +605,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             const command: ReturnCommand = {
                 kind: 'streamInsertBlock',
                 streamId: selectedStreamId,
-                insertAt: { kind: 'index', index: pos },
+                insertAt: pos,
             };
             const to: ToAddress = {
                 editor: 'block',
@@ -539,12 +656,12 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
                                 ? {
                                       kind: 'streamInsertBlock',
                                       streamId: selectedStreamId,
-                                      insertAt: { kind: 'afterBlockId', afterBlockId: blockId },
+                                      insertAt: idx + 1,
                                   }
                                 : {
                                       kind: 'streamInsertBlock',
                                       streamId: selectedStreamId,
-                                      insertAt: { kind: 'index', index: idx },
+                                      insertAt: idx,
                                   };
 
                         const to: ToAddress = { editor: 'block', mode: 'select' };
@@ -652,6 +769,8 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             updateTags,
             threeDotHandler,
             editBlock,
+            editMetadata,
+            commitMetaEditor,
         }),
         [
             selectedStreamId,
@@ -672,6 +791,8 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             updateTags,
             threeDotHandler,
             editBlock,
+            editMetadata,
+            commitMetaEditor,
         ],
     );
     return <StreamEditorCtx.Provider value={value}>{children}</StreamEditorCtx.Provider>;

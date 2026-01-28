@@ -28,7 +28,7 @@ class StreamData(BaseModel):
     )  # For filtering in the stream list
     description: str = ""  # Optional short text for admin/SEO
 
-    version: int = Field(ge=1, default=1)  # Optimistic concurrency
+    version: int = Field(ge=0, default=1)  # Optimistic concurrency
     createdAt: str  # ISO string
     updatedAt: str  # ISO string
 

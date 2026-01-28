@@ -35,11 +35,13 @@ export function BlockEditor() {
     const toolbarProps = {
         canSave: session.canSave,
         saving: session.saving,
-        save: session.save,
+        save: session.onSaveClick,
         exit: session.exit,
         onDelete: session.onDelete,
-        tags: session.values?.tags,
+        tags: session.draft?.tags,
         onChangeTags: session.updateTags,
+        onApply: session.onApply,
+        isJourney: session.isJourney,
     };
 
     const {
@@ -92,15 +94,16 @@ export function BlockEditor() {
 
     switch (screenMode) {
         case 'edit':
-            if (!session.values)
-                throw new Error(`[BlockEditor]: Try edit nonexistent block values`);
+            if (!session.draft) return <div>Setting...</div>;
+
+            // throw new Error(`[BlockEditor]: Try edit nonexistent block draft`);
             return (
                 <div className="block-editor">
                     <div className="block-editor__body">
                         <SingleBlockEditor
-                            item={session.values}
+                            item={session.draft}
                             onHit={testHit}
-                            setValue={session.setValues}
+                            setValue={session.setDraft}
                             toolbarProps={toolbarProps}
                         />
                     </div>
@@ -116,7 +119,7 @@ export function BlockEditor() {
                         <CollectionGrid
                             collection={collection}
                             onHit={onHit}
-                            setValue={session.setValues}
+                            setValue={session.setDraft}
                         />
                     </div>
                 </div>

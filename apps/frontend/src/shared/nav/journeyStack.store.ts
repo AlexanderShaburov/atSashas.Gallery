@@ -32,7 +32,8 @@ class JourneyStackStore {
                 phase: 'return',
             };
             this.emit();
-            return this.stack[topIndex];
+            // Return unconsumed ticket to use in logic
+            return top;
         }
         return this.pop();
     }

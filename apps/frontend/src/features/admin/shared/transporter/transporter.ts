@@ -6,8 +6,9 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 type DispatchFn = (ticket: JourneyTicket) => void;
-type ReturnFn = (ticketId: string, luggage: JumpResult) => void;
+type ReturnFn = (editor: EditorKind, luggage: JumpResult) => void;
 type ArrivalFn = (destination: EditorKind) => JourneyTicket | undefined;
+type PeekFn = () => JourneyTicket | undefined;
 
 const ROUTS: Record<EditorKind, string> = {
     stream: `/admin/streams`,
@@ -45,14 +46,11 @@ export function useReturnHome(): ReturnFn {
     const navigate = useNavigate();
 
     return useCallback(
-        (ticketId: string, luggage: JumpResult) => {
+        (editor: EditorKind, luggage: JumpResult) => {
             // Get ticket from the stack:
             const top = journeyStackStore.pickOrThrow();
             // Check ticket if meet to stack:
-            if (ticketId !== top.journeyId || top.phase !== 'return')
-                throw new Error(
-                    `Attempt to use wrong ticket ${ticketId} while expected ${top.journeyId}`,
-                );
+            if (editor !== top.destination.editor || top.phase !== 'return') return;
             // Check in luggage:
             journeyStackStore.checkInLuggage(top.journeyId, luggage);
             // jump:
@@ -64,15 +62,23 @@ export function useReturnHome(): ReturnFn {
 
 export function useArrival(): ArrivalFn {
     return useCallback((destination: EditorKind) => {
+        console.log(`[useArrival]: Called wit destination ${destination}`);
         const top = journeyStackStore.peek();
         if (!top) return undefined;
 
         const expected = currentLeg(top).editor;
+        console.log(`[useArrival]: expected arrival is: ${expected}`);
         if (expected !== destination)
             throw new Error(
                 `Arrival on unexpected destination ${destination} instead of ${expected}`,
             );
 
         return journeyStackStore.consumeLeg();
+    }, []);
+}
+
+export function usePeekTicket(): PeekFn {
+    return useCallback(() => {
+        return journeyStackStore.peek();
     }, []);
 }

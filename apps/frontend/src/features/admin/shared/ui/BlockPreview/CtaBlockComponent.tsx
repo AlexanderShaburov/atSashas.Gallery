@@ -1,12 +1,12 @@
 import { Block, BlockParent, CtaBlock } from '@/entities/block';
 import '@/features/admin/blocks/ui/BlockTemplates/block.templates.css';
 import { BlockHitEvent, Hit } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
-import { Dispatch, SetStateAction } from 'react';
 type Props = {
     item: CtaBlock;
     onHit: (hit: BlockHitEvent) => void;
     parent: BlockParent;
-    setValue: Dispatch<SetStateAction<Block | undefined>>;
+    setValue: (next: Block) => void;
+    readOnly?: boolean;
 };
 
 export function CtaBlockComponent({ item, onHit }: Props) {

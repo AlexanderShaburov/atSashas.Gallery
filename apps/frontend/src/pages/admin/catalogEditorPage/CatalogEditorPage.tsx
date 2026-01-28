@@ -1,7 +1,7 @@
 import '@/pages/admin/catalogEditorPage/CatalogEditorPage.css';
 
 import { GridItem } from '@/entities/grid';
-import { useEditorSession } from '@/features/admin/catalogEditor/editorSession/CatalogEditorSession.context';
+import { useEditorSession } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
 import SingleItemEditor from '@/features/admin/catalogEditor/ui/SingleItemEditor/SingleItemEditor';
 import ArtItemGrid from '@/features/admin/shared/ui/ArtItemGrid/ArtItemGrid';
 import { artItemToGridItem } from '@/features/admin/shared/ui/ArtItemGrid/utils';

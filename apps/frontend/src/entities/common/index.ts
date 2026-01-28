@@ -2,6 +2,7 @@ export type { ApiResponse } from './ApiResponse';
 export type { Availability, Dimensions, UnitName } from './dimensions';
 export type { EditorMode } from './editorMode';
 export type { EditorTarget } from './editorSession';
+export type { EntityLifecycle } from './lifecycle';
 export type { LangCode, Localized } from './locales';
 export type { CurrencyName, Money } from './money';
 export type { ISODate } from './primitives';

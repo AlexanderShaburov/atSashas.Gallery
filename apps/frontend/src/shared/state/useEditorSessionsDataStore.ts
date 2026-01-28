@@ -1,3 +1,5 @@
+// src/shared/state/useEditorSessionsDataStore.ts
+
 import type { EditorKey } from '@/shared/nav';
 import { useMemo, useSyncExternalStore } from 'react';
 import type { DraftSnapshot } from './editorSessionsData.store';

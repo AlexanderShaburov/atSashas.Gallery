@@ -1,4 +1,4 @@
-import { ArtItemForm } from '@/features/admin/catalogEditor/editorSession/editorTypes';
+import { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/editorTypes';
 
 export type FormErrors = Partial<{
     id: string;

@@ -1,4 +1,6 @@
-import { ISODate, Localized } from '@/entities/common';
+// src/entities/block/block.types.ts
+
+import { ISODate, Localized, EntityLifecycle } from '@/entities/common';
 
 //*************** Legacy ***************/
 
@@ -33,12 +35,11 @@ export const GALLERY_LAYOUTS = [
     'triptychHorizontal',
 ] as const;
 export type GalleryLayout = (typeof GALLERY_LAYOUTS)[number];
-export type BlockLifecycle = 'template' | 'draft' | 'saved';
 
 interface BlockBase {
     id: string;
     blockKind: BlockKind;
-    lifecycle: BlockLifecycle;
+    lifecycle: EntityLifecycle;
     isTemplate?: boolean;
     tags?: string[] | undefined;
     dateCreated: ISODate;

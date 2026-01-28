@@ -2,7 +2,7 @@
 
 import type {
     Block,
-    BlockEditorMode,
+    // BlockEditorMode,
     BlockEditorScreenMode,
     BlocksCollectionJSON,
     EditTarget,
@@ -10,72 +10,143 @@ import type {
 } from '@/entities/block';
 import type { UiErrorState } from '@/entities/common';
 import { GridItem } from '@/entities/grid';
-import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
-import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
-import { addNewBlock, getCollection, updateBlock } from '@/features/admin/blocks/api/blocksApi';
+import {
+    addNewBlock,
+    deleteBlock,
+    getCollection,
+    updateBlock,
+} from '@/features/admin/blocks/api/blocksApi';
 import { normalizeBlock } from '@/features/admin/blocks/blockEditorSession';
 import type {
     BlockEditorSession,
     ScreenModeStack,
-} from '@/features/admin/blocks/blockEditorSession/block-editor.types';
+} from '@/features/admin/blocks/blockEditorSession/Block-editor.types';
 import { BlockEditorCtx } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { validateBlockForm } from '@/features/admin/blocks/utils';
+import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import {
+    useArrival,
+    useDispatch,
+    // useDispatch,
+    usePeekTicket,
+    useReturnHome,
+} from '@/features/admin/shared/transporter/transporter';
 import { deepEqual } from '@/shared/lib/checkers/checkers';
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { EditorKey } from '@/shared/nav';
+import {
+    editSessionsDataStore,
+    unsavedChangesStore,
+    useSessionDataStore,
+    useUnsavedChanges,
+} from '@/shared/state';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { hitToTarget, instantiateFromTemplate } from './blockEditorSession.utils';
-
+import { resolveBlockBootstrapData, validateBlockReturnBootstrap } from './bootstrap';
+import {
+    JourneyTicket,
+    ReturnAddress,
+    ReturnCommand,
+    ToAddress,
+} from '@/shared/nav/journeyStack.types';
+import { generateId } from '@/shared/lib/id/generateId';
+import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 type ProviderProps = { children: ReactNode };
+type SaveResult = { ok: true; id: string } | { ok: false };
 
 export function BlockEditorSessionProvider({ children }: ProviderProps) {
     // Global context
     const gCtxt: EditorWorkspaceContextValue = useEditorWorkspace();
     //*******************************************************/
     // Core state:
-    // 1. Editor mode, used to decide if show templates(????)
-    const [mode, setMode] = useState<BlockEditorMode>('create');
+    const [selectedBlockId, setSelectedBlockId] = useState<string | undefined>(undefined);
     // 2. Blocks collection
     const [collection, setCollection] = useState<BlocksCollectionJSON | undefined>(undefined);
-    // 3. Selected block
-    const [selectedBlock, setSelectedBlock] = useState<Block | undefined>(undefined);
-    // 4. Editor form values:
-    const [values, setValues] = useState<Block | undefined>(undefined);
+    // 4. Editor block draft:
     // 5. Editor mode, used to decide if show grid or single block editor:
     const [modeStack, setModeStack] = useState<BlockEditorScreenMode[]>(['select']);
     // 6. Target used to choose if input has to shown on place of text in inlineEditor
+    // Editing block element click on that called handler
     const [currentTarget, setCurrentTarget] = useState<EditTarget | undefined>(undefined);
-    // 7. Art catalog:
+    // 7. Journey state:
+    const [isJourney, setIsJourney] = useState(false);
     //*******************************************************/
     // UI / derived state
-    // 8
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(false);
     // editorIsReady is to identify if now a block is under editing!!!
-    const [editorIsReady, setEditorIsReady] = useState(false);
+    // LEGACY !!!!!!!!!!!!!
+    // const [editorIsReady, setEditorIsReady] = useState(false);
     const [pendingSelection, setPendingSelection] = useState<BlockHitEvent | undefined>(undefined);
-
+    // Errors processing preparation, unimplemented.
     const [uiError, setUiError] = useState<UiErrorState | undefined>(undefined);
-
-    const snapshot = useRef<Block | undefined>(undefined);
-    // const valuesRef = useRef<Block | undefined>(values);
+    // to be replaced with external stor!!!!
     //*******************************************************/
 
-    // !!!!!!!!!!!!! TRACERS !!!!!!!!!!!!!!
+    // **************** EDITOR DATA EXTRACTION (EXTERNAL STORE) ****************
+
+    // Read saved editor values from the store:
+    const key: EditorKey | undefined = selectedBlockId
+        ? { kind: 'block', id: selectedBlockId }
+        : undefined;
+    const sessionData = useSessionDataStore<Block>(key);
+    const { storeData, setDraft, commit, clear } = sessionData;
+    const draft = storeData?.draft;
+    const snapshot = storeData?.snapshot;
+
+    // external store tracer:
     useEffect(() => {
-        console.log(`[pendingSelection TRACER]: state changed to:`);
-        console.dir(pendingSelection);
-    }, [pendingSelection]);
-    // !!!!!!!!!!!!! TRACERS END !!!!!!!!!!!!!!
+        console.log(`[externalStore tracer]: draft got changed:`);
+        console.dir(draft);
+    }, [draft]);
+
+    // ************* NAVIGATION HOOKS *************
+
+    // read ticket getter
+    const arrival = useArrival();
+    const dispatch = useDispatch();
+    const returnHome = useReturnHome();
+    const peekTicket = usePeekTicket();
+    //
+
+    // ************* STATE LOGIC *************
 
     // ************** LOGICS **************
 
-    const isValid = useMemo(() => (values ? validateBlockForm(values) : false), [values]);
+    const isValid = useMemo(() => (draft ? validateBlockForm(draft) : false), [draft]);
+
+    const isSelected = useMemo(
+        () => modeStack[modeStack.length - 1] !== 'select' && !!draft?.id,
+        [modeStack, draft],
+    );
+
+    const scope: EditorKey | null = useMemo(() => {
+        if (!isSelected || !draft) return null;
+        return { kind: 'block', id: draft.id };
+    }, [isSelected, draft]);
+
+    const dirtyStoreState = useUnsavedChanges(scope ?? { kind: 'block', id: '__none__' });
 
     const isDirty = useMemo(() => {
-        if (!values) return false;
-        if (!selectedBlock) return true;
-        return !deepEqual(snapshot.current, values);
-    }, [values, selectedBlock]);
+        if (!draft) return false;
+        return !deepEqual(snapshot, draft);
+    }, [draft, snapshot]);
+
+    // Synchronize local isDirty and unsavedChangesStore:
+    useEffect(() => {
+        if (!scope) return;
+        if (isDirty !== dirtyStoreState) {
+            unsavedChangesStore.setDirty(scope, isDirty);
+        }
+    }, [scope, isDirty, dirtyStoreState]);
+
+    // unsavedChangesStore cleanUp:
+    useEffect(() => {
+        if (!scope) return;
+
+        return () => unsavedChangesStore.clear(scope);
+    }, [scope]);
 
     const canSave = useMemo(() => !saving && isDirty && isValid, [saving, isDirty, isValid]);
 
@@ -99,13 +170,16 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
     // ***** Collections preload *****
     const refreshCollection = useCallback(async (): Promise<BlocksCollectionJSON> => {
+        console.log(`[refreshCollection]`);
         try {
             setLoading(true);
 
             // Download and set collections list
             const cl = await getCollection();
-            console.dir(`[BlockEditorSession.context][refreshCollection] cl: ${cl}`);
+            console.log(`[BlockEditorSession.context][refreshCollection] cl:`);
+            console.dir(cl);
             setCollection(cl);
+            gCtxt.currentBlocksCollection = cl;
 
             return cl;
         } catch (e) {
@@ -122,7 +196,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
+    // Inline editable text helper:
     const isEditingTarget = useCallback(
         (t: EditTarget) => {
             if (!currentTarget || !t) return false;
@@ -138,113 +212,275 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         [currentTarget],
     );
 
-    // initial load
-    useEffect(() => {
-        (async () => {
-            await refreshCollection();
-        })();
-    }, [refreshCollection]);
-
     // Reset session helper
     const resetSession = useCallback(() => {
-        setSelectedBlock(undefined);
-        setValues(undefined);
-        setEditorIsReady(false);
-        snapshot.current = undefined;
-        setMode('create');
-        pushMode('select');
+        console.log(`[resetSession]: Called`);
+        setSelectedBlockId(undefined);
+        setCurrentTarget(undefined);
+        setPendingSelection(undefined);
+        setModeStack(['select']);
     }, []);
 
-    // ------------------------------------
-    // *********** INIT SESSION ***********
-    // ------------------------------------
+    // *********** MOUNT BOOTSTRAP ***********
 
     useEffect(() => {
+        let cl = undefined;
         (async () => {
             try {
                 setLoading(true);
                 console.log('[INIT SESSION]: started');
                 // Refresh collection state
-                const cl = await refreshCollection();
-
-                if (!cl) throw new Error('Collection is empty');
-
-                // Check if workspace has block id selected
-                // If not reset Editor session to initial empty values
-                if (!gCtxt.currentBlockId) {
-                    resetSession();
-                    return;
-                }
-
-                // If block id selected -> find block in collection and set its data to form values
-
-                const bl = cl.blocks[gCtxt.currentBlockId];
-
-                if (!bl) {
-                    setUiError({
-                        title: 'Block not found',
-                        message:
-                            `Block "${gCtxt.currentBlockId}" was not found. ` +
-                            `The editor will be opened in create mode.`,
-                        onConfirm: () => {
-                            gCtxt.setBlock(undefined);
-                            resetSession();
-                        },
-                    });
-                    resetSession();
-                    return;
-                }
-
-                setSelectedBlock(bl);
-                setValues(normalizeBlock(bl));
-                setMode('edit');
+                cl = await refreshCollection();
+                setCollection(cl);
             } catch (e) {
-                console.error(`BlockEditorSession error: ${e}`);
+                throw new Error(`Error loading blocks collection ${e}`);
             } finally {
                 setLoading(false);
             }
+            const ticket = arrival('block');
+            if (!ticket) {
+                resetSession();
+                return;
+            }
+
+            if (!cl) return;
+
+            switch (ticket.phase) {
+                case 'outbound':
+                    setIsJourney(true);
+                    switch (ticket.destination.mode) {
+                        case 'select': {
+                            resetSession();
+                            break;
+                        }
+                        case 'edit': {
+                            const id = ticket.destination.objectId;
+
+                            if (!id)
+                                throw new Error(
+                                    'Outbound edit ticket missing destination.objectId',
+                                );
+                            setSelectedBlockId(id);
+                            const bl = cl.blocks[id];
+                            if (!bl) throw new Error(`Block not found: ${id}`);
+                            const key: EditorKey = { kind: 'block', id };
+                            editSessionsDataStore.saveDraft(key, bl);
+                            editSessionsDataStore.setSnapshot(key, bl);
+
+                            setModeStack(['select', 'edit']);
+                            return;
+                        }
+                    }
+                    break;
+                case 'return': {
+                    const tempId = ticket.returnTo.objectId;
+                    const bootstrapDataSet = await resolveBlockBootstrapData(tempId);
+                    const v = validateBlockReturnBootstrap(ticket, bootstrapDataSet);
+                    const id = v.blockId;
+                    if (!cl.blocks)
+                        throw new Error(`[Bootstrap]: Collection.blocks doesn't exist.`);
+                    const bl = cl.blocks[id];
+                    if (!bl)
+                        throw new Error(
+                            `[Bootstrap]: There is not block wit id: ${id} in current collection`,
+                        );
+                    if (id && bl) {
+                        const key: EditorKey = { kind: 'block', id };
+                        setDraft(normalizeBlock(bl));
+                        editSessionsDataStore.saveDraft(key, bl);
+                        editSessionsDataStore.setSnapshot(key, bl);
+                    }
+                    return;
+                }
+            }
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refreshCollection]);
+    }, []);
+    // *********** MOUNT BOOTSTRAP END ***********
 
-    const save = useCallback(async () => {
-        if (!values || !canSave) return;
+    // ************ UI handlers *************
+
+    // -------- SAVE procedure ----------
+
+    const save = useCallback(async (): Promise<SaveResult> => {
+        console.log(`[save]: called and curren draft is:`);
+        console.dir(draft);
+        console.log(`[save]: canSave is ${canSave}:`);
+        if (!draft) return { ok: false };
+        let saved: Block | null = null;
+
         setSaving(true);
         try {
-            if (!selectedBlock && !!values) {
-                addNewBlock(values);
+            if (saved) {
+                console.log(`[save]: called and curren draft is:`);
+                console.dir(draft);
             }
-            if (!!selectedBlock && !!values) {
-                updateBlock(values);
+            switch (draft?.lifecycle) {
+                case 'template': {
+                    throw new Error(`Attempt to save template as block`);
+                    break;
+                }
+                case 'draft': {
+                    saved = await addNewBlock(draft);
+                    // setDraft(saved);
+                    editSessionsDataStore.clear({ kind: 'block', id: draft.id });
+                    setSelectedBlockId(saved.id);
+                    stackNewDraft(saved);
+                    break;
+                }
+                case 'saved': {
+                    await updateBlock(draft);
+                    break;
+                }
+                default:
+                    console.error(
+                        `Unexpected draft.lifecycle or undefined draft while saving ${draft.lifecycle}`,
+                    );
             }
-
-            await refreshCollection();
-            pushMode('select');
-            setSelectedBlock(undefined);
-            setValues(undefined);
-            snapshot.current = undefined;
-        } catch (e) {
-            console.error('Failed to save block:', e);
+            commit();
+        } catch (err) {
+            console.error(`Failed to save block: ${err}`);
+            return { ok: false };
         } finally {
+            await refreshCollection();
             setSaving(false);
         }
-    }, [values, canSave, refreshCollection, selectedBlock]);
+        if (saved) console.log(`[save]: block saved and new id received: ${saved.id}`);
+        if (!saved) console.log(`[save]: block saved and id stay: ${draft.id}`);
+        return { ok: true, id: saved ? saved.id : draft.id };
+    }, [draft, canSave, refreshCollection, commit]);
 
+    // ******** After save processing ********
+
+    const finalizeAfterSave = useCallback(
+        (savedId: string) => {
+            console.log(`[finalizeAfterSave]: called`);
+            const ticket = peekTicket();
+            console.log(`[finalizeAfterSave]: ticket recalled:`);
+            console.dir(ticket);
+            if (ticket?.phase === 'return' && ticket.destination.editor === 'block') {
+                console.log(
+                    `[finalizeAfterSave]: taken decision to return home with blockId: ${savedId}`,
+                );
+                returnHome('block', { ok: true, id: savedId });
+            }
+            resetSession();
+        },
+        [peekTicket, returnHome, resetSession],
+    );
+    // *********** TOOLBAR HANDLERS ***********
+
+    // ----------- APPLY ------------
+    // apply button handler
+    const onApply = useCallback(() => {
+        void (async () => {
+            if (!isJourney) return;
+            const r = await save();
+            if (r.ok) finalizeAfterSave(r.id);
+        })();
+    }, [finalizeAfterSave, isJourney, save]);
+
+    // ----------- SAVE ----------
+    // save button handler
+    const onSaveClick = useCallback(() => {
+        void (async () => {
+            const r = await save();
+            if (r.ok) finalizeAfterSave(r.id);
+        })();
+    }, [save, finalizeAfterSave]);
+
+    // ---------- EXIT ---------
+    // exit button handler
     const exit = useCallback(() => {
         if (saving) return;
         if (isDirty && !confirm('Discard unsaved block changes?')) return;
         resetSession();
     }, [saving, isDirty, resetSession]);
 
+    // ----------- DELETE -----------
+    // delete button handler
+    const onDelete = useCallback(() => {
+        void (async () => {
+            console.log(`onDelete called for block ${draft?.id}`);
+            if (!draft || !draft.id || draft.lifecycle !== 'saved') return;
+            if (confirm('Delete block?')) {
+                await deleteBlock(draft.id);
+                clear();
+                refreshCollection();
+                resetSession();
+            }
+        })();
+    }, [draft, refreshCollection, resetSession, clear]);
+
+    const updateTags = useCallback(
+        (next: string[]) => {
+            if (!draft) return;
+            const normalized = next.map((t) => t.trim()).filter(Boolean);
+
+            const seen = new Set<string>();
+            const uniq: string[] = [];
+            for (const t of normalized) {
+                const key = t.toLowerCase();
+                if (seen.has(key)) continue;
+                seen.add(key);
+                uniq.push(t);
+            }
+            setDraft({ ...draft, tags: uniq });
+        },
+        [setDraft, draft],
+    );
+
+    // ***************** TRAVEL PART ****************
+    const jumpToBlockEditor = useCallback(
+        (to: ToAddress, command: ReturnCommand) => {
+            if (!selectedBlockId) return;
+
+            const returnTo: ReturnAddress = {
+                editor: 'stream',
+                mode: 'edit',
+                objectId: selectedBlockId,
+            };
+
+            const ticket: JourneyTicket = {
+                journeyId: generateId('travel'),
+
+                destination: to,
+                returnTo,
+
+                phase: 'outbound',
+                nonce: createNonce(),
+                createdAt: nowIso(),
+
+                returnEffect: command,
+            };
+            dispatch(ticket);
+        },
+        [dispatch, selectedBlockId],
+    );
+
+    // ----------- EDIT handlers -----------
+    // edit mode onBlock click handler
     const handleEditHit = useCallback(
         (hit: BlockHitEvent) => {
             console.log(`[handleEditHit]: edit mode hit detected`);
             console.dir(hit);
-
             if (currentStack.screenMode !== 'edit') return;
             const tg = hitToTarget(hit);
 
             if (tg.blockKind === 'gallery' && tg.kind == 'image') {
+                /// CONSTRUCTION YARD:
+                const command: ReturnCommand = {
+                    kind: 'blockUpdateArt',
+                    blockId: hit.block.id,
+                    pendingSelection: hit,
+                };
+                const to: ToAddress = {
+                    editor: 'catalog',
+                    mode; ''
+                };
+
+
+
                 setPendingSelection(hit);
                 pushMode('pickArt');
                 console.log(`[handleEditHit]: pendingSelection set to hit`);
@@ -257,43 +493,64 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         },
         [currentStack.screenMode],
     );
+    // Direct stack save for new block until hooks are unavailable
+    const stackNewDraft = (b: Block): void => {
+        const key: EditorKey = { kind: 'block', id: b.id };
+        editSessionsDataStore.saveDraft<Block>(key, b);
+        editSessionsDataStore.commit<Block>(key);
+    };
+    // select mode onBlock click handler
     const handleSelectHit = useCallback((hit: BlockHitEvent) => {
+        console.log(`[BlockEditorSessionProvider][handleSelectHit]: Called`);
         switch (hit.block.lifecycle) {
-            case 'draft':
+            case 'draft': {
+                console.log(`[BlockEditorSessionProvider][handleSelectHit]: Called`);
                 console.warn(
                     `[handleSelectHit]: Block ${hit.block.id} has inappropriate lifecycle type 'draft'!`,
                 );
-                setValues(hit.block);
-                setSelectedBlock(undefined);
                 break;
-            case 'saved':
-                setSelectedBlock(hit.block);
-                setValues(normalizeBlock(hit.block));
+            }
+            case 'saved': {
+                console.log(
+                    `[BlockEditorSessionProvider][handleSelectHit]: Saved lifecycle detected`,
+                );
+                setSelectedBlockId(hit.block.id);
+                const v = normalizeBlock(hit.block);
+                stackNewDraft(v);
+                console.log(`[BlockEditorSessionProvider][handleSelectHit]: commit called`);
                 break;
-            case 'template':
-                setSelectedBlock(undefined);
-                setValues(instantiateFromTemplate(hit.block));
+            }
+            case 'template': {
+                console.log(
+                    `[BlockEditorSessionProvider][handleSelectHit]: template branch selected`,
+                );
+                const draft = instantiateFromTemplate(hit.block);
+                const v = normalizeBlock(draft);
+                setSelectedBlockId(v.id);
+                v.lifecycle = 'draft';
+                stackNewDraft(v);
                 break;
+            }
         }
-        pushMode('edit');
+        setModeStack(['select', 'edit']);
     }, []);
 
+    // common click handler
     const onHit = useCallback(
         (hit: BlockHitEvent) => {
-            console.log(`[BlockEditorSessionProvider]: edit mode hit detected`);
-            console.dir(hit);
-
             if (currentStack.screenMode === 'select') handleSelectHit(hit);
             else handleEditHit(hit);
         },
         [currentStack.screenMode, handleEditHit, handleSelectHit],
     );
 
+    // hit handler helper
     const unHit = useCallback(() => {
         console.log('[unHit]: Called.');
         setCurrentTarget(undefined);
     }, []);
 
+    // Selected (journey-like) ArtItem to editing block to pos:
     const setSelectedArtItem = useCallback(
         (item: GridItem | undefined) => {
             console.log(`[setSelectedArtItem]: Called wit item:`);
@@ -344,7 +601,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 }
                 const nextBlock = { ...pendingSelection.block, items: nextItems };
 
-                setValues(normalizeBlock(nextBlock));
+                setDraft(normalizeBlock(nextBlock));
                 console.log(`[setSelectedArtItem]: Updated block set to:`);
                 console.dir(nextBlock);
                 pushMode('edit');
@@ -354,82 +611,55 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 throw new Error(`[pendingSelected]: Received data doesn't match expected`);
             }
         },
-        [pendingSelection, gCtxt.currentArtCatalog, unHit],
+        [pendingSelection, gCtxt.currentArtCatalog, unHit, setDraft],
     );
-
-    const onDelete = useCallback(() => {
-        console.log(`onDelete called for block ${selectedBlock}`);
-    }, [selectedBlock]);
-
-    useEffect(() => {
-        console.log(`[onHit]: currentTarget set to: ${currentTarget}`);
-        console.dir(currentTarget);
-    }, [currentTarget]);
-    const updateTags = useCallback((next: string[]) => {
-        const normalized = next.map((t) => t.trim()).filter(Boolean);
-
-        const seen = new Set<string>();
-        const uniq: string[] = [];
-        for (const t of normalized) {
-            const key = t.toLowerCase();
-            if (seen.has(key)) continue;
-            seen.add(key);
-            uniq.push(t);
-        }
-        setValues((prev) => {
-            if (!prev) return prev;
-            return { ...prev, tags: uniq };
-        });
-    }, []);
 
     const value: BlockEditorSession = useMemo(
         () => ({
-            selectedBlock,
-            mode,
-            values,
+            draft,
             collection,
-            setValues,
-            setMode,
+            setDraft,
             currentStack,
             setCollection,
             setSelectedArtItem,
-            editorIsReady,
             isDirty,
             isValid,
             canSave,
             loading,
             saving,
             uiError,
-            save,
+            isJourney,
+            onSaveClick,
             exit,
             onHit,
             unHit,
             onDelete,
             updateTags,
             isEditingTarget,
+            onApply,
         }),
         [
-            selectedBlock,
-            mode,
-            values,
+            draft,
             collection,
-            editorIsReady,
             isDirty,
             isValid,
             canSave,
             loading,
             saving,
             uiError,
+            isJourney,
             setCollection,
             setSelectedArtItem,
             currentStack,
-            save,
+            onSaveClick,
             exit,
             onHit,
             unHit,
             onDelete,
             updateTags,
             isEditingTarget,
+            onApply,
+            setDraft,
         ],
     );
 

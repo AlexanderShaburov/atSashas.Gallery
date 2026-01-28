@@ -4,6 +4,7 @@ import {
     StreamScreenMode,
     StreamScreenModeStack,
 } from '@/entities/stream';
+import { StreamMetadata } from '@/entities/stream/streamApi.types';
 import { ThreeDotCommand } from '@/shared/ui/ThreeDotMenu/threeDot.types';
 
 export type StreamEditorSession = {
@@ -25,4 +26,6 @@ export type StreamEditorSession = {
     updateTags: (next: string[]) => void;
     threeDotHandler: (command: ThreeDotCommand) => void;
     editBlock: (id: string) => void;
+    editMetadata: () => void;
+    commitMetaEditor: (req: StreamMetadata) => Promise<void>;
 };

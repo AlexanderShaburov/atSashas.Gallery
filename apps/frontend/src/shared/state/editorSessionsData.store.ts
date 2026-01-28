@@ -1,3 +1,5 @@
+//src/shared/state/editorSessionsData.store.ts
+
 import type { EditorKey, EditorKind } from '@/shared/nav';
 import { BaseStore } from './baseStore';
 
@@ -19,17 +21,21 @@ function keyToString(key: EditorKey): string {
 class EditSessionsDataStore extends BaseStore {
     private sessions = new Map<string, AnyEntry>();
 
-    get<T>(key: EditorKey): DraftSnapshot<T> | undefined {
+    get<T>(key: EditorKey | undefined): DraftSnapshot<T> | undefined {
+        if (!key) return undefined;
         const entry = this.sessions.get(keyToString(key));
         return entry?.data as DraftSnapshot<T> | undefined;
     }
 
     ensure<T>(key: EditorKey, initial: DraftSnapshot<T>): DraftSnapshot<T> {
+        console.log(`[EditSessionsDataStore]: Called`);
         const k = keyToString(key);
+        console.log(`[EditSessionsDataStore]: key assigned as ${key}`);
         const existing = this.sessions.get(k);
         if (existing) return existing.data as DraftSnapshot<T>;
 
         this.sessions.set(k, { key, data: initial as DraftSnapshot<unknown> });
+        console.log(`[EditSessionsDataStore]: new entry set`);
         this.emit();
         return initial;
     }
@@ -39,48 +45,46 @@ class EditSessionsDataStore extends BaseStore {
         const k = keyToString(key);
         console.log(`[EditSessionsDataStore][saveDraft]: key calculated as ${k}`);
         const entry = this.sessions.get(k);
-        if (!entry) return;
-
-        entry.data = {
-            ...(entry.data as DraftSnapshot<T>),
-            draft,
-            updatedAt: new Date().toISOString(),
-        } as DraftSnapshot<unknown>;
-        console.log(`[EditSessionsDataStore][saveDraft]: current draftSnapshot is:`);
-        console.dir(this.sessions.get(k));
+        const prev = entry?.data as DraftSnapshot<T> | undefined;
+        const next: DraftSnapshot<T> = prev
+            ? { ...prev, draft, updatedAt: new Date().toISOString() }
+            : {
+                  snapshot: draft,
+                  draft,
+                  updatedAt: new Date().toISOString(),
+              };
+        this.sessions.set(k, { key, data: next as DraftSnapshot<T> });
         this.emit();
     }
     setSnapshot<T>(key: EditorKey, snapshot: T): void {
         const k = keyToString(key);
-        const entry = this.sessions.get(k);
-        if (!entry) return;
 
-        entry.data = {
+        const next: DraftSnapshot<T> = {
             snapshot,
-            draft: snapshot, //  snapshot == draft
+            draft: snapshot,
             updatedAt: new Date().toISOString(),
-        } as DraftSnapshot<unknown>;
-        console.log(`[EditSessionsDataStore][setSnapshot]: setSnapshot called`);
-        console.log(`[EditSessionsDataStore][setSnapshot]: current draftSnapshot is:`);
-        console.dir(this.sessions.get(k));
+        };
 
+        this.sessions.set(k, { key, data: next as DraftSnapshot<unknown> });
         this.emit();
     }
+
     commit<T>(key: EditorKey): void {
         const k = keyToString(key);
         const entry = this.sessions.get(k);
+
         if (!entry) return;
 
         const prev = entry.data as DraftSnapshot<T>;
-        entry.data = {
+        const next: DraftSnapshot<T> = {
             snapshot: prev.draft,
             draft: prev.draft,
             updatedAt: new Date().toISOString(),
-        } as DraftSnapshot<unknown>;
+        };
 
+        this.sessions.set(k, { key, data: next as DraftSnapshot<unknown> });
         this.emit();
     }
-
     clear(key: EditorKey): void {
         const k = keyToString(key);
         if (!this.sessions.has(k)) return;

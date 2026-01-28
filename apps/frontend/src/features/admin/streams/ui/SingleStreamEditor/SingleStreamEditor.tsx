@@ -22,11 +22,12 @@ type Props = {
     toolbarProps: {
         canSave: boolean;
         saving: boolean;
-        addBlock?: (pos: number) => void;
+        addBlock?: () => void;
         save: () => void;
         exit: () => void;
         onDelete: () => void;
         onChangeTags?: (tags: string[]) => void;
+        onEditMetadata?: () => void;
     };
 };
 
@@ -38,6 +39,8 @@ export function SingleStreamEditor({ stream, threeDotMenu, editBlock, toolbarPro
         buildOwner: ({ streamId, blockId }) => ({ kind: 'stream', streamId, blockId }),
         onCommand: threeDotMenu,
     });
+    console.log(`[SingleStreamEditor]: current stream is:`);
+    console.dir(stream);
 
     const items: ThreeDotMenuItem[] = useMemo(
         () => [
@@ -45,14 +48,14 @@ export function SingleStreamEditor({ stream, threeDotMenu, editBlock, toolbarPro
             { key: 'up', label: 'Shift up', action: { kind: 'shift', dir: 'up' } },
             { key: 'edit', label: 'Edit block', action: { kind: 'editBlock' } },
             {
-                key: 'insAfter',
-                label: 'Insert after',
-                action: { kind: 'insertBlock', at: 'after' },
-            },
-            {
                 key: 'insBefore',
                 label: 'Insert before',
                 action: { kind: 'insertBlock', at: 'before' },
+            },
+            {
+                key: 'insAfter',
+                label: 'Insert after',
+                action: { kind: 'insertBlock', at: 'after' },
             },
             { key: 'replace', label: 'Replace block', action: { kind: 'replaceBlock' } },
             { key: 'del', label: 'Delete block', action: { kind: 'deleteBlock' }, danger: true },
@@ -125,6 +128,7 @@ export function SingleStreamEditor({ stream, threeDotMenu, editBlock, toolbarPro
                                     block={block}
                                     onHit={(hit) => editBlock(hit.block.id)}
                                     parent="streamEditor"
+                                    readOnly={true}
                                 />
                             </BlockWrapper>
                         </div>
@@ -143,7 +147,7 @@ export function SingleStreamEditor({ stream, threeDotMenu, editBlock, toolbarPro
 
             <div className="set__toolbar">
                 <SingleEditorToolbar
-                    tools={['delButton', 'tags', 'addBlock', 'exit', 'save']}
+                    tools={['delButton', 'tags', 'addBlock', 'editMeta', 'exit', 'save']}
                     ctx={toolbarProps}
                 />
             </div>

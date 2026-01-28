@@ -3,6 +3,7 @@ import { StreamData } from './stream.types';
 export type StreamScreenMode =
     | { kind: 'select' }
     | { kind: 'edit' }
+    | { kind: 'meta' }
     | { kind: 'reorder' }
     | { kind: 'confirmDelete'; at: number }
     | { kind: 'error'; message: string; canRetry: boolean };

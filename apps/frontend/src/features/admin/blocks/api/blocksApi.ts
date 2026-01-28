@@ -45,7 +45,7 @@ export async function deleteCollection(collection: BlocksCollectionJSON) {
         });
 
         if (!response.ok) {
-            console.error('Failed to delete collection file: ' < collection.collectionName);
+            console.error('Failed to delete collection file: ' + collection.collectionName);
         }
 
         return true;
@@ -55,7 +55,7 @@ export async function deleteCollection(collection: BlocksCollectionJSON) {
     }
 }
 
-export async function addNewBlock(block: Block) {
+export async function addNewBlock(block: Block): Promise<Block> {
     console.log(`[addNewBlock]: Called`);
     const res = await fetch(BLOCK_VAULT, {
         method: 'POST',
@@ -65,10 +65,10 @@ export async function addNewBlock(block: Block) {
         body: JSON.stringify(block),
     });
     if (!res.ok) throw new Error(`Add new block error: ${res.status}`);
-    return res.status;
+    return await res.json();
 }
 
-export async function updateBlock(block: Block) {
+export async function updateBlock(block: Block): Promise<Block> {
     console.log('[updateBlock]: Called');
     const URL = `${BLOCK_VAULT}/${block.id}`;
     const res = await fetch(URL, {
@@ -77,5 +77,16 @@ export async function updateBlock(block: Block) {
         body: JSON.stringify(block),
     });
     if (!res.ok) throw new Error(`Update block error: ${res.status}`);
+    return await res.json();
+}
+
+export async function deleteBlock(id: string) {
+    console.log(`[API][deleteBlock] block with id ${id} be deleted immediately`);
+    const URL = `${BLOCK_VAULT}/${id}`;
+    const res = await fetch(URL, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`Delete block error: ${res.status}`);
     return res.status;
 }

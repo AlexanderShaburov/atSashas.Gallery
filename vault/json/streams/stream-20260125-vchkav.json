@@ -1,0 +1,15 @@
+{
+  "streamId": "stream-20260125-vchkav",
+  "title": "pps",
+  "status": "draft",
+  "tags": [],
+  "description": "",
+  "version": 4,
+  "createdAt": "2026-01-25T15:51:59.957472+00:00",
+  "updatedAt": "2026-01-27T18:18:24.179858+00:00",
+  "blockIds": [
+    "block-gallery-triptychleft-05cb0d6f",
+    "block-gallery-single-6a44f3ec",
+    "block-gallery-single-466e6378"
+  ]
+}
