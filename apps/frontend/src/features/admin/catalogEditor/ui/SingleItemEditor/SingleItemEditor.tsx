@@ -11,13 +11,6 @@ export default function SingleItemEditor() {
         ...useEditorSession(),
     };
 
-    // TODO:
-    // When Blocks and Streams are implemented:
-    // - check real dependencies
-    // - prevent deletion if item is part of locked or published stream
-    // - implement placeholder item for removed artworks
-    // - update blocks by replacing removed item with placeholder token
-
     async function deleteFromCatalog() {
         if (!thumb?.id) return;
 

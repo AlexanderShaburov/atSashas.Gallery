@@ -1,6 +1,6 @@
 // src/features/admin/blocks/blockEditorSession/blockEditorSession.utils.tsx
 
-import { Block, EditTarget } from '@/entities/block';
+import { Block, EditTarget, ItemPosition } from '@/entities/block';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 import { generateId } from '@/shared/lib/id/generateId';
 
@@ -100,4 +100,8 @@ export const instantiateFromTemplate = (block: Block): Block => {
         id: generateId('block'),
         dateCreated: block.dateCreated ?? new Date().toISOString(),
     };
+};
+export const findArtItemByPos = (e: BlockHitEvent, pos: ItemPosition): number | undefined => {
+    if (e.block.blockKind !== 'gallery') return;
+    return e.block.items.findIndex((it) => it.position === pos);
 };

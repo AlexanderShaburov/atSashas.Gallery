@@ -1,6 +1,6 @@
 // src/entities/block/block.types.ts
 
-import { ISODate, Localized, EntityLifecycle } from '@/entities/common';
+import { EntityLifecycle, ISODate, Localized } from '@/entities/common';
 
 //*************** Legacy ***************/
 
@@ -35,6 +35,15 @@ export const GALLERY_LAYOUTS = [
     'triptychHorizontal',
 ] as const;
 export type GalleryLayout = (typeof GALLERY_LAYOUTS)[number];
+
+export const LAYOUT_SCHEME = {
+    single: ['Center'],
+    pairHorizontal: ['Left', 'Right'],
+    pairVertical: ['Up', 'Bottom'],
+    triptychHorizontal: ['Left', 'Center', 'Right'],
+    triptychLeft: ['LBC', 'LUC', 'Right'],
+    triptychRight: ['Left', 'RUC', 'RBC'],
+} as const satisfies Record<GalleryLayout, readonly ItemPosition[]>;
 
 interface BlockBase {
     id: string;

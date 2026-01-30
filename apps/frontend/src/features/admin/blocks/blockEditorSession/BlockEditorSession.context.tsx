@@ -42,16 +42,13 @@ import {
     useUnsavedChanges,
 } from '@/shared/state';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { hitToTarget, instantiateFromTemplate } from './blockEditorSession.utils';
-import { resolveBlockBootstrapData, validateBlockReturnBootstrap } from './bootstrap';
+import { printoutTicket } from './BlockEditorSession.travel';
+import { findArtItemByPos, hitToTarget, instantiateFromTemplate } from './blockEditorSession.utils';
+import { resolveBlockBootstrapData } from './bootstrap';
 import {
-    JourneyTicket,
-    ReturnAddress,
-    ReturnCommand,
-    ToAddress,
-} from '@/shared/nav/journeyStack.types';
-import { generateId } from '@/shared/lib/id/generateId';
-import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
+    isBlockReturnCommand,
+    validateBlockReturnBootstrapInsertArt,
+} from './bootstrap/blockEditorSession.bootstrap.validate';
 type ProviderProps = { children: ReactNode };
 type SaveResult = { ok: true; id: string } | { ok: false };
 
@@ -94,12 +91,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     const { storeData, setDraft, commit, clear } = sessionData;
     const draft = storeData?.draft;
     const snapshot = storeData?.snapshot;
-
-    // external store tracer:
-    useEffect(() => {
-        console.log(`[externalStore tracer]: draft got changed:`);
-        console.dir(draft);
-    }, [draft]);
 
     // ************* NAVIGATION HOOKS *************
 
@@ -261,11 +252,11 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                                     'Outbound edit ticket missing destination.objectId',
                                 );
                             setSelectedBlockId(id);
-                            const bl = cl.blocks[id];
-                            if (!bl) throw new Error(`Block not found: ${id}`);
+                            const block = cl.blocks[id];
+                            if (!block) throw new Error(`Block not found: ${id}`);
                             const key: EditorKey = { kind: 'block', id };
-                            editSessionsDataStore.saveDraft(key, bl);
-                            editSessionsDataStore.setSnapshot(key, bl);
+                            editSessionsDataStore.saveDraft(key, block);
+                            editSessionsDataStore.setSnapshot(key, block);
 
                             setModeStack(['select', 'edit']);
                             return;
@@ -273,24 +264,73 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                     }
                     break;
                 case 'return': {
+                    // 0) Resolve bootstrap dataset (draft+snapshot) saved by the outbound editor
                     const tempId = ticket.returnTo.objectId;
                     const bootstrapDataSet = await resolveBlockBootstrapData(tempId);
-                    const v = validateBlockReturnBootstrap(ticket, bootstrapDataSet);
-                    const id = v.blockId;
-                    if (!cl.blocks)
-                        throw new Error(`[Bootstrap]: Collection.blocks doesn't exist.`);
-                    const bl = cl.blocks[id];
-                    if (!bl)
+
+                    /**
+                     * IMPORTANT:
+                     * - Bootstrap MUST NOT modify the block.
+                     * - Bootstrap MUST restore editor context and execute the return instruction only.
+                     */
+
+                    // 1) Handle returnEffect kinds separately (insert vs update)
+                    const effect = ticket.returnEffect;
+                    if (!isBlockReturnCommand(effect)) {
                         throw new Error(
-                            `[Bootstrap]: There is not block wit id: ${id} in current collection`,
+                            `[Bootstrap]: Unexpected returnEffect for BlockEditor: ${effect ? effect.kind : 'undefined'}`,
                         );
-                    if (id && bl) {
-                        const key: EditorKey = { kind: 'block', id };
-                        setDraft(normalizeBlock(bl));
-                        editSessionsDataStore.saveDraft(key, bl);
-                        editSessionsDataStore.setSnapshot(key, bl);
                     }
-                    return;
+
+                    // 2) Restore selectedBlockId first (required to bind external store scope)
+                    //    NOTE: blockId always comes from the return effect (both insert/update share blockId)
+                    const blockId = effect.blockId;
+                    if (!blockId) throw new Error('[Bootstrap]: returnEffect missing blockId');
+                    setSelectedBlockId(blockId);
+
+                    // 3) Ensure collection has the block and restore draft+snapshot into external store
+                    if (!cl.blocks)
+                        throw new Error('[Bootstrap]: Collection.blocks does not exist');
+                    const block = cl.blocks[blockId];
+                    if (!block)
+                        throw new Error(`[Bootstrap]: Block not found in collection: ${blockId}`);
+
+                    const key: EditorKey = { kind: 'block', id: blockId };
+                    editSessionsDataStore.saveDraft(key, block);
+                    editSessionsDataStore.setSnapshot(key, block);
+
+                    // 4) Execute return instruction
+                    switch (effect.kind) {
+                        case 'blockInsertArt': {
+                            // Validate + narrow types (gallery/image/slot matches layout)
+                            const v = validateBlockReturnBootstrapInsertArt(
+                                ticket,
+                                bootstrapDataSet,
+                            );
+
+                            // Store pendingSelection so later setSelectedArtItem() can apply it
+                            setPendingSelection(v.command.pendingSelection);
+
+                            // Open editor in edit mode
+                            setModeStack(['select', 'edit']);
+                            setIsJourney(false);
+                            return;
+                        }
+
+                        case 'blockUpdateArt': {
+                            // For update-art return we do NOT insert anything here.
+                            // We only open the block in edit mode.
+                            setPendingSelection(undefined);
+                            setModeStack(['select', 'edit']);
+                            setIsJourney(false);
+                            return;
+                        }
+
+                        default: {
+                            // Should be unreachable due to isBlockReturnCommand, but keep as safety net
+                            throw new Error(`[Bootstrap]: Unsupported returnEffect kind`);
+                        }
+                    }
                 }
             }
         })();
@@ -322,7 +362,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 }
                 case 'draft': {
                     saved = await addNewBlock(draft);
-                    // setDraft(saved);
                     editSessionsDataStore.clear({ kind: 'block', id: draft.id });
                     setSelectedBlockId(saved.id);
                     stackNewDraft(saved);
@@ -430,68 +469,44 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         [setDraft, draft],
     );
 
-    // ***************** TRAVEL PART ****************
-    const jumpToBlockEditor = useCallback(
-        (to: ToAddress, command: ReturnCommand) => {
-            if (!selectedBlockId) return;
-
-            const returnTo: ReturnAddress = {
-                editor: 'stream',
-                mode: 'edit',
-                objectId: selectedBlockId,
-            };
-
-            const ticket: JourneyTicket = {
-                journeyId: generateId('travel'),
-
-                destination: to,
-                returnTo,
-
-                phase: 'outbound',
-                nonce: createNonce(),
-                createdAt: nowIso(),
-
-                returnEffect: command,
-            };
-            dispatch(ticket);
-        },
-        [dispatch, selectedBlockId],
-    );
-
     // ----------- EDIT handlers -----------
     // edit mode onBlock click handler
     const handleEditHit = useCallback(
         (hit: BlockHitEvent) => {
+            // 🚧 Construction Yard:
+            // Here not galleries type blocks have to be processed.
+            /*
+            At the moment there are two types of reactions for clicks:
+                1. If clicked element is image -> editor makes journey to 
+                    catalog editor
+
+                2. If clicked element is editable text, it gets set as target
+                    and element switch to editable mode.
+            TO DO:
+                - check if all text element are editable;
+                - think out CTA block click behavior 
+                    - time and date: text;
+                    - place of event: text with link (point on the map: coordinates);
+                    - description: text;
+                    - images or videos ????;
+
+            */
             console.log(`[handleEditHit]: edit mode hit detected`);
             console.dir(hit);
             if (currentStack.screenMode !== 'edit') return;
             const tg = hitToTarget(hit);
-
             if (tg.blockKind === 'gallery' && tg.kind == 'image') {
-                /// CONSTRUCTION YARD:
-                const command: ReturnCommand = {
-                    kind: 'blockUpdateArt',
-                    blockId: hit.block.id,
-                    pendingSelection: hit,
-                };
-                const to: ToAddress = {
-                    editor: 'catalog',
-                    mode; ''
-                };
+                const ticket = printoutTicket(hit);
+                if (!ticket) return;
 
-
-
-                setPendingSelection(hit);
-                pushMode('pickArt');
-                console.log(`[handleEditHit]: pendingSelection set to hit`);
-                console.log(`[handleEditHit]: screenMode set to pickArt`);
+                dispatch(ticket);
             } else {
                 setCurrentTarget(tg);
                 console.log(`[handleEditHit]: currentTarget set to th:`);
                 console.dir(tg);
             }
         },
-        [currentStack.screenMode],
+        [currentStack.screenMode, dispatch],
     );
     // Direct stack save for new block until hooks are unavailable
     const stackNewDraft = (b: Block): void => {
@@ -585,9 +600,10 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                     position: pendingSelection.hit.slot,
                     caption: { en: '' },
                 };
-                const idx = pendingSelection.block.items.findIndex(
-                    (it) => it.position === next.position,
-                );
+                const idx = findArtItemByPos(pendingSelection, next.position);
+                if (!idx) {
+                    throw new Error(`Image selected for wrong block type`);
+                }
                 let nextItems = [];
                 console.log(`[setSelectedArtItem]: Selected blockItem found with index ${idx}`);
 
