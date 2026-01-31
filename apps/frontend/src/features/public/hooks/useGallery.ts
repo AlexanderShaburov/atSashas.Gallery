@@ -1,5 +1,4 @@
-import { normalizeStream } from '@/entities/block/block.types';
-import type { LegacyStreamData, StreamData } from '@/entities/stream';
+import type { StreamData } from '@/entities/stream';
 import { useEffect, useState } from 'react';
 
 function getStreamUrl(slug: string): string {
@@ -23,8 +22,7 @@ export function useGallery(slug: string) {
                 if (!url) throw new Error('Unknown gallery slug');
                 const res = await fetch(url);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const d = (await res.json()) as LegacyStreamData;
-                const data = normalizeStream(d); // StreamData
+                const data = await res.json();
 
                 if (!cancelled) setStream(data);
             } catch (e: unknown) {

@@ -2,7 +2,6 @@
 
 import type {
     Block,
-    // BlockEditorMode,
     BlockEditorScreenMode,
     BlocksCollectionJSON,
     EditTarget,
@@ -29,7 +28,6 @@ import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorks
 import {
     useArrival,
     useDispatch,
-    // useDispatch,
     usePeekTicket,
     useReturnHome,
 } from '@/features/admin/shared/transporter/transporter';

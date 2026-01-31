@@ -12,11 +12,7 @@ export default function ImageComponent({ block }: ImageComponentProps) {
                 const img = getFromCatalog(item.artId);
                 if (!img) return null;
                 return (
-                    <picture
-                        key={img.id ?? imgId}
-                        role="button"
-                        onClick={() => open(img.images.full)}
-                    >
+                    <picture key={img.id} role="button" onClick={() => open(img.images.full)}>
                         <source type="image/avif" srcSet={img.images.preview.avif} />
                         <source type="image/webp" srcSet={img.images.preview.webp} />
                         <img

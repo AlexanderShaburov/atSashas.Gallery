@@ -28,7 +28,7 @@ const tiles: Tile[] = [
         description: 'Assemble visual blocks with drag & drop.',
     },
     {
-        to: '/admin/stream',
+        to: '/admin/streams',
         title: 'Streams',
         emoji: '📽',
         description: 'Compose a stream from saved blocks.',

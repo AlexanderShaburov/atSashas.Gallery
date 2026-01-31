@@ -4,20 +4,17 @@ export type {
     BlockEditorScreenMode,
     BlockParent,
 } from './block-editor-screen.types';
-export { EditTarget } from './block-targets.types';
-export {
+export type { EditTarget } from './block-targets.types';
+export { BLOCK_KINDS, CTA_TYPES, GALLERY_LAYOUTS, LAYOUT_SCHEME } from './block.types';
+export type {
     Block,
-    BLOCK_KINDS,
     BlockKind,
-    CTA_TYPES,
     CtaBlock,
     CtaTarget,
-    GALLERY_LAYOUTS,
     GalleryBlock,
     GalleryBlockItem,
     GalleryLayout,
     ItemPosition,
-    LAYOUT_SCHEME,
     TextBlock,
 } from './block.types';
-export { ImageBlock } from './new-block.types';
+// export { ImageBlock } from './new-block.types';
