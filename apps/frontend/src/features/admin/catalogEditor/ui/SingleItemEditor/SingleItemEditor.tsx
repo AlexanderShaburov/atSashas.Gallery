@@ -2,11 +2,12 @@ import { deleteFromHopper } from '@/features/admin/catalogEditor/api';
 import { useEditorSession } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
 import { CreateForm } from '@/features/admin/catalogEditor/ui/CreateForm/CreateForm';
 import '@/features/admin/catalogEditor/ui/SingleItemEditor/SingleItemEditor.css';
+import { SingleItemEditorProps } from '@/pages/admin/catalogEditorPage/NewCatalogEditor.types';
 import { ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
 import { useEffect } from 'react';
 
-export default function SingleItemEditor() {
+export default function SingleArtItemEditor(props: SingleItemEditorProps) {
     const { thumb, save, values, isDirty, isValid, exit, canSave, saving, mode } = {
         ...useEditorSession(),
     };

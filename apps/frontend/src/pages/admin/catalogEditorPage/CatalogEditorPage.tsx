@@ -65,6 +65,7 @@ export default function CatalogEditorPage() {
 
             case 'edit': {
                 setDisplayGrid(catalogGrid ?? []);
+                break;
             }
         }
     }, [mode, artItemGrid, catalogGrid]);

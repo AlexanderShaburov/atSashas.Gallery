@@ -11,11 +11,11 @@ import {
     getTechniques,
     updateCatalog,
 } from '@/features/admin/catalogEditor/api';
+import type { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.types/editorTypes';
 import {
     buildShipment,
     prepareEditorForm,
 } from '@/features/admin/catalogEditor/catalogEditorSession/editorLogic';
-import type { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/editorTypes';
 import { isMinimalValid, sanitizeForm } from '@/features/admin/catalogEditor/utils/Validators';
 import {
     useEditorWorkspace,
@@ -30,37 +30,7 @@ import { deepEqual } from '@/shared/lib/checkers/checkers';
 import { EditorKey } from '@/shared/nav';
 import { unsavedChangesStore, useSessionDataStore, useUnsavedChanges } from '@/shared/state';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-
-export type CatalogEditorSession = {
-    mode: 'create' | 'edit';
-    catalog: ArtCatalog | undefined;
-    hopper: CatalogGridItem[];
-    identity: EditorTarget | undefined; // matches state
-    values: ArtItemForm | undefined;
-
-    setIdentity: React.Dispatch<React.SetStateAction<EditorTarget | undefined>>;
-    setValues: React.Dispatch<React.SetStateAction<ArtItemForm | undefined>>;
-    setMode: (m: 'edit' | 'create') => void;
-
-    /** Start a new session from a hopper unit or existing item */
-    editorIsReady: boolean;
-
-    /** Derived flags */
-    isDirty: boolean;
-    isValid: boolean;
-    canSave: boolean;
-    loading: boolean;
-
-    /** Persistence controls */
-    saving: boolean;
-    save: () => Promise<void> | void;
-    exit: () => void;
-
-    /** UI helpers */
-    thumb: GridItem | undefined;
-    techniques: TechniquesJson;
-    seriesOptions: string[];
-};
+import { CatalogEditorSession } from './catalogEditorSession.types';
 
 const Ctx = createContext<CatalogEditorSession | undefined>(undefined);
 
@@ -100,7 +70,16 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     const arrival = useArrival();
     const peekTicket = usePeekTicket();
     const returnHome = useReturnHome();
+    // **************** EDITOR DATA EXTRACTION (EXTERNAL STORE) ****************
 
+    // Read saved editor values from the store:
+    const key: EditorKey | undefined = selectedBlockId
+        ? { kind: 'block', id: selectedBlockId }
+        : undefined;
+    const sessionData = useSessionDataStore<Block>(key);
+    const { storeData, setDraft, commit, clear } = sessionData;
+    const draft = storeData?.draft;
+    const snapshot = storeData?.snapshot;
     // -----------------------------
     // External store binding (draft/snapshot)
     // Key is derived from identity (edit/create)
@@ -214,6 +193,7 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     useEffect(() => {
         if (!identity) {
             setThumb(undefined);
+
             return;
         }
 

@@ -1,8 +1,20 @@
+import { ArtItemData } from '@/entities/art';
 import { EditorTarget, ISODate } from '@/entities/common';
-import type { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/editorTypes';
+import type { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.types/editorTypes';
 import { todayISO } from '@/shared/lib/dateAndLabels/today';
 import { generateId } from '@/shared/lib/id/generateId';
 
+const EMPTY_FORM_TAIL = {
+    title: undefined,
+    techniques: undefined,
+    availability: undefined,
+    dimensions: undefined,
+    price: undefined,
+    alt: undefined,
+    series: undefined,
+    tags: undefined,
+    notes: undefined,
+} satisfies Omit<ArtItemForm, 'id' | 'dateCreated'>;
 export function prepareEditorForm(unit: EditorTarget): ArtItemForm {
     switch (unit.mode) {
         case 'create':
@@ -35,3 +47,13 @@ export function prepareEditorForm(unit: EditorTarget): ArtItemForm {
             };
     }
 }
+export const editorFormConvertor = (draft: ArtItemData): ArtItemForm => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { images, id, dateCreated, ...rest } = draft;
+    return {
+        ...EMPTY_FORM_TAIL,
+        id: draft.id,
+        dateCreated: draft.dateCreated,
+        ...rest,
+    };
+};

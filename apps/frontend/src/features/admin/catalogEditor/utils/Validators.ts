@@ -1,5 +1,5 @@
-import { EditorTarget } from '@/entities/common';
-import { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/editorTypes';
+import { ArtItemData } from '@/entities/art';
+import { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.types/editorTypes';
 
 // ── Validation helpers (top-level) ───────────────────────────────────────────
 export function hasAnyTitle(v?: ArtItemForm['title']): boolean {
@@ -30,24 +30,10 @@ export function validDimensions(d?: ArtItemForm['dimensions']): boolean {
 // }
 //min validity: ID + image presence (no mode)
 
-export function isMinimalValid(form: ArtItemForm | undefined, item: EditorTarget): boolean {
+export function isMinimalValid(form: ArtItemData): boolean {
     const okId = typeof form?.id === 'string' && form.id.trim().length > 0;
     console.log('isMinimalValid: mode: create, okId is: ', okId);
-    let okImage = false;
-    switch (item.mode) {
-        case 'create': {
-            okImage = !!item.item.thumbUrl;
-            console.log('isMinimalValid: mode: create, okImage is: ', okImage);
-            break;
-        }
-        case 'edit': {
-            okImage = !!item.item.images;
-            break;
-        }
-        default:
-            break;
-    }
-
+    const okImage = !!form.images.full;
     return okId && okImage;
 }
 
