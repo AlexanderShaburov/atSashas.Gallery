@@ -5,19 +5,13 @@ import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 import { CollectionGrid } from '@/features/admin/blocks/ui/CollectionGrid/CollectionGrid';
 import { FilterControl, type BlockFilterState } from '@/features/admin/blocks/ui/FilterControl';
 import { SingleBlockEditor } from '@/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor';
-import {
-    applyArtCatalogFilter,
-    ArtCatalogFilterControl,
-    type ArtCatalogFilterState,
-} from '@/features/admin/shared/ui/ArtCatalogFilterControl/';
-import ArtItemGrid from '@/features/admin/shared/ui/ArtItemGrid/ArtItemGrid';
 import '@/features/admin/shared/ui/BlockPreview/index';
 import '@/pages/admin/BlocksPage/BlocksPage.css';
-import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
 import { useEffect, useState } from 'react';
 
 export function BlockEditor() {
     const session: BlockEditorSession = useBlockEditorSession();
+    const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
 
     const [filter, setFilter] = useState<BlockFilterState>({
         tags: [],
@@ -58,21 +52,21 @@ export function BlockEditor() {
         // exit,
         // removeCollection,
         onHit,
-        setSelectedArtItem,
+        // setSelectedArtItem,
     } = session;
 
     const { screenMode, onEscape } = currentStack;
-    const catalog = useArtCatalog();
+    // const catalog = useArtCatalog();
 
-    const [artFilter, setArtFilter] = useState<ArtCatalogFilterState>({
-        query: '',
-        tags: [],
-        technique: undefined,
-        availability: undefined,
-        series: undefined,
-        hasPrice: false,
-        extended: false,
-    });
+    // const [artFilter, setArtFilter] = useState<ArtCatalogFilterState>({
+    //     query: '',
+    //     tags: [],
+    //     technique: undefined,
+    //     availability: undefined,
+    //     series: undefined,
+    //     hasPrice: false,
+    //     extended: false,
+    // });
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
@@ -88,9 +82,9 @@ export function BlockEditor() {
         session.onHit(hit);
     };
 
-    const updateArtFilter = (patch: Partial<ArtCatalogFilterState>) => {
-        setArtFilter((prev) => ({ ...prev, ...patch }));
-    };
+    // const updateArtFilter = (patch: Partial<ArtCatalogFilterState>) => {
+    //     setArtFilter((prev) => ({ ...prev, ...patch }));
+    // };
 
     switch (screenMode) {
         case 'edit':
@@ -124,28 +118,28 @@ export function BlockEditor() {
                     </div>
                 </div>
             );
-        case 'pickArt': {
-            const artCollection = applyArtCatalogFilter(catalog.items, artFilter);
-            console.log(`[BlockEditor]: artCollection is: `);
-            console.dir(artCollection);
-            return (
-                <div className="block-editor">
-                    <div className="block-editor__toolbar">
-                        <ArtCatalogFilterControl
-                            items={catalog?.items}
-                            filter={artFilter}
-                            updateFilter={updateArtFilter}
-                            onBack={onEscape}
-                        />
-                    </div>
-                    <div className="block-editor__body">
-                        <ArtItemGrid
-                            artCollection={artCollection}
-                            setIdentity={setSelectedArtItem}
-                        />
-                    </div>
-                </div>
-            );
-        }
+        // case 'pickArt': {
+        //     const artCollection = applyArtCatalogFilter(catalog.items, artFilter);
+        //     console.log(`[BlockEditor]: artCollection is: `);
+        //     console.dir(artCollection);
+        //     return (
+        //         <div className="block-editor">
+        //             <div className="block-editor__toolbar">
+        //                 <ArtCatalogFilterControl
+        //                     items={catalog?.items}
+        //                     filter={artFilter}
+        //                     updateFilter={updateArtFilter}
+        //                     onBack={onEscape}
+        //                 />
+        //             </div>
+        //             <div className="block-editor__body">
+        //                 <ArtItemGrid
+        //                     artCollection={artCollection}
+        //                     setItemSelected={setSelectedArtItem}
+        //                 />
+        //             </div>
+        //         </div>
+        //     );
+        // }
     }
 }

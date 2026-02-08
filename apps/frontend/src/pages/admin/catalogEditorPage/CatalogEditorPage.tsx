@@ -1,108 +1,112 @@
-import '@/pages/admin/catalogEditorPage/CatalogEditorPage.css';
+// src/pages/admin/catalogEditorPage/CatalogEditorPage.tsx
 
 import { GridItem } from '@/entities/grid';
-import { useEditorSession } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
-import SingleItemEditor from '@/features/admin/catalogEditor/ui/SingleItemEditor/SingleItemEditor';
+import { useCatalogEditorSession } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
+import SingleArtItemEditor, {
+    SAProps,
+} from '@/features/admin/catalogEditor/ui/SingleItemEditor/SingleArtItemEditor';
+import {
+    ArtCatalogFilterControl,
+    ArtCatalogFilterState,
+} from '@/features/admin/shared/ui/ArtCatalogFilterControl';
 import ArtItemGrid from '@/features/admin/shared/ui/ArtItemGrid/ArtItemGrid';
 import { artItemToGridItem } from '@/features/admin/shared/ui/ArtItemGrid/utils';
+import { bindToolbarCtx } from '@/pages/admin/catalogEditorPage/catalogEditor.adapter';
+import { ToolbarCtx, ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
+import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
 import { useEffect, useState } from 'react';
 
 export default function CatalogEditorPage() {
-    const [artItemGrid, setArtItemGrid] = useState<GridItem[]>([]);
-    const [catalogGrid, setCatalogGrid] = useState<GridItem[]>([]);
+    const {
+        editorProps,
+        toolbarModel,
+        catalog,
+        // draft,
+        onEscape,
+        editorIsReady,
+        isLoading,
+        screenMode,
+        isSelected,
+    } = useCatalogEditorSession();
+
     const [displayGrid, setDisplayGrid] = useState<GridItem[]>([]);
 
-    const { identity, setIdentity, editorIsReady, catalog, hopper, loading, mode, setMode } = {
-        ...useEditorSession(),
+    const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
+
+    const tbCtx: ToolbarCtx = bindToolbarCtx({ ...toolbarModel, selectedId: selectedItemId });
+    const props: SAProps = {
+        editorProps,
+        toolbarProps: tbCtx,
+    };
+    // Art filter:
+    const [artFilter, setArtFilter] = useState<ArtCatalogFilterState>({
+        query: '',
+        tags: [],
+        technique: undefined,
+        availability: undefined,
+        series: undefined,
+        hasPrice: false,
+        extended: false,
+    });
+
+    const updateArtFilter = (patch: Partial<ArtCatalogFilterState>) => {
+        setArtFilter((prev) => ({ ...prev, ...patch }));
     };
 
-    function onClickHandler(t: GridItem | undefined) {
-        if (!t) {
-            return;
-        }
-        switch (mode) {
-            case 'create':
-                setIdentity({
-                    mode: mode,
-                    item: t,
-                });
-                break;
-            case 'edit': {
-                if (!catalog) {
-                    return;
-                }
-                const art = catalog.items[t.id];
-                if (!art) {
-                    return;
-                }
-
-                setIdentity({
-                    mode: mode,
-                    item: art,
-                });
-                break;
-            }
-        }
-    }
-
     useEffect(() => {
-        setArtItemGrid(hopper ?? []);
-
         if (catalog && catalog.items) {
             const c_grid = Object.values(catalog.items).map(artItemToGridItem);
-            setCatalogGrid(c_grid ?? []);
+            setDisplayGrid(c_grid ?? []);
         }
-    }, [hopper, catalog]);
+    }, [catalog]);
+    const onSelectHandler = (item: GridItem | undefined): void => {
+        if (!item) return;
+        setSelectedItemId(item.id);
+    };
 
-    // Form displayGrid:
+    // Toolbar settings:
+    const gridToolbar: ToolKey[] = ['add', 'delete', 'edit', 'exit', 'apply'];
+    // Here toolbar needed.
+    // ❗️IMPORTANT: below selected means internal ArtItemGrid state,
+    // NOT context state ❗️
+    // if not selected toolbar menu = grid menu
+    // if selected and editor is ready, menu = edit menu
 
-    useEffect(() => {
-        console.log(`[displayGrid] setter called`);
-        switch (mode) {
-            case 'create':
-                setDisplayGrid(artItemGrid ?? []);
-                break;
-
-            case 'edit': {
-                setDisplayGrid(catalogGrid ?? []);
-                break;
-            }
-        }
-    }, [mode, artItemGrid, catalogGrid]);
-
-    return (
-        <>
-            <div className="catalog-page">
-                <header>
-                    {/* SWITCH MODE BUTTONS BLOCK  */}
-                    <button
-                        className={mode === 'create' ? 'active' : ''}
-                        onClick={() => setMode('create')}
-                    >
-                        Create
-                    </button>
-                    <button
-                        className={mode === 'edit' ? 'active' : ''}
-                        onClick={() => setMode('edit')}
-                    >
-                        Edit
-                    </button>
-                </header>
-                {loading ? (
-                    <p>Loading data</p>
-                ) : (
-                    !identity && (
-                        <div /*className="grid"*/>
-                            <ArtItemGrid artCollection={displayGrid} setIdentity={onClickHandler} />
-                        </div>
-                    )
-                )}
-            </div>
-            {identity && editorIsReady && (
+    // ArtItemGrid make item selected (internal), but all operation through
+    // toolbar menu
+    switch (screenMode) {
+        case 'edit':
+            return (
                 <div className="catalog-page">
-                    <SingleItemEditor />
+                    {isLoading && <p>Loading...</p>}
+                    {isSelected && editorIsReady && <SingleArtItemEditor {...props} />}
                 </div>
-            )}
-        </>
-    );
+            );
+        case 'select':
+            return (
+                <div className="catalog-page">
+                    {isLoading && <p>Loading...</p>}
+                    {!isLoading && !isSelected && (
+                        <div /*className="grid"*/>
+                            <div className="catalog-editor__toolbar">
+                                <ArtCatalogFilterControl
+                                    items={catalog?.items}
+                                    filter={artFilter}
+                                    updateFilter={updateArtFilter}
+                                    onBack={onEscape}
+                                />
+                            </div>
+                            <div className="catalog-editor__body">
+                                <ArtItemGrid
+                                    artCollection={displayGrid}
+                                    selectedItemId={selectedItemId}
+                                    setItemSelected={onSelectHandler}
+                                />
+                                <SingleEditorToolbar tools={gridToolbar} ctx={tbCtx} />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+    }
 }

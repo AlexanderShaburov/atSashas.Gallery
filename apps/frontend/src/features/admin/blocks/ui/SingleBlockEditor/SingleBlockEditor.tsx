@@ -17,7 +17,7 @@ type Props = {
     setValue: (next: Block) => void;
     toolbarProps: {
         canSave: boolean;
-        saving: boolean;
+        isSaving: boolean;
         isJourney: boolean;
         save: () => void;
         exit: () => void;
@@ -31,13 +31,15 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps }: Props
     let content: JSX.Element | undefined = undefined;
     const { isJourney, ...tbCtx } = toolbarProps;
 
-    const tbContent: ToolKey[] = [
-        'delButton',
-        'tags',
-        'exit',
-        ...(isJourney ? (['apply'] as const) : []),
-        'save',
-    ];
+    if (isJourney) {
+        console.log(`[SingleBlockEditor]: We are in journey now, baby`);
+    } else {
+        console.log(`[SingleBlockEditor]: Oups! We got lost our ticket, baby`);
+    }
+
+    const tbContent: ToolKey[] = isJourney
+        ? ['delete', 'tags', 'exit', 'apply', 'save']
+        : ['delete', 'tags', 'exit', 'save'];
 
     switch (item.blockKind) {
         case 'gallery':

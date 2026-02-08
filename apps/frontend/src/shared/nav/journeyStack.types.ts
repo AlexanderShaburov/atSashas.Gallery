@@ -1,6 +1,7 @@
 // src/shared/nav/ReturnStack.types.ts
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 import { EditorKind } from './editorKey.types';
+import { GridItem } from '@/entities/grid';
 
 export type EditorKey =
     | { kind: 'stream'; id: string }
@@ -38,13 +39,17 @@ export type ReturnCommand =
           kind: 'blockUpdateArt';
           blockId: string;
           pendingSelection: BlockHitEvent;
+      }
+    | {
+          kind: 'createArtItem';
+          itemId: string;
       };
 
 // Phase of journey:
 export type JourneyLeg = 'outbound' | 'return';
 
 export type JumpResult =
-    | { ok: true; id: string }
+    | { ok: true; id: string; output?: GridItem }
     | { ok: false; reason?: 'cancel' | 'back' | 'error' };
 
 export type ToAddress =

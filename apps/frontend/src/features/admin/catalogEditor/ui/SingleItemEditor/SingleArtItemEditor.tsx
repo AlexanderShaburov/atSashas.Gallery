@@ -1,23 +1,30 @@
+// src/features/admin/catalogEditor/ui/SingleItemEditor/SingleArtItemEditor.tsx
+
 import { deleteFromHopper } from '@/features/admin/catalogEditor/api';
-import { useEditorSession } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
 import { CreateForm } from '@/features/admin/catalogEditor/ui/CreateForm/CreateForm';
 import '@/features/admin/catalogEditor/ui/SingleItemEditor/SingleItemEditor.css';
-import { SingleItemEditorProps } from '@/pages/admin/catalogEditorPage/NewCatalogEditor.types';
-import { ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
+import { SingleItemEditorProps } from '@/pages/admin/catalogEditorPage/catalogEditor.types';
+import { ToolbarCtx, ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
 import { useEffect } from 'react';
 
-export default function SingleArtItemEditor(props: SingleItemEditorProps) {
-    const { thumb, save, values, isDirty, isValid, exit, canSave, saving, mode } = {
-        ...useEditorSession(),
-    };
+export type SAProps = {
+    editorProps: SingleItemEditorProps;
+    toolbarProps: ToolbarCtx;
+};
+export default function SingleArtItemEditor(props: SAProps) {
+    const { editorProps, toolbarProps } = props;
+    const { draft, thumb, isDirty } = editorProps;
+    const { canSave, saving, exit, save } = toolbarProps;
 
+    // *********************************************
+    // ❗️ To be moved to the context provider ❗️
     async function deleteFromCatalog() {
         if (!thumb?.id) return;
 
         try {
             // Check dependencies:
-            const depsResp = await fetch(`/api/catalog/dependencies/${thumb.id}`);
+            const depsResp = await fetch(`/api/art/dependencies/${thumb.id}`);
             const deps = await depsResp.json();
 
             let message = `Delete item "${thumb.id}" permanently?`;
@@ -50,11 +57,11 @@ export default function SingleArtItemEditor(props: SingleItemEditorProps) {
     }
 
     async function onDelete() {
-        switch (mode) {
-            case 'edit':
+        switch (draft?.lifecycle) {
+            case 'saved':
                 await deleteFromCatalog();
                 break;
-            case 'create':
+            case 'draft':
                 if (thumb && thumb.id) {
                     await deleteFromHopper(thumb.id);
                 }
@@ -62,15 +69,19 @@ export default function SingleArtItemEditor(props: SingleItemEditorProps) {
         }
         exit();
     }
+
+    // Until this ❗️❗️❗️
+    // *********************************************
+    // Cmd + S, Esc
     //Cmd/Ctrl + S to save, Exc to cancel:
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
-            if (!values) return;
+            if (!draft) return;
             const mod = /Mac/i.test(navigator.platform) ? e.metaKey : e.ctrlKey;
 
             if (mod && e.key.toLowerCase() === 's') {
                 e.preventDefault();
-                if (isValid && isDirty) save(); // ✅ save on Cmd/Ctrl+S
+                if (isDirty && save) save(); // ✅ save on Cmd/Ctrl+S
                 return;
             }
             if (e.key === 'Escape') {
@@ -82,13 +93,13 @@ export default function SingleArtItemEditor(props: SingleItemEditorProps) {
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [isValid, exit, save, isDirty, values, canSave]);
+    }, [exit, save, isDirty, draft, canSave]);
 
     const tbCtx = {
-        canSave: canSave,
-        saving: saving,
-        save: save,
-        exit: exit,
+        canSave,
+        saving,
+        save,
+        exit,
         onDelete: onDelete,
     };
     const tbTools = ['delButton', 'exit', 'save'] as ToolKey[];
@@ -100,7 +111,7 @@ export default function SingleArtItemEditor(props: SingleItemEditorProps) {
                 <div className="sie-thumb-card">
                     <img src={thumb?.thumbUrl} alt={thumb?.title || thumb?.id} loading="lazy" />
                     <div className="sie-thumb-meta">
-                        <div className="sie-thumb-id">{values?.title?.en ?? thumb?.id}</div>
+                        <div className="sie-thumb-id">{draft?.title?.en ?? thumb?.id}</div>
                     </div>
                 </div>
             </aside>
@@ -108,7 +119,7 @@ export default function SingleArtItemEditor(props: SingleItemEditorProps) {
             {/* Form column */}
             <section className="sie-form-col" aria-label="Metadata form">
                 <div className="sie-form-wrap">
-                    <CreateForm />
+                    <CreateForm {...editorProps} />
                     <SingleEditorToolbar tools={tbTools} ctx={tbCtx} />
                 </div>
             </section>

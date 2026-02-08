@@ -1,4 +1,4 @@
-import type { TechniquesJson } from '@/entities/art';
+import type { ArtItemDependents, TechniquesJson } from '@/entities/art';
 import { ArtShipment } from '@/entities/art/shipment';
 import type { ArtCatalog } from '@/entities/catalog';
 import type { ApiResponse } from '@/entities/common';
@@ -13,6 +13,7 @@ export const HOPPER_DEL = `${API_BASE}/hopper`;
 export const JSON_VAULT = `${API_BASE}/json`;
 export const UPLOAD_URL = `${API_BASE}/upload`;
 
+// Load current catalog version:
 export async function getCatalog(): Promise<ArtCatalog> {
     const request = `${JSON_VAULT}/art_catalog`;
     const res = await fetch(request);
@@ -105,7 +106,7 @@ export async function deleteFromHopper(fileId: string): Promise<boolean> {
         });
 
         if (!response.ok) {
-            console.error('Failed to delete hopper file:', response.status, await response.text());
+            // console.error('Failed to delete hopper file:', response.status, await response.text());
             return false;
         }
 
@@ -114,4 +115,20 @@ export async function deleteFromHopper(fileId: string): Promise<boolean> {
         console.error('Network error while deleting hopper file:', err);
         return false;
     }
+}
+
+export async function getDependents(id: string) {
+    if (!id) return { response: 'failed', reason: 'no id' };
+    const request = `${API_BASE}/art/dependencies/${id}`;
+
+    const response = await fetch(request);
+    if (!response.ok) {
+        console.error(`Failed to collect dependents while deleting art item: ${id}`);
+        return { response: 'failed', reason: String(response) };
+    }
+    const raw = (await response.json()) as ApiResponse<ArtItemDependents>;
+    return {
+        response: 'ok',
+        data: raw.data,
+    };
 }

@@ -1,8 +1,8 @@
 {
   "kind": "BlockCollection",
-  "version": 125,
+  "version": 126,
   "generatedAt": "2025-12-14",
-  "updatedAt": "2026-01-28",
+  "updatedAt": "2026-02-08",
   "blocks": {
     "block-gallery-single-466e6378": {
       "id": "block-gallery-single-466e6378",
@@ -978,9 +978,33 @@
           }
         }
       ]
+    },
+    "block-gallery-single-782a7cf3": {
+      "id": "block-gallery-single-782a7cf3",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-02-08",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "single",
+      "items": [
+        {
+          "artId": "art-20260124-1v8tvf",
+          "position": "Center",
+          "caption": null
+        }
+      ]
     }
   },
   "order": [
+    "block-gallery-single-782a7cf3",
     "block-gallery-triptychhorizontal-aed36295",
     "block-gallery-pairhorizontal-a9f7a7d5",
     "block-gallery-pairvertical-aa570e9b",

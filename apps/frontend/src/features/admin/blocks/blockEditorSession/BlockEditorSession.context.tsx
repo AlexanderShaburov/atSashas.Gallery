@@ -8,7 +8,6 @@ import type {
     GalleryBlockItem,
 } from '@/entities/block';
 import type { UiErrorState } from '@/entities/common';
-import { GridItem } from '@/entities/grid';
 import {
     addNewBlock,
     deleteBlock,
@@ -41,7 +40,7 @@ import {
 } from '@/shared/state';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { printoutTicket } from './BlockEditorSession.travel';
-import { findArtItemByPos, hitToTarget, instantiateFromTemplate } from './blockEditorSession.utils';
+import { hitToTarget, instantiateFromTemplate } from './blockEditorSession.utils';
 import { resolveBlockBootstrapData } from './bootstrap';
 import {
     isBlockReturnCommand,
@@ -234,9 +233,9 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
             if (!cl) return;
 
+            setIsJourney(true);
             switch (ticket.phase) {
                 case 'outbound':
-                    setIsJourney(true);
                     switch (ticket.destination.mode) {
                         case 'select': {
                             resetSession();
@@ -286,16 +285,25 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                     if (!blockId) throw new Error('[Bootstrap]: returnEffect missing blockId');
                     setSelectedBlockId(blockId);
 
-                    // 3) Ensure collection has the block and restore draft+snapshot into external store
+                    // ❗️ New approach: just created block hasn't get into collection yet!
+                    // The true place to get the block - external store!!!
+                    const key: EditorKey = { kind: 'block', id: blockId };
+                    const block = editSessionsDataStore.get<Block>(key);
+                    if (!block)
+                        throw new Error(
+                            `[Bootstrap]: Journey ticket block doesn't stored in SessionsDataStore`,
+                        );
+
+                    /*                   3) Ensure collection has the block and restore draft+snapshot into external store
                     if (!cl.blocks)
                         throw new Error('[Bootstrap]: Collection.blocks does not exist');
-                    const block = cl.blocks[blockId];
                     if (!block)
                         throw new Error(`[Bootstrap]: Block not found in collection: ${blockId}`);
 
                     const key: EditorKey = { kind: 'block', id: blockId };
                     editSessionsDataStore.saveDraft(key, block);
                     editSessionsDataStore.setSnapshot(key, block);
+*/
 
                     // 4) Execute return instruction
                     switch (effect.kind) {
@@ -308,10 +316,23 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
                             // Store pendingSelection so later setSelectedArtItem() can apply it
                             setPendingSelection(v.command.pendingSelection);
+                            // Create new gallery block item form loot and ticket
+                            const newItem: GalleryBlockItem = {
+                                artId: v.loot.id,
+                                position: v.command.pendingSelection.hit.slot,
+                            };
+                            // Extract items list form saved and validated data:
+                            const items = v.savedData.draft.items;
+
+                            // Make changes in the draft
+                            const newDraft = { ...v.savedData.draft, items: [...items, newItem] };
+
+                            // Update changed draft in the store:
+                            editSessionsDataStore.saveDraft(key, newDraft);
 
                             // Open editor in edit mode
                             setModeStack(['select', 'edit']);
-                            setIsJourney(false);
+                            // setIsJourney(false);
                             return;
                         }
 
@@ -320,7 +341,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                             // We only open the block in edit mode.
                             setPendingSelection(undefined);
                             setModeStack(['select', 'edit']);
-                            setIsJourney(false);
+                            // setIsJourney(false);
                             return;
                         }
 
@@ -564,69 +585,69 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     }, []);
 
     // Selected (journey-like) ArtItem to editing block to pos:
-    const setSelectedArtItem = useCallback(
-        (item: GridItem | undefined) => {
-            console.log(`[setSelectedArtItem]: Called wit item:`);
-            console.dir(item);
+    // const setSelectedArtItem = useCallback(
+    //     (item: GridItem | undefined) => {
+    //         console.log(`[setSelectedArtItem]: Called wit item:`);
+    //         console.dir(item);
 
-            if (!item || !item.id) {
-                setPendingSelection(undefined);
-                unHit();
-                return;
-            }
-            console.log(`[setSelectedArtItem]: Called with status:`);
+    //         if (!item || !item.id) {
+    //             setPendingSelection(undefined);
+    //             unHit();
+    //             return;
+    //         }
+    //         console.log(`[setSelectedArtItem]: Called with status:`);
 
-            console.dir('item:');
-            console.dir(item);
-            console.dir('pendingSelection:');
-            console.dir(pendingSelection);
-            if (!gCtxt.currentArtCatalog)
-                throw new Error('[setSelectedArtItem]: Catalog not loaded yet');
-            if (!gCtxt.currentArtCatalog.items[item.id])
-                throw new Error(
-                    '[setSelectedArtItem]: Selected ArtItem not found in current catalog',
-                );
-            if (
-                pendingSelection &&
-                pendingSelection.hit.blockKind === 'gallery' &&
-                pendingSelection.hit.kind === 'image' &&
-                pendingSelection.block.blockKind === 'gallery'
-            ) {
-                console.log(`[setSelectedArtItem]: All conditions met`);
-                const next: GalleryBlockItem = {
-                    artId: item.id,
-                    position: pendingSelection.hit.slot,
-                    caption: { en: '' },
-                };
-                const idx = findArtItemByPos(pendingSelection, next.position);
-                if (!idx) {
-                    throw new Error(`Image selected for wrong block type`);
-                }
-                let nextItems = [];
-                console.log(`[setSelectedArtItem]: Selected blockItem found with index ${idx}`);
+    //         console.dir('item:');
+    //         console.dir(item);
+    //         console.dir('pendingSelection:');
+    //         console.dir(pendingSelection);
+    //         if (!gCtxt.currentArtCatalog)
+    //             throw new Error('[setSelectedArtItem]: Catalog not loaded yet');
+    //         if (!gCtxt.currentArtCatalog.items[item.id])
+    //             throw new Error(
+    //                 '[setSelectedArtItem]: Selected ArtItem not found in current catalog',
+    //             );
+    //         if (
+    //             pendingSelection &&
+    //             pendingSelection.hit.blockKind === 'gallery' &&
+    //             pendingSelection.hit.kind === 'image' &&
+    //             pendingSelection.block.blockKind === 'gallery'
+    //         ) {
+    //             console.log(`[setSelectedArtItem]: All conditions met`);
+    //             const next: GalleryBlockItem = {
+    //                 artId: item.id,
+    //                 position: pendingSelection.hit.slot,
+    //                 caption: { en: '' },
+    //             };
+    //             const idx = findArtItemByPos(pendingSelection, next.position);
+    //             if (!idx) {
+    //                 throw new Error(`Image selected for wrong block type`);
+    //             }
+    //             let nextItems = [];
+    //             console.log(`[setSelectedArtItem]: Selected blockItem found with index ${idx}`);
 
-                // If block item with pos not found ?????
-                if (idx === -1) {
-                    nextItems = [...pendingSelection.block.items, next];
-                } else {
-                    nextItems = pendingSelection.block.items.map((it, i) =>
-                        i === idx ? next : it,
-                    );
-                }
-                const nextBlock = { ...pendingSelection.block, items: nextItems };
+    //             // If block item with pos not found ?????
+    //             if (idx === -1) {
+    //                 nextItems = [...pendingSelection.block.items, next];
+    //             } else {
+    //                 nextItems = pendingSelection.block.items.map((it, i) =>
+    //                     i === idx ? next : it,
+    //                 );
+    //             }
+    //             const nextBlock = { ...pendingSelection.block, items: nextItems };
 
-                setDraft(normalizeBlock(nextBlock));
-                console.log(`[setSelectedArtItem]: Updated block set to:`);
-                console.dir(nextBlock);
-                pushMode('edit');
-                setPendingSelection(undefined);
-                unHit();
-            } else {
-                throw new Error(`[pendingSelected]: Received data doesn't match expected`);
-            }
-        },
-        [pendingSelection, gCtxt.currentArtCatalog, unHit, setDraft],
-    );
+    //             setDraft(normalizeBlock(nextBlock));
+    //             console.log(`[setSelectedArtItem]: Updated block set to:`);
+    //             console.dir(nextBlock);
+    //             pushMode('edit');
+    //             setPendingSelection(undefined);
+    //             unHit();
+    //         } else {
+    //             throw new Error(`[pendingSelected]: Received data doesn't match expected`);
+    //         }
+    //     },
+    //     [pendingSelection, gCtxt.currentArtCatalog, unHit, setDraft],
+    // );
 
     const value: BlockEditorSession = useMemo(
         () => ({
@@ -635,7 +656,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             setDraft,
             currentStack,
             setCollection,
-            setSelectedArtItem,
+            // setSelectedArtItem,
             isDirty,
             isValid,
             canSave,
@@ -663,7 +684,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             uiError,
             isJourney,
             setCollection,
-            setSelectedArtItem,
+            // setSelectedArtItem,
             currentStack,
             onSaveClick,
             exit,

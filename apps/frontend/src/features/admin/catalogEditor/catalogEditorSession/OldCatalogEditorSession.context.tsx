@@ -1,4 +1,4 @@
-import { TechniquesJson } from '@/entities/art';
+import { ArtItemData, TechniquesJson } from '@/entities/art';
 import { ArtCatalog } from '@/entities/catalog';
 import { EditorTarget } from '@/entities/common';
 import { CatalogGridItem, GridItem } from '@/entities/grid/gridItem';
@@ -35,7 +35,7 @@ export type EditorSession = {
     mode: 'create' | 'edit';
     values: ArtItemForm | undefined;
     setValues: React.Dispatch<React.SetStateAction<ArtItemForm | undefined>>;
-    setIdentity: (v: EditorTarget | undefined) => void;
+    setSelectedArtItem: (v: ArtItemData | undefined) => void;
     setMode: (m: 'edit' | 'create') => void;
 
     /** Start a new session from a hopper unit or existing item */
@@ -294,7 +294,7 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             identity,
             values,
             setValues,
-            setIdentity,
+            setSelectedArtItem,
             editorIsReady,
             isDirty,
             isValid,

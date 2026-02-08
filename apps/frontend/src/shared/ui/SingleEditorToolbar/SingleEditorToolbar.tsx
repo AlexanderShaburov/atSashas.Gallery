@@ -24,7 +24,6 @@ export function SingleEditorToolbar(props: SingleEditorToolbarProps) {
             {props.tools.map((e, index) => {
                 const renderer = TOOL_REGISTRY[e];
                 if (typeof renderer !== 'function') {
-                    console.error('Unknown tool key:', e, 'available:', Object.keys(TOOL_REGISTRY));
                     return null;
                 }
                 return (

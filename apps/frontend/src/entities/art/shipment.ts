@@ -1,4 +1,11 @@
-import { Availability, Dimensions, ISODate, Localized, Money } from '@/entities/common';
+import {
+    Availability,
+    Dimensions,
+    EntityLifecycle,
+    ISODate,
+    Localized,
+    Money,
+} from '@/entities/common';
 import { ImagesJSON } from './images';
 
 export type ImageShipment =
@@ -24,4 +31,5 @@ export interface ArtShipment {
     tags: string[];
     notes?: string;
     images: ImageShipment;
+    lifecycle: EntityLifecycle;
 }

@@ -82,6 +82,10 @@ export const router = createBrowserRouter([
                     </StreamEditorSessionProvider>
                 ),
             },
+            {
+                path: 'hopper',
+                element: <UploadPage />,
+            },
         ],
     },
     { path: '*', element: <NotFound /> },

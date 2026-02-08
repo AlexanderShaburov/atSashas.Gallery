@@ -1,4 +1,5 @@
 import { ArtItemData } from '@/entities/art';
+import { ArtShipment } from '@/entities/art/shipment';
 import { EditorTarget, ISODate } from '@/entities/common';
 import type { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.types/editorTypes';
 import { todayISO } from '@/shared/lib/dateAndLabels/today';
@@ -54,6 +55,15 @@ export const editorFormConvertor = (draft: ArtItemData): ArtItemForm => {
         ...EMPTY_FORM_TAIL,
         id: draft.id,
         dateCreated: draft.dateCreated,
+        ...rest,
+    };
+};
+
+export const draftToShipmentConvertor = (draft: ArtItemData): ArtShipment => {
+    const { images, ...rest } = draft;
+    return {
+        ...EMPTY_FORM_TAIL,
+        images: { kind: 'ready', image: images },
         ...rest,
     };
 };

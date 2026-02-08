@@ -1,4 +1,5 @@
 // src/features/admin/streams/StreamEditorScreen/StreamEditorScreen.tsx
+import { StreamMetadata } from '@/entities/stream';
 import { ScreenHeaderRow } from '@/features/admin/shared/ui/ScreenHeaderRow';
 import { useStreamEditorSession } from '@/features/admin/streams/hooks/useStreamEditor';
 import { applyStreamFilter } from '@/features/admin/streams/ui/FilterControl/applyStreamFilter';
@@ -13,7 +14,6 @@ import { SingleStreamEditor } from '@/features/admin/streams/ui/SingleStreamEdit
 import { ToolbarCtx } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import './StreamEditorScreen.css';
-import { StreamMetadata } from '@/entities/stream';
 
 export function StreamEditor() {
     const session = useStreamEditorSession();
@@ -66,14 +66,14 @@ export function StreamEditor() {
 
         return {
             canSave: isDirty && !isLoading && isValid,
-            saving: isSaving,
+            isSaving,
+            tags: draft.tags,
+            onAdd: addBlockFromToolbar,
+            onEdit: editMetadata,
+            onDelete: () => delStream(selectedStreamId ?? ''),
             save,
             exit: onEscape,
-            onDelete: () => delStream(selectedStreamId ?? ''),
-            addBlock: addBlockFromToolbar,
-            tags: draft.tags,
             onChangeTags: updateTags,
-            onEditMetadata: editMetadata,
         };
     }, [
         draft,

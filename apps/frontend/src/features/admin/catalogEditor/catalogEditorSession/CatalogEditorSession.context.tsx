@@ -1,164 +1,175 @@
-// CatalogEditorSession.context.tsx
+// src/features/admin/catalogEditor/catalogEditorSession/newCatalogEditorSession.context.tsx
 
-import { TechniquesJson } from '@/entities/art';
+import { ArtItemData, TechniquesJson } from '@/entities/art';
 import { ArtCatalog } from '@/entities/catalog';
-import { EditorTarget } from '@/entities/common';
-import { CatalogGridItem, GridItem } from '@/entities/grid/gridItem';
-import {
-    getCatalog,
-    getHopperContent,
-    getSeriesOptionsCI,
-    getTechniques,
-    updateCatalog,
-} from '@/features/admin/catalogEditor/api';
-import type { ArtItemForm } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.types/editorTypes';
-import {
-    buildShipment,
-    prepareEditorForm,
-} from '@/features/admin/catalogEditor/catalogEditorSession/editorLogic';
+import { GridItem } from '@/entities/grid';
+import { CatalogEditorScreenMode } from '@/features/admin/catalogEditor/catalogEditorSession/catalogEditorSession.types';
+import { draftToShipmentConvertor } from '@/features/admin/catalogEditor/catalogEditorSession/editorLogic/editorLogic';
+import { printoutTicket } from '@/features/admin/catalogEditor/catalogEditorSession/journeyService';
 import { isMinimalValid, sanitizeForm } from '@/features/admin/catalogEditor/utils/Validators';
 import {
+    EditorWorkspaceContextValue,
     useEditorWorkspace,
-    type EditorWorkspaceContextValue,
 } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import {
     useArrival,
+    useDispatch,
     usePeekTicket,
     useReturnHome,
 } from '@/features/admin/shared/transporter/transporter';
+import {
+    ProviderProps,
+    SingleItemEditorProps,
+} from '@/pages/admin/catalogEditorPage/catalogEditor.types';
 import { deepEqual } from '@/shared/lib/checkers/checkers';
 import { EditorKey } from '@/shared/nav';
-import { unsavedChangesStore, useSessionDataStore, useUnsavedChanges } from '@/shared/state';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+    editSessionsDataStore,
+    unsavedChangesStore,
+    useSessionDataStore,
+    useUnsavedChanges,
+} from '@/shared/state';
+import {
+    CatalogCommands,
+    CatalogToolbarModel,
+} from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+    getCatalog,
+    getDependents,
+    getSeriesOptionsCI,
+    getTechniques,
+    updateCatalog,
+} from '../api';
 import { CatalogEditorSession } from './catalogEditorSession.types';
+type SaveResult = { ok: true; id: string } | { ok: false };
 
 const Ctx = createContext<CatalogEditorSession | undefined>(undefined);
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useEditorSession = () => {
+export const useCatalogEditorSession = () => {
     const v = useContext(Ctx);
     if (!v) throw new Error('useEditorSession must be used within CatalogEditorSessionProvider');
     return v;
 };
 
-type ProviderProps = { children: React.ReactNode };
-
 export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     const gCtx: EditorWorkspaceContextValue = useEditorWorkspace();
 
-    // -----------------------------
-    // Core UI state (selection/session)
-    // -----------------------------
-    const [identity, setIdentity] = useState<EditorTarget | undefined>(undefined);
-    const [mode, setMode] = useState<'create' | 'edit'>('create');
-
-    // Base datasets
+    // Core state:
+    // 1. Use as logic trigger and reference:
+    const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
+    // 2. Catalog dataset:
     const [catalog, setCatalog] = useState<ArtCatalog | undefined>(undefined);
-    const [hopper, setHopper] = useState<CatalogGridItem[]>([]);
 
-    // Helpers / UI flags
-    const [techniques, setTechniques] = useState<TechniquesJson>({});
+    // 3. Current techniques database analytics result
+    const [techniquesRange, setTechniquesRange] = useState<TechniquesJson>({});
+    // 4. Current series database analytics result
     const [seriesOptions, setSeriesOptions] = useState<string[]>([]);
+    // 5. Selected artItem thumbnail image url:
     const [thumb, setThumb] = useState<GridItem | undefined>(undefined);
 
-    const [loading, setLoading] = useState(false);
-    const [saving, setSaving] = useState(false);
-
+    // UI states:
+    const [screenMode, setScreenMode] = useState<CatalogEditorScreenMode>('select');
+    const isSelected = screenMode === 'edit' && !!selectedItemId;
+    // API process states:
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    // Journey state:
+    const [isJourney, setIsJourney] = useState<boolean>(false);
     // -----------------------------
     // Journey navigation hooks (same as Block/Stream pattern)
     // -----------------------------
     const arrival = useArrival();
     const peekTicket = usePeekTicket();
     const returnHome = useReturnHome();
+    const dispatch = useDispatch();
+
     // **************** EDITOR DATA EXTRACTION (EXTERNAL STORE) ****************
 
     // Read saved editor values from the store:
-    const key: EditorKey | undefined = selectedBlockId
-        ? { kind: 'block', id: selectedBlockId }
-        : undefined;
-    const sessionData = useSessionDataStore<Block>(key);
-    const { storeData, setDraft, commit, clear } = sessionData;
-    const draft = storeData?.draft;
-    const snapshot = storeData?.snapshot;
     // -----------------------------
     // External store binding (draft/snapshot)
-    // Key is derived from identity (edit/create)
     // -----------------------------
-    const key: EditorKey | undefined = useMemo(() => {
-        if (!identity) return undefined;
+    // Scope (key) is derived from selected item id:
+    const scope: EditorKey | undefined = useMemo(() => {
+        return isSelected ? { kind: 'catalog', id: selectedItemId } : undefined;
+    }, [isSelected, selectedItemId]);
 
-        // For edit we use existing item id
-        if (identity.mode === 'edit') return { kind: 'catalog', id: identity.item.id };
-
-        // For create we use hopper item id as session id (stable enough for draft),
-        // unless your prepareEditorForm generates another id. In that case the first setValues will move it.
-        if (identity.mode === 'create') return { kind: 'catalog', id: identity.item.id };
-
-        return undefined;
-    }, [identity]);
-
-    const sessionData = useSessionDataStore<ArtItemForm>(key);
-    const { storeData, setDraft, setSnapshot, commit, clear } = sessionData;
-
-    const values = storeData?.draft;
+    const sessionData = useSessionDataStore<ArtItemData>(scope);
+    const { storeData, setDraft, commit } = sessionData;
+    const draft = storeData?.draft;
     const snapshot = storeData?.snapshot;
 
+    // Single Item Editor state calculator:
+    const editorIsReady = useMemo(() => {
+        return isSelected && !!draft && !!techniquesRange && !!seriesOptions;
+    }, [draft, isSelected, techniquesRange, seriesOptions]);
     // -----------------------------
     // Dirty & validity (same style as Block/Stream)
     // -----------------------------
-    const scope: EditorKey | null = useMemo(() => {
-        if (!values?.id) return null;
-        return { kind: 'catalog', id: values.id };
-    }, [values?.id]);
 
+    // External store dirty state value:
     const dirtyStoreState = useUnsavedChanges(scope ?? { kind: 'catalog', id: '__none__' });
 
+    // Local dirty state calculator
     const isDirty = useMemo(() => {
-        if (!values || !snapshot) return false;
-        return !deepEqual(snapshot, values);
-    }, [values, snapshot]);
+        if (!draft || !snapshot) return false;
+        return !deepEqual(snapshot, draft);
+    }, [draft, snapshot]);
 
+    // local <-> external isDirty state synchronizer:
     useEffect(() => {
-        if (!scope) return;
+        if (!isSelected || !scope) return;
         if (isDirty !== dirtyStoreState) {
             unsavedChangesStore.setDirty(scope, isDirty);
         }
-    }, [scope, isDirty, dirtyStoreState]);
+    }, [scope, isSelected, isDirty, dirtyStoreState]);
 
+    // External dirty state cleanup callback:
     useEffect(() => {
-        if (!scope) return;
+        if (!isSelected || !scope) return;
         return () => unsavedChangesStore.clear(scope);
-    }, [scope]);
+    }, [isSelected, scope]);
 
+    // Data validator actuator:
     const isValid = useMemo(() => {
-        if (!values || !identity) return false;
-        return isMinimalValid(values, identity);
-    }, [values, identity]);
+        if (!draft || !selectedItemId || !isSelected) return false;
+        return isMinimalValid(draft);
+    }, [draft, isSelected, selectedItemId]);
 
-    const canSave = useMemo(() => !saving && isDirty && isValid, [saving, isDirty, isValid]);
+    const canSave = useMemo(() => !isSaving && isDirty && isValid, [isSaving, isDirty, isValid]);
 
-    const editorIsReady = useMemo(() => !!identity && !!values, [identity, values]);
+    // 🚧 Construction Yard:
 
     // -----------------------------
     // Base refresh (catalog + hopper)
     // -----------------------------
     const refreshBase = useCallback(async (): Promise<void> => {
         try {
-            setLoading(true);
+            setIsLoading(true);
             const cat = await getCatalog();
             setCatalog(cat);
             gCtx.setArtCatalog(cat);
-
-            const hop = await getHopperContent();
-            setHopper(hop);
         } catch (e) {
-            console.error('[CatalogEditorSessionProvider]: Failed to load server data:', e);
+            console.error(`[CatalogEditorSessionProvider]: Failed to load server data: ${e}`);
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     }, [gCtx]);
 
-    // One-time load of techniques + series options
+    // Start new editor session:
+    const resetSession = useCallback(
+        () =>
+            void (async () => {
+                setSelectedItemId(undefined);
+                setScreenMode('select');
+                await refreshBase();
+            }),
+        [refreshBase],
+    );
+
+    // One-time load of techniquesRange + series options
     useEffect(() => {
         let alive = true;
         (async () => {
@@ -166,7 +177,7 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                 const tech = await getTechniques();
                 const s = await getSeriesOptionsCI();
                 if (!alive) return;
-                setTechniques(tech);
+                setTechniquesRange(tech);
                 setSeriesOptions(s);
             } catch (err) {
                 console.error(
@@ -180,79 +191,56 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
         };
     }, []);
 
-    // Keep global workspace catalog in sync
+    // Keep global workspace catalog in sync ????
     useEffect(() => {
         if (catalog) gCtx.setArtCatalog(catalog);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [catalog]);
 
-    // -----------------------------
-    // Session initializer (identity → draft/snapshot bootstrap)
-    // IMPORTANT: identity changes should create/restore external store entries.
-    // -----------------------------
-    useEffect(() => {
-        if (!identity) {
-            setThumb(undefined);
+    // *********** MOUNT BOOTSTRAP ***********
 
-            return;
-        }
+    /*
+    ❗️❗️❗️ 
+    According previous logic new artItem been created by setting mode to create
+    what switched UI to Hopper view and user could select item.
+    Selected item returned to editor as GridItem (as it was saving in hopper)
 
-        // decide mode
-        setMode(identity.mode);
+    Now we have to either prolong Journey mechanics to hopper or emulate create mode
+    by another state or trigger.
 
-        try {
-            const initial = prepareEditorForm(identity);
+    As a good idea looks to add toolbar to select mode with new artItem button
+    or add template as first thumbnail to art items grid. Or both of two.
 
-            // bind thumb
-            if (identity.mode === 'create') {
-                setThumb(identity.item as GridItem);
-            } else {
-                setThumb({
-                    id: identity.item.id,
-                    thumbUrl: identity.item.images.full,
-                    title: identity.item.alt,
-                } as GridItem);
-            }
+    For new item template and add item button, handler can create ticket and 
+    jump to hopper. 
+    The issue is hopper page doesn't have context yet. Maybe it can be 
+    done by code in component with direct access or using hooks 
 
-            // external store init:
-            // - draft set to prepared form
-            // - snapshot set to same baseline (clean)
-            setDraft(initial);
-            setSnapshot(initial);
-        } catch (e) {
-            console.error('[CatalogEditorSessionProvider]: Failed to init session:', e);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [identity]);
+    Yes, having external store for journey data, context isn't necessary.
+    ❗️❗️❗️
+    */
 
-    // -----------------------------
-    // Mount bootstrap (Journey-aware) — same philosophy as BlockEditor bootstrap
-    // -----------------------------
     useEffect(() => {
         void (async () => {
             await refreshBase();
-
             const ticket = arrival('catalog');
             if (!ticket) {
-                // Normal “open catalog editor” case: no journey, stay idle until user selects
-                setIdentity(undefined);
-                setMode('create');
+                //Open catalog editor in 'select' screenMode
+                setScreenMode('select');
                 return;
             }
-
             console.log('[Catalog BOOTSTRAP]: ticket received:');
             console.dir(ticket);
-
             switch (ticket.phase) {
                 case 'outbound': {
+                    setIsJourney(true);
                     // Someone navigated TO catalog editor
                     // We support:
                     // - destination.mode === 'select' (pick an art item)
                     // - destination.mode === 'edit'   (open specific item id)
                     switch (ticket.destination.mode) {
                         case 'select': {
-                            setIdentity(undefined);
-                            setMode('create');
+                            setScreenMode('select');
                             return;
                         }
                         case 'edit': {
@@ -273,7 +261,8 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                                     `[Catalog BOOTSTRAP]: ArtItem not found in catalog: ${id}`,
                                 );
 
-                            setIdentity({ mode: 'edit', item } as EditorTarget);
+                            setSelectedItemId(id);
+                            setScreenMode('edit');
                             return;
                         }
                         default:
@@ -284,168 +273,274 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                 }
 
                 case 'return': {
-                    /**
-                     * Return-to-catalog leg means: catalog initiated a journey to another editor
-                     * (most likely hopper) and now received luggage.
-                     *
-                     * I’m leaving a SAFE skeleton here because you didn’t provide the catalog-specific
-                     * return commands/types yet.
-                     */
+                    /*❗️
+                    Important notice: as a result, journey to hopper has to have left created artItem
+                    object added into the catalog with id, initially transferred to ticket
+                    ❗️*/
+                    if (ticket.returnTo.mode !== 'edit')
+                        throw new Error(`Impossible return to catalog  editor`);
+                    if (!ticket.loot)
+                        throw new Error(`Impossible return to catalog not having loot`);
+                    if (!ticket.loot.ok)
+                        throw new Error(`Impossible return to catalog not having loot`);
+                    editById(ticket.loot.id);
                     console.log('[Catalog BOOTSTRAP]: return leg. ticket:');
                     console.dir(ticket);
-
-                    // If you later add catalog return commands, handle them here by inspecting:
-                    // - ticket.returnEffect
-                    // - ticket.loot
-                    // For now we just keep current state intact.
                     return;
                 }
             }
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    // -----------------------------
-    // Public setters compatible with old API
-    // -----------------------------
-    const setValues: React.Dispatch<React.SetStateAction<ArtItemForm | undefined>> = useCallback(
-        (next) => {
-            const prev = values;
 
-            const resolved =
-                typeof next === 'function'
-                    ? (next as (p: ArtItemForm | undefined) => ArtItemForm | undefined)(prev)
-                    : next;
+    // ************** HANDLERS DEPARTMENT **************
 
-            if (!resolved) {
-                // If consumer clears values — clear store entry too
-                clear();
+    // ************** CREATE NEW ART ITEM **************
+    const onAdd = useCallback(() => {
+        const ticket = printoutTicket();
+        dispatch(ticket);
+        // Create new art item:
+    }, [dispatch]);
+
+    // *************** SELECT AND EDIT ****************
+    const editById = useCallback(
+        (id: string) => {
+            if (!catalog) {
+                console.error(`Item selected while catalog not downloaded`);
                 return;
             }
-
-            // If id changed, we still store by current key (identity-derived),
-            // this is OK short-term; if you want true “move session by id”, tell me and I’ll add it.
-            setDraft(resolved);
+            // Set selected item as edited and change screenMode to 'edit'
+            setSelectedItemId(id);
+            const item = catalog.items[id];
+            if (!item) {
+                console.error(`Selected item not found in catalog`);
+                return;
+            }
+            const key: EditorKey = { kind: 'catalog', id };
+            editSessionsDataStore.saveDraft<ArtItemData>(key, item);
+            editSessionsDataStore.commit<ArtItemData>(key);
+            setThumb({
+                id: item.id,
+                thumbUrl: item.images.full,
+                title: item.title?.en ?? '',
+            });
+            setScreenMode('edit');
         },
-        [values, setDraft, clear],
+        [catalog],
     );
 
-    // -----------------------------
-    // Exit / reset
-    // -----------------------------
-    const resetSession = useCallback(async () => {
-        // clean local selection
-        setIdentity(undefined);
-        setMode('create');
-        setThumb(undefined);
+    const deleteById = useCallback((id: string) => {
+        // Move here logic from UI component
+        /*
+        👷‍♂️😓 
+        Here we call nonexistent backend method give dependencies, that has to return 
+        list of blocks and streams, where deleting art object got involved. 
 
-        // clear store state for current key
-        clear();
+        And what to do with this info???!!! 
+            1. Every dependence has to be a link to object, and on click start journey to 
+                corresponding editor to fix future issues. And back to renewed list.
+            2. Dialog window has to have ignore button, and what happen after? -> Every 
+                involved block get blanc slot with "Missing art object message"
 
-        await refreshBase();
-    }, [clear, refreshBase]);
+        */
+        void (async () => {
+            if (!isSelected || !selectedItemId) return;
+            const depsResp = await getDependents(selectedItemId);
+            if (depsResp.response !== 'ok')
+                console.error(`Failed to get dependents list: ${depsResp.reason}`);
+            //TODO:
+            /*
+            1. Add 'outbound' ticket processing to the stream editor to process 
+                dependencies resolver calls;
+            2. Make backend endpoint for ArtItemDependents type response;
+            3. Make UI processing for delete response!!!!
 
-    const exit = useCallback(() => {
-        if (saving) return;
+            */
+        })();
+    });
 
-        if (isDirty && !confirm('Discard unsaved changes?')) return;
+    const finalizeAfterSave = useCallback(
+        (savedId: string) => {
+            const ticket = peekTicket();
+            if (ticket?.phase === 'return' && ticket.destination.editor === 'catalog') {
+                console.log(
+                    `[finalizeAfterSave]: taken decision to return home with blockId: ${savedId}`,
+                );
+                setIsJourney(false);
+                returnHome('catalog', { ok: true, id: savedId });
+            }
+            resetSession();
+        },
+        [peekTicket, returnHome, resetSession],
+    );
 
-        // If we are in journey return phase — we should return home with "cancel"
-        const t = peekTicket();
-        if (t?.phase === 'return' && t.destination.editor === 'catalog') {
-            // JumpResult union in your codebase allows { ok:false } (as used in BlockEditor SaveResult style)
-            returnHome('catalog', { ok: false });
-            return;
-        }
+    // ----------------- Save procedure -----------------
 
-        void resetSession();
-    }, [saving, isDirty, peekTicket, returnHome, resetSession]);
+    const save = useCallback(async (): Promise<SaveResult> => {
+        if (!draft) return { ok: false };
 
-    // -----------------------------
-    // Save
-    // -----------------------------
-    const save = useCallback(async () => {
-        if (!values || !identity) return;
-        if (!canSave) return;
-
-        if (!isValid) {
-            alert('Minimal required fields are missing (ID + Image).');
-            return;
-        }
-
-        setSaving(true);
+        setIsSaving(true);
         try {
-            const clean = sanitizeForm(values);
-            const payload = buildShipment(identity, clean);
+            const clean = sanitizeForm(draft);
+            const payload = draftToShipmentConvertor(clean);
 
             const code = await updateCatalog(payload);
             if (code !== 200) throw new Error(`Catalog update unsuccessful! Code: ${code}`);
-
             // commit local external store
             commit();
 
             // refresh base datasets (catalog/hopper)
-            await refreshBase();
-
-            // If we are in Journey and catalog acts as selector/step, return home with ok+id
-            const t = peekTicket();
-            if (t?.phase === 'return' && t.destination.editor === 'catalog') {
-                returnHome('catalog', { ok: true, id: clean.id });
-                return;
-            }
-        } catch (e) {
-            console.error('[CatalogEditorSessionProvider]: Save failed', e);
+        } catch (err) {
+            console.error(`Failed to save art item: ${err}`);
+            return { ok: false };
         } finally {
-            setSaving(false);
+            await refreshBase();
+            setIsSaving(false);
         }
-    }, [values, identity, canSave, isValid, commit, refreshBase, peekTicket, returnHome]);
+        return { ok: true, id: draft.id };
+    }, [commit, draft, refreshBase]);
 
-    const value: CatalogEditorSession = useMemo(
-        () => ({
-            mode,
-            catalog,
-            hopper,
-            identity,
-            values,
-            setIdentity,
-            setValues,
-            setMode,
+    // ----------- APPLY ------------
+    // apply button handler
+    const applyById = useCallback(
+        (id: string) => {
+            // Convey selected item to journey
+            void (async () => {
+                if (!isJourney || !id) return;
+                finalizeAfterSave(id);
+            })();
+        },
+        [finalizeAfterSave, isJourney],
+    );
+    // ---------- EXIT ---------
+    // exit button handler
+    const exit = useCallback(() => {
+        //Jump one level up
+        if (isSaving) return;
+        if (isDirty && !confirm(`Discard unsaved art item changes?`)) return;
+        resetSession();
+    }, [isSaving, isDirty, resetSession]);
 
-            editorIsReady,
-
-            isDirty,
-            isValid,
-            canSave,
-            loading,
-
-            saving,
-            save,
-            exit,
-
-            thumb,
-            techniques,
-            seriesOptions,
-        }),
-        [
-            mode,
-            catalog,
-            hopper,
-            identity,
-            values,
-            setIdentity,
-            setValues,
-            editorIsReady,
-            isDirty,
-            isValid,
-            canSave,
-            loading,
-            saving,
-            save,
-            exit,
-            thumb,
-            techniques,
-            seriesOptions,
-        ],
+    // ----------- SAVE ----------
+    // save button handler
+    const onSaveClick = useCallback(
+        () =>
+            void (async () => {
+                // Complete presave check and save, possibly convey to journey
+                const r = await save();
+                if (r.ok && isJourney) finalizeAfterSave(r.id);
+            })(),
+        [finalizeAfterSave, save, isJourney],
     );
 
+    const onChangeTags = useCallback(
+        (next: string[] | undefined) => {
+            // Transfer here form UI
+            if (!draft) return;
+            if (!next) return;
+            const normalized = next.map((t) => t.trim()).filter(Boolean);
+
+            const seen = new Set<string>();
+            const uniq: string[] = [];
+            for (const t of normalized) {
+                const key = t.toLowerCase();
+                if (seen.has(key)) continue;
+                seen.add(key);
+                uniq.push(t);
+            }
+            setDraft({ ...draft, tags: uniq });
+        },
+        [setDraft, draft],
+    );
+
+    const onDraftChange = useCallback((next: ArtItemData) => setDraft(next), [setDraft]);
+    // ************** END OF HANDLERS DEPARTMENT **************
+
+    // Single item editor props object:
+    const editorProps: SingleItemEditorProps = useMemo(() => {
+        return {
+            // Data:
+            id: selectedItemId,
+            techniquesRange,
+            seriesOptions,
+            thumb,
+
+            // Derived flags:
+            isDirty,
+            draft,
+            editorIsReady,
+
+            // Setters:
+            onDraftChange,
+        };
+    }, [
+        selectedItemId,
+        draft,
+        onDraftChange,
+        seriesOptions,
+        editorIsReady,
+        thumb,
+        isDirty,
+        techniquesRange,
+    ]);
+
+    const toolbarModel: CatalogToolbarModel = useMemo(() => {
+        return {
+            canSave,
+            isSaving,
+            tags: draft?.tags,
+            commands: {
+                add: onAdd,
+                editById,
+                deleteById,
+                applyById,
+                save: onSaveClick,
+                exit,
+                onChangeTags,
+            } as CatalogCommands,
+        };
+    }, [
+        canSave,
+        isSaving,
+        applyById,
+        editById,
+        deleteById,
+        onAdd,
+        onSaveClick,
+        exit,
+        onChangeTags,
+        draft?.tags,
+    ]);
+    const value: CatalogEditorSession = useMemo(
+        () => ({
+            // Props:
+            editorProps,
+            toolbarModel,
+
+            // Data:
+            catalog,
+            draft,
+
+            // Handlers
+            onEscape: exit,
+
+            // Derived flags:
+            screenMode,
+            isSelected,
+            editorIsReady,
+            isLoading,
+        }),
+        [
+            editorProps,
+            screenMode,
+            draft,
+            catalog,
+            toolbarModel,
+            editorIsReady,
+            isSelected,
+            isLoading,
+            exit,
+        ],
+    );
     return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

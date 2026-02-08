@@ -1,6 +1,6 @@
 // TechniqueListEditor.tsx
 import type { TechniquesJson } from '@/entities/art';
-import { useEditorSession } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
+import { SingleItemEditorProps } from '@/pages/admin/catalogEditorPage/catalogEditor.types';
 import { useMemo, useState } from 'react';
 type TechniqueItem = { key: string; label: string };
 
@@ -12,8 +12,8 @@ function normalizeItems(raw: Array<string | TechniqueItem>): TechniqueItem[] {
     );
 }
 
-export default function TechniqueListEditor() {
-    const { values, setValues, techniques } = useEditorSession();
+export default function TechniqueListEditor(props: SingleItemEditorProps) {
+    const { draft, setDraft, techniquesRange } = props;
 
     // показывать ли панель добавления (категория+техника)
     const [adding, setAdding] = useState(false);
@@ -23,41 +23,38 @@ export default function TechniqueListEditor() {
     // категории (левая часть выпадающего выбора)
     const categories = useMemo(
         () =>
-            techniques
-                ? Object.entries(techniques as TechniquesJson).map(([key, def]) => ({
+            techniquesRange
+                ? Object.entries(techniquesRange as TechniquesJson).map(([key, def]) => ({
                       key,
                       label: def.label ?? key,
                   }))
                 : [],
-        [techniques],
+        [techniquesRange],
     );
 
     // актуальный список техник по выбранной категории
     const techsForCat = useMemo<TechniqueItem[]>(() => {
-        if (!techniques || !selectedCategory) return [];
-        const def = (techniques as TechniquesJson)[selectedCategory];
+        if (!techniquesRange || !selectedCategory) return [];
+        const def = (techniquesRange as TechniquesJson)[selectedCategory];
         return normalizeItems(def?.items ?? []);
-    }, [selectedCategory, techniques]);
+    }, [selectedCategory, techniquesRange]);
 
     // выбранные техники из формы (строки)
-    const chosen = values?.techniques ?? [];
+    const chosen = draft?.techniques ?? [];
 
     const addTechnique = (tech: string) => {
-        setValues((prev) => {
-            if (!prev) throw new Error('Form not ready');
-            const nextList = prev.techniques ? [...prev.techniques] : [];
-            if (!nextList.includes(tech)) nextList.push(tech);
-            return { ...prev, techniques: nextList };
-        });
+        if (!draft) throw new Error('Form not ready');
+        const nextList = draft.techniques ? [...draft.techniques] : [];
+        if (!nextList.includes(tech)) nextList.push(tech);
+        setDraft({ ...draft, techniques: nextList });
+
         setAdding(false); // close pane after got added
     };
 
     const removeTechnique = (tech: string) => {
-        setValues((prev) => {
-            if (!prev) throw new Error('Form not ready');
-            const nextList = (prev.techniques ?? []).filter((t) => t !== tech);
-            return { ...prev, techniques: nextList };
-        });
+        if (!draft) throw new Error('Form not ready');
+        const nextList = (draft.techniques ?? []).filter((t) => t !== tech);
+        return { ...draft, techniques: nextList };
     };
 
     return (

@@ -18,7 +18,7 @@ async def updater(payload: ArtShipmentModel):
     return {"status": "ok"}
 
 
-# this endpoint should retrun lists of blocks and streams that use the artItem with id
+# 👷‍♂️😓 this endpoint should retrun lists of blocks and streams that use the artItem with id
 @router.get("/dependencies/{id}")
 async def get_dependencies(id):
     return {"blocks": [], "streams": []}

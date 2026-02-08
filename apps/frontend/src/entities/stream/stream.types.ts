@@ -1,6 +1,6 @@
 // src/entities/stream/Stream.ts
 
-export type StreamStatus = 'draft' | 'ready' | 'archived';
+export type StreamStatus = 'draft' | 'ready' | 'archived' | 'published';
 
 export type StreamData = {
     streamId: string; // Slug/id, also filename (e.g., "home")

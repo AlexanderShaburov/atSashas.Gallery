@@ -50,7 +50,7 @@ export async function deleteCollection(collection: BlocksCollectionJSON) {
 
         return true;
     } catch (err) {
-        console.error('Network error while deleting collection file: ', err);
+        // console.error('Network error while deleting collection file: ', err);
         return false;
     }
 }

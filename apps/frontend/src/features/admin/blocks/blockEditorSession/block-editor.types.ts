@@ -8,7 +8,6 @@ import type {
     EditTarget,
 } from '@/entities/block';
 import type { UiErrorState } from '@/entities/common';
-import { GridItem } from '@/entities/grid';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 
 export type BlockEditorTarget = { mode: 'create' } | { mode: 'edit'; block: Block };
@@ -26,7 +25,7 @@ export type BlockEditorSession = {
     // setMode: (m: BlockEditorMode) => void;
     currentStack: ScreenModeStack;
     setCollection: (c: BlocksCollectionJSON | undefined) => void;
-    setSelectedArtItem: (i: GridItem | undefined) => void;
+    // setSelectedArtItem: (i: GridItem | undefined) => void;
     onHit: (h: BlockHitEvent) => void;
     unHit: () => void;
     onDelete: () => void;

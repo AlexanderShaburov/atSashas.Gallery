@@ -1,17 +1,17 @@
 // CreateForm.tsx
 import type { Availability, ISODate } from '@/entities/common';
-import { useEditorSession } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
 import '@/features/admin/catalogEditor/ui/CreateForm/CreateForm.css';
 import DimensionsInput from '@/features/admin/catalogEditor/ui/CreateForm/UX/DimensionsInput';
 import LangInput from '@/features/admin/catalogEditor/ui/CreateForm/UX/LangInput';
 import MoneyInput from '@/features/admin/catalogEditor/ui/CreateForm/UX/MoneyInput';
 // import TechniqueListEditor from '@/features/admin/ui/CreateForm/UX/TechniqueListEditor';
 import TechniqueListEditor from '@/features/admin/catalogEditor/ui/CreateForm/UX/TechniqueListEditor';
+import { SingleItemEditorProps } from '@/pages/admin/catalogEditorPage/catalogEditor.types';
 
-export function CreateForm() {
-    const { values, setValues, seriesOptions, editorIsReady } = useEditorSession();
+export function CreateForm(props: SingleItemEditorProps) {
+    const { seriesOptions, editorIsReady, draft, onDraftChange } = props;
 
-    if (!editorIsReady || !values) return null;
+    if (!editorIsReady || !draft) return null;
 
     if (editorIsReady) {
         return (
@@ -25,12 +25,9 @@ export function CreateForm() {
                         id="dateCreated"
                         type="date"
                         className="cf-input"
-                        value={values?.dateCreated ?? ''}
+                        value={draft?.dateCreated ?? ''}
                         onChange={(e) =>
-                            setValues((prev) => {
-                                if (!prev) throw new Error('Form not ready');
-                                return { ...prev, dateCreated: e.target.value as ISODate };
-                            })
+                            onDraftChange({ ...draft, dateCreated: e.target.value as ISODate })
                         }
                     />
                 </div>
@@ -38,20 +35,15 @@ export function CreateForm() {
                 {/* Title */}
                 <LangInput
                     label="Title"
-                    value={{ en: values?.title?.en ?? '', ru: values?.title?.ru ?? '' }}
+                    value={{ en: draft?.title?.en ?? '', ru: draft?.title?.ru ?? '' }}
                     className="cf-field--title"
                     inputId="title_multi"
-                    onChange={(e) =>
-                        setValues((prev) => {
-                            if (!prev) throw new Error('Form not ready');
-                            return { ...prev, title: e };
-                        })
-                    }
+                    onChange={(e) => onDraftChange({ ...draft, title: e })}
                     placeholder="Here is artwork name"
                 />
 
                 {/* Select techniques from the list */}
-                <TechniqueListEditor />
+                <TechniqueListEditor {...props} />
 
                 {/* Series with datalist */}
                 <div className="cf-row">
@@ -62,13 +54,8 @@ export function CreateForm() {
                         id="series"
                         list="series-list"
                         className="cf-input"
-                        value={values?.series ?? ''}
-                        onChange={(e) =>
-                            setValues((prev) => {
-                                if (!prev) throw new Error('Form not ready');
-                                return { ...prev, series: e.target.value };
-                            })
-                        }
+                        value={draft?.series ?? ''}
+                        onChange={(e) => onDraftChange({ ...draft, series: e.target.value })}
                         placeholder="Start typing or pick…"
                     />
                     <datalist id="series-list">
@@ -86,17 +73,15 @@ export function CreateForm() {
                     <input
                         id="tags"
                         className="cf-input"
-                        value={values?.tags?.join(', ') ?? ''}
+                        value={draft?.tags?.join(', ') ?? ''}
                         onChange={(e) => {
                             const raw = e.target.value;
                             const tags = raw
                                 .split(',')
                                 .map((s) => s.trim())
                                 .filter(Boolean);
-                            setValues((prev) => {
-                                if (!prev) throw new Error('Form not ready');
-                                return { ...prev, tags: tags.length ? tags : undefined };
-                            });
+                            if (!tags) return;
+                            onDraftChange({ ...draft, tags });
                         }}
                         placeholder="comma, separated (e.g. roses, landscape)"
                     />
@@ -111,12 +96,9 @@ export function CreateForm() {
                         id="notes"
                         className="cf-textarea"
                         rows={3}
-                        value={values?.notes ?? ''}
+                        value={draft?.notes ?? ''}
                         onChange={(e) =>
-                            setValues((prev) => {
-                                if (!prev) throw new Error('Form not ready');
-                                return { ...prev, notes: e.target.value as string };
-                            })
+                            onDraftChange({ ...draft, notes: e.target.value as string })
                         }
                         placeholder="Say something about this artwork here."
                     />
@@ -130,11 +112,11 @@ export function CreateForm() {
                     <select
                         id="availability"
                         className="cf-select"
-                        value={values?.availability}
+                        value={draft?.availability}
                         onChange={(e) =>
-                            setValues((prev) => {
-                                if (!prev) throw new Error('Form not ready');
-                                return { ...prev, availability: e.target.value as Availability };
+                            onDraftChange({
+                                ...draft,
+                                availability: e.target.value as Availability,
                             })
                         }
                     >
@@ -152,13 +134,11 @@ export function CreateForm() {
                     <div className="cf-row--inline">
                         <DimensionsInput
                             label="Dimensions"
-                            value={values?.dimensions}
-                            onChange={(size) =>
-                                setValues((prev) => {
-                                    if (!prev) throw new Error('Form not ready');
-                                    return { ...prev, dimensions: size };
-                                })
-                            }
+                            value={draft?.dimensions}
+                            onChange={(size) => {
+                                if (!size) return;
+                                onDraftChange({ ...draft, dimensions: size });
+                            }}
                         />
                     </div>
                 </div>
@@ -166,26 +146,16 @@ export function CreateForm() {
                 {/* Price */}
                 <MoneyInput
                     label="Artwork price"
-                    value={values?.price}
-                    onChange={(price) =>
-                        setValues((prev) => {
-                            if (!prev) throw new Error('Form not ready');
-                            return { ...prev, price: price };
-                        })
-                    }
+                    value={draft?.price}
+                    onChange={(price) => onDraftChange({ ...draft, price: price })}
                 />
                 {/* ALT */}
                 <LangInput
                     label="Alt"
                     className="cf-field--alt"
                     inputId="alt_multi"
-                    value={values?.alt}
-                    onChange={(next) =>
-                        setValues((prev) => {
-                            if (!prev) throw new Error('Form not ready');
-                            return { ...prev, alt: next };
-                        })
-                    }
+                    value={draft?.alt}
+                    onChange={(next) => onDraftChange({ ...draft, alt: next })}
                     placeholder="Artwork short description"
                 />
             </form>

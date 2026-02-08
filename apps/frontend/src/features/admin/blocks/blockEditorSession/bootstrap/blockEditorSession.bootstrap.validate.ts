@@ -35,7 +35,7 @@ export type BlockReturnBootstrapInsertValidated<L extends GalleryLayout> = {
     blockId: string;
     layout: L;
     position: PositionForLayout<L>;
-    bootstrap: DraftSnapshot<GalleryBlock & { layout: L }>;
+    savedData: DraftSnapshot<GalleryBlock & { layout: L }>;
 };
 
 function assertPendingSelectionSlotMatchesLayout<L extends GalleryLayout>(
@@ -189,6 +189,6 @@ export function validateBlockReturnBootstrapInsertArt<L extends GalleryLayout>(
         blockId,
         layout,
         position: pendingSelection.hit.slot, // now PositionForLayout<L>
-        bootstrap: bootstrapData,
+        savedData: bootstrapData,
     };
 }

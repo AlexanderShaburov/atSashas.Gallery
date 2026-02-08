@@ -6,8 +6,13 @@ import {
     getHopperContent,
     uploadImage,
 } from '@/features/admin/catalogEditor/api';
+import { useArrival, useReturnHome } from '@/features/admin/shared/transporter/transporter';
 import ArtItemGrid from '@/features/admin/shared/ui/ArtItemGrid/ArtItemGrid';
 import '@/pages/admin/Upload.css';
+import { generateId } from '@/shared/lib/id/generateId';
+import { JumpResult } from '@/shared/nav';
+import { ToolbarCtx, ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
+import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
 import { useEffect, useState, type DragEvent } from 'react';
 
 export default function UploadPage() {
@@ -16,6 +21,10 @@ export default function UploadPage() {
     const [uploaded, setUploaded] = useState<GridItem[]>([]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [isJourney, setIsJourney] = useState(false);
+
+    const arrival = useArrival();
+    const returnHome = useReturnHome();
 
     // Handle grid selection ( deselect: undefined)
     const handleSelect = (item: GridItem | undefined) => {
@@ -25,15 +34,22 @@ export default function UploadPage() {
         }
         setSelectedId(item.id);
     };
-    // Download hopper content once at page load
+    // ************** BOOTSTRAP MOUNT ***************
     useEffect(() => {
         (async () => {
+            // Download hopper content once at page load
             const artItemGrid = await getHopperContent();
             console.log(`[UploadPage]: artItemGrid (Hopper) is: `);
             console.dir(artItemGrid);
             setUploaded(artItemGrid);
+            const ticket = arrival('hopper');
+            if (!ticket) return;
+            if (ticket.phase === 'return') throw new Error(`Hooper bootstrap got return ticket`);
+            setIsJourney(true);
         })();
-    }, []);
+    }, [arrival]);
+
+    // ************* HANDLERS SECTION *************
 
     async function handleUpload() {
         if (!files.length) return;
@@ -43,13 +59,8 @@ export default function UploadPage() {
 
             for (const file of files) {
                 const { url, ok } = await uploadImage(file, 'hopper');
-
                 if (ok && url) {
-                    const item: GridItem = {
-                        id: file.name,
-                        thumbUrl: url,
-                    };
-                    newGrid.push(item);
+                    newGrid.push({ id: generateId('art'), thumbUrl: url });
                 }
             }
 
@@ -60,6 +71,19 @@ export default function UploadPage() {
         }
     }
 
+    // ------------- APPLY Handler ----------------
+    const handleApply = () => {
+        if (!isJourney) return;
+        if (!selectedId) return;
+        const image = uploaded.find((i) => i.id === selectedId);
+        const loot: JumpResult = {
+            ok: true,
+            id: selectedId,
+            output: image,
+        };
+        returnHome('hopper', loot);
+    };
+    // ------------- DELETE Handler ---------------
     // Remove on FE for now
     function handleDelete() {
         if (!selectedId) return;
@@ -98,7 +122,14 @@ export default function UploadPage() {
 
         setFiles((prev) => [...prev, ...dropped]);
     }
-
+    const tools: ToolKey[] = isJourney ? ['delete', 'apply'] : ['delete'];
+    const ctx: ToolbarCtx = {
+        canSave: true,
+        isSaving: false,
+        exit: () => {},
+        onDelete: handleDelete,
+        onApply: handleApply,
+    };
     return (
         <div className="upload-page">
             <h1>Upload artworks</h1>
@@ -161,7 +192,12 @@ export default function UploadPage() {
                     </button>
                 </div>
 
-                <ArtItemGrid artCollection={uploaded} setIdentity={handleSelect} />
+                <ArtItemGrid
+                    artCollection={uploaded}
+                    selectedItemId={undefined}
+                    setItemSelected={handleSelect}
+                />
+                <SingleEditorToolbar tools={tools} ctx={ctx} />
             </section>
         </div>
     );

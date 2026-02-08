@@ -38,7 +38,7 @@ export function isMinimalValid(form: ArtItemData): boolean {
 }
 
 // Normalization. Now soft:
-export function sanitizeForm(v: ArtItemForm): ArtItemForm {
+export function sanitizeForm(v: ArtItemData): ArtItemData {
     const s = { ...v };
     if (typeof s.id === 'string') s.id = s.id.trim();
     return s;

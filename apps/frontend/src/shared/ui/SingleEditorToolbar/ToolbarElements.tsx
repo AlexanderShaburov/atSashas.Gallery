@@ -6,7 +6,7 @@ export function AddBlockButton({ onClick }: { onClick: () => void }) {
     return (
         <div className="set-actions">
             <button type="button" className="set-btn" onClick={onClick}>
-                Add Block
+                Add
             </button>
         </div>
     );
@@ -29,21 +29,21 @@ export function ApplyButton({ onApply }: { onApply: () => void }) {
         </div>
     );
 }
-export function DeleteButton({ exit }: { exit: () => void }) {
+export function DeleteButton({ onDelete }: { onDelete: () => void }) {
     return (
         <>
             {/* LEFT */}
             <div className="set-actions set-actions--left">
-                <button type="button" className="set-btn set-btn--danger" onClick={exit}>
+                <button type="button" className="set-btn set-btn--danger" onClick={onDelete}>
                     🗑 Delete
                 </button>
             </div>
         </>
     );
 }
-export function ExitButton({ exit }: { exit: () => void }) {
+export function ExitButton({ onExit }: { onExit: () => void }) {
     return (
-        <button type="button" className="set-btn set-btn--secondary" onClick={exit}>
+        <button type="button" className="set-btn set-btn--secondary" onClick={onExit}>
             ✖ Exit
         </button>
     );

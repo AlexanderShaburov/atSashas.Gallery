@@ -7,6 +7,7 @@ import { BlockWrapper } from '@/features/admin/streams/ui/Wrapper/BlockWrapper';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
 import './SingleStreamEditor.css';
 
+import { ToolbarCtx } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { ThreeDotCommand } from '@/shared/ui/ThreeDotMenu/threeDot.types';
 import {
     ThreeDotMenuItem,
@@ -19,16 +20,7 @@ type Props = {
     stream: StreamData;
     threeDotMenu: (command: ThreeDotCommand) => void; // executes in session
     editBlock: (id: string) => void;
-    toolbarProps: {
-        canSave: boolean;
-        saving: boolean;
-        addBlock?: () => void;
-        save: () => void;
-        exit: () => void;
-        onDelete: () => void;
-        onChangeTags?: (tags: string[]) => void;
-        onEditMetadata?: () => void;
-    };
+    toolbarProps: ToolbarCtx;
 };
 
 export function SingleStreamEditor({ stream, threeDotMenu, editBlock, toolbarProps }: Props) {
@@ -147,7 +139,7 @@ export function SingleStreamEditor({ stream, threeDotMenu, editBlock, toolbarPro
 
             <div className="set__toolbar">
                 <SingleEditorToolbar
-                    tools={['delButton', 'tags', 'addBlock', 'editMeta', 'exit', 'save']}
+                    tools={['delete', 'tags', 'add', 'edit', 'exit', 'save']}
                     ctx={toolbarProps}
                 />
             </div>

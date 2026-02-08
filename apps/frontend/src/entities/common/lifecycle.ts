@@ -1,4 +1,4 @@
-export type EntityLifecycle = 'template' | 'draft' | 'saved';
+export type EntityLifecycle = 'template' | 'draft' | 'saved' | 'published';
 
 export type MetaAction = 'create' | 'edit' | 'idle';
 
