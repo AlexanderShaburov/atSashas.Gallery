@@ -11,8 +11,6 @@ import { useEffect, useState } from 'react';
 
 export function BlockEditor() {
     const session: BlockEditorSession = useBlockEditorSession();
-    const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
-
     const [filter, setFilter] = useState<BlockFilterState>({
         tags: [],
         kind: undefined,
@@ -28,7 +26,7 @@ export function BlockEditor() {
 
     const toolbarProps = {
         canSave: session.canSave,
-        saving: session.saving,
+        isSaving: session.saving,
         save: session.onSaveClick,
         exit: session.exit,
         onDelete: session.onDelete,

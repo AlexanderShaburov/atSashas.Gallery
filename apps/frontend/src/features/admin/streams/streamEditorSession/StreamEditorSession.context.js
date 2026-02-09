@@ -1,0 +1,644 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import { useArrival, useDispatch } from '@/features/admin/shared/transporter/transporter';
+import { StreamEditorCtx } from '@/features/admin/streams/hooks/useStreamEditor';
+import { validateStreamForm } from '@/features/admin/streams/utils';
+import { deepEqual } from '@/shared/lib/checkers/checkers';
+import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
+import { generateId } from '@/shared/lib/id/generateId';
+import { useUnsavedChanges } from '@/shared/state';
+import { editSessionsDataStore } from '@/shared/state/editorSessionsData.store';
+import { unsavedChangesStore } from '@/shared/state/unsavedChanges.store';
+import { useSessionDataStore } from '@/shared/state/useEditorSessionsDataStore';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { resolveStreamBootstrapData, validateStreamReturnBootstrap } from './bootstrap';
+import { deleteStream, loadStreamsIndex, openStream, requestNewStream, updateStream, } from './data/streamEditorSession.utils';
+import { assertReturnCommand } from './guards/streamEditorSession.guards';
+const SELECT_MODE = { kind: 'select' };
+export function StreamEditorSessionProvider({ children }) {
+    // ****************** UI LAYER ******************
+    // Mode of stream screen
+    // Stack of mode sequence instead of screenMode
+    // const [screenMode, setScreenMode] = useState<StreamScreenMode>({ kind: 'select' });
+    const [modeStack, setModeStack] = useState([{ kind: 'select' }]);
+    // Id of selected stream: ?????????????????
+    const [selectedStreamId, setSelectedStreamId] = useState(undefined);
+    // Streams list object
+    const [streamsIndex, setStreamsIndex] = useState([]);
+    // Saving lifecycle -> all about SAVING
+    const [lifecycle, setLifecycle] = useState({ saveState: 'idle' });
+    // isLoading flag
+    const [isLoading, setIsLoading] = useState(false);
+    const [pendingFocus, setPendingFocus] = useState(null);
+    const metaIntent = useRef({ action: 'idle' });
+    // ****************** EDITOR DATA EXTRACTION (EXTERNAL STORE) ******************
+    // Read saved editor values from the store:
+    const key = selectedStreamId
+        ? { kind: 'stream', id: selectedStreamId }
+        : undefined;
+    const sessionData = useSessionDataStore(key);
+    const { storeData, setDraft, commit } = sessionData;
+    const draft = storeData?.draft;
+    const snapshot = storeData?.snapshot;
+    //  ?????????????? TO CHANGE ??????????????
+    const gCtx = useEditorWorkspace();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const collection = gCtx.currentBlocksCollection?.blocks ?? {};
+    //  ?????????????? TO CHANGE END ??????????????
+    // ************* NAVIGATION *************
+    // read ticket getter
+    const arrival = useArrival();
+    const dispatch = useDispatch();
+    // ************* STATE LOGIC *************
+    const isValid = useMemo(() => (draft ? validateStreamForm(draft) : false), [draft]);
+    const scope = useMemo(() => (selectedStreamId ? { kind: 'stream', id: selectedStreamId } : null), [selectedStreamId]);
+    const dirtyStoreState = useUnsavedChanges(scope ?? { kind: 'stream', id: '__none__' });
+    const isDirty = useMemo(() => {
+        if (!draft)
+            return false;
+        return !deepEqual(snapshot, draft);
+    }, [snapshot, draft]);
+    // Synchronize local isDirty and unsavedChangesStore:
+    useEffect(() => {
+        if (!scope)
+            return;
+        if (isDirty !== dirtyStoreState) {
+            unsavedChangesStore.setDirty(scope, isDirty);
+        }
+    }, [scope, isDirty, dirtyStoreState]);
+    // unsavedChangesStore cleanUp:
+    useEffect(() => {
+        if (!scope)
+            return;
+        return () => unsavedChangesStore.clear(scope);
+    }, [scope]);
+    const isSaving = useMemo(() => {
+        return lifecycle.saveState === 'saving';
+    }, [lifecycle]);
+    // ************* STATE LOGIC END *************
+    // ************** MODE STACK CONTROL **************
+    const pushMode = useCallback((next) => {
+        setModeStack((s) => (s[s.length - 1]?.kind === next.kind ? s : [...s, next]));
+    }, []);
+    const onEscape = useCallback(() => {
+        console.log(`[onEscape]: Called`);
+        setModeStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
+    }, []);
+    const currentStack = useMemo(() => {
+        console.log(`[currentStack]: current mode is: ${modeStack.length - 1}`);
+        return {
+            mode: modeStack[modeStack.length - 1] ?? SELECT_MODE,
+            onEscape: onEscape,
+        };
+    }, [modeStack, onEscape]);
+    // ************** MODE STACK CONTROL END **************
+    // Reset session helpers:
+    const resetSelectSession = useCallback(() => {
+        // If external data store has to be cleaned here ??????
+        setSelectedStreamId(undefined);
+        pushMode({ kind: 'select' });
+    }, [pushMode]);
+    const renewStreamsIndex = useCallback(async () => {
+        try {
+            console.log(`[renewStreamsIndex]: Called`);
+            setIsLoading(true);
+            const lst = await loadStreamsIndex();
+            console.log(`[renewStreamsIndex]: streams index loaded`);
+            if (!lst)
+                throw new Error('Streams list loading error');
+            setStreamsIndex(lst);
+        }
+        catch (err) {
+            console.error(`StreamEditorSession error: ${err}`);
+        }
+        finally {
+            setIsLoading(false);
+        }
+    }, []);
+    // while hooks are undefined
+    const streamStoreDirectSave = (draft, snapshot) => {
+        const key = { kind: 'stream', id: draft.streamId };
+        editSessionsDataStore.saveDraft(key, draft);
+        if (snapshot)
+            editSessionsDataStore.setSnapshot(key, draft);
+        unsavedChangesStore.setDirty(key, false);
+    };
+    const applyInsertBlock = (draft, command, luggage) => {
+        assertReturnCommand('streamInsertBlock', command, luggage);
+        const { insertAt } = command;
+        const clampedIdex = Math.max(0, Math.min(insertAt, draft.blockIds.length));
+        const nextBlocks = [
+            ...draft.blockIds.slice(0, clampedIdex),
+            luggage.id,
+            ...draft.blockIds.slice(clampedIdex),
+        ];
+        streamStoreDirectSave({ ...draft, blockIds: nextBlocks });
+    };
+    const applyReplaceBlock = (draft, command, luggage) => {
+        assertReturnCommand('streamReplaceBlock', command, luggage);
+        const newBlockId = luggage.id;
+        const replaceBlockId = command.replaceBlockId;
+        const index = draft.blockIds.findIndex((b) => b === replaceBlockId);
+        if (index < 0) {
+            throw new Error(`Replaced block with id: ${replaceBlockId} not found in the current stream`);
+        }
+        const nextBlocks = [
+            ...draft.blockIds.slice(0, index),
+            newBlockId,
+            ...draft.blockIds.slice(index + 1),
+        ];
+        streamStoreDirectSave({ ...draft, blockIds: nextBlocks });
+    };
+    // *************** MOUNT BOOTSTRAP ***************
+    useEffect(() => {
+        (async () => {
+            // Renew streams list:
+            await renewStreamsIndex();
+            // check ticket if we just return from the journey
+            const arrivalTicket = arrival('stream');
+            // if no ticket -> it is new session form zero
+            if (!arrivalTicket) {
+                // IMPORTANT
+                // ??????????????????????????????????????????? !!!!!!!!!!!!!!!!!!!!!!!!!
+                // If we reset session shouldn't we reset editorSessionData.store values?
+                resetSelectSession();
+                return;
+            }
+            console.log(`[BOOTSTRAP]: Got ticket:`);
+            console.dir(arrivalTicket);
+            const bootstrapId = arrivalTicket.returnTo.objectId;
+            const key = (selectedStreamId ?? bootstrapId)
+                ? { kind: 'stream', id: selectedStreamId ?? bootstrapId }
+                : undefined;
+            setSelectedStreamId(bootstrapId);
+            let storeData;
+            storeData = editSessionsDataStore.get(key);
+            if (!storeData) {
+                storeData = await resolveStreamBootstrapData(bootstrapId);
+            }
+            console.log(`[BOOTSTRAP]: Got stored data:`);
+            console.dir(storeData);
+            // Get validated context data:
+            const v = validateStreamReturnBootstrap(arrivalTicket, storeData);
+            console.log(`[BOOTSTRAP]: Got validated values:`);
+            console.dir(v);
+            // Before complete earlier started actions we have to
+            // check statStore and journeyStore matching (checked in validateStreamReturnTicket)
+            const id = v.streamId;
+            if (id) {
+                setSelectedStreamId(id);
+                console.log(`[BOOTSTRAP]: selected stream id set to : ${id}`);
+            }
+            // set screenMode to 'edit' state:
+            pushMode({ kind: 'edit' });
+            let focusBlockId = null;
+            // when ticket is valid let's finish command started before dispatch:
+            switch (v.command.kind) {
+                case 'streamInsertBlock':
+                    console.log(`[BOOTSTRAP]: streamInsertBlock branch selected`);
+                    console.log('[BOOTSTRAP] selectedStreamId BEFORE set:', selectedStreamId);
+                    console.log('[BOOTSTRAP] will setSelectedStreamId:', v.streamId);
+                    applyInsertBlock(v.storeData.draft, v.command, v.loot);
+                    focusBlockId = v.loot.id;
+                    break;
+                case 'streamReplaceBlock':
+                    console.log(`[BOOTSTRAP]: streamReplaceBlock branch selected`);
+                    applyReplaceBlock(v.storeData.draft, v.command, v.loot);
+                    focusBlockId = v.loot.id;
+                    break;
+                case 'streamUpdateBlock':
+                    console.log(`[BOOTSTRAP]: streamUpdateBlock branch selected`);
+                    focusBlockId = v.loot.id ? v.loot.id : v.command.blockId;
+                    break;
+            }
+            if (focusBlockId) {
+                setPendingFocus({ kind: 'blockId', id: focusBlockId });
+            }
+        })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    // *************** BOOTSTRAP END ***************
+    // *************** SCROLLER ***************
+    useEffect(() => {
+        if (!pendingFocus)
+            return;
+        if (!selectedStreamId)
+            return;
+        const blockId = pendingFocus.id;
+        requestAnimationFrame(() => {
+            const el = document.querySelector(`[data-block-id="${blockId}"]`);
+            if (el) {
+                el.scrollIntoView({ block: 'center' });
+                el.classList.add(`sse_block--focus`);
+                window.setTimeout(() => el.classList.remove(`sse_block--focus`), 700);
+            }
+            setPendingFocus(null);
+        });
+    }, [pendingFocus, selectedStreamId]);
+    // *************** SCROLLER END ***************
+    // *************** OPEN STREAM FOR EDIT ***************
+    const selectStream = useCallback(async (id) => {
+        console.log(`[StreamEditorSessionProvider][selectStream]: Called`);
+        if (!streamsIndex) {
+            pushMode({
+                kind: 'error',
+                message: 'Attempt to find stream while streamIndex or streamIndex.streams is undefined',
+                canRetry: false,
+            });
+            return;
+        }
+        // Check if selected stream with id is in the list ???
+        const s = streamsIndex.find((s) => s.streamId === id);
+        if (!s) {
+            pushMode({
+                kind: 'error',
+                message: `Stream with id: ${id} can't be found`,
+                canRetry: false,
+            });
+            return;
+        }
+        console.log(`[StreamEditorSessionProvider][selectStream]: Clicked stream with id: ${s.streamId} successfully found`);
+        try {
+            setIsLoading(true);
+            const stream = await openStream(s.streamId);
+            console.log(`[StreamEditorSessionProvider][selectStream]: Selected stream successfully downloaded`);
+            setSelectedStreamId(stream.streamId);
+            console.log(`[StreamEditorSessionProvider][selectStream]: Selected stream id set`);
+            streamStoreDirectSave(stream, stream);
+            console.log('[selectStream] after setDraft, streamId=', stream.streamId);
+            console.log(`[StreamEditorSessionProvider][selectStream]: Stream saved to store`);
+            pushMode({ kind: 'edit' });
+            setModeStack((s) => [...s]); // force render
+            console.log(`[StreamEditorSessionProvider][selectStream]: Mode set to edit`);
+        }
+        catch (err) {
+            pushMode({
+                kind: 'error',
+                message: `Error loading stream by id: ${id} error: ${err}`,
+                canRetry: false,
+            });
+        }
+        finally {
+            setIsLoading(false);
+            console.log(`[StreamEditorSessionProvider][selectStream]: Completed`);
+        }
+    }, [streamsIndex, pushMode, setSelectedStreamId]);
+    // *************** DELETE STREAM ***************
+    const delStream = useCallback(async (streamId) => {
+        if (!confirm('Delete stream?'))
+            return;
+        console.log(`[StreamEditorSessionProvider][delStream]: Called`);
+        try {
+            setLifecycle({ saveState: 'saving' });
+            const res = await deleteStream(streamId);
+            console.log(`[StreamEditorSessionProvider][delStream]: deleteStream api called`);
+            if (!res.ok)
+                throw new Error(`Error deleting stream with id: ${streamId}`);
+            renewStreamsIndex();
+            resetSelectSession(); //!!!!!!!!!!!!!!!!!!!!!
+        }
+        catch (err) {
+            pushMode({
+                kind: 'error',
+                message: String(err),
+                canRetry: true,
+            });
+        }
+        finally {
+            setLifecycle({ saveState: 'idle' });
+        }
+    }, [renewStreamsIndex, resetSelectSession, pushMode]);
+    // *************** SAVE STREAM ***************
+    const popIfTopIs = useCallback((kind) => {
+        setModeStack((s) => {
+            if (s.length <= 1)
+                return s;
+            const top = s[s.length - 1];
+            return top?.kind === kind ? s.slice(0, -1) : s;
+        });
+    }, []);
+    const save = useCallback(async () => {
+        if (!draft)
+            return;
+        if (!isValid) {
+            pushMode({
+                kind: 'error',
+                message: 'Stream form is not valid. Please fix validation errors before saving.',
+                canRetry: false,
+            });
+            return;
+        }
+        setLifecycle({ saveState: 'saving' });
+        try {
+            await updateStream(draft);
+            commit();
+            await renewStreamsIndex();
+            popIfTopIs('meta');
+        }
+        catch (err) {
+            pushMode({
+                kind: 'error',
+                message: `Save failed: ${String(err)}`,
+                canRetry: true,
+            });
+        }
+        finally {
+            setLifecycle({ saveState: 'idle' });
+        }
+    }, [draft, isValid, pushMode, commit, popIfTopIs, renewStreamsIndex]);
+    // **************** END OF CRUD ***************
+    // **************** TRAVEL PART ***************
+    const jumpToBlockEditor = useCallback((to, command) => {
+        if (!selectedStreamId)
+            return;
+        const returnTo = {
+            editor: 'stream',
+            mode: 'edit',
+            objectId: selectedStreamId,
+        };
+        const ticket = {
+            journeyId: generateId('travel'),
+            destination: to,
+            returnTo,
+            phase: 'outbound',
+            nonce: createNonce(),
+            createdAt: nowIso(),
+            returnEffect: command,
+        };
+        dispatch(ticket);
+    }, [dispatch, selectedStreamId]);
+    // ************* METADATA EDITOR ************
+    const editMetadata = useCallback(() => {
+        console.log(`[StreamEditorSession][editMetadata]j: Called`);
+        metaIntent.current = { action: 'edit' };
+        pushMode({ kind: 'meta' });
+    }, [pushMode]);
+    // Switch UI to new Stream form:
+    const createNewStream = useCallback(() => {
+        console.log(`[StreamEditorSession]: Create new stream called`);
+        resetSelectSession();
+        metaIntent.current = { action: 'create' };
+        pushMode({ kind: 'meta' });
+    }, [pushMode, resetSelectSession]);
+    const submitCreateStream = useCallback(async (req) => {
+        console.log(`[submitCreateStream]: Called`);
+        try {
+            setIsLoading(true);
+            const created = await requestNewStream(req);
+            const createdId = created.streamId ?? req.streamId;
+            await renewStreamsIndex();
+            const stream = await openStream(createdId);
+            setSelectedStreamId(stream.streamId);
+            streamStoreDirectSave(stream);
+            commit();
+            popIfTopIs('meta');
+            pushMode({ kind: 'edit' });
+        }
+        catch (err) {
+            const msg = String(err);
+            pushMode({
+                kind: 'error',
+                message: `Create stream failed: ${msg}`,
+                canRetry: true,
+            });
+        }
+        finally {
+            setIsLoading(false);
+        }
+    }, [commit, pushMode, renewStreamsIndex, popIfTopIs]);
+    const applyStreamMetadata = useCallback((data) => {
+        if (!draft)
+            return;
+        const nextDraft = {
+            ...draft,
+            title: data.title,
+            tags: data.tags,
+            description: data.description,
+        };
+        setDraft(nextDraft);
+        popIfTopIs('meta');
+        metaIntent.current = { action: 'idle' };
+    }, [setDraft, draft, popIfTopIs]);
+    const commitMetaEditor = useCallback(async (data) => {
+        console.log(`[StreamEditorSessionProvider][commitMetaEditor] Called`);
+        switch (metaIntent.current.action) {
+            case 'create': {
+                console.log(`[StreamEditorSessionProvider][commitMetaEditor] Create stream selected`);
+                await submitCreateStream(data);
+                break;
+            }
+            case 'edit': {
+                console.log(`[StreamEditorSessionProvider][commitMetaEditor] Edit meta selected`);
+                applyStreamMetadata(data);
+                break;
+            }
+            default: {
+                throw new Error(`[commitMetaEditor]: commit unexpected metaIntent ${metaIntent.current.action} `);
+            }
+        }
+        metaIntent.current = { action: 'idle' };
+        console.log(`[StreamEditorSessionProvider][commitMetaEditor] metaIntent set to 'idle'`);
+        pushMode({ kind: 'edit' });
+        console.log(`[StreamEditorSessionProvider][commitMetaEditor] screenMode set to'edit'`);
+    }, [submitCreateStream, applyStreamMetadata, pushMode]);
+    const updateTags = useCallback((next) => {
+        if (!draft)
+            return;
+        const normalized = next.map((t) => t.trim()).filter(Boolean);
+        const seen = new Set();
+        const uniq = [];
+        for (const t of normalized) {
+            const key = t.toLowerCase();
+            if (seen.has(key))
+                continue;
+            seen.add(key);
+            uniq.push(t);
+        }
+        setDraft({ ...draft, tags: uniq });
+    }, [setDraft, draft]);
+    const editBlock = useCallback((id) => {
+        if (!selectedStreamId)
+            return;
+        const command = {
+            kind: 'streamUpdateBlock',
+            streamId: selectedStreamId,
+            blockId: id,
+        };
+        const to = {
+            editor: 'block',
+            mode: 'edit',
+            objectId: id,
+        };
+        jumpToBlockEditor(to, command);
+    }, [jumpToBlockEditor, selectedStreamId]);
+    const addBlock = useCallback((pos) => {
+        if (!selectedStreamId)
+            return;
+        const command = {
+            kind: 'streamInsertBlock',
+            streamId: selectedStreamId,
+            insertAt: pos,
+        };
+        const to = {
+            editor: 'block',
+            mode: 'select',
+        };
+        jumpToBlockEditor(to, command);
+    }, [jumpToBlockEditor, selectedStreamId]);
+    // ****************** THREE DOT MENU *****************
+    const threeDotHandler = useCallback((cmd) => {
+        const safeDraft = draft;
+        if (!safeDraft)
+            return;
+        // For stream actions we must have selected stream
+        if (cmd.owner.kind === 'stream') {
+            const { streamId, blockId } = cmd.owner;
+            // Guard: avoid acting on stale UI if stream changed
+            if (!selectedStreamId || selectedStreamId !== streamId)
+                return;
+            const idx = safeDraft.blockIds.findIndex((b) => b === blockId);
+            if (idx < 0) {
+                console.warn(`threeDotHandler: blockId not found in stream: ${blockId}`);
+                return;
+            }
+            const focus = () => setPendingFocus({ kind: 'blockId', id: blockId });
+            switch (cmd.action.kind) {
+                case 'editBlock': {
+                    const command = {
+                        kind: 'streamUpdateBlock',
+                        streamId: selectedStreamId,
+                        blockId,
+                    };
+                    const to = { editor: 'block', mode: 'edit', objectId: blockId };
+                    jumpToBlockEditor(to, command);
+                    return;
+                }
+                case 'insertBlock': {
+                    const command = cmd.action.at === 'after'
+                        ? {
+                            kind: 'streamInsertBlock',
+                            streamId: selectedStreamId,
+                            insertAt: idx + 1,
+                        }
+                        : {
+                            kind: 'streamInsertBlock',
+                            streamId: selectedStreamId,
+                            insertAt: idx,
+                        };
+                    const to = { editor: 'block', mode: 'select' };
+                    jumpToBlockEditor(to, command);
+                    return;
+                }
+                case 'replaceBlock': {
+                    const command = {
+                        kind: 'streamReplaceBlock',
+                        streamId: selectedStreamId,
+                        replaceBlockId: blockId,
+                    };
+                    const to = { editor: 'block', mode: 'select' };
+                    jumpToBlockEditor(to, command);
+                    return;
+                }
+                case 'deleteBlock': {
+                    const nextIds = safeDraft.blockIds.filter((b) => b !== blockId);
+                    setDraft({ ...safeDraft, blockIds: nextIds });
+                    // Focus neighbor (optional UX)
+                    const nextFocusId = nextIds[Math.min(idx, nextIds.length - 1)] ?? null;
+                    if (nextFocusId)
+                        setPendingFocus({ kind: 'blockId', id: nextFocusId });
+                    return;
+                }
+                case 'shift': {
+                    const dir = cmd.action.dir;
+                    const swapWith = dir === 'up' ? idx - 1 : idx + 1;
+                    if (swapWith < 0 || swapWith >= safeDraft.blockIds.length)
+                        return;
+                    const next = [...safeDraft.blockIds];
+                    const a = next[idx];
+                    const b = next[swapWith];
+                    if (a === undefined || b === undefined)
+                        return;
+                    next[idx] = b;
+                    next[swapWith] = a;
+                    setDraft({ ...safeDraft, blockIds: next });
+                    focus();
+                    return;
+                }
+                case 'move': {
+                    const pos = cmd.action.pos;
+                    let targetIndex;
+                    if (pos === 'start')
+                        targetIndex = 0;
+                    else if (pos === 'end')
+                        targetIndex = safeDraft.blockIds.length - 1;
+                    else
+                        targetIndex = pos;
+                    // clamp
+                    if (targetIndex < 0)
+                        targetIndex = 0;
+                    if (targetIndex > safeDraft.blockIds.length - 1) {
+                        targetIndex = safeDraft.blockIds.length - 1;
+                    }
+                    if (targetIndex === idx)
+                        return;
+                    const next = [...safeDraft.blockIds];
+                    next.splice(idx, 1);
+                    next.splice(targetIndex, 0, blockId);
+                    setDraft({ ...safeDraft, blockIds: next });
+                    focus();
+                    return;
+                }
+                default: {
+                    console.warn('threeDotHandler: unsupported action for stream owner', cmd.action);
+                    return;
+                }
+            }
+        }
+        // Other owners not implemented in this session yet (block/cat menus)
+        console.warn(`threeDotHandler: unsupported owner kind: ${cmd.owner.kind}`, cmd);
+    }, [draft, selectedStreamId, jumpToBlockEditor, setDraft]);
+    const value = useMemo(() => ({
+        selectedStreamId,
+        streamsIndex,
+        draft,
+        isLoading,
+        isSaving,
+        isValid,
+        isDirty,
+        save,
+        addBlock,
+        pushMode,
+        onEscape,
+        currentStack,
+        selectStream,
+        createNewStream,
+        delStream,
+        updateTags,
+        threeDotHandler,
+        editBlock,
+        editMetadata,
+        commitMetaEditor,
+    }), [
+        selectedStreamId,
+        streamsIndex,
+        draft,
+        isLoading,
+        isSaving,
+        isValid,
+        isDirty,
+        save,
+        addBlock,
+        pushMode,
+        onEscape,
+        currentStack,
+        selectStream,
+        createNewStream,
+        delStream,
+        updateTags,
+        threeDotHandler,
+        editBlock,
+        editMetadata,
+        commitMetaEditor,
+    ]);
+    return _jsx(StreamEditorCtx.Provider, { value: value, children: children });
+}

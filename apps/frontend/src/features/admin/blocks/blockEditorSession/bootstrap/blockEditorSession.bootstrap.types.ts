@@ -1,5 +1,4 @@
-import type { ItemPosition } from '@/entities/block';
-import type { JourneyTicket, JumpResult, ReturnCommand } from '@/shared/nav/journeyStack.types';
+import type { JumpResult } from '@/shared/nav/journeyStack.types';
 
 export type BlockReturnKind = 'blockInsertArt' | 'blockUpdateArt';
 

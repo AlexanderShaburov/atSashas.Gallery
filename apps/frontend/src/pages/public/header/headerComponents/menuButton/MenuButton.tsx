@@ -1,5 +1,5 @@
-import MenuIcon from '@/shared/header/headerComponents/menuButton/MenuIcon';
-import '@/shared/header/headerComponents/menuButton/menuButton.css';
+import MenuIcon from './MenuIcon';
+import './MenuButton.css';
 
 function ShowMenu() {
     return <h1>Menu</h1>;

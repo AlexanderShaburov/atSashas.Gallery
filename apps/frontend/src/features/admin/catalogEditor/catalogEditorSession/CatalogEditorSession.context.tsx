@@ -283,7 +283,30 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                         throw new Error(`Impossible return to catalog not having loot`);
                     if (!ticket.loot.ok)
                         throw new Error(`Impossible return to catalog not having loot`);
-                    editById(ticket.loot.id);
+
+                    // Fetch catalog directly to avoid stale state from refreshBase()
+                    const cat = (await getCatalog()) as ArtCatalog;
+                    setCatalog(cat);
+                    gCtx.setArtCatalog(cat);
+
+                    const returnId = ticket.loot.id;
+                    const item = cat.items?.[returnId];
+                    if (!item)
+                        throw new Error(
+                            `[Catalog BOOTSTRAP]: ArtItem not found in catalog: ${returnId}`,
+                        );
+
+                    setSelectedItemId(returnId);
+                    const key: EditorKey = { kind: 'catalog', id: returnId };
+                    editSessionsDataStore.saveDraft<ArtItemData>(key, item);
+                    editSessionsDataStore.commit<ArtItemData>(key);
+                    setThumb({
+                        id: item.id,
+                        thumbUrl: item.images.full,
+                        title: item.title?.en ?? '',
+                    });
+                    setScreenMode('edit');
+
                     console.log('[Catalog BOOTSTRAP]: return leg. ticket:');
                     console.dir(ticket);
                     return;
@@ -329,35 +352,39 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
         [catalog],
     );
 
-    const deleteById = useCallback((id: string) => {
-        // Move here logic from UI component
-        /*
-        👷‍♂️😓 
-        Here we call nonexistent backend method give dependencies, that has to return 
-        list of blocks and streams, where deleting art object got involved. 
-
-        And what to do with this info???!!! 
-            1. Every dependence has to be a link to object, and on click start journey to 
-                corresponding editor to fix future issues. And back to renewed list.
-            2. Dialog window has to have ignore button, and what happen after? -> Every 
-                involved block get blanc slot with "Missing art object message"
-
-        */
-        void (async () => {
-            if (!isSelected || !selectedItemId) return;
-            const depsResp = await getDependents(selectedItemId);
-            if (depsResp.response !== 'ok')
-                console.error(`Failed to get dependents list: ${depsResp.reason}`);
-            //TODO:
+    const deleteById = useCallback(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        (_id: string) => {
+            // Move here logic from UI component
             /*
-            1. Add 'outbound' ticket processing to the stream editor to process 
-                dependencies resolver calls;
-            2. Make backend endpoint for ArtItemDependents type response;
-            3. Make UI processing for delete response!!!!
+            👷‍♂️😓
+            Here we call nonexistent backend method give dependencies, that has to return
+            list of blocks and streams, where deleting art object got involved.
+
+            And what to do with this info???!!!
+                1. Every dependence has to be a link to object, and on click start journey to
+                    corresponding editor to fix future issues. And back to renewed list.
+                2. Dialog window has to have ignore button, and what happen after? -> Every
+                    involved block get blanc slot with "Missing art object message"
 
             */
-        })();
-    });
+            void (async () => {
+                if (!isSelected || !selectedItemId) return;
+                const depsResp = await getDependents(selectedItemId);
+                if (depsResp.response !== 'ok')
+                    console.error(`Failed to get dependents list: ${depsResp.reason}`);
+                //TODO:
+                /*
+                1. Add 'outbound' ticket processing to the stream editor to process
+                    dependencies resolver calls;
+                2. Make backend endpoint for ArtItemDependents type response;
+                3. Make UI processing for delete response!!!!
+
+                */
+            })();
+        },
+        [isSelected, selectedItemId],
+    );
 
     const finalizeAfterSave = useCallback(
         (savedId: string) => {

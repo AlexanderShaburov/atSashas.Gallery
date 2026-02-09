@@ -15,7 +15,7 @@ export type SAProps = {
 export default function SingleArtItemEditor(props: SAProps) {
     const { editorProps, toolbarProps } = props;
     const { draft, thumb, isDirty } = editorProps;
-    const { canSave, saving, exit, save } = toolbarProps;
+    const { canSave, isSaving, exit, save } = toolbarProps;
 
     // *********************************************
     // ❗️ To be moved to the context provider ❗️
@@ -97,7 +97,7 @@ export default function SingleArtItemEditor(props: SAProps) {
 
     const tbCtx = {
         canSave,
-        saving,
+        isSaving,
         save,
         exit,
         onDelete: onDelete,

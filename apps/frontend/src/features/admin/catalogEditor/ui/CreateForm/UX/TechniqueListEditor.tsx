@@ -13,7 +13,7 @@ function normalizeItems(raw: Array<string | TechniqueItem>): TechniqueItem[] {
 }
 
 export default function TechniqueListEditor(props: SingleItemEditorProps) {
-    const { draft, setDraft, techniquesRange } = props;
+    const { draft, onDraftChange, techniquesRange } = props;
 
     // показывать ли панель добавления (категория+техника)
     const [adding, setAdding] = useState(false);
@@ -46,7 +46,7 @@ export default function TechniqueListEditor(props: SingleItemEditorProps) {
         if (!draft) throw new Error('Form not ready');
         const nextList = draft.techniques ? [...draft.techniques] : [];
         if (!nextList.includes(tech)) nextList.push(tech);
-        setDraft({ ...draft, techniques: nextList });
+        onDraftChange({ ...draft, techniques: nextList });
 
         setAdding(false); // close pane after got added
     };

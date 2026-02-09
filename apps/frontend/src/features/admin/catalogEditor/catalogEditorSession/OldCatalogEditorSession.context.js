@@ -1,101 +1,43 @@
-import { ArtItemData, TechniquesJson } from '@/entities/art';
-import { ArtCatalog } from '@/entities/catalog';
-import { EditorTarget } from '@/entities/common';
-import { CatalogGridItem, GridItem } from '@/entities/grid/gridItem';
-import {
-    getCatalog,
-    getHopperContent,
-    getSeriesOptionsCI,
-    getTechniques,
-    updateCatalog,
-} from '@/features/admin/catalogEditor/api';
+import { jsx as _jsx } from "react/jsx-runtime";
+import { getCatalog, getHopperContent, getSeriesOptionsCI, getTechniques, updateCatalog, } from '@/features/admin/catalogEditor/api';
 import { prepareEditorForm } from '@/features/admin/catalogEditor/editorSession/editorLogic/';
 import { buildShipment } from '@/features/admin/catalogEditor/editorSession/editorLogic/buildShipment';
-import type { ArtItemForm } from '@/features/admin/catalogEditor/editorSession/editorTypes';
 import { deepEqual } from '@/features/admin/catalogEditor/utils/checkers';
 import { isMinimalValid, sanitizeForm } from '@/features/admin/catalogEditor/utils/Validators';
-import {
-    useEditorWorkspace,
-    type EditorWorkspaceContextValue,
-} from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
-
-export type EditorSession = {
-    catalog: ArtCatalog | undefined;
-    hopper: CatalogGridItem[];
-    identity: EditorTarget | undefined; // matches state
-    mode: 'create' | 'edit';
-    values: ArtItemForm | undefined;
-    setValues: React.Dispatch<React.SetStateAction<ArtItemForm | undefined>>;
-    setSelectedArtItem: (v: ArtItemData | undefined) => void;
-    setMode: (m: 'edit' | 'create') => void;
-
-    /** Start a new session from a hopper unit or existing item */
-    editorIsReady: boolean;
-
-    /** Derived flags */
-    isDirty: boolean;
-    isValid: boolean;
-    canSave: boolean;
-    loading: boolean;
-
-    /** Persistence controls */
-    saving: boolean;
-    save: () => Promise<void> | void;
-    exit: () => void;
-
-    /** UI helpers */
-    thumb: GridItem | undefined;
-    techniques: TechniquesJson;
-    seriesOptions: string[];
-};
-
-const Ctx = createContext<EditorSession | undefined>(undefined);
-
+import { useEditorWorkspace, } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, } from 'react';
+const Ctx = createContext(undefined);
 // eslint-disable-next-line react-refresh/only-export-components
 export const useEditorSession = () => {
     const v = useContext(Ctx);
-    if (!v) throw new Error('useEditorSession must be used within EditorSessionProvider');
+    if (!v)
+        throw new Error('useEditorSession must be used within EditorSessionProvider');
     return v;
 };
-
-type ProviderProps = { children: React.ReactNode };
-
-export function EditorSessionProvider({ children }: ProviderProps) {
-    const gCtx: EditorWorkspaceContextValue = useEditorWorkspace();
-
+export function EditorSessionProvider({ children }) {
+    const gCtx = useEditorWorkspace();
     // Core state
-    const [identity, setIdentity] = useState<EditorTarget | undefined>(undefined); // Item selected to be edited
-    const [values, setValues] = useState<ArtItemForm | undefined>(undefined);
-    const [catalog, setCatalog] = useState<ArtCatalog | undefined>(undefined);
-    const [hopper, setHopper] = useState<GridItem[]>([]);
-    const [mode, setMode] = useState<'create' | 'edit'>('create'); // !!! 'edit' in production !!!
-
+    const [identity, setIdentity] = useState(undefined); // Item selected to be edited
+    const [values, setValues] = useState(undefined);
+    const [catalog, setCatalog] = useState(undefined);
+    const [hopper, setHopper] = useState([]);
+    const [mode, setMode] = useState('create'); // !!! 'edit' in production !!!
     // UI/derived state
-    const [techniques, setTechniques] = useState<TechniquesJson>({});
+    const [techniques, setTechniques] = useState({});
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
     const [isValid, setIsValid] = useState(false);
     const [editorIsReady, setEditorIsReady] = useState(false);
-    const [thumb, setThumb] = useState<GridItem | undefined>(undefined);
+    const [thumb, setThumb] = useState(undefined);
     const [canSave, setCanSave] = useState(false);
-    const [seriesOptions, setSeriesOptions] = useState<string[]>([]);
+    const [seriesOptions, setSeriesOptions] = useState([]);
     // Snapshot for dirty checking
-    const snapshot = useRef<ArtItemForm | undefined>(undefined);
+    const snapshot = useRef(undefined);
     // valuesRef for use in functions not should run after every values change:
-    const valuesRef = useRef<ArtItemForm | undefined>(values);
-
+    const valuesRef = useRef(values);
     // Load current catalog and hopper version
-    const refreshBase = useCallback(async (): Promise<void> => {
+    const refreshBase = useCallback(async () => {
         try {
             setLoading(true);
             const cat = await getCatalog();
@@ -103,35 +45,32 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             const hop = await getHopperContent();
             console.log('[refreshBase]: Received hopper: ', hop);
             setHopper(hop);
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Failed to load server data: ', e);
-        } finally {
+        }
+        finally {
             setLoading(false);
         }
     }, []);
-
     // Check catalog changes and set it to gCtx
-
     useEffect(() => {
         if (catalog) {
             gCtx.setArtCatalog(catalog);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [catalog]);
-
     // Load current catalog and hopper version once at provider creation:
     useEffect(() => {
         (async () => {
             await refreshBase();
         })();
     }, [refreshBase]); // <- Load once at provider mounting
-
     useEffect(() => {
         console.log('values watcher: run. values: ', values);
         valuesRef.current = values;
         console.log('values watcher: run. valuesRef.current: ', valuesRef.current);
     }, [values]);
-
     /** One-time load of techniques.json */
     useEffect(() => {
         let alive = true;
@@ -143,7 +82,8 @@ export function EditorSessionProvider({ children }: ProviderProps) {
                     setTechniques(tech);
                     setSeriesOptions(s);
                 }
-            } catch (err) {
+            }
+            catch (err) {
                 // Surface in console; app flow can continue without techniques
                 console.error('Failed to load techniques.json:', err);
             }
@@ -152,29 +92,26 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             alive = false;
         };
     }, []);
-
     /** Recompute canSave whenever the inputs change */
     useEffect(() => {
         setCanSave(!saving && isDirty && isValid);
     }, [isDirty, isValid, saving]);
-
     // Debug only:
     useEffect(() => {
         console.log(`[refreshBase starter]: mode got ${mode} value`);
         refreshBase();
     }, [mode, refreshBase]);
-
     /** Start a new editing session (create/edit) on every identity change */
     useEffect(() => {
         console.log('Session initiator called with identity: ', identity);
         console.dir(identity);
-        let nextThumb: GridItem | undefined = undefined;
+        let nextThumb = undefined;
         switch (identity?.mode) {
             case 'create': {
                 const initialValues = prepareEditorForm(identity);
                 console.log('Session initiator: initialValues.id: ', initialValues.id);
                 valuesRef.current = initialValues;
-                nextThumb = identity.item as GridItem;
+                nextThumb = identity.item;
                 setValues(initialValues);
                 console.log('Initiator: Values set as: ', initialValues);
                 break;
@@ -185,8 +122,7 @@ export function EditorSessionProvider({ children }: ProviderProps) {
                     id: identity.item.id,
                     thumbUrl: identity.item.images.full,
                     title: identity.item.alt,
-                } as GridItem;
-
+                };
                 break;
             }
             case undefined:
@@ -198,16 +134,15 @@ export function EditorSessionProvider({ children }: ProviderProps) {
                 return;
             }
         }
-
         // Initialize state
         setThumb(nextThumb);
         console.log('Initiator: Session initiated. valuesRef.current:', valuesRef.current);
         snapshot.current = valuesRef.current; // <-- critical: baseline for dirty checks
         console.log('Initiator: Session initiated. snapshot.current: ', snapshot.current);
         setIsDirty(false);
-        if (identity) setEditorIsReady(true);
+        if (identity)
+            setEditorIsReady(true);
     }, [identity]);
-
     /** Reset the whole session */
     const exitSession = useCallback(() => {
         (async () => {
@@ -224,7 +159,6 @@ export function EditorSessionProvider({ children }: ProviderProps) {
         setCanSave(false);
         snapshot.current = undefined;
     }, [refreshBase]);
-
     /** Dirty & validity tracking on every form change */
     useEffect(() => {
         if (!valuesRef.current || !snapshot.current) {
@@ -237,7 +171,6 @@ export function EditorSessionProvider({ children }: ProviderProps) {
             setIsValid(isMinimalValid(values, identity));
         }
     }, [values, identity]);
-
     /* SAVE procedure: */
     // !!!!! Important!
     // save to be refactored: It should detect the mode and act depends of it:
@@ -259,75 +192,71 @@ export function EditorSessionProvider({ children }: ProviderProps) {
         try {
             const clean = sanitizeForm(values);
             console.log(`Before build shipment identity is: ${identity?.mode}`);
-            const payload = buildShipment(identity!, clean);
-
+            const payload = buildShipment(identity, clean);
             // if (catalog) upsertCatalogItem(catalog, clean);
             console.log(`Before sending shipment values ${payload}`);
             console.dir(payload);
             const HTTPCode = await updateCatalog(payload);
             if (HTTPCode !== 200)
                 throw new Error(`Catalog  update unsuccessful! Code: ${HTTPCode}`);
-
             await refreshBase();
             exitSession();
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Save failed', e);
-        } finally {
+        }
+        finally {
             setSaving(false);
         }
     }, [values, canSave, isValid, identity, exitSession, saving, refreshBase]); // keep identical behavior to your stub
-
     /** Public exit with confirmation if dirty */
     const exit = useCallback(() => {
-        if (saving) return;
+        if (saving)
+            return;
         console.log('isDirty: ', isDirty);
-        if (isDirty && !confirm('Discard unsaved changes?')) return;
+        if (isDirty && !confirm('Discard unsaved changes?'))
+            return;
         refreshBase();
         exitSession();
     }, [saving, isDirty, exitSession, refreshBase]);
-
-    const value: EditorSession = useMemo(
-        () => ({
-            mode,
-            catalog,
-            hopper,
-            identity,
-            values,
-            setValues,
-            setSelectedArtItem,
-            editorIsReady,
-            isDirty,
-            isValid,
-            saving,
-            save,
-            exit,
-            thumb,
-            canSave,
-            techniques,
-            seriesOptions,
-            loading,
-            setMode,
-        }),
-        [
-            mode,
-            catalog,
-            hopper,
-            identity,
-            values,
-            editorIsReady,
-            isDirty,
-            isValid,
-            saving,
-            save,
-            exit,
-            thumb,
-            canSave,
-            techniques,
-            seriesOptions,
-            loading,
-            setMode,
-        ],
-    );
-
-    return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+    const value = useMemo(() => ({
+        mode,
+        catalog,
+        hopper,
+        identity,
+        values,
+        setValues,
+        setSelectedArtItem,
+        editorIsReady,
+        isDirty,
+        isValid,
+        saving,
+        save,
+        exit,
+        thumb,
+        canSave,
+        techniques,
+        seriesOptions,
+        loading,
+        setMode,
+    }), [
+        mode,
+        catalog,
+        hopper,
+        identity,
+        values,
+        editorIsReady,
+        isDirty,
+        isValid,
+        saving,
+        save,
+        exit,
+        thumb,
+        canSave,
+        techniques,
+        seriesOptions,
+        loading,
+        setMode,
+    ]);
+    return _jsx(Ctx.Provider, { value: value, children: children });
 }

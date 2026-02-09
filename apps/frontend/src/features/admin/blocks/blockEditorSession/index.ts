@@ -1,4 +1,4 @@
 export { BlockEditorSessionProvider } from './BlockEditorSession.context';
 export { findArtItemByPos, normalizeBlock } from './blockEditorSession.utils';
 
-export type { BlockEditorSession, ScreenModeStack } from './Block-editor.types';
+export type { BlockEditorSession, ScreenModeStack } from './block-editor.types';

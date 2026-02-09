@@ -18,7 +18,7 @@ import { normalizeBlock } from '@/features/admin/blocks/blockEditorSession';
 import type {
     BlockEditorSession,
     ScreenModeStack,
-} from '@/features/admin/blocks/blockEditorSession/Block-editor.types';
+} from '@/features/admin/blocks/blockEditorSession/block-editor.types';
 import { BlockEditorCtx } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { validateBlockForm } from '@/features/admin/blocks/utils';
@@ -72,7 +72,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     // editorIsReady is to identify if now a block is under editing!!!
     // LEGACY !!!!!!!!!!!!!
     // const [editorIsReady, setEditorIsReady] = useState(false);
-    const [pendingSelection, setPendingSelection] = useState<BlockHitEvent | undefined>(undefined);
+    const [, setPendingSelection] = useState<BlockHitEvent | undefined>(undefined);
     // Errors processing preparation, unimplemented.
     const [uiError, setUiError] = useState<UiErrorState | undefined>(undefined);
     // to be replaced with external stor!!!!
@@ -142,9 +142,10 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
     // ************** STACK CONTROL **************
 
-    const pushMode = (next: BlockEditorScreenMode) => {
-        setModeStack((s) => (s[s.length - 1] === next ? s : [...s, next]));
-    };
+    // TODO: pushMode will be used when multi-step editing is implemented
+    // const pushMode = (next: BlockEditorScreenMode) => {
+    //     setModeStack((s) => (s[s.length - 1] === next ? s : [...s, next]));
+    // };
     const onEscape = useCallback(() => {
         setModeStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
     }, []);

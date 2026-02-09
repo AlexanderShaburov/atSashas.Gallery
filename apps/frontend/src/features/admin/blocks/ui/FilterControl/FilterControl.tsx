@@ -61,8 +61,8 @@ export function FilterControl({ filter, updateFilter }: Props) {
         if (!ctx.collection) return;
 
         const tags: string[] = [];
-        Object.values(ctx.collection?.blocks).forEach((b) => {
-            b.tags?.forEach((t) => {
+        Object.values(ctx.collection.blocks).forEach((b) => {
+            b.tags?.forEach((t: string) => {
                 if (!tags.includes(t)) {
                     tags.push(t);
                 }

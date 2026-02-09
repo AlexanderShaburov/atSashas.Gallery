@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { BlockEditorSession } from '@/features/admin/blocks/editorSession';
+import { BlockEditorSession } from '@/features/admin/blocks/blockEditorSession';
 
 export const BlockEditorCtx = createContext<BlockEditorSession | undefined>(undefined);
 
