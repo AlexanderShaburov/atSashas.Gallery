@@ -42,6 +42,7 @@ import {
     updateCatalog,
 } from '../api';
 import { CatalogEditorSession } from './catalogEditorSession.types';
+import { newArtItemFromGrid } from './editorLogic/newArtItemFromGrid';
 type SaveResult = { ok: true; id: string } | { ok: false };
 
 const Ctx = createContext<CatalogEditorSession | undefined>(undefined);
@@ -147,10 +148,14 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     // -----------------------------
     const refreshBase = useCallback(async (): Promise<void> => {
         try {
+            console.log(`[refreshBase]: called`);
             setIsLoading(true);
             const cat = await getCatalog();
+            console.log(`[refreshBase]: current catalog received`);
             setCatalog(cat);
-            gCtx.setArtCatalog(cat);
+            console.log(`[refreshBase]: current catalog saved to state`);
+            gCtx.setArtCatalog(cat); //LEGACY
+            console.log(`[refreshBase]: current catalog saved to global context`);
         } catch (e) {
             console.error(`[CatalogEditorSessionProvider]: Failed to load server data: ${e}`);
         } finally {
@@ -162,10 +167,14 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     const resetSession = useCallback(
         () =>
             void (async () => {
+                console.log(`[resetSession]: called`);
                 setSelectedItemId(undefined);
+                console.log(`[resetSession]: selectedItemId reset`);
                 setScreenMode('select');
+                console.log(`[resetSession]: screenMode set to select`);
                 await refreshBase();
-            }),
+                console.log(`[resetSession]: refreshBase complete`);
+            })(),
         [refreshBase],
     );
 
@@ -234,6 +243,7 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
             switch (ticket.phase) {
                 case 'outbound': {
                     setIsJourney(true);
+                    console.log(`[Catalog BOOTSTRAP]: isJourney state set to true`);
                     // Someone navigated TO catalog editor
                     // We support:
                     // - destination.mode === 'select' (pick an art item)
@@ -277,6 +287,7 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                     Important notice: as a result, journey to hopper has to have left created artItem
                     object added into the catalog with id, initially transferred to ticket
                     ❗️*/
+                    console.log(`[Catalog BOOTSTRAP]: RETURN ticket presented.`);
                     if (ticket.returnTo.mode !== 'edit')
                         throw new Error(`Impossible return to catalog  editor`);
                     if (!ticket.loot)
@@ -287,25 +298,53 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                     // Fetch catalog directly to avoid stale state from refreshBase()
                     const cat = (await getCatalog()) as ArtCatalog;
                     setCatalog(cat);
+                    console.log(`[Catalog BOOTSTRAP]: Catalog renewed`);
+                    // Save catalog to the global context /LEGACY -> TO BE REFACTORED
                     gCtx.setArtCatalog(cat);
-
-                    const returnId = ticket.loot.id;
-                    const item = cat.items?.[returnId];
-                    if (!item)
-                        throw new Error(
-                            `[Catalog BOOTSTRAP]: ArtItem not found in catalog: ${returnId}`,
+                    // Get loot id, this particular case it is hopper temporal image id, means nothing.
+                    // Get looted image:
+                    const loot = ticket.loot.output;
+                    console.log(`[Catalog BOOTSTRAP]: Loot checkup starts:`);
+                    if (!loot) {
+                        //If no loot -> open catalog editor in 'select' screenMode
+                        console.log(
+                            `[Catalog BOOTSTRAP]: Journey to hopper doesn't brought any loot`,
                         );
+                        setScreenMode('select');
+                        return;
+                    }
+                    console.log(`[Catalog BOOTSTRAP]: Loot detected`);
+                    // Create new ArtItemData object with 'draft' lifecycle, what lead us
+                    // to hopper kind image in shipment object and makes backend generate
+                    // previews
+                    const newDraft = newArtItemFromGrid(loot);
+                    console.log(`[Catalog BOOTSTRAP]: newDraft created based on loot`);
+                    console.dir(newDraft);
 
-                    setSelectedItemId(returnId);
-                    const key: EditorKey = { kind: 'catalog', id: returnId };
-                    editSessionsDataStore.saveDraft<ArtItemData>(key, item);
+                    setSelectedItemId(newDraft.id);
+                    console.log(`[Catalog BOOTSTRAP]: selectedItemId state set`);
+
+                    const key: EditorKey = { kind: 'catalog', id: newDraft.id };
+                    console.log(`[Catalog BOOTSTRAP]: formed key as:`);
+                    console.dir(key);
+                    editSessionsDataStore.saveDraft<ArtItemData>(key, newDraft);
                     editSessionsDataStore.commit<ArtItemData>(key);
+                    console.log(`[Catalog BOOTSTRAP]: Created draft saved to store and committed`);
+
                     setThumb({
-                        id: item.id,
-                        thumbUrl: item.images.full,
-                        title: item.title?.en ?? '',
+                        id: newDraft.id,
+                        thumbUrl: newDraft.images.full,
+                        title: newDraft.title?.en ?? '',
                     });
+                    console.log(`[Catalog BOOTSTRAP]: Thumb state set as:`);
+                    console.dir({
+                        id: newDraft.id,
+                        thumbUrl: newDraft.images.full,
+                        title: newDraft.title?.en ?? '',
+                    });
+
                     setScreenMode('edit');
+                    console.log(`[Catalog BOOTSTRAP]: Screen mode set to edit`);
 
                     console.log('[Catalog BOOTSTRAP]: return leg. ticket:');
                     console.dir(ticket);
@@ -388,10 +427,13 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
 
     const finalizeAfterSave = useCallback(
         (savedId: string) => {
+            console.log(`[finalizeAfterSave]: called`);
             const ticket = peekTicket();
+            console.log(`[finalizeAfterSave]: ticket received as:`);
+            console.dir(ticket);
             if (ticket?.phase === 'return' && ticket.destination.editor === 'catalog') {
                 console.log(
-                    `[finalizeAfterSave]: taken decision to return home with blockId: ${savedId}`,
+                    `[finalizeAfterSave]: taken decision to return home with artItemId: ${savedId}`,
                 );
                 setIsJourney(false);
                 returnHome('catalog', { ok: true, id: savedId });
@@ -424,8 +466,12 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
             await refreshBase();
             setIsSaving(false);
         }
+
+        // 🚧 Here, after item has saved, journey inspection has to be implemented:
+        // if we are in journey, return home procedure should be completed, as in the block editor.
         return { ok: true, id: draft.id };
     }, [commit, draft, refreshBase]);
+    // ******** After save processing ********
 
     // ----------- APPLY ------------
     // apply button handler
@@ -442,10 +488,16 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     // ---------- EXIT ---------
     // exit button handler
     const exit = useCallback(() => {
+        console.log(`[EXIT]: called`);
         //Jump one level up
-        if (isSaving) return;
+        if (isSaving) {
+            console.log(`[EXIT]: isSaving === true detected`);
+            return;
+        }
         if (isDirty && !confirm(`Discard unsaved art item changes?`)) return;
+        console.log(`[EXIT]: isDirty and Discard changes check passed`);
         resetSession();
+        console.log(`[EXIT]: Session reset`);
     }, [isSaving, isDirty, resetSession]);
 
     // ----------- SAVE ----------
@@ -453,8 +505,12 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     const onSaveClick = useCallback(
         () =>
             void (async () => {
+                console.log(`[onSaveClick]: called`);
                 // Complete presave check and save, possibly convey to journey
                 const r = await save();
+                console.log(`[onSaveClick]: save completed with result:`);
+                console.dir(r);
+                console.log(`[onSaveClick]: isJourney state is ${isJourney}`);
                 if (r.ok && isJourney) finalizeAfterSave(r.id);
             })(),
         [finalizeAfterSave, save, isJourney],

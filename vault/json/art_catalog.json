@@ -1,6 +1,6 @@
 {
-  "catalogVersion": 70,
-  "updatedAt": "2026-01-24T17:05:15.942300+00:00",
+  "catalogVersion": 81,
+  "updatedAt": "2026-02-10T19:29:40.304700+00:00",
   "items": {
     "art-20251118-4gpfj3": {
       "id": "art-20251118-4gpfj3",
@@ -399,9 +399,372 @@
       "series": null,
       "tags": null,
       "notes": null
+    },
+    "art-20260210-kfb5q7": {
+      "id": "art-20260210-kfb5q7",
+      "dateCreated": "2026-02-10",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260210-kfb5q7.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260210-kfb5q7.avif",
+          "webp": "/media/arts/previews/art-20260210-kfb5q7.webp",
+          "jpeg": "/media/arts/previews/art-20260210-kfb5q7.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "me",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260210-73dhk5": {
+      "id": "art-20260210-73dhk5",
+      "dateCreated": "2026-02-10",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260210-73dhk5.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260210-73dhk5.avif",
+          "webp": "/media/arts/previews/art-20260210-73dhk5.webp",
+          "jpeg": "/media/arts/previews/art-20260210-73dhk5.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "espanol",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260210-hbwf03": {
+      "id": "art-20260210-hbwf03",
+      "dateCreated": "2026-02-10",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260210-hbwf03.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260210-hbwf03.avif",
+          "webp": "/media/arts/previews/art-20260210-hbwf03.webp",
+          "jpeg": "/media/arts/previews/art-20260210-hbwf03.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "DARKNESS",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260210-1ywd8q": {
+      "id": "art-20260210-1ywd8q",
+      "dateCreated": "2026-02-10",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260210-1ywd8q.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260210-1ywd8q.avif",
+          "webp": "/media/arts/previews/art-20260210-1ywd8q.webp",
+          "jpeg": "/media/arts/previews/art-20260210-1ywd8q.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "strange japan girl",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260210-6p1kz0": {
+      "id": "art-20260210-6p1kz0",
+      "dateCreated": "2026-02-10",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260210-6p1kz0.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260210-6p1kz0.avif",
+          "webp": "/media/arts/previews/art-20260210-6p1kz0.webp",
+          "jpeg": "/media/arts/previews/art-20260210-6p1kz0.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "??passport??",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260210-as208q": {
+      "id": "art-20260210-as208q",
+      "dateCreated": "2026-02-10",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260210-as208q.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260210-as208q.avif",
+          "webp": "/media/arts/previews/art-20260210-as208q.webp",
+          "jpeg": "/media/arts/previews/art-20260210-as208q.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "Pajero",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260210-79ejgk": {
+      "id": "art-20260210-79ejgk",
+      "dateCreated": "2026-02-10",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260210-79ejgk.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260210-79ejgk.avif",
+          "webp": "/media/arts/previews/art-20260210-79ejgk.webp",
+          "jpeg": "/media/arts/previews/art-20260210-79ejgk.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "copics",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260210-vh7azm": {
+      "id": "art-20260210-vh7azm",
+      "dateCreated": "2026-02-10",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260210-vh7azm.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260210-vh7azm.avif",
+          "webp": "/media/arts/previews/art-20260210-vh7azm.webp",
+          "jpeg": "/media/arts/previews/art-20260210-vh7azm.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "Past perfect",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260210-wdzf6d": {
+      "id": "art-20260210-wdzf6d",
+      "dateCreated": "2026-02-10",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260210-wdzf6d.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260210-wdzf6d.avif",
+          "webp": "/media/arts/previews/art-20260210-wdzf6d.webp",
+          "jpeg": "/media/arts/previews/art-20260210-wdzf6d.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "Picina",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260210-xevee7": {
+      "id": "art-20260210-xevee7",
+      "dateCreated": "2026-02-10",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260210-xevee7.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260210-xevee7.avif",
+          "webp": "/media/arts/previews/art-20260210-xevee7.webp",
+          "jpeg": "/media/arts/previews/art-20260210-xevee7.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "Donna",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260210-54m36f": {
+      "id": "art-20260210-54m36f",
+      "dateCreated": "2026-02-10",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260210-54m36f.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260210-54m36f.avif",
+          "webp": "/media/arts/previews/art-20260210-54m36f.webp",
+          "jpeg": "/media/arts/previews/art-20260210-54m36f.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "Kate",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
     }
   },
   "order": [
+    "art-20260210-54m36f",
+    "art-20260210-xevee7",
+    "art-20260210-wdzf6d",
+    "art-20260210-vh7azm",
+    "art-20260210-79ejgk",
+    "art-20260210-as208q",
+    "art-20260210-6p1kz0",
+    "art-20260210-1ywd8q",
+    "art-20260210-hbwf03",
+    "art-20260210-73dhk5",
+    "art-20260210-kfb5q7",
     "art-20260124-1v8tvf",
     "art-20260124-est8wp",
     "art-20260124-6h8d4s",

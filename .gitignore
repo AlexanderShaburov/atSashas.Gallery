@@ -21,6 +21,10 @@ pnpm-debug.log*
 vite.config.ts.timestamp*
 .vite/
 coverage/
+# TypeScript compiled output (should never be in src/)
+**/src/**/*.js
+**/src/**/*.jsx
+tsconfig.tsbuildinfo
 
 # Local env files
 .env.local

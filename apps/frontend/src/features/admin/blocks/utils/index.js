@@ -1,1 +1,0 @@
-export { validateBlockForm } from './validators';

@@ -61,6 +61,14 @@ export const editorFormConvertor = (draft: ArtItemData): ArtItemForm => {
 
 export const draftToShipmentConvertor = (draft: ArtItemData): ArtShipment => {
     const { images, ...rest } = draft;
+    switch (draft.lifecycle) {
+        case 'draft':
+            return {
+                ...EMPTY_FORM_TAIL,
+                images: { kind: 'hopper', hopperSrc: draft.images.full },
+                ...rest,
+            };
+    }
     return {
         ...EMPTY_FORM_TAIL,
         images: { kind: 'ready', image: images },

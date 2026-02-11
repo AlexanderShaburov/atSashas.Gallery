@@ -72,7 +72,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     // editorIsReady is to identify if now a block is under editing!!!
     // LEGACY !!!!!!!!!!!!!
     // const [editorIsReady, setEditorIsReady] = useState(false);
-    const [, setPendingSelection] = useState<BlockHitEvent | undefined>(undefined);
+    const [pendingSelection, setPendingSelection] = useState<BlockHitEvent | undefined>(undefined);
     // Errors processing preparation, unimplemented.
     const [uiError, setUiError] = useState<UiErrorState | undefined>(undefined);
     // to be replaced with external stor!!!!
@@ -220,6 +220,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 console.log('[INIT SESSION]: started');
                 // Refresh collection state
                 cl = await refreshCollection();
+                if (!cl) return;
                 setCollection(cl);
             } catch (e) {
                 throw new Error(`Error loading blocks collection ${e}`);
@@ -227,22 +228,24 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 setLoading(false);
             }
             const ticket = arrival('block');
+            console.log(`[INIT SESSION]: ticket requested and it is: ${ticket}`);
             if (!ticket) {
                 resetSession();
                 return;
             }
 
-            if (!cl) return;
-
             setIsJourney(true);
             switch (ticket.phase) {
                 case 'outbound':
+                    console.log(`[INIT SESSION]: outbound ticket found`);
                     switch (ticket.destination.mode) {
                         case 'select': {
+                            console.log(`[INIT SESSION]: destination mode is SELECT`);
                             resetSession();
                             break;
                         }
                         case 'edit': {
+                            console.log(`[INIT SESSION]: destination mode is EDIT`);
                             const id = ticket.destination.objectId;
 
                             if (!id)
@@ -262,9 +265,13 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                     }
                     break;
                 case 'return': {
+                    console.log(`[INIT SESSION]: RETURN ticket found`);
                     // 0) Resolve bootstrap dataset (draft+snapshot) saved by the outbound editor
                     const tempId = ticket.returnTo.objectId;
+                    console.log(`[INIT SESSION]: target object detected as ${tempId}`);
                     const bootstrapDataSet = await resolveBlockBootstrapData(tempId);
+                    console.log(`[INIT SESSION]: bootstrap saved data received as:`);
+                    console.dir(bootstrapDataSet);
 
                     /**
                      * IMPORTANT:
@@ -279,6 +286,8 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                             `[Bootstrap]: Unexpected returnEffect for BlockEditor: ${effect ? effect.kind : 'undefined'}`,
                         );
                     }
+                    console.log(`[INIT SESSION]: Return effect detected as:`);
+                    console.dir(effect);
 
                     // 2) Restore selectedBlockId first (required to bind external store scope)
                     //    NOTE: blockId always comes from the return effect (both insert/update share blockId)
@@ -289,22 +298,28 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                     // ❗️ New approach: just created block hasn't get into collection yet!
                     // The true place to get the block - external store!!!
                     const key: EditorKey = { kind: 'block', id: blockId };
+                    console.log(`[INIT SESSION]: Editor Key restored as:`);
+                    console.dir(key);
+
                     const block = editSessionsDataStore.get<Block>(key);
                     if (!block)
                         throw new Error(
                             `[Bootstrap]: Journey ticket block doesn't stored in SessionsDataStore`,
                         );
+                    console.log(`[INIT SESSION]: saved block read as:`);
+                    console.dir(block.draft);
 
-                    /*                   3) Ensure collection has the block and restore draft+snapshot into external store
+                    /*                   
+                    3) Ensure collection has the block and restore draft+snapshot into external store
                     if (!cl.blocks)
-                        throw new Error('[Bootstrap]: Collection.blocks does not exist');
+                    throw new Error('[Bootstrap]: Collection.blocks does not exist');
                     if (!block)
-                        throw new Error(`[Bootstrap]: Block not found in collection: ${blockId}`);
-
+                    throw new Error(`[Bootstrap]: Block not found in collection: ${blockId}`);
+                    
                     const key: EditorKey = { kind: 'block', id: blockId };
                     editSessionsDataStore.saveDraft(key, block);
                     editSessionsDataStore.setSnapshot(key, block);
-*/
+                    */
 
                     // 4) Execute return instruction
                     switch (effect.kind) {
@@ -314,6 +329,9 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                                 ticket,
                                 bootstrapDataSet,
                             );
+                            console.log(
+                                `[INIT SESSION]: return instruction recognized as blockInsertArt`,
+                            );
 
                             // Store pendingSelection so later setSelectedArtItem() can apply it
                             setPendingSelection(v.command.pendingSelection);
@@ -322,17 +340,26 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                                 artId: v.loot.id,
                                 position: v.command.pendingSelection.hit.slot,
                             };
+                            console.log(`[INIT SESSION]: new gallery item created`);
+                            console.dir(newItem);
                             // Extract items list form saved and validated data:
                             const items = v.savedData.draft.items;
 
                             // Make changes in the draft
                             const newDraft = { ...v.savedData.draft, items: [...items, newItem] };
+                            console.log(`[INIT SESSION]: new art items list set as:`);
+                            console.dir(newDraft.items);
 
                             // Update changed draft in the store:
                             editSessionsDataStore.saveDraft(key, newDraft);
-
+                            console.log(`[INIT SESSION]: external store data updated:`);
+                            // Set edited block id
+                            setSelectedBlockId(newDraft.id);
                             // Open editor in edit mode
                             setModeStack(['select', 'edit']);
+                            console.log(
+                                `[INIT SESSION]: screen mode set to edit, and block id is: ${newDraft.id}`,
+                            );
                             // setIsJourney(false);
                             return;
                         }

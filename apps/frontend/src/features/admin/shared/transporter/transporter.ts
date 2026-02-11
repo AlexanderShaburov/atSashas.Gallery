@@ -62,7 +62,7 @@ export function useReturnHome(): ReturnFn {
 
 export function useArrival(): ArrivalFn {
     return useCallback((destination: EditorKind) => {
-        console.log(`[useArrival]: Called wit destination ${destination}`);
+        console.log(`[useArrival]: Called with destination ${destination}`);
         const top = journeyStackStore.peek();
         if (!top) return undefined;
 
