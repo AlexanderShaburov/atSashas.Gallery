@@ -14,7 +14,7 @@ import {
 import {
     useArrival,
     useDispatch,
-    usePeekTicket,
+    useJourneyStatus,
     useReturnHome,
 } from '@/features/admin/shared/transporter/transporter';
 import {
@@ -22,7 +22,7 @@ import {
     SingleItemEditorProps,
 } from '@/pages/admin/catalogEditorPage/catalogEditor.types';
 import { deepEqual } from '@/shared/lib/checkers/checkers';
-import { EditorKey } from '@/shared/nav';
+import { EditorKey, JourneyHome } from '@/shared/nav';
 import {
     editSessionsDataStore,
     unsavedChangesStore,
@@ -33,7 +33,15 @@ import {
     CatalogCommands,
     CatalogToolbarModel,
 } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import {
     getCatalog,
     getDependents,
@@ -72,19 +80,26 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
 
     // UI states:
     const [screenMode, setScreenMode] = useState<CatalogEditorScreenMode>('select');
+
+    // React Strict Mode protection for bootstrap
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bootstrapRef = useRef<{ processed: boolean; ticket: any }>({
+        processed: false,
+        ticket: null,
+    });
     const isSelected = screenMode === 'edit' && !!selectedItemId;
     // API process states:
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    // Journey state:
-    const [isJourney, setIsJourney] = useState<boolean>(false);
     // -----------------------------
     // Journey navigation hooks (same as Block/Stream pattern)
     // -----------------------------
     const arrival = useArrival();
-    const peekTicket = usePeekTicket();
     const returnHome = useReturnHome();
     const dispatch = useDispatch();
+
+    // NEW: Derived journey state (replaces local useState)
+    const isJourney = useJourneyStatus('catalog');
 
     // **************** EDITOR DATA EXTRACTION (EXTERNAL STORE) ****************
 
@@ -230,126 +245,135 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     */
 
     useEffect(() => {
+        console.log('[Catalog BOOTSTRAP]: Effect started');
+
+        // React Strict Mode protection: Only process once
+        if (bootstrapRef.current.processed) {
+            console.log('[Catalog BOOTSTRAP]: Skipping - already processed');
+            return;
+        }
+
+        // CRITICAL: Call arrival() synchronously FIRST, before any async operations
+        // This prevents race conditions in React Strict Mode
+        const ticket = arrival('catalog');
+        console.log('[Catalog BOOTSTRAP]: ticket received:');
+        console.dir(ticket);
+
+        // Mark as processed and store ticket
+        bootstrapRef.current = { processed: true, ticket };
+
         void (async () => {
             await refreshBase();
-            const ticket = arrival('catalog');
             if (!ticket) {
                 //Open catalog editor in 'select' screenMode
                 setScreenMode('select');
                 return;
             }
-            console.log('[Catalog BOOTSTRAP]: ticket received:');
-            console.dir(ticket);
-            switch (ticket.phase) {
-                case 'outbound': {
-                    setIsJourney(true);
-                    console.log(`[Catalog BOOTSTRAP]: isJourney state set to true`);
-                    // Someone navigated TO catalog editor
-                    // We support:
-                    // - destination.mode === 'select' (pick an art item)
-                    // - destination.mode === 'edit'   (open specific item id)
-                    switch (ticket.destination.mode) {
-                        case 'select': {
-                            setScreenMode('select');
-                            return;
-                        }
-                        case 'edit': {
-                            const id = ticket.destination.objectId;
-                            if (!id)
-                                throw new Error(
-                                    '[Catalog BOOTSTRAP]: outbound edit missing objectId',
-                                );
 
-                            // We need catalog to resolve item
-                            const cat = (await getCatalog()) as ArtCatalog;
-                            setCatalog(cat);
-                            gCtx.setArtCatalog(cat);
-
-                            const item = cat.items?.[id];
-                            if (!item)
-                                throw new Error(
-                                    `[Catalog BOOTSTRAP]: ArtItem not found in catalog: ${id}`,
-                                );
-
-                            setSelectedItemId(id);
-                            setScreenMode('edit');
-                            return;
-                        }
-                        default:
-                            throw new Error(
-                                '[Catalog BOOTSTRAP]: Unsupported outbound destination.mode',
-                            );
-                    }
-                }
-
-                case 'return': {
-                    /*❗️
-                    Important notice: as a result, journey to hopper has to have left created artItem
-                    object added into the catalog with id, initially transferred to ticket
-                    ❗️*/
-                    console.log(`[Catalog BOOTSTRAP]: RETURN ticket presented.`);
-                    if (ticket.returnTo.mode !== 'edit')
-                        throw new Error(`Impossible return to catalog  editor`);
-                    if (!ticket.loot)
-                        throw new Error(`Impossible return to catalog not having loot`);
-                    if (!ticket.loot.ok)
-                        throw new Error(`Impossible return to catalog not having loot`);
-
-                    // Fetch catalog directly to avoid stale state from refreshBase()
-                    const cat = (await getCatalog()) as ArtCatalog;
-                    setCatalog(cat);
-                    console.log(`[Catalog BOOTSTRAP]: Catalog renewed`);
-                    // Save catalog to the global context /LEGACY -> TO BE REFACTORED
-                    gCtx.setArtCatalog(cat);
-                    // Get loot id, this particular case it is hopper temporal image id, means nothing.
-                    // Get looted image:
-                    const loot = ticket.loot.output;
-                    console.log(`[Catalog BOOTSTRAP]: Loot checkup starts:`);
-                    if (!loot) {
-                        //If no loot -> open catalog editor in 'select' screenMode
-                        console.log(
-                            `[Catalog BOOTSTRAP]: Journey to hopper doesn't brought any loot`,
-                        );
+            // Check if this is a return (has loot) or outbound (no loot)
+            // Note: tickets always have phase='outbound', the leg state determines if it's returning
+            if (!ticket.loot) {
+                // OUTBOUND: Someone navigated TO catalog editor
+                // isJourney now derived from useJourneyStatus() - no manual setting needed
+                // We support:
+                // - destination.mode === 'select' (pick an art item)
+                // - destination.mode === 'edit'   (open specific item id)
+                switch (ticket.destination.mode) {
+                    case 'select': {
                         setScreenMode('select');
                         return;
                     }
-                    console.log(`[Catalog BOOTSTRAP]: Loot detected`);
-                    // Create new ArtItemData object with 'draft' lifecycle, what lead us
-                    // to hopper kind image in shipment object and makes backend generate
-                    // previews
-                    const newDraft = newArtItemFromGrid(loot);
-                    console.log(`[Catalog BOOTSTRAP]: newDraft created based on loot`);
-                    console.dir(newDraft);
+                    case 'edit': {
+                        const id = ticket.destination.objectId;
+                        if (!id)
+                            throw new Error('[Catalog BOOTSTRAP]: outbound edit missing objectId');
 
-                    setSelectedItemId(newDraft.id);
-                    console.log(`[Catalog BOOTSTRAP]: selectedItemId state set`);
+                        // We need catalog to resolve item
+                        const cat = (await getCatalog()) as ArtCatalog;
+                        setCatalog(cat);
+                        gCtx.setArtCatalog(cat);
 
-                    const key: EditorKey = { kind: 'catalog', id: newDraft.id };
-                    console.log(`[Catalog BOOTSTRAP]: formed key as:`);
-                    console.dir(key);
-                    editSessionsDataStore.saveDraft<ArtItemData>(key, newDraft);
-                    editSessionsDataStore.commit<ArtItemData>(key);
-                    console.log(`[Catalog BOOTSTRAP]: Created draft saved to store and committed`);
+                        const item = cat.items?.[id];
+                        if (!item)
+                            throw new Error(
+                                `[Catalog BOOTSTRAP]: ArtItem not found in catalog: ${id}`,
+                            );
 
-                    setThumb({
-                        id: newDraft.id,
-                        thumbUrl: newDraft.images.full,
-                        title: newDraft.title?.en ?? '',
-                    });
-                    console.log(`[Catalog BOOTSTRAP]: Thumb state set as:`);
-                    console.dir({
-                        id: newDraft.id,
-                        thumbUrl: newDraft.images.full,
-                        title: newDraft.title?.en ?? '',
-                    });
+                        setSelectedItemId(id);
+                        setScreenMode('edit');
+                        return;
+                    }
+                    default:
+                        throw new Error(
+                            '[Catalog BOOTSTRAP]: Unsupported outbound destination.mode',
+                        );
+                }
+            } else {
+                // RETURN: Returning from child editor (Hopper) with loot
+                console.log(`[Catalog BOOTSTRAP]: RETURN ticket with loot`);
+                /*❗️
+                    Important notice: as a result, journey to hopper has to have left created artItem
+                    object added into the catalog with id, initially transferred to ticket
+                    ❗️*/
+                console.log(`[Catalog BOOTSTRAP]: RETURN ticket presented.`);
+                if (ticket.returnTo.mode !== 'edit')
+                    throw new Error(`Impossible return to catalog  editor`);
+                if (!ticket.loot) throw new Error(`Impossible return to catalog not having loot`);
+                if (!ticket.loot.ok)
+                    throw new Error(`Impossible return to catalog not having loot`);
 
-                    setScreenMode('edit');
-                    console.log(`[Catalog BOOTSTRAP]: Screen mode set to edit`);
-
-                    console.log('[Catalog BOOTSTRAP]: return leg. ticket:');
-                    console.dir(ticket);
+                // Fetch catalog directly to avoid stale state from refreshBase()
+                const cat = (await getCatalog()) as ArtCatalog;
+                setCatalog(cat);
+                console.log(`[Catalog BOOTSTRAP]: Catalog renewed`);
+                // Save catalog to the global context /LEGACY -> TO BE REFACTORED
+                gCtx.setArtCatalog(cat);
+                // Get loot id, this particular case it is hopper temporal image id, means nothing.
+                // Get looted image:
+                const loot = ticket.loot.output;
+                console.log(`[Catalog BOOTSTRAP]: Loot checkup starts:`);
+                if (!loot) {
+                    //If no loot -> open catalog editor in 'select' screenMode
+                    console.log(`[Catalog BOOTSTRAP]: Journey to hopper doesn't brought any loot`);
+                    setScreenMode('select');
                     return;
                 }
+                console.log(`[Catalog BOOTSTRAP]: Loot detected`);
+                // Create new ArtItemData object with 'draft' lifecycle, what lead us
+                // to hopper kind image in shipment object and makes backend generate
+                // previews
+                const newDraft = newArtItemFromGrid(loot);
+                console.log(`[Catalog BOOTSTRAP]: newDraft created based on loot`);
+                console.dir(newDraft);
+
+                setSelectedItemId(newDraft.id);
+                console.log(`[Catalog BOOTSTRAP]: selectedItemId state set`);
+
+                const key: EditorKey = { kind: 'catalog', id: newDraft.id };
+                console.log(`[Catalog BOOTSTRAP]: formed key as:`);
+                console.dir(key);
+                editSessionsDataStore.saveDraft<ArtItemData>(key, newDraft);
+                editSessionsDataStore.commit<ArtItemData>(key);
+                console.log(`[Catalog BOOTSTRAP]: Created draft saved to store and committed`);
+
+                setThumb({
+                    id: newDraft.id,
+                    thumbUrl: newDraft.images.full,
+                    title: newDraft.title?.en ?? '',
+                });
+                console.log(`[Catalog BOOTSTRAP]: Thumb state set as:`);
+                console.dir({
+                    id: newDraft.id,
+                    thumbUrl: newDraft.images.full,
+                    title: newDraft.title?.en ?? '',
+                });
+
+                setScreenMode('edit');
+                console.log(`[Catalog BOOTSTRAP]: Screen mode set to edit`);
+
+                console.log('[Catalog BOOTSTRAP]: return leg. ticket:');
+                console.dir(ticket);
+                return;
             }
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -360,9 +384,16 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     // ************** CREATE NEW ART ITEM **************
     const onAdd = useCallback(() => {
         const ticket = printoutTicket();
-        dispatch(ticket);
+
+        // NEW: Provide home when starting journey to Hopper
+        const home: JourneyHome = {
+            editor: 'catalog',
+            objectId: selectedItemId, // May be undefined if in select mode
+        };
+
+        dispatch(ticket, home);
         // Create new art item:
-    }, [dispatch]);
+    }, [dispatch, selectedItemId]);
 
     // *************** SELECT AND EDIT ****************
     const editById = useCallback(
@@ -428,19 +459,16 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     const finalizeAfterSave = useCallback(
         (savedId: string) => {
             console.log(`[finalizeAfterSave]: called`);
-            const ticket = peekTicket();
-            console.log(`[finalizeAfterSave]: ticket received as:`);
-            console.dir(ticket);
-            if (ticket?.phase === 'return' && ticket.destination.editor === 'catalog') {
+            // If in a journey, return home with the saved art item ID
+            if (isJourney) {
                 console.log(
-                    `[finalizeAfterSave]: taken decision to return home with artItemId: ${savedId}`,
+                    `[finalizeAfterSave]: in journey, returning home with artItemId: ${savedId}`,
                 );
-                setIsJourney(false);
                 returnHome('catalog', { ok: true, id: savedId });
             }
             resetSession();
         },
-        [peekTicket, returnHome, resetSession],
+        [isJourney, returnHome, resetSession],
     );
 
     // ----------------- Save procedure -----------------
@@ -480,10 +508,29 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
             // Convey selected item to journey
             void (async () => {
                 if (!isJourney || !id) return;
-                finalizeAfterSave(id);
+
+                // If there are unsaved changes (creating/editing), save first
+                // Otherwise (just selecting existing item), return directly
+                if (isDirty && draft) {
+                    console.log('[applyById]: Unsaved changes detected, saving before return...');
+                    const saveResult = await save();
+
+                    if (!saveResult.ok) {
+                        console.error('[applyById]: Save failed, not returning');
+                        return;
+                    }
+
+                    console.log('[applyById]: Save successful, returning home');
+                    finalizeAfterSave(saveResult.id);
+                } else {
+                    console.log(
+                        '[applyById]: No unsaved changes, returning directly with selected id',
+                    );
+                    finalizeAfterSave(id);
+                }
             })();
         },
-        [finalizeAfterSave, isJourney],
+        [draft, finalizeAfterSave, isDirty, isJourney, save],
     );
     // ---------- EXIT ---------
     // exit button handler

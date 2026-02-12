@@ -4,27 +4,29 @@ import { MetaIntent } from '@/entities/common/lifecycle';
 import type { StreamMetadata } from '@/entities/stream';
 import { StreamData, StreamIndexItem, type StreamScreenMode } from '@/entities/stream';
 import { SaveLifecycle, StreamScreenModeStack } from '@/entities/stream/stream-editor-screen.types';
+import { getCollection } from '@/features/admin/blocks/api/blocksApi';
 import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
-import { useArrival, useDispatch } from '@/features/admin/shared/transporter/transporter';
+import {
+    useArrival,
+    useDispatch,
+    useJourneyStatus,
+    useReturnHome,
+} from '@/features/admin/shared/transporter/transporter';
 import { StreamEditorCtx } from '@/features/admin/streams/hooks/useStreamEditor';
 import { validateStreamForm } from '@/features/admin/streams/utils';
 import { deepEqual } from '@/shared/lib/checkers/checkers';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { generateId } from '@/shared/lib/id/generateId';
-import type { OkJumpResult } from '@/shared/nav';
+import type { JourneyHome, OkJumpResult } from '@/shared/nav';
 import { EditorKey } from '@/shared/nav';
-import {
-    JourneyTicket,
-    ReturnAddress,
-    ReturnCommand,
-    ToAddress,
-} from '@/shared/nav/journeyStack.types';
+import { JourneyTicket, ReturnAddress, ReturnCommand, ToAddress } from '@/shared/nav/journey.types';
 import { useUnsavedChanges } from '@/shared/state';
 import { editSessionsDataStore } from '@/shared/state/editorSessionsData.store';
 import { unsavedChangesStore } from '@/shared/state/unsavedChanges.store';
 import { useSessionDataStore } from '@/shared/state/useEditorSessionsDataStore';
 import { ThreeDotCommand } from '@/shared/ui/ThreeDotMenu/threeDot.types';
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { resolveStreamBootstrapData, validateStreamReturnBootstrap } from './bootstrap';
 import {
     deleteStream,
@@ -61,6 +63,8 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     const [pendingFocus, setPendingFocus] = useState<PendingFocus>(null);
 
     const metaIntent = useRef<MetaIntent>({ action: 'idle' });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bootstrapRef = useRef<{ pathname: string; ticket: any } | null>(null);
 
     // ****************** EDITOR DATA EXTRACTION (EXTERNAL STORE) ******************
 
@@ -84,6 +88,9 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     // read ticket getter
     const arrival = useArrival();
     const dispatch = useDispatch();
+    const returnHome = useReturnHome();
+    const location = useLocation(); // For triggering bootstrap on route changes
+    const isJourney = useJourneyStatus('stream');
 
     // ************* STATE LOGIC *************
 
@@ -216,21 +223,53 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     // *************** MOUNT BOOTSTRAP ***************
 
     useEffect(() => {
+        console.log(`[STREAM BOOTSTRAP]: Effect running, pathname=${location.pathname}`);
+
+        // React Strict Mode protection: Only process if pathname actually changed
+        if (bootstrapRef.current?.pathname === location.pathname) {
+            console.log(`[STREAM BOOTSTRAP]: Skipping - already processed this pathname`);
+            return;
+        }
+
+        // CRITICAL: Call arrival() synchronously FIRST, before any async operations
+        // This prevents race conditions in React Strict Mode which runs effects twice
+        const arrivalTicket = arrival('stream');
+        console.log(`[STREAM BOOTSTRAP]: arrival('stream') returned:`, arrivalTicket);
+
+        // Store this pathname as processed
+        bootstrapRef.current = { pathname: location.pathname, ticket: arrivalTicket };
+
+        // Now start async operations
         (async () => {
-            // Renew streams list:
+            console.log(`[STREAM BOOTSTRAP]: Current modeStack:`, modeStack);
+            console.log(`[STREAM BOOTSTRAP]: Current selectedStreamId:`, selectedStreamId);
+
+            // Renew streams list AFTER consuming the ticket
             await renewStreamsIndex();
-            // check ticket if we just return from the journey
-            const arrivalTicket = arrival('stream');
-            // if no ticket -> it is new session form zero
+
+            // if no ticket -> it is new session from zero
             if (!arrivalTicket) {
-                // IMPORTANT
-                // ??????????????????????????????????????????? !!!!!!!!!!!!!!!!!!!!!!!!!
-                // If we reset session shouldn't we reset editorSessionData.store values?
+                console.log(`[STREAM BOOTSTRAP]: No ticket, calling resetSelectSession()`);
                 resetSelectSession();
                 return;
             }
+
             console.log(`[BOOTSTRAP]: Got ticket:`);
             console.dir(arrivalTicket);
+
+            // Check if this is a return (has loot) or outbound (no loot)
+            if (!arrivalTicket.loot) {
+                // OUTBOUND: Someone navigated TO stream editor (not a return)
+                console.log(`[BOOTSTRAP]: Outbound ticket - Stream editor is destination`);
+                // For now, Stream editor doesn't support being a journey destination
+                // (users navigate to streams directly, not via journey)
+                resetSelectSession();
+                return;
+            }
+
+            // RETURN: Returning from child editor (Block/Catalog/etc) with loot
+            console.log(`[BOOTSTRAP]: Return ticket with loot - processing return`);
+
             const bootstrapId: string = arrivalTicket.returnTo.objectId;
             const key =
                 (selectedStreamId ?? bootstrapId)
@@ -246,14 +285,11 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             console.log(`[BOOTSTRAP]: Got stored data:`);
             console.dir(storeData);
 
-            // Get validated context data:
-
+            // Validate return ticket data
             const v = validateStreamReturnBootstrap(arrivalTicket, storeData);
 
             console.log(`[BOOTSTRAP]: Got validated values:`);
             console.dir(v);
-            // Before complete earlier started actions we have to
-            // check statStore and journeyStore matching (checked in validateStreamReturnTicket)
 
             const id = v.streamId;
             if (id) {
@@ -262,10 +298,13 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             }
 
             // set screenMode to 'edit' state:
+            console.log(`[STREAM BOOTSTRAP]: About to call pushMode({ kind: 'edit' })`);
+            console.log(`[STREAM BOOTSTRAP]: Current modeStack before pushMode:`, modeStack);
             pushMode({ kind: 'edit' });
+            console.log(`[STREAM BOOTSTRAP]: pushMode({ kind: 'edit' }) called`);
 
             let focusBlockId: string | null = null;
-            // when ticket is valid let's finish command started before dispatch:
+            // Execute the return command based on its kind:
             switch (v.command.kind) {
                 case 'streamInsertBlock':
                     console.log(`[BOOTSTRAP]: streamInsertBlock branch selected`);
@@ -285,12 +324,19 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
                     break;
             }
 
+            // CRITICAL: Refresh blocks collection to include newly created/updated block
+            // This ensures the stream can render the block that was just saved
+            console.log(`[BOOTSTRAP]: Refreshing blocks collection...`);
+            const freshCollection = await getCollection();
+            gCtx.setBlocksCollection(freshCollection);
+            console.log(`[BOOTSTRAP]: Blocks collection refreshed with new block`);
+
             if (focusBlockId) {
                 setPendingFocus({ kind: 'blockId', id: focusBlockId });
             }
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [location.pathname]); // Re-run when route changes (e.g., returning from journey)
 
     // *************** BOOTSTRAP END ***************
 
@@ -405,6 +451,21 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             return top?.kind === kind ? s.slice(0, -1) : s;
         });
     }, []);
+
+    const finalizeAfterSave = useCallback(
+        (savedId: string) => {
+            console.log(`[StreamEditor][finalizeAfterSave]: called with streamId: ${savedId}`);
+            // If in a journey, return home with the saved stream ID
+            if (isJourney) {
+                console.log(
+                    `[StreamEditor][finalizeAfterSave]: in journey, returning home with streamId: ${savedId}`,
+                );
+                returnHome('stream', { ok: true, id: savedId });
+            }
+        },
+        [isJourney, returnHome],
+    );
+
     const save = useCallback(async () => {
         if (!draft) return;
 
@@ -423,6 +484,8 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             commit();
             await renewStreamsIndex();
             popIfTopIs('meta');
+            // If in a journey, finalize and return home
+            finalizeAfterSave(draft.streamId);
         } catch (err) {
             pushMode({
                 kind: 'error',
@@ -432,7 +495,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         } finally {
             setLifecycle({ saveState: 'idle' });
         }
-    }, [draft, isValid, pushMode, commit, popIfTopIs, renewStreamsIndex]);
+    }, [draft, isValid, pushMode, commit, popIfTopIs, renewStreamsIndex, finalizeAfterSave]);
 
     // **************** END OF CRUD ***************
 
@@ -460,7 +523,14 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
 
                 returnEffect: command,
             };
-            dispatch(ticket);
+
+            // NEW: Provide home when starting journey to BlockEditor
+            const home: JourneyHome = {
+                editor: 'stream',
+                objectId: selectedStreamId,
+            };
+
+            dispatch(ticket, home);
         },
         [dispatch, selectedStreamId],
     );

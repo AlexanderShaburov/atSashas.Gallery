@@ -1,40 +1,44 @@
 {
   "version": 1,
-  "updatedAt": "2026-01-27T18:18:24.183402+00:00",
+  "updatedAt": "2026-02-12T19:41:26.329845+00:00",
   "streams": [
     {
       "streamId": "stream-20260124-50ypmm",
       "title": "Second one",
+      "thumbnail": "/media/arts/previews/art-20251226-52p602.jpeg",
       "status": "draft",
       "tags": [],
       "description": "",
-      "updatedAt": "2026-01-24T14:43:14.333620+00:00"
+      "updatedAt": "2026-02-12T19:40:55.504692+00:00"
     },
     {
       "streamId": "stream-20260124-gzy15k",
       "title": "opplala",
+      "thumbnail": "/media/arts/previews/art-20260210-kfb5q7.jpeg",
       "status": "draft",
       "tags": [],
       "description": "",
-      "updatedAt": "2026-01-24T14:42:54.181662+00:00"
+      "updatedAt": "2026-02-12T19:41:26.323074+00:00"
     },
     {
       "streamId": "stream-20260124-3jt4bb",
       "title": "sdfasfd",
+      "thumbnail": "/media/arts/previews/art-20251226-7vqxmz.jpeg",
       "status": "draft",
       "tags": [
         "lopez"
       ],
       "description": "",
-      "updatedAt": "2026-01-24T17:01:05.073476+00:00"
+      "updatedAt": "2026-02-12T19:40:36.202874+00:00"
     },
     {
       "streamId": "stream-20260125-vchkav",
       "title": "pps",
+      "thumbnail": "/media/arts/previews/art-20260124-est8wp.jpeg",
       "status": "draft",
       "tags": [],
       "description": "",
-      "updatedAt": "2026-01-27T18:18:24.179858+00:00"
+      "updatedAt": "2026-02-12T19:39:47.401085+00:00"
     }
   ]
 }

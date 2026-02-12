@@ -102,7 +102,9 @@ export default function CatalogEditorPage() {
                                     selectedItemId={selectedItemId}
                                     setItemSelected={onSelectHandler}
                                 />
-                                <SingleEditorToolbar tools={gridToolbar} ctx={tbCtx} />
+                                <div className="set__toolbar">
+                                    <SingleEditorToolbar tools={gridToolbar} ctx={tbCtx} />
+                                </div>
                             </div>
                         </div>
                     )}

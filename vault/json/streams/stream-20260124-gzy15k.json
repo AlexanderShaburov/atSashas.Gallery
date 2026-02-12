@@ -4,10 +4,11 @@
   "status": "draft",
   "tags": [],
   "description": "",
-  "version": 3,
+  "version": 4,
   "createdAt": "2026-01-24T14:37:29.761460+00:00",
-  "updatedAt": "2026-01-24T14:42:54.181662+00:00",
+  "updatedAt": "2026-02-12T19:41:26.323074+00:00",
   "blockIds": [
+    "block-gallery-single-a9fde4cf",
     "block-gallery-pairhorizontal-5314cf4f",
     "block-gallery-single-466e6378"
   ]

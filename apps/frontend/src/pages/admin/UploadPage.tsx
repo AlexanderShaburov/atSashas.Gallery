@@ -6,14 +6,18 @@ import {
     getHopperContent,
     uploadImage,
 } from '@/features/admin/catalogEditor/api';
-import { useArrival, useReturnHome } from '@/features/admin/shared/transporter/transporter';
+import {
+    useArrival,
+    useJourneyStatus,
+    useReturnHome,
+} from '@/features/admin/shared/transporter/transporter';
 import ArtItemGrid from '@/features/admin/shared/ui/ArtItemGrid/ArtItemGrid';
 import '@/pages/admin/Upload.css';
 import { generateId } from '@/shared/lib/id/generateId';
 import { JumpResult } from '@/shared/nav';
 import { ToolbarCtx, ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
-import { useEffect, useState, type DragEvent } from 'react';
+import { useEffect, useRef, useState, type DragEvent } from 'react';
 
 export default function UploadPage() {
     const [files, setFiles] = useState<File[]>([]);
@@ -21,10 +25,15 @@ export default function UploadPage() {
     const [uploaded, setUploaded] = useState<GridItem[]>([]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
-    const [isJourney, setIsJourney] = useState(false);
 
     const arrival = useArrival();
     const returnHome = useReturnHome();
+
+    // NEW: Derived journey state (replaces local useState)
+    const isJourney = useJourneyStatus('hopper');
+
+    // React Strict Mode protection for bootstrap
+    const bootstrapRef = useRef<{ processed: boolean; ticket: any }>({ processed: false, ticket: null });
 
     // Handle grid selection ( deselect: undefined)
     const handleSelect = (item: GridItem | undefined) => {
@@ -36,16 +45,39 @@ export default function UploadPage() {
     };
     // ************** BOOTSTRAP MOUNT ***************
     useEffect(() => {
+        console.log('[Hopper BOOTSTRAP]: Effect started');
+
+        // React Strict Mode protection: Only process once
+        if (bootstrapRef.current.processed) {
+            console.log('[Hopper BOOTSTRAP]: Skipping - already processed');
+            return;
+        }
+
+        // CRITICAL: Call arrival() synchronously FIRST, before any async operations
+        // This prevents race conditions in React Strict Mode
+        const ticket = arrival('hopper');
+        console.log('[Hopper BOOTSTRAP]: ticket received:', ticket);
+
+        // Mark as processed and store ticket
+        bootstrapRef.current = { processed: true, ticket };
+
+        // Process ticket if present
+        if (ticket) {
+            if (ticket.phase === 'outbound' && ticket.destination.mode === 'select') {
+                console.log('[Hopper BOOTSTRAP]: Outbound select ticket - ready for selection');
+                // isJourney now derived from useJourneyStatus() - UI will show Apply button
+            } else {
+                console.warn('[Hopper BOOTSTRAP]: Unexpected ticket configuration:', ticket);
+            }
+        }
+
+        // Now perform async operations
         (async () => {
             // Download hopper content once at page load
             const artItemGrid = await getHopperContent();
             console.log(`[UploadPage]: artItemGrid (Hopper) is: `);
             console.dir(artItemGrid);
             setUploaded(artItemGrid);
-            const ticket = arrival('hopper');
-            if (!ticket) return;
-            if (ticket.phase === 'return') throw new Error(`Hooper bootstrap got return ticket`);
-            setIsJourney(true);
         })();
     }, [arrival]);
 

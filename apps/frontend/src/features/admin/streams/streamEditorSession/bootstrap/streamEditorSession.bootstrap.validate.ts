@@ -21,8 +21,10 @@ export function validateStreamReturnBootstrap(
         throw new Error('StreamEditor bootstrap called without ticket');
     }
 
-    if (ticket.phase !== 'return') {
-        throw new Error('StreamEditor expects return-phase ticket');
+    // Check if this is a return by presence of loot (attached by returnHome())
+    // Note: tickets always have phase='outbound', the leg state determines if it's returning
+    if (!ticket.loot) {
+        throw new Error('StreamEditor expects ticket with loot (from child editor return)');
     }
 
     if (ticket.returnTo.mode !== 'edit') {

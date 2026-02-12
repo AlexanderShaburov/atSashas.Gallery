@@ -1,9 +1,8 @@
 // src/features/admin/blocks/blockEditorSession/bootstrap/blockEditorSession.bootstrap.validate.ts
 
 import { Block, GalleryBlock, GalleryLayout, ItemPosition, LAYOUT_SCHEME } from '@/entities/block';
-import { JourneyTicket, JumpResult, ReturnCommand } from '@/shared/nav';
+import { JourneyTicket, JumpResult, ReturnCommand, SerializableBlockHitEvent } from '@/shared/nav';
 import { DraftSnapshot } from '@/shared/state';
-import { BlockHitEvent } from '../../ui/BlockTemplates';
 import { BlockReturnKind, OkJumpResult } from './blockEditorSession.bootstrap.types';
 
 /**
@@ -21,13 +20,13 @@ export type PositionForLayout<L extends GalleryLayout> =
 type BlockInsertArtEffect = {
     kind: 'blockInsertArt';
     blockId: string;
-    pendingSelection: BlockHitEvent;
+    pendingSelection: SerializableBlockHitEvent;
 };
 
 export type BlockReturnBootstrapInsertValidated<L extends GalleryLayout> = {
-    ticket: JourneyTicket & { phase: 'return' };
+    ticket: JourneyTicket & { loot: JumpResult };
     command: BlockInsertArtEffect & {
-        pendingSelection: BlockHitEvent & {
+        pendingSelection: SerializableBlockHitEvent & {
             hit: { blockKind: 'gallery'; kind: 'image'; slot: PositionForLayout<L> };
         };
     };
@@ -40,8 +39,8 @@ export type BlockReturnBootstrapInsertValidated<L extends GalleryLayout> = {
 
 function assertPendingSelectionSlotMatchesLayout<L extends GalleryLayout>(
     layout: L,
-    pending: BlockHitEvent & { hit: { blockKind: 'gallery'; kind: 'image'; slot: ItemPosition } },
-): asserts pending is BlockHitEvent & {
+    pending: SerializableBlockHitEvent & { hit: { blockKind: 'gallery'; kind: 'image'; slot: ItemPosition } },
+): asserts pending is SerializableBlockHitEvent & {
     hit: { blockKind: 'gallery'; kind: 'image'; slot: PositionForLayout<L> };
 } {
     assertPositionMatchesLayout(layout, pending.hit.slot);
@@ -60,10 +59,12 @@ export function isBlockReturnCommand(
 /** Narrow JourneyTicket to RETURN ticket */
 function assertReturnTicket(
     ticket: JourneyTicket | undefined,
-): asserts ticket is JourneyTicket & { phase: 'return' } {
+): asserts ticket is JourneyTicket & { loot: JumpResult } {
     if (!ticket) throw new Error('BlockEditor return bootstrap called without ticket');
-    if (ticket.phase !== 'return') {
-        throw new Error(`Expected return ticket, got: ${ticket.phase}`);
+    // Check for loot instead of phase - tickets always have phase='outbound'
+    // The presence of loot indicates this is a return from a child editor
+    if (!ticket.loot) {
+        throw new Error(`Expected return ticket with loot, but loot is missing`);
     }
 }
 
@@ -88,8 +89,8 @@ function assertInsertArtEffect(
 }
 
 function assertGalleryImagePendingSelection(
-    pending: BlockHitEvent | undefined,
-): asserts pending is BlockHitEvent & {
+    pending: SerializableBlockHitEvent | undefined,
+): asserts pending is SerializableBlockHitEvent & {
     hit: { blockKind: 'gallery'; kind: 'image'; slot: ItemPosition };
 } {
     if (!pending) throw new Error('ReturnEffect pendingSelection has no data');
@@ -147,7 +148,7 @@ export function validateBlockReturnBootstrapInsertArt<L extends GalleryLayout>(
     bootstrapData: DraftSnapshot<Block> | undefined,
     opts?: { expectedLayout?: L },
 ): BlockReturnBootstrapInsertValidated<L> {
-    // 0) Narrow ticket.phase to 'return'
+    // 0) Assert ticket has loot (indicates return from child editor)
     assertReturnTicket(ticket);
 
     // 1) Validate effect kind is ours + is insert

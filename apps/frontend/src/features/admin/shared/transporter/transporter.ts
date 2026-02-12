@@ -1,11 +1,13 @@
 // src/features/admin/shared/transporter/transporter.ts
 
-import { EditorKind, journeyStackStore, JourneyTicket, JumpResult } from '@/shared/nav';
-import { ReturnAddress, ToAddress } from '@/shared/nav/journeyStack.types';
-import { useCallback } from 'react';
+import { EditorKind, JourneyTicket, JumpResult } from '@/shared/nav';
+import { ReturnAddress, ToAddress } from '@/shared/nav/journey.types';
+import { journeySessionStore } from '@/shared/nav/journeySession.store';
+import type { JourneyHome } from '@/shared/nav/journeySession.types';
+import { useCallback, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-type DispatchFn = (ticket: JourneyTicket) => void;
+type DispatchFn = (ticket: JourneyTicket, home?: JourneyHome) => void;
 type ReturnFn = (editor: EditorKind, luggage: JumpResult) => void;
 type ArrivalFn = (destination: EditorKind) => JourneyTicket | undefined;
 type PeekFn = () => JourneyTicket | undefined;
@@ -30,9 +32,13 @@ export function useDispatch(): DispatchFn {
     const navigate = useNavigate();
     //
     const transport = useCallback(
-        (ticket: JourneyTicket) => {
-            // Save new ticket to stack:
-            journeyStackStore.push(ticket);
+        (ticket: JourneyTicket, home?: JourneyHome) => {
+            // NEW: Use session store (with backward compat for old stack)
+            journeySessionStore.pushOutbound(ticket, home);
+
+            // COMPAT: Keep old stack in sync for now
+            // journeyStackStore.push(ticket);
+
             // Define dest address and jump:
             const dest = currentLeg(ticket);
             navigate(ROUTS[dest.editor]);
@@ -47,14 +53,31 @@ export function useReturnHome(): ReturnFn {
 
     return useCallback(
         (editor: EditorKind, luggage: JumpResult) => {
-            // Get ticket from the stack:
-            const top = journeyStackStore.pickOrThrow();
-            // Check ticket if meet to stack:
-            if (editor !== top.destination.editor || top.phase !== 'return') return;
-            // Check in luggage:
-            journeyStackStore.checkInLuggage(top.journeyId, luggage);
-            // jump:
-            navigate(ROUTS[top.returnTo.editor]);
+            console.log(`[useReturnHome]: Called by ${editor} with luggage:`, luggage);
+
+            // NEW: Use session store
+            console.log('session before', journeySessionStore._snapshot?.());
+            journeySessionStore.completeReturn(editor, luggage);
+            console.log('session after', journeySessionStore._snapshot?.());
+
+            const nextAction = journeySessionStore.continueJourney();
+            console.log(`[useReturnHome]: Next action determined:`, nextAction);
+
+            switch (nextAction.kind) {
+                case 'navigate':
+                    navigate(ROUTS[nextAction.editor]);
+                    break;
+                case 'finishAtHome':
+                    // Navigate to home editor
+                    navigate(ROUTS[nextAction.home.editor]);
+                    // Clear session (journey complete)
+                    journeySessionStore.clear();
+                    // journeyStackStore.clear();
+                    break;
+                case 'idle':
+                    // No action needed
+                    break;
+            }
         },
         [navigate],
     );
@@ -63,22 +86,50 @@ export function useReturnHome(): ReturnFn {
 export function useArrival(): ArrivalFn {
     return useCallback((destination: EditorKind) => {
         console.log(`[useArrival]: Called with destination ${destination}`);
-        const top = journeyStackStore.peek();
-        if (!top) return undefined;
 
-        const expected = currentLeg(top).editor;
-        console.log(`[useArrival]: expected arrival is: ${expected}`);
-        if (expected !== destination)
-            throw new Error(
-                `Arrival on unexpected destination ${destination} instead of ${expected}`,
-            );
+        // NEW: Use session store
+        const ticket = journeySessionStore.arrival(destination);
 
-        return journeyStackStore.consumeLeg();
+        // COMPAT: Keep old stack in sync
+        // const top = journeyStackStore.peek();
+        // if (top) {
+        //     const expected = currentLeg(top).editor;
+        //     console.log(`[useArrival]: expected arrival is: ${expected} (compat check)`);
+        //     if (expected !== destination) {
+        //         throw new Error(
+        //             `Arrival on unexpected destination ${destination} instead of ${expected}`,
+        //         );
+        //     }
+        //     journeyStackStore.consumeLeg();
+        // }
+
+        return ticket;
     }, []);
 }
 
-export function usePeekTicket(): PeekFn {
+export function usePeekTicket(editor: EditorKind): PeekFn {
     return useCallback(() => {
-        return journeyStackStore.peek();
-    }, []);
+        // COMPAT: Use old stack for now (session store needs editor context)
+        return journeySessionStore.peekNextTicketFor(editor);
+    }, [editor]);
+}
+
+/**
+ * NEW HOOK: Check if current editor is in a journey.
+ * Replaces local isJourney flags with derived state from session store.
+ */
+export function useJourneyStatus(editor: EditorKind): boolean {
+    const hasSession = useSyncExternalStore(
+        journeySessionStore.subscribe.bind(journeySessionStore),
+        () => journeySessionStore.hasActiveSession(),
+        () => false,
+    );
+
+    const isInJourney = useSyncExternalStore(
+        journeySessionStore.subscribe.bind(journeySessionStore),
+        () => journeySessionStore.isEditorInJourney(editor),
+        () => false,
+    );
+
+    return hasSession && isInJourney;
 }

@@ -16,15 +16,15 @@ import {
 } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { TEMPLATE_BLOCKS } from '@/features/admin/blocks/ui/BlockTemplates/templateTypes';
 import { InlineEditableText } from '@/features/admin/shared/ui/BlockPreview';
-import { useResolveArt } from '@/shared/ArtCatalogProvider/CatalogHook';
+import { useResolveArtAdaptive } from '@/shared/ArtCatalogProvider/useResolveArtAdaptive';
 import { JSX, ReactNode } from 'react';
 
 const ITEM_POSITIONS: Record<GalleryLayout, ItemPosition[]> = {
     single: ['Center'],
     pairHorizontal: ['Left', 'Right'],
     pairVertical: ['Up', 'Bottom'],
-    triptychLeft: ['LS', 'RUC', 'RBC'],
-    triptychRight: ['LUC', 'LBC', 'RS'],
+    triptychLeft: ['LBC', 'LUC', 'Right'],
+    triptychRight: ['Left', 'RUC', 'RBC'],
     triptychHorizontal: ['Left', 'Center', 'Right'],
 };
 
@@ -58,7 +58,7 @@ type CaptionRenderOptions = {
 export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Props) {
     const isEditor = parent === 'editor';
     const imgPositions = ITEM_POSITIONS[item.layout];
-    const resolveArt = useResolveArt();
+    const resolveArt = useResolveArtAdaptive();
 
     const tpl = TEMPLATE_BLOCKS.find((t) => t.kind === item.blockKind && t.layout === item.layout);
     const label = tpl?.label;

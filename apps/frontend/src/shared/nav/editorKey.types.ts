@@ -1,4 +1,4 @@
-import { JumpResult } from './journeyStack.types';
+import { JumpResult } from './journey.types';
 
 export type EditorKind = 'stream' | 'block' | 'catalog' | 'hopper';
 

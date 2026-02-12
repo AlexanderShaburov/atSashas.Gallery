@@ -69,15 +69,91 @@ class StreamRepo:
         payload = stream.model_dump(mode="json")
         _atomic_write_json(path, payload)
 
+    def _generate_thumbnail(self, stream: StreamData) -> str:
+        """
+        Generate thumbnail URL from the first art item in the first gallery block.
+        Returns empty string if no suitable thumbnail found.
+        """
+        if not stream.blockIds:
+            return ""
+
+        # Get first block ID
+        first_block_id = stream.blockIds[0]
+
+        # Load blocks collection
+        blocks_path = (
+            Path(settings.storage_root)
+            / settings.json_data.strip("/")
+            / "block_collection"
+            / "block_collection.json"
+        )
+
+        if not blocks_path.exists():
+            return ""
+
+        try:
+            with blocks_path.open("r", encoding="utf-8") as f:
+                blocks_data = json.load(f)
+
+            # Get the first block
+            block = blocks_data.get("blocks", {}).get(first_block_id)
+            if not block:
+                return ""
+
+            # Only process gallery blocks
+            if block.get("blockKind") != "gallery":
+                return ""
+
+            # Get first item's artId
+            items = block.get("items", [])
+            if not items:
+                return ""
+
+            first_art_id = items[0].get("artId")
+            if not first_art_id:
+                return ""
+
+            # Load catalog to get art item
+            catalog_path = (
+                Path(settings.storage_root)
+                / settings.json_data.strip("/")
+                / "art_catalog.json"
+            )
+
+            if not catalog_path.exists():
+                return ""
+
+            with catalog_path.open("r", encoding="utf-8") as f:
+                catalog_data = json.load(f)
+
+            # Get art item
+            art_item = catalog_data.get("items", {}).get(first_art_id)
+            if not art_item:
+                return ""
+
+            # Get preview image URL (prefer JPEG fallback)
+            images = art_item.get("images", {})
+            preview = images.get("preview", {})
+            thumbnail_url = preview.get("jpeg", "")
+
+            return thumbnail_url
+
+        except (json.JSONDecodeError, KeyError, AttributeError):
+            return ""
+
     def _upsert_index_item_unlocked(
         self, index: StreamsIndex, stream: StreamData
     ) -> None:
+        # Generate thumbnail from first block's first art item
+        thumbnail = self._generate_thumbnail(stream)
+
         # Upsert by streamId
         for i, item in enumerate(index.streams):
             if item.streamId == stream.streamId:
                 index.streams[i] = StreamIndexItem(
                     streamId=stream.streamId,
                     title=stream.title,
+                    thumbnail=thumbnail,
                     status=stream.status,
                     tags=list(stream.tags),
                     description=stream.description,
@@ -89,6 +165,7 @@ class StreamRepo:
                 StreamIndexItem(
                     streamId=stream.streamId,
                     title=stream.title,
+                    thumbnail=thumbnail,
                     status=stream.status,
                     tags=list(stream.tags),
                     description=stream.description,

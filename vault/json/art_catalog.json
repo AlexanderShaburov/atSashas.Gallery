@@ -1,6 +1,6 @@
 {
-  "catalogVersion": 81,
-  "updatedAt": "2026-02-10T19:29:40.304700+00:00",
+  "catalogVersion": 89,
+  "updatedAt": "2026-02-12T19:56:13.377825+00:00",
   "items": {
     "art-20251118-4gpfj3": {
       "id": "art-20251118-4gpfj3",
@@ -412,7 +412,9 @@
         },
         "alt": null
       },
-      "techniques": [],
+      "techniques": [
+        "photography"
+      ],
       "availability": "available",
       "dimensions": {
         "width": 0.0,
@@ -428,8 +430,10 @@
         "pt": null
       },
       "price": null,
-      "series": null,
-      "tags": [],
+      "series": "old_days",
+      "tags": [
+        "glass"
+      ],
       "notes": null
     },
     "art-20260210-73dhk5": {
@@ -751,9 +755,240 @@
       "series": null,
       "tags": [],
       "notes": null
+    },
+    "art-20260212-ap97c0": {
+      "id": "art-20260212-ap97c0",
+      "dateCreated": "2026-02-12",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260212-ap97c0.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260212-ap97c0.avif",
+          "webp": "/media/arts/previews/art-20260212-ap97c0.webp",
+          "jpeg": "/media/arts/previews/art-20260212-ap97c0.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "the wall",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260212-jfa67w": {
+      "id": "art-20260212-jfa67w",
+      "dateCreated": "2026-02-12",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260212-jfa67w.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260212-jfa67w.avif",
+          "webp": "/media/arts/previews/art-20260212-jfa67w.webp",
+          "jpeg": "/media/arts/previews/art-20260212-jfa67w.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "sweet view",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260212-g57kb9": {
+      "id": "art-20260212-g57kb9",
+      "dateCreated": "2026-02-12",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260212-g57kb9.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260212-g57kb9.avif",
+          "webp": "/media/arts/previews/art-20260212-g57kb9.webp",
+          "jpeg": "/media/arts/previews/art-20260212-g57kb9.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "something mechanic",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260212-h5wr0b": {
+      "id": "art-20260212-h5wr0b",
+      "dateCreated": "2026-02-12",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260212-h5wr0b.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260212-h5wr0b.avif",
+          "webp": "/media/arts/previews/art-20260212-h5wr0b.webp",
+          "jpeg": "/media/arts/previews/art-20260212-h5wr0b.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "markers",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260212-x7ynbc": {
+      "id": "art-20260212-x7ynbc",
+      "dateCreated": "2026-02-12",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260212-x7ynbc.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260212-x7ynbc.avif",
+          "webp": "/media/arts/previews/art-20260212-x7ynbc.webp",
+          "jpeg": "/media/arts/previews/art-20260212-x7ynbc.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "nniga",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260212-32qq5n": {
+      "id": "art-20260212-32qq5n",
+      "dateCreated": "2026-02-12",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260212-32qq5n.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260212-32qq5n.avif",
+          "webp": "/media/arts/previews/art-20260212-32qq5n.webp",
+          "jpeg": "/media/arts/previews/art-20260212-32qq5n.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "band",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260212-8k04bp": {
+      "id": "art-20260212-8k04bp",
+      "dateCreated": "2026-02-12",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260212-8k04bp.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260212-8k04bp.avif",
+          "webp": "/media/arts/previews/art-20260212-8k04bp.webp",
+          "jpeg": "/media/arts/previews/art-20260212-8k04bp.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "Un placer lane",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
     }
   },
   "order": [
+    "art-20260212-8k04bp",
+    "art-20260212-32qq5n",
+    "art-20260212-x7ynbc",
+    "art-20260212-h5wr0b",
+    "art-20260212-g57kb9",
+    "art-20260212-jfa67w",
+    "art-20260212-ap97c0",
     "art-20260210-54m36f",
     "art-20260210-xevee7",
     "art-20260210-wdzf6d",

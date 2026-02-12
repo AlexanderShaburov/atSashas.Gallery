@@ -1,4 +1,4 @@
-import type { JumpResult } from '@/shared/nav/journeyStack.types';
+import type { JumpResult } from '@/shared/nav/journey.types';
 
 export type BlockReturnKind = 'blockInsertArt' | 'blockUpdateArt';
 

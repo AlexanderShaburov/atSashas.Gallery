@@ -42,6 +42,7 @@ class StreamIndexItem(BaseModel):
 
     streamId: str
     title: str
+    thumbnail: str = ""  # URL to thumbnail image (first art item from first block)
     status: StreamStatus
     tags: List[str] = Field(default_factory=list)
     description: str

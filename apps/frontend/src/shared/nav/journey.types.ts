@@ -9,6 +9,12 @@ export type EditorKey =
     | { kind: 'catalog'; id: 'main' }
     | { kind: 'hopper'; id: 'main' };
 
+/**
+ * Serializable version of BlockHitEvent (without nativeEvent to avoid circular refs in JSON)
+ * Used in journey tickets which get serialized/logged
+ */
+export type SerializableBlockHitEvent = Omit<BlockHitEvent, 'nativeEvent'>;
+
 // What editor should do as return on parent editor
 // created entity id is in the JumpResult type data (loot)
 export type ReturnCommand =
@@ -33,12 +39,12 @@ export type ReturnCommand =
     | {
           kind: 'blockInsertArt';
           blockId: string;
-          pendingSelection: BlockHitEvent;
+          pendingSelection: SerializableBlockHitEvent;
       }
     | {
           kind: 'blockUpdateArt';
           blockId: string;
-          pendingSelection: BlockHitEvent;
+          pendingSelection: SerializableBlockHitEvent;
       }
     | {
           kind: 'createArtItem';

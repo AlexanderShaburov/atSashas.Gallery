@@ -54,7 +54,11 @@ export function printoutTicket(hit: BlockHitEvent): JourneyTicket | undefined {
                         returnEffect: {
                             kind: 'blockInsertArt',
                             blockId: hit.block.id,
-                            pendingSelection: hit,
+                            // Store only serializable data, not the nativeEvent
+                            pendingSelection: {
+                                block: hit.block,
+                                hit: hit.hit,
+                            },
                         },
                     };
                     return ticket;
@@ -77,7 +81,11 @@ export function printoutTicket(hit: BlockHitEvent): JourneyTicket | undefined {
                         returnEffect: {
                             kind: 'blockUpdateArt',
                             blockId: hit.block.id,
-                            pendingSelection: hit,
+                            // Store only serializable data, not the nativeEvent
+                            pendingSelection: {
+                                block: hit.block,
+                                hit: hit.hit,
+                            },
                         },
                     };
                     return ticket;
