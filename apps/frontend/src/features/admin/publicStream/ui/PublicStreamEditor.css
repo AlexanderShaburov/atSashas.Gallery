@@ -209,6 +209,38 @@
     background: #eff6ff;
 }
 
+.pse__stream-item--draggable {
+    cursor: grab;
+}
+
+.pse__stream-item--draggable:active {
+    cursor: grabbing;
+}
+
+.pse__drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    cursor: grab;
+    color: #9ca3af;
+    font-size: 1.25rem;
+    line-height: 1;
+    user-select: none;
+    transition: color 0.2s;
+    flex-shrink: 0;
+}
+
+.pse__drag-handle:hover {
+    color: #3b82f6;
+}
+
+.pse__drag-handle:active {
+    cursor: grabbing;
+    color: #2563eb;
+}
+
 .pse__stream-thumbnail {
     width: 80px;
     height: 80px;
