@@ -15,7 +15,9 @@ export type StreamEditorSession = {
     isSaving: boolean;
     isValid: boolean;
     isDirty: boolean;
+    isJourney: boolean;
     save: () => void;
+    onApply: () => void;
     addBlock: (pos: number) => void;
     pushMode: (n: StreamScreenMode) => void;
     onEscape: () => void;

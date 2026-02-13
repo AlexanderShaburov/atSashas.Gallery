@@ -21,6 +21,7 @@ import type {
     ScreenModeStack,
 } from '@/features/admin/blocks/blockEditorSession/block-editor.types';
 import { BlockEditorCtx } from '@/features/admin/blocks/hooks/useBlocksEditor';
+import { useBlockDependencyAwareDeletion } from '@/features/admin/blocks/hooks/useBlockDependencyAwareDeletion';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { validateBlockForm } from '@/features/admin/blocks/utils';
 import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
@@ -109,6 +110,25 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     const isJourney = useJourneyStatus('block');
     //
 
+    // Ref to hold callbacks for deletion hook
+    const refreshCallbackRef = useRef<(() => Promise<void>) | null>(null);
+    const resetSessionRef = useRef<(() => void) | null>(null);
+
+    // Dependency-aware deletion hook
+    const { deleteBlockWithDeps } = useBlockDependencyAwareDeletion({
+        onRefresh: async () => {
+            if (refreshCallbackRef.current) {
+                await refreshCallbackRef.current();
+            }
+        },
+        onComplete: () => {
+            if (resetSessionRef.current) {
+                resetSessionRef.current();
+            }
+        },
+        isInJourney: isJourney,
+    });
+
     // ************* STATE LOGIC *************
 
     // ************** LOGICS **************
@@ -196,6 +216,10 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Store refreshCollection in ref for deletion hook
+    refreshCallbackRef.current = refreshCollection;
+
     // Inline editable text helper:
     const isEditingTarget = useCallback(
         (t: EditTarget) => {
@@ -220,6 +244,9 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         setPendingSelection(undefined);
         setModeStack(['select']);
     }, []);
+
+    // Store resetSession in ref for deletion hook
+    resetSessionRef.current = resetSession;
 
     // *********** MOUNT BOOTSTRAP ***********
 
@@ -303,8 +330,39 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                  * - Bootstrap MUST restore editor context and execute the return instruction only.
                  */
 
-                // 1) Handle returnEffect kinds separately (insert vs update)
+                // 1) Handle special case: dependency resolution return
                 const effect = ticket.returnEffect;
+                if (effect?.kind === 'dependencyResolved') {
+                    console.log(`[Block BOOTSTRAP]: Dependency resolution return detected`);
+
+                    // User fixed a dependency in stream editor
+                    // Refresh all data and re-trigger dependency check for the target block
+                    console.log(`[Block BOOTSTRAP]: Refreshing all data sources...`);
+
+                    await Promise.all([
+                        refreshCollection(),
+                        gCtxt.refreshStreams(),
+                    ]);
+
+                    console.log(`[Block BOOTSTRAP]: All data refreshed`);
+
+                    // Fetch fresh collection and block
+                    const targetId = effect.targetId;
+                    const freshCollection = await getCollection();
+                    const block = freshCollection.blocks?.[targetId];
+
+                    if (block) {
+                        console.log(`[Block BOOTSTRAP]: Re-checking dependencies for ${targetId}`);
+                        // Re-trigger dependency-aware deletion
+                        void deleteBlockWithDeps(block);
+                    } else {
+                        console.warn(`[Block BOOTSTRAP]: Target block ${targetId} not found after dependency resolution`);
+                        setModeStack(['select']);
+                    }
+                    return;
+                }
+
+                // 2) Handle returnEffect kinds separately (insert vs update)
                 if (!isBlockReturnCommand(effect)) {
                     throw new Error(
                         `[Bootstrap]: Unexpected returnEffect for BlockEditor: ${effect ? effect.kind : 'undefined'}`,
@@ -511,17 +569,12 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     // ----------- DELETE -----------
     // delete button handler
     const onDelete = useCallback(() => {
-        void (async () => {
-            console.log(`onDelete called for block ${draft?.id}`);
-            if (!draft || !draft.id || draft.lifecycle !== 'saved') return;
-            if (confirm('Delete block?')) {
-                await deleteBlock(draft.id);
-                clear();
-                refreshCollection();
-                resetSession();
-            }
-        })();
-    }, [draft, refreshCollection, resetSession, clear]);
+        console.log(`onDelete called for block ${draft?.id}`);
+        if (!draft || !draft.id || draft.lifecycle !== 'saved') return;
+
+        // Use dependency-aware deletion
+        void deleteBlockWithDeps(draft);
+    }, [draft, deleteBlockWithDeps]);
 
     const updateTags = useCallback(
         (next: string[]) => {

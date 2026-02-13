@@ -23,7 +23,8 @@ export class ArtItem {
             throw new Error('dateCreated must be ISO YYYY-MM-DD');
         }
 
-        if (!['cm', 'in'].includes(data.dimensions.unit)) {
+        // Only validate dimensions if they exist
+        if (data.dimensions && !['cm', 'in'].includes(data.dimensions.unit)) {
             throw new Error('dimensions.unit must be "cm" or "in"');
         }
     }

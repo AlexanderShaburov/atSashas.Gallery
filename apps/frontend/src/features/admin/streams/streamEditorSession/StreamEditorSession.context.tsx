@@ -21,6 +21,7 @@ import type { JourneyHome, OkJumpResult } from '@/shared/nav';
 import { EditorKey } from '@/shared/nav';
 import { JourneyTicket, ReturnAddress, ReturnCommand, ToAddress } from '@/shared/nav/journey.types';
 import { useUnsavedChanges } from '@/shared/state';
+import { destructiveActionsStore } from '@/shared/state/destructiveActions.store';
 import { editSessionsDataStore } from '@/shared/state/editorSessionsData.store';
 import { unsavedChangesStore } from '@/shared/state/unsavedChanges.store';
 import { useSessionDataStore } from '@/shared/state/useEditorSessionsDataStore';
@@ -261,8 +262,41 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             if (!arrivalTicket.loot) {
                 // OUTBOUND: Someone navigated TO stream editor (not a return)
                 console.log(`[BOOTSTRAP]: Outbound ticket - Stream editor is destination`);
-                // For now, Stream editor doesn't support being a journey destination
-                // (users navigate to streams directly, not via journey)
+
+                // Support outbound journey with destination.mode = 'edit'
+                if (arrivalTicket.destination.mode === 'edit') {
+                    const targetId = arrivalTicket.destination.objectId;
+                    if (!targetId) {
+                        console.error(`[BOOTSTRAP]: Outbound edit mode missing objectId`);
+                        resetSelectSession();
+                        return;
+                    }
+
+                    console.log(`[BOOTSTRAP]: Opening stream ${targetId} in edit mode`);
+
+                    // Load the stream
+                    await renewStreamsIndex();
+                    const stream = await openStream(targetId);
+
+                    if (!stream) {
+                        console.error(`[BOOTSTRAP]: Stream ${targetId} not found`);
+                        resetSelectSession();
+                        return;
+                    }
+
+                    // Set up editor state
+                    setSelectedStreamId(targetId);
+                    const key: EditorKey = { kind: 'stream', id: targetId };
+                    editSessionsDataStore.saveDraft(key, stream);
+                    editSessionsDataStore.commit(key);
+
+                    // Open in edit mode
+                    pushMode({ kind: 'edit' });
+                    console.log(`[BOOTSTRAP]: Stream ${targetId} opened in edit mode`);
+                    return;
+                }
+
+                // Default: just reset to select mode
                 resetSelectSession();
                 return;
             }
@@ -419,28 +453,33 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
 
     const delStream = useCallback(
         async (streamId: string) => {
-            if (!confirm('Delete stream?')) return;
+            destructiveActionsStore.open({
+                title: 'Delete stream',
+                message: 'This will permanently delete the stream. This cannot be undone.',
+                dangerHint: 'Make sure it is not used as an event landing page.',
+                steps: [
+                    'We will remove the stream JSON from storage.',
+                    'We will refresh the streams list.',
+                ],
+                confirmLabel: 'Delete stream',
+                run: async () => {
+                    await deleteStream(streamId);
+                },
+                onSuccess: () => {
+                    // Clear the store data for the deleted stream
+                    const key: EditorKey = { kind: 'stream', id: streamId };
+                    editSessionsDataStore.clear(key);
+                    unsavedChangesStore.clear(key);
 
-            console.log(`[StreamEditorSessionProvider][delStream]: Called`);
-            try {
-                setLifecycle({ saveState: 'saving' });
+                    // Refresh the streams list
+                    renewStreamsIndex();
 
-                const res = await deleteStream(streamId);
-                console.log(`[StreamEditorSessionProvider][delStream]: deleteStream api called`);
-                if (!res.ok) throw new Error(`Error deleting stream with id: ${streamId}`);
-                renewStreamsIndex();
-                resetSelectSession(); //!!!!!!!!!!!!!!!!!!!!!
-            } catch (err) {
-                pushMode({
-                    kind: 'error',
-                    message: String(err),
-                    canRetry: true,
-                });
-            } finally {
-                setLifecycle({ saveState: 'idle' });
-            }
+                    // Reset to select mode
+                    resetSelectSession();
+                },
+            });
         },
-        [renewStreamsIndex, resetSelectSession, pushMode],
+        [renewStreamsIndex, resetSelectSession],
     );
 
     // *************** SAVE STREAM ***************
@@ -496,6 +535,15 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             setLifecycle({ saveState: 'idle' });
         }
     }, [draft, isValid, pushMode, commit, popIfTopIs, renewStreamsIndex, finalizeAfterSave]);
+
+    // Apply button handler (for journey mode)
+    const onApply = useCallback(() => {
+        void (async () => {
+            if (!isJourney) return;
+            await save();
+            // finalizeAfterSave is called within save() when isJourney is true
+        })();
+    }, [isJourney, save]);
 
     // **************** END OF CRUD ***************
 
@@ -828,7 +876,9 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             isSaving,
             isValid,
             isDirty,
+            isJourney,
             save,
+            onApply,
             addBlock,
             pushMode,
             onEscape,
@@ -850,7 +900,9 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             isSaving,
             isValid,
             isDirty,
+            isJourney,
             save,
+            onApply,
             addBlock,
             pushMode,
             onEscape,

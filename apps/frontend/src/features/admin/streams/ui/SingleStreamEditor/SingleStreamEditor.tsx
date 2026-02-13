@@ -7,7 +7,7 @@ import { BlockWrapper } from '@/features/admin/streams/ui/Wrapper/BlockWrapper';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
 import './SingleStreamEditor.css';
 
-import { ToolbarCtx } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
+import { ToolbarCtx, ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { ThreeDotCommand } from '@/shared/ui/ThreeDotMenu/threeDot.types';
 import {
     ThreeDotMenuItem,
@@ -21,9 +21,10 @@ type Props = {
     threeDotMenu: (command: ThreeDotCommand) => void; // executes in session
     editBlock: (id: string) => void;
     toolbarProps: ToolbarCtx;
+    toolbarTools: string[];
 };
 
-export function SingleStreamEditor({ stream, threeDotMenu, editBlock, toolbarProps }: Props) {
+export function SingleStreamEditor({ stream, threeDotMenu, editBlock, toolbarProps, toolbarTools }: Props) {
     const gCtx = useEditorWorkspace();
     const collection = gCtx.currentBlocksCollection?.blocks ?? {};
 
@@ -33,6 +34,8 @@ export function SingleStreamEditor({ stream, threeDotMenu, editBlock, toolbarPro
     });
     console.log(`[SingleStreamEditor]: current stream is:`);
     console.dir(stream);
+    console.log(`[SingleStreamEditor]: toolbarTools received:`, toolbarTools);
+    console.log(`[SingleStreamEditor]: toolbarProps received:`, toolbarProps);
 
     const items: ThreeDotMenuItem[] = useMemo(
         () => [
@@ -139,7 +142,7 @@ export function SingleStreamEditor({ stream, threeDotMenu, editBlock, toolbarPro
 
             <div className="set__toolbar">
                 <SingleEditorToolbar
-                    tools={['delete', 'tags', 'add', 'edit', 'exit', 'save']}
+                    tools={toolbarTools as ToolKey[]}
                     ctx={toolbarProps}
                 />
             </div>

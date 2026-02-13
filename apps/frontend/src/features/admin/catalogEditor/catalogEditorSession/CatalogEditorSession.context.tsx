@@ -1,6 +1,6 @@
 // src/features/admin/catalogEditor/catalogEditorSession/newCatalogEditorSession.context.tsx
 
-import { ArtItemData, TechniquesJson } from '@/entities/art';
+import { ArtItem, ArtItemData, TechniquesJson } from '@/entities/art';
 import { ArtCatalog } from '@/entities/catalog';
 import { GridItem } from '@/entities/grid';
 import { CatalogEditorScreenMode } from '@/features/admin/catalogEditor/catalogEditorSession/catalogEditorSession.types';
@@ -44,11 +44,11 @@ import {
 } from 'react';
 import {
     getCatalog,
-    getDependents,
     getSeriesOptionsCI,
     getTechniques,
     updateCatalog,
 } from '../api';
+import { useDependencyAwareDeletion } from '../hooks/useDependencyAwareDeletion';
 import { CatalogEditorSession } from './catalogEditorSession.types';
 import { newArtItemFromGrid } from './editorLogic/newArtItemFromGrid';
 type SaveResult = { ok: true; id: string } | { ok: false };
@@ -64,6 +64,18 @@ export const useCatalogEditorSession = () => {
 
 export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     const gCtx: EditorWorkspaceContextValue = useEditorWorkspace();
+
+    // Ref to hold refresh callback for deletion hook
+    const refreshCallbackRef = useRef<(() => Promise<void>) | null>(null);
+
+    // Dependency-aware deletion hook
+    const { deleteArtItem: deleteArtItemWithDeps } = useDependencyAwareDeletion({
+        onRefresh: async () => {
+            if (refreshCallbackRef.current) {
+                await refreshCallbackRef.current();
+            }
+        },
+    });
 
     // Core state:
     // 1. Use as logic trigger and reference:
@@ -177,6 +189,9 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
             setIsLoading(false);
         }
     }, [gCtx]);
+
+    // Store refreshBase in ref for deletion hook
+    refreshCallbackRef.current = refreshBase;
 
     // Start new editor session:
     const resetSession = useCallback(
@@ -309,8 +324,43 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                         );
                 }
             } else {
-                // RETURN: Returning from child editor (Hopper) with loot
+                // RETURN: Returning from child editor with loot
                 console.log(`[Catalog BOOTSTRAP]: RETURN ticket with loot`);
+
+                // Check if this is a dependency resolution return
+                if (ticket.returnEffect?.kind === 'dependencyResolved') {
+                    console.log(`[Catalog BOOTSTRAP]: Dependency resolution return detected`);
+
+                    // User fixed a dependency in block/stream editor
+                    // Refresh ALL data (catalog, blocks, streams) and re-trigger dependency check
+                    console.log(`[Catalog BOOTSTRAP]: Refreshing all data sources...`);
+
+                    // Refresh in parallel
+                    await Promise.all([
+                        refreshBase(),
+                        gCtx.refreshBlocks(),
+                        gCtx.refreshStreams(),
+                    ]);
+
+                    console.log(`[Catalog BOOTSTRAP]: All data refreshed`);
+
+                    // Fetch fresh catalog directly (don't use stale state)
+                    const targetId = ticket.returnEffect.targetId;
+                    const freshCatalog = await getCatalog();
+                    const artItem = freshCatalog.items?.[targetId];
+
+                    if (artItem) {
+                        console.log(`[Catalog BOOTSTRAP]: Re-checking dependencies for ${targetId}`);
+                        // Convert ArtItemData to ArtItem instance and re-trigger dependency-aware deletion
+                        const artItemInstance = ArtItem.fromJSON(artItem);
+                        void deleteArtItemWithDeps(artItemInstance);
+                    } else {
+                        console.warn(`[Catalog BOOTSTRAP]: Target art item ${targetId} not found after dependency resolution`);
+                        setScreenMode('select');
+                    }
+                    return;
+                }
+
                 /*❗️
                     Important notice: as a result, journey to hopper has to have left created artItem
                     object added into the catalog with id, initially transferred to ticket
@@ -423,37 +473,21 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     );
 
     const deleteById = useCallback(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        (_id: string) => {
-            // Move here logic from UI component
-            /*
-            👷‍♂️😓
-            Here we call nonexistent backend method give dependencies, that has to return
-            list of blocks and streams, where deleting art object got involved.
+        (id: string) => {
+            console.log(`[CatalogEditor][deleteById]: Called with id: ${id}`);
 
-            And what to do with this info???!!!
-                1. Every dependence has to be a link to object, and on click start journey to
-                    corresponding editor to fix future issues. And back to renewed list.
-                2. Dialog window has to have ignore button, and what happen after? -> Every
-                    involved block get blanc slot with "Missing art object message"
+            // Find the art item to delete
+            const artItemData = catalog?.items?.[id];
+            if (!artItemData) {
+                console.error(`[CatalogEditor][deleteById]: Art item not found: ${id}`);
+                return;
+            }
 
-            */
-            void (async () => {
-                if (!isSelected || !selectedItemId) return;
-                const depsResp = await getDependents(selectedItemId);
-                if (depsResp.response !== 'ok')
-                    console.error(`Failed to get dependents list: ${depsResp.reason}`);
-                //TODO:
-                /*
-                1. Add 'outbound' ticket processing to the stream editor to process
-                    dependencies resolver calls;
-                2. Make backend endpoint for ArtItemDependents type response;
-                3. Make UI processing for delete response!!!!
-
-                */
-            })();
+            // Convert to ArtItem instance and use dependency-aware deletion
+            const artItem = ArtItem.fromJSON(artItemData);
+            void deleteArtItemWithDeps(artItem);
         },
-        [isSelected, selectedItemId],
+        [catalog, deleteArtItemWithDeps],
     );
 
     const finalizeAfterSave = useCallback(

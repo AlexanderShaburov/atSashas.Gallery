@@ -273,3 +273,7 @@ class StreamRepo:
             index = self._load_index_unlocked()
             self._remove_index_item_unlocked(index, stream_id)
             self._save_index_unlocked(index)
+
+
+# Singleton instance
+stream_repo = StreamRepo()

@@ -23,7 +23,9 @@ export function StreamEditor() {
         isLoading,
         isValid,
         isSaving,
+        isJourney,
         save,
+        onApply,
         onEscape,
         delStream,
         selectedStreamId,
@@ -63,6 +65,7 @@ export function StreamEditor() {
         console.log(`[StreamEditor] isDirty: ${isDirty} `);
         console.log(`[StreamEditor] isLoading: ${isLoading} `);
         console.log(`[StreamEditor] isValid: ${isValid} `);
+        console.log(`[StreamEditor] isJourney: ${isJourney} `);
 
         return {
             canSave: isDirty && !isLoading && isValid,
@@ -71,6 +74,7 @@ export function StreamEditor() {
             onAdd: addBlockFromToolbar,
             onEdit: editMetadata,
             onDelete: () => delStream(selectedStreamId ?? ''),
+            onApply: onApply,
             save,
             exit: onEscape,
             onChangeTags: updateTags,
@@ -81,7 +85,9 @@ export function StreamEditor() {
         isLoading,
         isValid,
         isSaving,
+        isJourney,
         save,
+        onApply,
         onEscape,
         delStream,
         selectedStreamId,
@@ -110,6 +116,20 @@ export function StreamEditor() {
         },
         [selectStream],
     );
+
+    // Determine toolbar tools based on journey state
+    const toolbarTools = useMemo(() => {
+        const baseTools = ['delete', 'tags', 'add', 'edit', 'exit', 'save'];
+        console.log(`[StreamEditor] Computing toolbarTools. isJourney=${isJourney}`);
+        if (isJourney) {
+            // In journey: add 'apply' button
+            const tools = [...baseTools, 'apply'];
+            console.log(`[StreamEditor] In journey, tools:`, tools);
+            return tools;
+        }
+        console.log(`[StreamEditor] Not in journey, tools:`, baseTools);
+        return baseTools;
+    }, [isJourney]);
 
     // Reduce blinking:
     // if (!draft || !toolbarProps) {
@@ -183,6 +203,7 @@ export function StreamEditor() {
                         threeDotMenu={threeDotHandler}
                         editBlock={editBlock}
                         toolbarProps={toolbarProps}
+                        toolbarTools={toolbarTools}
                     />
                 </div>
             );

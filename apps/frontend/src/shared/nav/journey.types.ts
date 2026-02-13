@@ -49,6 +49,10 @@ export type ReturnCommand =
     | {
           kind: 'createArtItem';
           itemId: string;
+      }
+    | {
+          kind: 'dependencyResolved';
+          targetId: string; // ID of the object that was being deleted
       };
 
 // Phase of journey:

@@ -1,0 +1,274 @@
+/* ================= BACKDROP ================= */
+
+.destrOverlay__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* subtle neutral dim — works in both themes */
+    background: color-mix(in srgb, var(--bg) 35%, black 65%);
+    backdrop-filter: blur(4px);
+
+    animation: destrOverlay__fadeIn 120ms ease-out;
+}
+
+/* ================= CARD ================= */
+
+.destrOverlay__card {
+    width: min(520px, 92vw);
+    max-height: 85vh;
+    overflow: auto;
+
+    background: var(--card-bg);
+    color: var(--text);
+
+    border-radius: 12px;
+    padding: 22px 22px 18px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+
+    animation: destrOverlay__scaleIn 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ================= TEXT ================= */
+
+.destrOverlay__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.destrOverlay__message {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--muted);
+    margin-bottom: 12px;
+}
+
+/* ================= DANGER NOTE ================= */
+
+.destrOverlay__danger {
+    margin: 12px 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+
+    background: color-mix(in srgb, red 10%, var(--card-bg));
+    border: 1px solid color-mix(in srgb, red 40%, var(--border));
+    color: color-mix(in srgb, red 65%, var(--text));
+
+    font-size: 0.9rem;
+}
+
+/* ================= STEPS ================= */
+
+.destrOverlay__steps {
+    margin: 14px 0 6px 18px;
+    padding: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.destrOverlay__steps li {
+    margin: 6px 0;
+}
+
+/* ================= ERROR ================= */
+
+.destrOverlay__error {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+
+    background: color-mix(in srgb, red 14%, var(--card-bg));
+    border: 1px solid color-mix(in srgb, red 50%, var(--border));
+    color: color-mix(in srgb, red 80%, var(--text));
+
+    font-size: 0.9rem;
+}
+
+/* ================= DEPENDENCIES ================= */
+
+.destrOverlay__dependencies {
+    margin: 16px 0;
+}
+
+.destrOverlay__depHeader {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text);
+}
+
+.destrOverlay__depList {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.destrOverlay__depItem {
+    margin-bottom: 8px;
+}
+
+.depItem__button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-bg);
+    cursor: pointer;
+    transition: all 120ms ease;
+    text-align: left;
+}
+
+.depItem__button:hover {
+    background: color-mix(in srgb, var(--accent) 8%, var(--card-bg));
+    border-color: var(--accent);
+}
+
+.depItem__icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.depItem__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.depItem__title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+}
+
+.depItem__context {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.depItem__nav {
+    font-size: 1.2rem;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+/* ================= CASCADE ================= */
+
+.destrOverlay__cascade {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.cascade__warning {
+    padding: 12px;
+    border-radius: 8px;
+    background: color-mix(in srgb, orange 10%, var(--card-bg));
+    border: 1px solid color-mix(in srgb, orange 40%, var(--border));
+    margin-bottom: 12px;
+}
+
+.cascade__warning strong {
+    color: color-mix(in srgb, orange 70%, var(--text));
+    display: block;
+    margin-bottom: 8px;
+}
+
+.cascade__warning p {
+    margin: 8px 0 4px 0;
+    font-size: 0.9rem;
+}
+
+.cascade__warning ul {
+    margin: 6px 0 0 20px;
+    padding: 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.cascade__warning li {
+    margin: 4px 0;
+}
+
+.destrOverlay__cascade .destrOverlay__dangerBtn {
+    width: 100%;
+}
+
+/* ================= ACTIONS ================= */
+
+.destrOverlay__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+/* base button */
+.destrOverlay__actions button {
+    font-size: 0.9rem;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    cursor: pointer;
+
+    transition:
+        background-color 120ms ease,
+        opacity 120ms ease,
+        border-color 120ms ease;
+}
+
+.destrOverlay__actions button:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent) 12%, var(--card-bg));
+    border-color: var(--accent);
+}
+
+.destrOverlay__actions button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* destructive confirm */
+.destrOverlay__dangerBtn {
+    background: color-mix(in srgb, red 75%, var(--accent));
+    border-color: color-mix(in srgb, red 65%, var(--accent));
+    color: white;
+}
+
+.destrOverlay__dangerBtn:hover:not(:disabled) {
+    background: color-mix(in srgb, red 85%, var(--accent));
+}
+
+/* ================= ANIMATIONS ================= */
+
+@keyframes destrOverlay__fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes destrOverlay__scaleIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
