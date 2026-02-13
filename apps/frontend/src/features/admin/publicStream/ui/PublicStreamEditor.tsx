@@ -13,11 +13,17 @@ export function PublicStreamEditor() {
         isLoading,
         isSaving,
         isDirty,
+        selectedIds,
         addStream,
         removeStream,
         save,
         discard,
         exit,
+        toggleSelection,
+        selectAll,
+        deselectAll,
+        publishSelected,
+        unpublishSelected,
     } = session;
 
     if (isLoading) {
@@ -86,10 +92,24 @@ export function PublicStreamEditor() {
             <div className="pse__content">
                 {/* Public Streams (current) */}
                 <div className="pse__section">
-                    <h2 className="pse__section-title">
-                        Published Streams
-                        <span className="pse__count">({orderedPublicStreams.length})</span>
-                    </h2>
+                    <div className="pse__section-header">
+                        <h2 className="pse__section-title">
+                            Published Streams
+                            <span className="pse__count">({orderedPublicStreams.length})</span>
+                        </h2>
+                        {orderedPublicStreams.length > 0 && (
+                            <div className="pse__batch-controls">
+                                {selectedIds.size > 0 && (
+                                    <button
+                                        className="pse__batch-btn pse__batch-btn--danger"
+                                        onClick={unpublishSelected}
+                                    >
+                                        Unpublish Selected ({selectedIds.size})
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
                     <div className="pse__list">
                         {orderedPublicStreams.length === 0 ? (
                             <div className="pse__empty">
@@ -98,6 +118,12 @@ export function PublicStreamEditor() {
                         ) : (
                             orderedPublicStreams.map((stream) => (
                                 <div key={stream.streamId} className="pse__stream-item pse__stream-item--public">
+                                    <input
+                                        type="checkbox"
+                                        className="pse__checkbox"
+                                        checked={selectedIds.has(stream.streamId)}
+                                        onChange={() => toggleSelection(stream.streamId)}
+                                    />
                                     {stream.thumbnail && (
                                         <img
                                             src={stream.thumbnail}
@@ -130,10 +156,40 @@ export function PublicStreamEditor() {
 
                 {/* Available Streams (to add) */}
                 <div className="pse__section">
-                    <h2 className="pse__section-title">
-                        Available Streams
-                        <span className="pse__count">({nonPublicStreams.length})</span>
-                    </h2>
+                    <div className="pse__section-header">
+                        <h2 className="pse__section-title">
+                            Available Streams
+                            <span className="pse__count">({nonPublicStreams.length})</span>
+                        </h2>
+                        {nonPublicStreams.length > 0 && (
+                            <div className="pse__batch-controls">
+                                <button
+                                    className="pse__batch-btn"
+                                    onClick={selectAll}
+                                    disabled={selectedIds.size === availableStreams.length}
+                                >
+                                    Select All
+                                </button>
+                                <button
+                                    className="pse__batch-btn"
+                                    onClick={deselectAll}
+                                    disabled={selectedIds.size === 0}
+                                >
+                                    Deselect
+                                </button>
+                                <span className="pse__selection-count">
+                                    {selectedIds.size > 0 && `${selectedIds.size} selected`}
+                                </span>
+                                <button
+                                    className="pse__batch-btn pse__batch-btn--action"
+                                    onClick={publishSelected}
+                                    disabled={selectedIds.size === 0}
+                                >
+                                    Publish Selected
+                                </button>
+                            </div>
+                        )}
+                    </div>
                     <div className="pse__list">
                         {nonPublicStreams.length === 0 ? (
                             <div className="pse__empty">
@@ -142,6 +198,12 @@ export function PublicStreamEditor() {
                         ) : (
                             nonPublicStreams.map((stream) => (
                                 <div key={stream.streamId} className="pse__stream-item">
+                                    <input
+                                        type="checkbox"
+                                        className="pse__checkbox"
+                                        checked={selectedIds.has(stream.streamId)}
+                                        onChange={() => toggleSelection(stream.streamId)}
+                                    />
                                     {stream.thumbnail && (
                                         <img
                                             src={stream.thumbnail}

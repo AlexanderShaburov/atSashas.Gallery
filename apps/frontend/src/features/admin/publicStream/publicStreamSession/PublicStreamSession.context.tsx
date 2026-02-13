@@ -30,6 +30,7 @@ export function PublicStreamSessionProvider({ children }: Props) {
     const [draft, setDraft] = useState<PublicStreamData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
     // Load PublicStream on mount
     useEffect(() => {
@@ -143,12 +144,61 @@ export function PublicStreamSessionProvider({ children }: Props) {
         navigate('/admin');
     }, [navigate]);
 
+    /** Toggle stream selection */
+    const toggleSelection = useCallback((streamId: string) => {
+        setSelectedIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(streamId)) {
+                next.delete(streamId);
+            } else {
+                next.add(streamId);
+            }
+            return next;
+        });
+    }, []);
+
+    /** Select all available streams */
+    const selectAll = useCallback(() => {
+        const allIds = new Set(availableStreams.map((s) => s.streamId));
+        setSelectedIds(allIds);
+    }, [availableStreams]);
+
+    /** Deselect all streams */
+    const deselectAll = useCallback(() => {
+        setSelectedIds(new Set());
+    }, []);
+
+    /** Batch publish selected streams */
+    const publishSelected = useCallback(() => {
+        if (!draft || selectedIds.size === 0) return;
+
+        let updated = PublicStream.fromJSON(draft);
+        selectedIds.forEach((id) => {
+            updated = updated.addStream(id);
+        });
+        setDraft(updated.toJSON());
+        setSelectedIds(new Set()); // Clear selection after batch operation
+    }, [draft, selectedIds]);
+
+    /** Batch unpublish selected streams */
+    const unpublishSelected = useCallback(() => {
+        if (!draft || selectedIds.size === 0) return;
+
+        let updated = PublicStream.fromJSON(draft);
+        selectedIds.forEach((id) => {
+            updated = updated.removeStream(id);
+        });
+        setDraft(updated.toJSON());
+        setSelectedIds(new Set()); // Clear selection after batch operation
+    }, [draft, selectedIds]);
+
     const session: PublicStreamSession = {
         publicStream: draft,
         availableStreams,
         isLoading,
         isSaving,
         isDirty: !!isDirty,
+        selectedIds,
         addStream,
         removeStream,
         reorderStreams,
@@ -156,6 +206,11 @@ export function PublicStreamSessionProvider({ children }: Props) {
         discard,
         editStream,
         exit,
+        toggleSelection,
+        selectAll,
+        deselectAll,
+        publishSelected,
+        unpublishSelected,
     };
 
     return (

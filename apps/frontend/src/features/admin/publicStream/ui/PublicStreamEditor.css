@@ -88,6 +88,14 @@
     gap: 1rem;
 }
 
+.pse__section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
 .pse__section-title {
     font-size: 1.25rem;
     font-weight: 600;
@@ -101,6 +109,60 @@
     font-size: 0.875rem;
     font-weight: normal;
     color: #6b7280;
+}
+
+.pse__batch-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pse__batch-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pse__batch-btn:hover:not(:disabled) {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.pse__batch-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pse__batch-btn--action {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.pse__batch-btn--action:hover:not(:disabled) {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+.pse__batch-btn--danger {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+.pse__batch-btn--danger:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+.pse__selection-count {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
 }
 
 .pse__list {
@@ -133,6 +195,13 @@
 
 .pse__stream-item:hover {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pse__checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+    flex-shrink: 0;
 }
 
 .pse__stream-item--public {

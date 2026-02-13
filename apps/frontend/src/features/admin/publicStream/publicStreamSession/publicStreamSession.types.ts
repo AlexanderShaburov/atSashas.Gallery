@@ -19,6 +19,9 @@ export type PublicStreamSession = {
     /** Has unsaved changes */
     isDirty: boolean;
 
+    /** Selected stream IDs for batch operations */
+    selectedIds: Set<string>;
+
     /** Add stream to PublicStream */
     addStream: (streamId: string) => void;
 
@@ -39,4 +42,19 @@ export type PublicStreamSession = {
 
     /** Exit PublicStream editor */
     exit: () => void;
+
+    /** Toggle stream selection for batch operations */
+    toggleSelection: (streamId: string) => void;
+
+    /** Select all available streams */
+    selectAll: () => void;
+
+    /** Deselect all streams */
+    deselectAll: () => void;
+
+    /** Publish all selected streams */
+    publishSelected: () => void;
+
+    /** Unpublish all selected streams */
+    unpublishSelected: () => void;
 };
