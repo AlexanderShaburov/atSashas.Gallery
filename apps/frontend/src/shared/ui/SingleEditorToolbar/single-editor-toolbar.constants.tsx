@@ -8,8 +8,10 @@ import {
     DeleteButton,
     EditMetadata,
     ExitButton,
+    PublishButton,
     SaveButton,
     TagsEditor,
+    UnpublishButton,
 } from './ToolbarElements';
 
 import { resolveAnyClick } from '@/shared/lib/resolvers/resolvers';
@@ -47,5 +49,15 @@ export const TOOL_REGISTRY: Record<ToolKey, ToolRenderer> = {
     tags: (ctx) =>
         ctx.onChangeTags ? (
             <TagsEditor onCommit={resolveAnyClick(ctx.onChangeTags)} tags={ctx.tags ?? []} />
+        ) : null,
+
+    publish: (ctx) =>
+        ctx.onPublish && !ctx.isPublished ? (
+            <PublishButton onPublish={resolveAnyClick(ctx.onPublish)} />
+        ) : null,
+
+    unpublish: (ctx) =>
+        ctx.onUnpublish && ctx.isPublished ? (
+            <UnpublishButton onUnpublish={resolveAnyClick(ctx.onUnpublish)} />
         ) : null,
 };

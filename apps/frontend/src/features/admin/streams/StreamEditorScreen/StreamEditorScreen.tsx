@@ -24,6 +24,7 @@ export function StreamEditor() {
         isValid,
         isSaving,
         isJourney,
+        isPublished,
         save,
         onApply,
         onEscape,
@@ -39,6 +40,8 @@ export function StreamEditor() {
         currentStack,
         commitMetaEditor,
         editMetadata,
+        publishStream,
+        unpublishStream,
     } = session;
 
     useEffect(() => {
@@ -70,6 +73,7 @@ export function StreamEditor() {
         return {
             canSave: isDirty && !isLoading && isValid,
             isSaving,
+            isPublished,
             tags: draft.tags,
             onAdd: addBlockFromToolbar,
             onEdit: editMetadata,
@@ -78,6 +82,8 @@ export function StreamEditor() {
             save,
             exit: onEscape,
             onChangeTags: updateTags,
+            onPublish: () => void publishStream(),
+            onUnpublish: () => void unpublishStream(),
         };
     }, [
         draft,
@@ -94,6 +100,9 @@ export function StreamEditor() {
         updateTags,
         addBlockFromToolbar,
         editMetadata,
+        isPublished,
+        publishStream,
+        unpublishStream,
     ]);
 
     const initial: StreamMetadata = {
@@ -117,19 +126,26 @@ export function StreamEditor() {
         [selectStream],
     );
 
-    // Determine toolbar tools based on journey state
+    // Determine toolbar tools based on journey state and publish status
     const toolbarTools = useMemo(() => {
-        const baseTools = ['delete', 'tags', 'add', 'edit', 'exit', 'save'];
-        console.log(`[StreamEditor] Computing toolbarTools. isJourney=${isJourney}`);
+        const baseTools = ['delete', 'tags', 'add', 'edit'];
+        console.log(`[StreamEditor] Computing toolbarTools. isJourney=${isJourney}, isPublished=${isPublished}`);
+
+        // Add publish/unpublish (only one will render based on isPublished)
+        const withPublish = [...baseTools, 'publish', 'unpublish'];
+
+        // Add exit and save
+        const withActions = [...withPublish, 'exit', 'save'];
+
         if (isJourney) {
             // In journey: add 'apply' button
-            const tools = [...baseTools, 'apply'];
+            const tools = [...withActions, 'apply'];
             console.log(`[StreamEditor] In journey, tools:`, tools);
             return tools;
         }
-        console.log(`[StreamEditor] Not in journey, tools:`, baseTools);
-        return baseTools;
-    }, [isJourney]);
+        console.log(`[StreamEditor] Not in journey, tools:`, withActions);
+        return withActions;
+    }, [isJourney, isPublished]);
 
     // Reduce blinking:
     // if (!draft || !toolbarProps) {

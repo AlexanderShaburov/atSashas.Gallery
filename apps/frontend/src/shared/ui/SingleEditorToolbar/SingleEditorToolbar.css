@@ -98,6 +98,32 @@
     background: transparent;
     border-color: var(--form-border, #d0d0d0);
 }
+
+.set-btn--success {
+    background: #4caf50;
+    border: none;
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.set-btn--success:hover {
+    background: #45a049;
+}
+
+.set-btn--warning {
+    background: #ff9800;
+    border: none;
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.set-btn--warning:hover {
+    background: #fb8c00;
+}
 /* ---- TAGS (center) ---- */
 
 .set-tags {

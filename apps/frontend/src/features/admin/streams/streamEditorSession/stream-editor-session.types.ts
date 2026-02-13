@@ -16,6 +16,7 @@ export type StreamEditorSession = {
     isValid: boolean;
     isDirty: boolean;
     isJourney: boolean;
+    isPublished: boolean;
     save: () => void;
     onApply: () => void;
     addBlock: (pos: number) => void;
@@ -30,4 +31,6 @@ export type StreamEditorSession = {
     editBlock: (id: string) => void;
     editMetadata: () => void;
     commitMetaEditor: (req: StreamMetadata) => Promise<void>;
+    publishStream: () => Promise<void>;
+    unpublishStream: () => Promise<void>;
 };

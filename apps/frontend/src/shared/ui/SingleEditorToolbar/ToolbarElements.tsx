@@ -41,6 +41,26 @@ export function DeleteButton({ onDelete }: { onDelete: () => void }) {
         </>
     );
 }
+
+export function PublishButton({ onPublish }: { onPublish: () => void }) {
+    return (
+        <div className="set-actions">
+            <button type="button" className="set-btn set-btn--success" onClick={onPublish}>
+                🌐 Publish
+            </button>
+        </div>
+    );
+}
+
+export function UnpublishButton({ onUnpublish }: { onUnpublish: () => void }) {
+    return (
+        <div className="set-actions">
+            <button type="button" className="set-btn set-btn--warning" onClick={onUnpublish}>
+                🔒 Unpublish
+            </button>
+        </div>
+    );
+}
 export function ExitButton({ onExit }: { onExit: () => void }) {
     return (
         <button type="button" className="set-btn set-btn--secondary" onClick={onExit}>

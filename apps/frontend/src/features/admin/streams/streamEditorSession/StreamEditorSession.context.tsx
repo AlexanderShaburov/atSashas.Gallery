@@ -1,11 +1,13 @@
 // src/features/admin/streams/streamEditorSession/StreamEditorSession.context.tsx
 
 import { MetaIntent } from '@/entities/common/lifecycle';
+import type { PublicStreamData } from '@/entities/publicStream';
 import type { StreamMetadata } from '@/entities/stream';
 import { StreamData, StreamIndexItem, type StreamScreenMode } from '@/entities/stream';
 import { SaveLifecycle, StreamScreenModeStack } from '@/entities/stream/stream-editor-screen.types';
 import { getCollection } from '@/features/admin/blocks/api/blocksApi';
 import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import { publicStreamApi } from '@/features/admin/publicStream/api/publicStreamApi';
 import {
     useArrival,
     useDispatch,
@@ -62,6 +64,8 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     // isLoading flag
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [pendingFocus, setPendingFocus] = useState<PendingFocus>(null);
+    // PublicStream state
+    const [publicStream, setPublicStream] = useState<PublicStreamData | null>(null);
 
     const metaIntent = useRef<MetaIntent>({ action: 'idle' });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -247,6 +251,14 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
 
             // Renew streams list AFTER consuming the ticket
             await renewStreamsIndex();
+
+            // Load PublicStream
+            try {
+                const ps = await publicStreamApi.get();
+                setPublicStream(ps);
+            } catch (err) {
+                console.error('[STREAM BOOTSTRAP]: Failed to load PublicStream', err);
+            }
 
             // if no ticket -> it is new session from zero
             if (!arrivalTicket) {
@@ -481,6 +493,42 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         },
         [renewStreamsIndex, resetSelectSession],
     );
+
+    // *************** PUBLISH/UNPUBLISH STREAM ***************
+
+    // Check if current stream is published
+    const isPublished = useMemo(() => {
+        if (!selectedStreamId || !publicStream) return false;
+        return publicStream.streamIds.includes(selectedStreamId);
+    }, [selectedStreamId, publicStream]);
+
+    const publishStream = useCallback(async () => {
+        if (!selectedStreamId) return;
+
+        try {
+            console.log(`[publishStream]: Publishing stream ${selectedStreamId}`);
+            const updated = await publicStreamApi.addStream(selectedStreamId);
+            setPublicStream(updated);
+            console.log(`[publishStream]: Stream published successfully`);
+        } catch (err) {
+            console.error('[publishStream]: Failed to publish stream', err);
+            alert(`Failed to publish stream: ${err}`);
+        }
+    }, [selectedStreamId]);
+
+    const unpublishStream = useCallback(async () => {
+        if (!selectedStreamId) return;
+
+        try {
+            console.log(`[unpublishStream]: Unpublishing stream ${selectedStreamId}`);
+            const updated = await publicStreamApi.removeStream(selectedStreamId);
+            setPublicStream(updated);
+            console.log(`[unpublishStream]: Stream unpublished successfully`);
+        } catch (err) {
+            console.error('[unpublishStream]: Failed to unpublish stream', err);
+            alert(`Failed to unpublish stream: ${err}`);
+        }
+    }, [selectedStreamId]);
 
     // *************** SAVE STREAM ***************
     const popIfTopIs = useCallback((kind: StreamScreenMode['kind']) => {
@@ -877,6 +925,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             isValid,
             isDirty,
             isJourney,
+            isPublished,
             save,
             onApply,
             addBlock,
@@ -891,6 +940,8 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             editBlock,
             editMetadata,
             commitMetaEditor,
+            publishStream,
+            unpublishStream,
         }),
         [
             selectedStreamId,
@@ -901,6 +952,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             isValid,
             isDirty,
             isJourney,
+            isPublished,
             save,
             onApply,
             addBlock,
@@ -915,6 +967,8 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             editBlock,
             editMetadata,
             commitMetaEditor,
+            publishStream,
+            unpublishStream,
         ],
     );
     return <StreamEditorCtx.Provider value={value}>{children}</StreamEditorCtx.Provider>;
