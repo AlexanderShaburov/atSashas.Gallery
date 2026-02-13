@@ -19,12 +19,20 @@ export async function getCollection(): Promise<BlocksCollectionJSON> {
     }
     const contentType = resp.headers.get('content-type');
     console.log('[blocksApi] Content-Type:', contentType);
-    if (!contentType?.includes('application/json')) {
-        const text = await resp.text();
-        console.error('[blocksApi] Expected JSON but got:', text.substring(0, 200));
-        throw new Error('Expected JSON response but got HTML');
+
+    // Read as text first so we can debug if JSON parsing fails
+    const text = await resp.text();
+    console.log('[blocksApi] Response body length:', text.length, 'First 100 chars:', text.substring(0, 100));
+
+    try {
+        const json = JSON.parse(text);
+        console.log('[blocksApi] Successfully parsed JSON, blocks count:', Object.keys(json.blocks || {}).length);
+        return json;
+    } catch (err) {
+        console.error('[blocksApi] JSON parse error:', err);
+        console.error('[blocksApi] Response body was:', text.substring(0, 500));
+        throw new Error(`Failed to parse JSON: ${err}`);
     }
-    return await resp.json();
 }
 
 export async function createCollection(name: string) {
