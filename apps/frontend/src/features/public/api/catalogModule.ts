@@ -27,5 +27,9 @@ export async function loadCatalogOnce(): Promise<ArtCatalog> {
 }
 
 export function getFromCatalog(id: string): ArtItemData | null {
-    return catalogCache?.items?.[id] ?? null;
+    const result = catalogCache?.items?.[id] ?? null;
+    if (!result) {
+        console.warn('[catalogModule] Art item not in cache:', id, 'Cache loaded:', !!catalogCache, 'Item count:', Object.keys(catalogCache?.items || {}).length);
+    }
+    return result;
 }
