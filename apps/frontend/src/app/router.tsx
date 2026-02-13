@@ -18,6 +18,7 @@ const UploadPage = lazy(() => import('@/pages/admin/UploadPage'));
 const CatalogEditorPage = lazy(() => import('@/pages/admin/catalogEditorPage/CatalogEditorPage'));
 const BlocksPage = lazy(() => import('@/pages/admin/BlocksPage/BlocksPage'));
 const StreamsPage = lazy(() => import('@/pages/admin/StreamPage/StreamsPage'));
+const PublicStreamPage = lazy(() => import('@/pages/admin/PublicStreamPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 // Public root wrap:
@@ -81,6 +82,10 @@ export const router = createBrowserRouter([
                         <StreamsPage />
                     </StreamEditorSessionProvider>
                 ),
+            },
+            {
+                path: 'public-stream',
+                element: <PublicStreamPage />,
             },
             {
                 path: 'hopper',

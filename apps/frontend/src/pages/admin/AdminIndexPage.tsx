@@ -33,6 +33,12 @@ const tiles: Tile[] = [
         emoji: '📽',
         description: 'Compose a stream from saved blocks.',
     },
+    {
+        to: '/admin/public-stream',
+        title: 'Public Stream',
+        emoji: '🌐',
+        description: 'Manage which streams are visible to public.',
+    },
 ];
 
 export default function AdminIndexPage() {
