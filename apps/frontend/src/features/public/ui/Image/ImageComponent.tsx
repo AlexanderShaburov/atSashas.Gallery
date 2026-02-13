@@ -1,17 +1,19 @@
 import { GalleryBlock } from '@/entities/block';
-import { getFromCatalog } from '@/features/public/api/catalogModule';
+import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
 
 type ImageComponentProps = { block: GalleryBlock };
 
 export default function ImageComponent({ block }: ImageComponentProps) {
     const { layout, items } = { ...block };
+    const catalog = useArtCatalog();
 
     console.log('[ImageComponent] Rendering block:', block.id, 'layout:', layout, 'items:', items.length);
+    console.log('[ImageComponent] Catalog available:', !!catalog, 'Item count:', Object.keys(catalog?.items || {}).length);
 
     return (
         <figure className={`block ${layout}`}>
             {items.map((item) => {
-                const img = getFromCatalog(item.artId);
+                const img = catalog?.items?.[item.artId];
                 console.log('[ImageComponent] Art item', item.artId, 'found:', !!img);
                 if (!img) {
                     console.warn('[ImageComponent] Art item not found in catalog:', item.artId);
