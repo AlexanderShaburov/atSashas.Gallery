@@ -35,8 +35,10 @@ export function PublicStreamSessionProvider({ children }: Props) {
     useEffect(() => {
         void (async () => {
             try {
+                console.log('[PublicStreamSession]: Loading PublicStream...');
                 setIsLoading(true);
                 const data = await publicStreamApi.get();
+                console.log('[PublicStreamSession]: PublicStream loaded:', data);
                 setPublicStream(data);
                 setDraft(data);
             } catch (err) {
@@ -58,6 +60,9 @@ export function PublicStreamSessionProvider({ children }: Props) {
     const availableStreams = (gCtx.streamsIndex || []).filter(
         (s) => s.status === 'ready' || s.status === 'published',
     );
+
+    console.log('[PublicStreamSession]: Available streams:', availableStreams);
+    console.log('[PublicStreamSession]: PublicStream streamIds:', draft?.streamIds);
 
     /** Add stream to draft */
     const addStream = useCallback(

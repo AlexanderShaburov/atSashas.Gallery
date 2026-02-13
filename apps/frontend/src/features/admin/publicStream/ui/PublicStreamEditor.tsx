@@ -1,10 +1,12 @@
 // features/admin/publicStream/ui/PublicStreamEditor.tsx
 
+import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { usePublicStreamSession } from '../publicStreamSession/PublicStreamSession.context';
 import './PublicStreamEditor.css';
 
 export function PublicStreamEditor() {
     const session = usePublicStreamSession();
+    const gCtx = useEditorWorkspace();
     const {
         publicStream,
         availableStreams,
@@ -34,11 +36,12 @@ export function PublicStreamEditor() {
         );
     }
 
-    // Get streams that are in public stream
+    // Get streams that are in public stream (from FULL index, not filtered)
     const publicStreamIds = new Set(publicStream.streamIds);
-    const publicStreams = availableStreams.filter((s) => publicStreamIds.has(s.streamId));
+    const allStreams = gCtx.streamsIndex || [];
+    const publicStreams = allStreams.filter((s) => publicStreamIds.has(s.streamId));
 
-    // Get streams that are NOT in public stream (available to add)
+    // Get streams that are NOT in public stream AND have valid status (available to add)
     const nonPublicStreams = availableStreams.filter((s) => !publicStreamIds.has(s.streamId));
 
     // Preserve order from publicStream.streamIds

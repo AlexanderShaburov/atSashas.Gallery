@@ -503,32 +503,52 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     }, [selectedStreamId, publicStream]);
 
     const publishStream = useCallback(async () => {
-        if (!selectedStreamId) return;
+        if (!selectedStreamId || !draft) return;
 
         try {
             console.log(`[publishStream]: Publishing stream ${selectedStreamId}`);
             const updated = await publicStreamApi.addStream(selectedStreamId);
             setPublicStream(updated);
+
+            // Update stream status to 'published'
+            if (draft.status !== 'published') {
+                const updatedStream = { ...draft, status: 'published' as const };
+                await updateStream(updatedStream);
+                setDraft(updatedStream);
+                commit();
+                await renewStreamsIndex();
+            }
+
             console.log(`[publishStream]: Stream published successfully`);
         } catch (err) {
             console.error('[publishStream]: Failed to publish stream', err);
             alert(`Failed to publish stream: ${err}`);
         }
-    }, [selectedStreamId]);
+    }, [selectedStreamId, draft, commit, renewStreamsIndex]);
 
     const unpublishStream = useCallback(async () => {
-        if (!selectedStreamId) return;
+        if (!selectedStreamId || !draft) return;
 
         try {
             console.log(`[unpublishStream]: Unpublishing stream ${selectedStreamId}`);
             const updated = await publicStreamApi.removeStream(selectedStreamId);
             setPublicStream(updated);
+
+            // Update stream status back to 'ready'
+            if (draft.status === 'published') {
+                const updatedStream = { ...draft, status: 'ready' as const };
+                await updateStream(updatedStream);
+                setDraft(updatedStream);
+                commit();
+                await renewStreamsIndex();
+            }
+
             console.log(`[unpublishStream]: Stream unpublished successfully`);
         } catch (err) {
             console.error('[unpublishStream]: Failed to unpublish stream', err);
             alert(`Failed to unpublish stream: ${err}`);
         }
-    }, [selectedStreamId]);
+    }, [selectedStreamId, draft, commit, renewStreamsIndex]);
 
     // *************** SAVE STREAM ***************
     const popIfTopIs = useCallback((kind: StreamScreenMode['kind']) => {
@@ -567,7 +587,14 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
 
         setLifecycle({ saveState: 'saving' });
         try {
-            await updateStream(draft);
+            // Auto-update status: draft → ready on save
+            const streamToSave = { ...draft };
+            if (streamToSave.status === 'draft') {
+                streamToSave.status = 'ready';
+                console.log('[save]: Auto-updating status from draft to ready');
+            }
+
+            await updateStream(streamToSave);
             commit();
             await renewStreamsIndex();
             popIfTopIs('meta');

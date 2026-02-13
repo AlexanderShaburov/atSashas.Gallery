@@ -49,7 +49,7 @@ export const router = createBrowserRouter([
         element: <PublicRoot />,
         children: [
             { index: true, element: <HomePage /> },
-            { path: 'gallery', element: <GalleryPage /> },
+            { path: 'gallery/:slug', element: <GalleryPage /> },
             { path: 'about', element: <AboutPage /> },
         ],
     },

@@ -1,14 +1,15 @@
 /* src/shared/ui/SingleEditorToolbar/SingleEditorToolbar.css */
 
-/* Row wrapper: left (Delete) + right (Exit/Save) in one line */
+/* Row wrapper: allows wrapping when buttons don't fit */
 .set-wrap {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap; /* Allow wrapping to multiple lines */
     gap: 0.75rem;
 
     width: 100%;
-    min-width: 0; /* важно для flex-детей, чтобы не ломали контейнер */
+    min-width: 0;
 }
 
 /* both sides stay in a row */
@@ -17,15 +18,15 @@
     align-items: center;
     gap: 0.5rem;
     min-width: 0;
+    flex-wrap: wrap; /* Allow buttons to wrap */
 }
 
-/* prevent the right group from wrapping into 2 lines */
+/* right group */
 .set-actions--right {
     flex: 0 0 auto;
-    white-space: nowrap;
 }
 
-/* left group may shrink if needed (optional) */
+/* left group */
 .set-actions--left {
     flex: 0 0 auto;
 }

@@ -1,52 +1,66 @@
 import '@/pages/public/Home.css';
+import { usePublicStream } from '@/features/public/hooks/usePublicStream';
 import { Link } from 'react-router-dom';
+
 export default function HomePage() {
-    const base = (import.meta.env.VITE_VAULT_BASE_URL || '/').replace(/\/+$/, '/');
+    const { streams, loading, error } = usePublicStream();
 
-    // /Users/shaburov/Documents/Programming/PROJECTS/SASHA/SashaGallery/vault/arts/mixed/full/m01.png
+    if (loading) {
+        return (
+            <section className="styles.container home">
+                <div className="infoContainer">Loading gallery...</div>
+            </section>
+        );
+    }
 
-    console.log(`Base url: ${base}`);
-    console.log(`Tile url: ${base}/arts/mixed/full/img24.png`);
-    const tiles = [
-        {
-            to: '/watercolor',
-            title: 'Watercolor',
-            img: `${base}/arts/watercolor/full/img24.png`,
-            posx: 50,
-            posy: 50,
-            zoom: 1.3,
-        },
-        {
-            to: '/mixed-media',
-            title: 'Mixed Media',
-            img: `${base}/arts/mixed/full/m14.png`,
-            posx: 60,
-            posy: 50,
-            zoom: 1.3,
-        },
-    ];
+    if (error) {
+        return (
+            <section className="styles.container home">
+                <div className="infoContainer">Error: {error}</div>
+            </section>
+        );
+    }
+
+    if (streams.length === 0) {
+        return (
+            <section className="styles.container home">
+                <div className="infoContainer">No published streams yet.</div>
+            </section>
+        );
+    }
+
     return (
         <section className="styles.container home">
             <div className="tiles">
-                {tiles.map((t) => (
-                    <nav key={t.to} className="home-nav" style={{}}>
-                        <Link
-                            to={t.to}
-                            className="tile"
-                            aria-label={t.title}
-                            style={
-                                {
-                                    '--pos-x': `${t.posx ?? 50}%`,
-                                    '--pos-y': `${t.posy ?? 50}%`,
-                                    '--zoom': t.zoom ?? 1,
-                                } as React.CSSProperties
-                            }
-                        >
-                            <img className="tile-img" src={t.img} alt="" aria-hidden="true" />
-                            <span className="tile-label">{t.title}</span>
-                        </Link>
-                    </nav>
-                ))}
+                {streams.map((stream, index) => {
+                    // Calculate position with slight offset for visual variety
+                    const posx = 50 + (index % 2) * 10 - 5;
+                    const posy = 50 + Math.floor(index / 2) * 5;
+                    const zoom = 1.2 + (index % 3) * 0.1;
+
+                    return (
+                        <nav key={stream.streamId} className="home-nav">
+                            <Link
+                                to={`/gallery/${stream.streamId}`}
+                                className="tile"
+                                aria-label={stream.title}
+                                style={
+                                    {
+                                        '--pos-x': `${posx}%`,
+                                        '--pos-y': `${posy}%`,
+                                        '--zoom': zoom,
+                                    } as React.CSSProperties
+                                }
+                            >
+                                {/* TODO: Add stream thumbnail once available */}
+                                <div className="tile-img tile-img--placeholder" aria-hidden="true">
+                                    <span>{stream.title.charAt(0)}</span>
+                                </div>
+                                <span className="tile-label">{stream.title}</span>
+                            </Link>
+                        </nav>
+                    );
+                })}
             </div>
         </section>
     );
