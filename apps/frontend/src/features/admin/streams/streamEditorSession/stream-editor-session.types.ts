@@ -5,6 +5,7 @@ import {
     StreamScreenModeStack,
 } from '@/entities/stream';
 import { StreamMetadata } from '@/entities/stream/streamApi.types';
+import { PublicStreamData } from '@/entities/publicStream';
 import { ThreeDotCommand } from '@/shared/ui/ThreeDotMenu/threeDot.types';
 
 export type StreamEditorSession = {
@@ -17,6 +18,7 @@ export type StreamEditorSession = {
     isDirty: boolean;
     isJourney: boolean;
     isPublished: boolean;
+    publicStream: PublicStreamData | null;
     save: () => void;
     onApply: () => void;
     addBlock: (pos: number) => void;

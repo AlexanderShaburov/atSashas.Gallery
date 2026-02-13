@@ -25,6 +25,7 @@ export function StreamEditor() {
         isSaving,
         isJourney,
         isPublished,
+        publicStream,
         save,
         onApply,
         onEscape,
@@ -170,22 +171,28 @@ export function StreamEditor() {
                     />
                     <div className="se__grid">
                         <NewStreamComponent createNewStream={createNewStream} />
-                        {filtered.map((s) => (
-                            <figure
-                                key={s.streamId}
-                                className="se__thumbnail"
-                                role="button"
-                                tabIndex={0}
-                                onClick={() => handleOnClick(s.streamId)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ')
-                                        handleOnClick(s.streamId);
-                                }}
-                            >
-                                <img src={s.thumbnail} loading="lazy" />
-                                <figcaption>{s.title ?? ''}</figcaption>
-                            </figure>
-                        ))}
+                        {filtered.map((s) => {
+                            const isStreamPublished = publicStream?.streamIds.includes(s.streamId) ?? false;
+                            return (
+                                <figure
+                                    key={s.streamId}
+                                    className="se__thumbnail"
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => handleOnClick(s.streamId)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ')
+                                            handleOnClick(s.streamId);
+                                    }}
+                                >
+                                    {isStreamPublished && (
+                                        <span className="se__badge se__badge--public">PUBLIC</span>
+                                    )}
+                                    <img src={s.thumbnail} loading="lazy" />
+                                    <figcaption>{s.title ?? ''}</figcaption>
+                                </figure>
+                            );
+                        })}
                     </div>
                 </div>
             );

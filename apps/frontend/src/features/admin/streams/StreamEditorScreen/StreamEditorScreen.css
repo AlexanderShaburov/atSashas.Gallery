@@ -114,6 +114,35 @@
 }
 
 /* =========================
+   Badge (PUBLIC indicator)
+   ========================= */
+
+.se__badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+
+    padding: 4px 10px;
+    border-radius: 6px;
+
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    backdrop-filter: blur(4px);
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.se__badge--public {
+    background: linear-gradient(135deg, #4caf50, #45a049);
+}
+
+/* =========================
    Create tile
    ========================= */
 
