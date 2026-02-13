@@ -10,29 +10,9 @@ export const BLOCK_COLLECTION = `${BLOCK_VAULT}/collection`;
 const BLOCK_NEW_COLLECTION = `${BLOCK_VAULT}/new_collection`;
 
 export async function getCollection(): Promise<BlocksCollectionJSON> {
-    console.log('[blocksApi] Fetching blocks from:', BLOCK_COLLECTION);
     const resp = await fetch(BLOCK_COLLECTION);
-    console.log('[blocksApi] Response status:', resp.status, 'URL:', resp.url);
-    if (!resp.ok) {
-        console.error('[blocksApi] Failed to fetch blocks:', resp.status, resp.statusText);
-        throw new Error(`Failed to read collection: ${resp.status}`);
-    }
-    const contentType = resp.headers.get('content-type');
-    console.log('[blocksApi] Content-Type:', contentType);
-
-    // Read as text first so we can debug if JSON parsing fails
-    const text = await resp.text();
-    console.log('[blocksApi] Response body length:', text.length, 'First 100 chars:', text.substring(0, 100));
-
-    try {
-        const json = JSON.parse(text);
-        console.log('[blocksApi] Successfully parsed JSON, blocks count:', Object.keys(json.blocks || {}).length);
-        return json;
-    } catch (err) {
-        console.error('[blocksApi] JSON parse error:', err);
-        console.error('[blocksApi] Response body was:', text.substring(0, 500));
-        throw new Error(`Failed to parse JSON: ${err}`);
-    }
+    if (!resp.ok) throw new Error(`Failed to read collection: ${resp.status}`);
+    return await resp.json();
 }
 
 export async function createCollection(name: string) {
