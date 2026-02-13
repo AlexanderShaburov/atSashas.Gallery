@@ -25,7 +25,7 @@ export default function ImageComponent({ block }: ImageComponentProps) {
                         <source type="image/webp" srcSet={img.images.preview.webp} />
                         <img
                             src={img.images.preview.jpeg}
-                            alt={img.images.alt.en || ''}
+                            alt={img.images.alt?.en || img.title?.en || ''}
                             loading="lazy"
                         />
                     </picture>
