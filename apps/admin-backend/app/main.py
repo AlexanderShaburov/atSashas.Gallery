@@ -8,6 +8,7 @@ from .routers.hopper import hopper, upload
 from app.routers.art import catalog
 from app.routers.block import blocks
 from app.routers.streams import streams
+from app.routers.public_stream import public_stream
 from app.settings import settings
 from app.routers import health, json_kv
 from app.storage import BASE
@@ -66,3 +67,5 @@ app.include_router(hopper.router)
 app.include_router(catalog.router)
 app.include_router(blocks.router)
 app.include_router(streams.router)
+app.include_router(public_stream.public_router)  # Public endpoint
+app.include_router(public_stream.admin_router)  # Admin endpoints
