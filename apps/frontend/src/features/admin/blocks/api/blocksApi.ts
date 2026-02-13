@@ -3,16 +3,27 @@
 import type { Block, BlocksCollectionJSON } from '@/entities/block';
 import { generateId } from '@/shared/lib/id/generateId';
 
-export const API_BASE = import.meta.env.VITE_API_BASE_URL;
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 export const BLOCK_VAULT = `${API_BASE}/blocks`;
 export const BLOCK_COLLECTIONS_CONTENT = `${BLOCK_VAULT}/content`;
 export const BLOCK_COLLECTION = `${BLOCK_VAULT}/collection`;
 const BLOCK_NEW_COLLECTION = `${BLOCK_VAULT}/new_collection`;
 
 export async function getCollection(): Promise<BlocksCollectionJSON> {
+    console.log('[blocksApi] Fetching blocks from:', BLOCK_COLLECTION);
     const resp = await fetch(BLOCK_COLLECTION);
-    console.dir(resp);
-    if (!resp.ok) throw new Error(`Failed to read collection`);
+    console.log('[blocksApi] Response status:', resp.status, 'URL:', resp.url);
+    if (!resp.ok) {
+        console.error('[blocksApi] Failed to fetch blocks:', resp.status, resp.statusText);
+        throw new Error(`Failed to read collection: ${resp.status}`);
+    }
+    const contentType = resp.headers.get('content-type');
+    console.log('[blocksApi] Content-Type:', contentType);
+    if (!contentType?.includes('application/json')) {
+        const text = await resp.text();
+        console.error('[blocksApi] Expected JSON but got:', text.substring(0, 200));
+        throw new Error('Expected JSON response but got HTML');
+    }
     return await resp.json();
 }
 
