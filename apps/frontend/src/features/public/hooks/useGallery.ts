@@ -1,12 +1,12 @@
 import type { StreamData } from '@/entities/stream';
 import { useEffect, useState } from 'react';
 
-function getStreamUrl(slug: string): string {
-    const streamsPath = import.meta.env.VITE_STREAMS_BASE_URL;
-    const url = `${streamsPath}${slug}.json`.replace(/\/\//g, '/');
-    return url;
-}
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
+/**
+ * Hook to load a single stream for public gallery page
+ * Uses the API endpoint for consistency with usePublicStream
+ */
 export function useGallery(slug: string) {
     const [stream, setStream] = useState<StreamData | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -14,36 +14,46 @@ export function useGallery(slug: string) {
 
     useEffect(() => {
         let cancelled = false;
+
         async function load() {
             try {
                 setLoading(true);
                 setError(null);
-                const url = getStreamUrl(slug);
-                if (!url) throw new Error('Unknown gallery slug');
+
+                // Load stream via API (consistent with usePublicStream)
+                const url = `${API_BASE}/admin/streams/${slug}`;
                 const res = await fetch(url);
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                if (!res.ok) {
+                    throw new Error(`Failed to load stream: ${res.status}`);
+                }
+
                 const data = await res.json();
 
-                if (!cancelled) setStream(data);
+                if (!cancelled) {
+                    setStream(data);
+                }
             } catch (e: unknown) {
                 if (!cancelled) {
-                    if (
-                        e &&
-                        typeof e === 'object' &&
-                        'message' in e &&
-                        typeof e.message === 'string'
-                    ) {
-                        setError(e?.message ?? 'Load error');
-                    }
+                    const message =
+                        e && typeof e === 'object' && 'message' in e && typeof e.message === 'string'
+                            ? e.message
+                            : 'Failed to load gallery';
+                    setError(message);
                 }
             } finally {
-                if (!cancelled) setLoading(false);
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
         }
-        load();
+
+        void load();
+
         return () => {
             cancelled = true;
         };
     }, [slug]);
+
     return { stream, loading, error };
 }
