@@ -49,11 +49,22 @@ export function PublicStreamEditor() {
         .map((id) => publicStreams.find((s) => s.streamId === id))
         .filter((s) => s !== undefined);
 
+    const handlePreview = () => {
+        window.open('/', '_blank', 'noopener,noreferrer');
+    };
+
     return (
         <div className="pse">
             <div className="pse__header">
                 <h1 className="pse__title">Public Stream</h1>
                 <div className="pse__actions">
+                    <button
+                        className="pse__btn pse__btn--preview"
+                        onClick={handlePreview}
+                        title="View public site in new tab"
+                    >
+                        👁️ Preview
+                    </button>
                     <button className="pse__btn pse__btn--secondary" onClick={exit}>
                         Exit
                     </button>

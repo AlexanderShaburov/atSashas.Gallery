@@ -58,6 +58,15 @@
     background: #d1d5db;
 }
 
+.pse__btn--preview {
+    background: #8b5cf6;
+    color: white;
+}
+
+.pse__btn--preview:hover {
+    background: #7c3aed;
+}
+
 .pse__btn--danger {
     background: #ef4444;
     color: white;
