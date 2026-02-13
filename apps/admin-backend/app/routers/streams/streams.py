@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 from app.models.streams import StreamData, StreamIndexItem, StreamStatus
 from app.repos.stream_repo import StreamRepo
+from app.repos.public_stream_repo import public_stream_repo
 
 router = APIRouter(prefix="/admin/streams", tags=["admin-streams"])
 repo = StreamRepo()
@@ -91,6 +92,30 @@ async def update_stream(stream_id: str, body: StreamData) -> StreamData:
     except ValueError as e:
         # Version mismatch
         raise HTTPException(status_code=409, detail=str(e))
+
+
+@router.get("/{stream_id}/dependencies", response_model=dict)
+async def get_stream_dependencies(stream_id: str) -> dict:
+    """
+    Check if a stream is published in PublicStream.
+    Returns dependency information to warn before deletion.
+    """
+    is_published = False
+
+    try:
+        public_stream = await public_stream_repo.get()
+        is_published = stream_id in public_stream.streamIds
+    except Exception:
+        # If PublicStream doesn't exist or fails to load, assume not published
+        pass
+
+    return {
+        "streamId": stream_id,
+        "isPublished": is_published,
+        "dependencies": {
+            "publicStream": is_published
+        }
+    }
 
 
 @router.delete("/{stream_id}", response_model=dict)
