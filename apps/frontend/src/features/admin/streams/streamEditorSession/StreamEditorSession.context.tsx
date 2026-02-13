@@ -16,6 +16,7 @@ import {
 } from '@/features/admin/shared/transporter/transporter';
 import { StreamEditorCtx } from '@/features/admin/streams/hooks/useStreamEditor';
 import { validateStreamForm } from '@/features/admin/streams/utils';
+import { streamsApi } from '@/features/admin/streams/api/streamsApi';
 import { deepEqual } from '@/shared/lib/checkers/checkers';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { generateId } from '@/shared/lib/id/generateId';
@@ -465,16 +466,50 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
 
     const delStream = useCallback(
         async (streamId: string) => {
+            // Check if stream is published before deleting
+            let isPublished = false;
+            try {
+                const deps = await streamsApi.checkDependencies(streamId);
+                isPublished = deps.isPublished;
+            } catch (err) {
+                console.error('[delStream] Failed to check dependencies:', err);
+                // Continue with deletion even if check fails
+            }
+
+            const warningMessage = isPublished
+                ? '⚠️ WARNING: This stream is currently PUBLISHED in the public gallery. Deleting it will remove it from the public site.'
+                : 'This will permanently delete the stream. This cannot be undone.';
+
+            const steps = isPublished
+                ? [
+                      'This stream is published and visible to the public.',
+                      'We will remove it from PublicStream.',
+                      'We will remove the stream JSON from storage.',
+                      'We will refresh the streams list.',
+                  ]
+                : [
+                      'We will remove the stream JSON from storage.',
+                      'We will refresh the streams list.',
+                  ];
+
             destructiveActionsStore.open({
-                title: 'Delete stream',
-                message: 'This will permanently delete the stream. This cannot be undone.',
-                dangerHint: 'Make sure it is not used as an event landing page.',
-                steps: [
-                    'We will remove the stream JSON from storage.',
-                    'We will refresh the streams list.',
-                ],
+                title: isPublished ? '⚠️ Delete Published Stream' : 'Delete stream',
+                message: warningMessage,
+                dangerHint: isPublished
+                    ? 'This stream is live on the public site!'
+                    : 'Make sure it is not used as an event landing page.',
+                steps,
                 confirmLabel: 'Delete stream',
                 run: async () => {
+                    // If published, unpublish first
+                    if (isPublished) {
+                        try {
+                            await publicStreamApi.removeStream(streamId);
+                        } catch (err) {
+                            console.error('[delStream] Failed to unpublish:', err);
+                            // Continue with deletion anyway
+                        }
+                    }
                     await deleteStream(streamId);
                 },
                 onSuccess: () => {

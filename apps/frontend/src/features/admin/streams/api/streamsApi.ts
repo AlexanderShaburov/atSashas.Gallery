@@ -42,6 +42,13 @@ export const streamsApi = {
             body: JSON.stringify(stream),
         }),
 
+    checkDependencies: (streamId: string) =>
+        http<{
+            streamId: string;
+            isPublished: boolean;
+            dependencies: { publicStream: boolean };
+        }>(`/admin/streams/${encodeURIComponent(streamId)}/dependencies`),
+
     remove: (streamId: string, hard = false) => {
         console.log(`[streamsApi][remove] called with id: ${streamId}`);
         const suffix = hard ? `?hard=true` : '';
