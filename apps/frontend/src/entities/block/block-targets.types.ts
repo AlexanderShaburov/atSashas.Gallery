@@ -8,4 +8,5 @@ export type EditTarget =
           kind: 'imageCaption' | 'blockCaption' | 'image';
       }
     | { blockKind: 'text'; kind: 'title' | 'body' }
-    | { blockKind: 'cta'; kind: 'label' | 'url' };
+    | { blockKind: 'cta'; kind: 'label' | 'url' }
+    | { blockKind: 'eventCta'; kind: 'eventId' | 'buttonLabel' };

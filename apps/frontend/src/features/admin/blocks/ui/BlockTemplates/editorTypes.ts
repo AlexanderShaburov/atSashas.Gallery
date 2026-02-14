@@ -20,7 +20,10 @@ export type BlockHit =
     // CTA block
     | { blockKind: 'cta'; kind: 'ctaTitle' }
     | { blockKind: 'cta'; kind: 'ctaBody' }
-    | { blockKind: 'cta'; kind: 'ctaButton' };
+    | { blockKind: 'cta'; kind: 'ctaButton' }
+
+    // EventCta block
+    | { blockKind: 'eventCta'; kind: 'eventCtaButton' };
 
 export const Hit = {
     galleryImage: (slot: ItemPosition): BlockHit => ({
@@ -56,5 +59,9 @@ export const Hit = {
     ctaButton: (): BlockHit => ({
         blockKind: 'cta',
         kind: 'ctaButton',
+    }),
+    eventCtaButton: (): BlockHit => ({
+        blockKind: 'eventCta',
+        kind: 'eventCtaButton',
     }),
 };

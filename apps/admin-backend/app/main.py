@@ -9,6 +9,7 @@ from app.routers.art import catalog
 from app.routers.auth import auth
 from app.routers.block import blocks
 from app.routers.streams import streams
+from app.routers.events import events
 from app.routers.public_stream import public_stream
 from app.settings import settings
 from app.routers import health, json_kv
@@ -72,3 +73,5 @@ app.include_router(streams.public_router)  # Public streams endpoint
 app.include_router(streams.router)  # Admin streams endpoints
 app.include_router(public_stream.public_router)  # Public endpoint
 app.include_router(public_stream.admin_router)  # Admin endpoints
+app.include_router(events.public_router)  # Public events endpoint
+app.include_router(events.admin_router)  # Admin events endpoints

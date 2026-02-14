@@ -1,11 +1,12 @@
 //src/features/admin/blocks/ui/BlockEditorShell/templateTypes.ts
-import type { CtaBlock, GalleryBlock, GalleryLayout, TextBlock } from '@/entities/block';
+import type { CtaBlock, EventCtaBlock, GalleryBlock, GalleryLayout, TextBlock } from '@/entities/block';
 import { todayISO } from '@/shared/lib/dateAndLabels/today';
 
 type TemplateBlock =
     | { kind: 'gallery'; layout: GalleryLayout; label: string }
     | { kind: 'text'; label: string }
-    | { kind: 'cta'; label: string };
+    | { kind: 'cta'; label: string }
+    | { kind: 'eventCta'; label: string };
 
 export const TEMPLATE_BLOCKS: TemplateBlock[] = [
     // --- Gallery layouts ---
@@ -21,6 +22,9 @@ export const TEMPLATE_BLOCKS: TemplateBlock[] = [
 
     // --- CTA block ---
     { kind: 'cta', label: 'CTA' },
+
+    // --- Event CTA block ---
+    { kind: 'eventCta', label: 'Event CTA' },
 ];
 export function createGalleryTemplateBlock(layout: GalleryLayout): GalleryBlock {
     return {
@@ -57,5 +61,16 @@ export function createCtaTemplateBlock(): CtaBlock {
         body: { en: 'Description here' },
         buttonLabel: { en: 'Button label' },
         target: { type: 'event', eventId: '' },
+    };
+}
+
+export function createEventCtaTemplateBlock(): EventCtaBlock {
+    return {
+        id: '__template-eventCta',
+        blockKind: 'eventCta',
+        lifecycle: 'template',
+        dateCreated: todayISO(),
+        eventId: '',
+        buttonLabel: { en: 'Sign up' },
     };
 }

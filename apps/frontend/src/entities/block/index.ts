@@ -11,6 +11,7 @@ export type {
     BlockKind,
     CtaBlock,
     CtaTarget,
+    EventCtaBlock,
     GalleryBlock,
     GalleryBlockItem,
     GalleryLayout,

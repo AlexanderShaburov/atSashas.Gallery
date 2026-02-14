@@ -47,6 +47,10 @@ export const hitToTarget = (e: BlockHitEvent): EditTarget => {
             }
             break;
         }
+
+        case 'eventCta': {
+            return { blockKind: 'eventCta', kind: 'eventId' };
+        }
     }
 };
 
@@ -89,6 +93,17 @@ export function normalizeBlock(block: Block): Block {
                 body: block.body ?? { en: '' },
                 buttonLabel: block.buttonLabel ?? { en: '' },
                 target: block.target ?? { type: 'stream', slug: '' },
+            };
+
+        case 'eventCta':
+            return {
+                id: block.id,
+                blockKind: 'eventCta',
+                lifecycle,
+                tags: block.tags ?? [],
+                dateCreated: block.dateCreated,
+                eventId: block.eventId,
+                buttonLabel: block.buttonLabel ?? { en: 'Sign up' },
             };
     }
 }

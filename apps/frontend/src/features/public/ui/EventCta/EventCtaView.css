@@ -1,0 +1,84 @@
+/* features/public/ui/EventCta/EventCtaView.css */
+
+.event-cta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 2rem;
+    border-radius: 1rem;
+    background: var(--card-bg, #f9fafb);
+    border: 1px solid var(--border, #e5e7eb);
+    max-width: 480px;
+    margin-inline: auto;
+}
+
+.event-cta--missing {
+    text-align: center;
+    color: #9ca3af;
+    font-style: italic;
+    padding: 3rem 2rem;
+}
+
+.event-cta--draft {
+    opacity: 0.7;
+    border-style: dashed;
+}
+
+.event-cta--closed {
+    opacity: 0.8;
+}
+
+.event-cta__badge {
+    display: inline-block;
+    align-self: flex-start;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 0.25rem;
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.event-cta__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.event-cta__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: var(--muted, #6b7280);
+}
+
+.event-cta__description {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--text, #374151);
+}
+
+.event-cta__button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: #3b82f6;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    align-self: flex-start;
+}
+
+.event-cta__button:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.event-cta__button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

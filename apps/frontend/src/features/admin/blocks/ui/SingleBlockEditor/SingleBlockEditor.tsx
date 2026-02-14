@@ -1,8 +1,9 @@
 //src/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor.tsx
-import { Block, CtaBlock, GalleryBlock, TextBlock } from '@/entities/block';
+import { Block, CtaBlock, EventCtaBlock, GalleryBlock, TextBlock } from '@/entities/block';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 import {
     CtaBlockComponent,
+    EventCtaBlockComponent,
     GalleryComponent,
     TextBlockComponent,
 } from '@/features/admin/shared/ui/BlockPreview';
@@ -66,6 +67,16 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps }: Props
             content = (
                 <TextBlockComponent
                     item={item as TextBlock}
+                    onHit={onHit}
+                    parent="editor"
+                    setValue={setValue}
+                />
+            );
+            break;
+        case 'eventCta':
+            content = (
+                <EventCtaBlockComponent
+                    item={item as EventCtaBlock}
                     onHit={onHit}
                     parent="editor"
                     setValue={setValue}

@@ -16,6 +16,8 @@ export function validateBlockForm(form: Block): boolean {
             return hasLocalizedContent(form.body);
         case 'cta':
             return hasLocalizedContent(form.buttonLabel) && validateCtaTarget(form.target);
+        case 'eventCta':
+            return hasFilledString(form.eventId);
         default:
             return false;
     }

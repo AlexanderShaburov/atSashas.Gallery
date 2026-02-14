@@ -63,7 +63,7 @@ class BlockBase(BaseModel):
     """
 
     id: str
-    blockKind: Literal["gallery", "text", "cta"]
+    blockKind: Literal["gallery", "text", "cta", "eventCta"]
     lifecycle: BlockLifecycle
 
     # Legacy compatibility (optional)
@@ -150,8 +150,16 @@ class CtaBlock(BlockBase):
 # Discriminated union
 # ==============================
 
+class EventCtaBlock(BlockBase):
+    blockKind: Literal["eventCta"] = "eventCta"
+    eventId: str = Field(min_length=1)
+    buttonLabel: Optional[Localized] = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
 Block = Annotated[
-    Union[GalleryBlock, TextBlock, CtaBlock],
+    Union[GalleryBlock, TextBlock, CtaBlock, EventCtaBlock],
     Field(discriminator="blockKind"),
 ]
 

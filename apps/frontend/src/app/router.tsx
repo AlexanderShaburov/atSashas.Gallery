@@ -8,6 +8,7 @@ import { CatalogEditorSessionProvider } from '@/features/admin/catalogEditor/cat
 import { EditorWorkspaceProvider } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { StreamEditorSessionProvider } from '@/features/admin/streams/streamEditorSession/StreamEditorSession.context';
 import { ArtCatalogLoader } from '@/shared/ArtCatalogProvider/ArtCatalogLoader';
+import { EventsLoader } from '@/shared/EventsProvider/EventsLoader';
 import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 
@@ -28,7 +29,9 @@ const NotFound = lazy(() => import('@/pages/NotFound'));
 function PublicRoot() {
     return (
         <ArtCatalogLoader mode="public">
-            <PublicLayout />
+            <EventsLoader>
+                <PublicLayout />
+            </EventsLoader>
         </ArtCatalogLoader>
     );
 }
@@ -39,9 +42,11 @@ function AdminRoot() {
     return (
         <RequireAuth>
             <ArtCatalogLoader mode="admin">
-                <EditorWorkspaceProvider>
-                    <AdminLayout />
-                </EditorWorkspaceProvider>
+                <EventsLoader>
+                    <EditorWorkspaceProvider>
+                        <AdminLayout />
+                    </EditorWorkspaceProvider>
+                </EventsLoader>
             </ArtCatalogLoader>
         </RequireAuth>
     );

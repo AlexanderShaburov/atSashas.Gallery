@@ -10,7 +10,7 @@ export type BlockEditorMode = 'create' | 'edit';
 export const CTA_TYPES = ['stream', 'external', 'event'];
 export type CtaTypes = (typeof CTA_TYPES)[number];
 
-export const BLOCK_KINDS = ['gallery', 'text', 'cta'] as const;
+export const BLOCK_KINDS = ['gallery', 'text', 'cta', 'eventCta'] as const;
 export type BlockKind = (typeof BLOCK_KINDS)[number];
 
 export type ItemPosition =
@@ -99,4 +99,10 @@ export interface CtaBlock extends BlockBase {
     target: CtaTarget | undefined;
 }
 
-export type Block = GalleryBlock | TextBlock | CtaBlock;
+export interface EventCtaBlock extends BlockBase {
+    blockKind: 'eventCta';
+    eventId: string;
+    buttonLabel?: Localized;
+}
+
+export type Block = GalleryBlock | TextBlock | CtaBlock | EventCtaBlock;
