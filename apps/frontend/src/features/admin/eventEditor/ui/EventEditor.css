@@ -1,0 +1,205 @@
+/* features/admin/eventEditor/ui/EventEditor.css */
+
+.eve {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 2rem;
+  gap: 2rem;
+  overflow-y: auto;
+}
+
+.eve__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.eve__title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.eve__actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.eve__btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.eve__btn--primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.eve__btn--primary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.eve__btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.eve__btn--secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.eve__btn--secondary:hover {
+  background: #d1d5db;
+}
+
+.eve__btn--danger {
+  background: #ef4444;
+  color: white;
+}
+
+.eve__btn--danger:hover {
+  background: #dc2626;
+}
+
+/* List view */
+
+.eve__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.eve__item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.eve__item:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.eve__item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.eve__item-title {
+  font-weight: 600;
+  margin: 0;
+}
+
+.eve__item-meta {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.eve__badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
+}
+
+.eve__badge--draft {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.eve__badge--scheduled {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.eve__badge--closed {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.eve__empty {
+  color: #9ca3af;
+  text-align: center;
+  padding: 4rem;
+  font-style: italic;
+}
+
+.eve__loading {
+  padding: 4rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* Form */
+
+.eve__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 600px;
+}
+
+.eve__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.eve__field label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.eve__field input,
+.eve__field textarea,
+.eve__field select {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.eve__field input:focus,
+.eve__field textarea:focus,
+.eve__field select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.eve__field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.eve__row {
+  display: flex;
+  gap: 1rem;
+}
+
+.eve__row .eve__field {
+  flex: 1;
+}
+
+.eve__toolbar {
+  display: flex;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}

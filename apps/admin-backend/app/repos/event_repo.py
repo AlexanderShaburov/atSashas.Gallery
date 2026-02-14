@@ -2,6 +2,8 @@
 
 import asyncio
 import json
+import secrets
+import string
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -9,6 +11,12 @@ from typing import AsyncIterator, Optional
 
 from app.models.events import EventCatalog, EventData
 from app.settings import settings
+
+
+def generate_event_id() -> str:
+    today = datetime.now(timezone.utc).strftime("%Y%m%d")
+    suffix = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(6))
+    return f"event-{today}-{suffix}"
 
 
 class EventRepo:

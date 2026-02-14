@@ -2,6 +2,7 @@
 
 import type { Block, BlockParent, EventCtaBlock } from '@/entities/block';
 import '@/features/admin/blocks/ui/BlockTemplates/block.templates.css';
+import { EventPicker } from '@/features/admin/blocks/ui/EventPicker/EventPicker';
 import { BlockHitEvent, Hit } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { useEvent } from '@/shared/EventsProvider/useEvent';
 
@@ -13,31 +14,33 @@ type Props = {
     readOnly?: boolean;
 };
 
-export function EventCtaBlockComponent({ item, onHit }: Props) {
+export function EventCtaBlockComponent({ item, onHit, parent, setValue }: Props) {
     const event = useEvent(item.eventId);
 
     return (
-        <div
-            role="button"
-            className="blk-cta blk-cta-event"
-            onClick={(e) =>
-                onHit({
-                    block: item,
-                    hit: Hit.eventCtaButton(),
-                    nativeEvent: e,
-                })
-            }
-        >
-            {event ? (
-                <>
-                    <div className="blk-event-title">{event.title.en}</div>
-                    <div className="blk-event-status">{event.status}</div>
-                </>
-            ) : (
-                <div className="blk-event-missing">
-                    {item.eventId ? `Event: ${item.eventId}` : 'No event selected'}
-                </div>
-            )}
+        <div className="blk-cta blk-cta-event">
+            <div
+                role="button"
+                onClick={(e) =>
+                    onHit({
+                        block: item,
+                        hit: Hit.eventCtaButton(),
+                        nativeEvent: e,
+                    })
+                }
+            >
+                {event ? (
+                    <>
+                        <div className="blk-event-title">{event.title.en}</div>
+                        <div className="blk-event-status">{event.status}</div>
+                    </>
+                ) : (
+                    <div className="blk-event-missing">
+                        {item.eventId ? `Event: ${item.eventId}` : 'No event selected'}
+                    </div>
+                )}
+            </div>
+            {parent === 'editor' && <EventPicker item={item} setValue={setValue} />}
         </div>
     );
 }

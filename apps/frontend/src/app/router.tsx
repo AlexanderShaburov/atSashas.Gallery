@@ -21,6 +21,7 @@ const UploadPage = lazy(() => import('@/pages/admin/UploadPage'));
 const CatalogEditorPage = lazy(() => import('@/pages/admin/catalogEditorPage/CatalogEditorPage'));
 const BlocksPage = lazy(() => import('@/pages/admin/BlocksPage/BlocksPage'));
 const StreamsPage = lazy(() => import('@/pages/admin/StreamPage/StreamsPage'));
+const EventsPage = lazy(() => import('@/pages/admin/EventsPage'));
 const PublicStreamPage = lazy(() => import('@/pages/admin/PublicStreamPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
@@ -95,6 +96,10 @@ export const router = createBrowserRouter([
                         <StreamsPage />
                     </StreamEditorSessionProvider>
                 ),
+            },
+            {
+                path: 'events',
+                element: <EventsPage />,
             },
             {
                 path: 'public-stream',

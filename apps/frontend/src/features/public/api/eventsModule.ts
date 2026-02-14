@@ -30,3 +30,8 @@ export async function loadEventsOnce(): Promise<EventCatalog> {
 export function getEvent(id: string): EventData | undefined {
     return eventsCatalogCache?.events?.[id];
 }
+
+export function invalidateEventsCache(): void {
+    eventsCatalogCache = null;
+    inflight = null;
+}

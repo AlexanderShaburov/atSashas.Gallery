@@ -31,6 +31,20 @@ class EventData(BaseModel):
     streamSlug: Optional[str] = None
 
 
+class CreateEventRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    slug: str = Field(min_length=1)
+    title: Localized
+    description: Optional[Localized] = None
+    dateTime: str
+    durationMinutes: Optional[int] = None
+    location: str = ""
+    price: Optional[Money] = None
+    status: EventStatus = EventStatus.draft
+    streamSlug: Optional[str] = None
+
+
 class EventCatalog(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

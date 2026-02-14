@@ -62,6 +62,14 @@ export function AdminHeader() {
                         Streams
                     </NavLink>
                     <NavLink
+                        to="/admin/events"
+                        className={({ isActive }) =>
+                            'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
+                        }
+                    >
+                        Events
+                    </NavLink>
+                    <NavLink
                         to="/admin/public-stream"
                         className={({ isActive }) =>
                             'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
