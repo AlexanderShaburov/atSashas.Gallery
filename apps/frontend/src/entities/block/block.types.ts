@@ -61,11 +61,22 @@ export interface GalleryBlock extends BlockBase {
     items: GalleryBlockItem[];
 }
 
-export interface GalleryBlockItem {
+export interface GalleryArtItem {
+    kind: 'art';
     artId: string;
     position: ItemPosition;
     caption?: Localized;
 }
+
+export interface GalleryEventItem {
+    kind: 'eventCta';
+    eventId: string;
+    position: ItemPosition;
+    buttonLabel?: Localized;
+    backgroundArtId?: string;
+}
+
+export type GalleryBlockItem = GalleryArtItem | GalleryEventItem;
 
 export interface TextBlock extends BlockBase {
     blockKind: 'text';

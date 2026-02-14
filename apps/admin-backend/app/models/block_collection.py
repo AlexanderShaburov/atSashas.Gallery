@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Dict, List, Optional, Union, Annotated, Literal
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 from datetime import datetime, timezone
 
 from app.models.common import Localized, ISODate
@@ -76,12 +76,29 @@ class BlockBase(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class GalleryBlockItem(BaseModel):
+class GalleryArtItem(BaseModel):
+    kind: Literal["art"] = "art"
     artId: str
     position: ItemPosition
     caption: Optional[Localized] = None
 
     model_config = ConfigDict(extra="forbid")
+
+
+class GalleryEventItem(BaseModel):
+    kind: Literal["eventCta"] = "eventCta"
+    eventId: str
+    position: ItemPosition
+    buttonLabel: Optional[Localized] = None
+    backgroundArtId: Optional[str] = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+GalleryBlockItem = Annotated[
+    Union[GalleryArtItem, GalleryEventItem],
+    Field(discriminator="kind"),
+]
 
 
 class GalleryBlock(BlockBase):
@@ -91,6 +108,15 @@ class GalleryBlock(BlockBase):
     items: List[GalleryBlockItem]  # TS allows empty list -> no validator
 
     model_config = ConfigDict(extra="forbid")
+
+    @model_validator(mode='before')
+    @classmethod
+    def normalize_items(cls, data):
+        if isinstance(data, dict) and 'items' in data:
+            for item in data['items']:
+                if isinstance(item, dict) and 'kind' not in item:
+                    item['kind'] = 'art'
+        return data
 
 
 class TextBlock(BlockBase):

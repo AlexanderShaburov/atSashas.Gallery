@@ -1,5 +1,6 @@
 // src/features/admin/blocks/ui/BlockPreview/GalleryComponent.tsx
 
+import type { ArtItemData } from '@/entities/art';
 import {
     Block,
     BlockParent,
@@ -10,14 +11,21 @@ import {
     ItemPosition,
 } from '@/entities/block';
 import {
+    isArtItem,
+    isEventItem,
+} from '@/features/admin/blocks/blockEditorSession/blockEditorSession.utils';
+import {
     BlockHit,
     BlockHitEvent,
     Hit,
 } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { TEMPLATE_BLOCKS } from '@/features/admin/blocks/ui/BlockTemplates/templateTypes';
+import { GalleryEventSlot } from '@/features/admin/shared/ui/BlockPreview/GalleryEventSlot';
 import { InlineEditableText } from '@/features/admin/shared/ui/BlockPreview';
+import { SlotChoiceMenu } from '@/features/admin/shared/ui/BlockPreview/SlotChoiceMenu';
+import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { useResolveArtAdaptive } from '@/shared/ArtCatalogProvider/useResolveArtAdaptive';
-import { JSX, ReactNode } from 'react';
+import { JSX, ReactNode, useMemo, useState } from 'react';
 
 const ITEM_POSITIONS: Record<GalleryLayout, ItemPosition[]> = {
     single: ['Center'],
@@ -59,6 +67,15 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Pr
     const isEditor = parent === 'editor';
     const imgPositions = ITEM_POSITIONS[item.layout];
     const resolveArt = useResolveArtAdaptive();
+    const [slotChoice, setSlotChoice] = useState<{ pos: ItemPosition; top: number; left: number } | null>(null);
+
+    // Art catalog list for event slot background picker
+    const workspace = useEditorWorkspace();
+    const artItems = useMemo<ArtItemData[]>(() => {
+        const catalog = workspace.currentArtCatalog;
+        if (!catalog) return [];
+        return Object.values(catalog.items);
+    }, [workspace.currentArtCatalog]);
 
     const tpl = TEMPLATE_BLOCKS.find((t) => t.kind === item.blockKind && t.layout === item.layout);
     const label = tpl?.label;
@@ -104,7 +121,7 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Pr
     };
 
     const renderItemCaption = (pos: ItemPosition, blockItem?: GalleryBlockItem) => {
-        const current = blockItem?.caption?.en ?? '';
+        const current = (blockItem && 'caption' in blockItem ? blockItem.caption?.en : undefined) ?? '';
 
         const className = ['blk-field', 'blk-field--slot-caption', current ? '' : 'is-empty']
             .filter(Boolean)
@@ -129,7 +146,7 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Pr
                     ...item,
                     items: item.items.map((i) =>
                         i.position === pos
-                            ? { ...i, caption: { ...(i.caption ?? {}), en: next } }
+                            ? { ...i, caption: { ...('caption' in i ? i.caption ?? {} : {}), en: next } }
                             : i,
                     ),
                 };
@@ -183,30 +200,54 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Pr
         );
     };
 
+    const handleEmptySlotClick = (pos: ItemPosition, e: React.MouseEvent<HTMLElement>) => {
+        if (isEditor) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            setSlotChoice({
+                pos,
+                top: rect.top + rect.height / 2,
+                left: rect.left + rect.width / 2,
+            });
+        } else {
+            onHit({ block: item, hit: Hit.galleryImage(pos), nativeEvent: e });
+        }
+    };
+
+    const handleChooseArt = (pos: ItemPosition) => {
+        setSlotChoice(null);
+        // Synthesize a hit event to trigger the art journey
+        const syntheticEvent = new MouseEvent('click') as unknown as React.MouseEvent<HTMLElement>;
+        onHit({ block: item, hit: Hit.galleryImage(pos), nativeEvent: syntheticEvent });
+    };
+
+    const handleChooseEvent = (pos: ItemPosition) => {
+        setSlotChoice(null);
+        // Insert a GalleryEventItem placeholder with empty eventId
+        const newEventItem: GalleryBlockItem = {
+            kind: 'eventCta',
+            eventId: '',
+            position: pos,
+        };
+        setValue({ ...item, items: [...item.items, newEventItem] });
+    };
+
     return (
         <figure className={`blk-${item.blockKind} ${isEditor ? 'blk--editor' : ''}`}>
             {imgPositions.map((pos) => {
                 const blockItem = item.items.find((i) => i.position === pos);
-                const imgId = blockItem?.artId;
 
                 const slotBaseClass = `blk-gallery__slot blk-gallery__slot-${posClass(pos)}${
                     isTriptychHorizontal(item.layout) ? '-horizontal' : ''
                 }`;
 
-                // --- EMPTY SLOT (no artId) ---
-                if (!imgId) {
+                // --- EMPTY SLOT (no item at this position) ---
+                if (!blockItem) {
                     return (
                         <div key={pos} className={`${slotBaseClass} blk-gallery__slot-empty`}>
                             <div
                                 role="button"
                                 className="blk-gallery__slot-media"
-                                onClick={(e) =>
-                                    onHit({
-                                        block: item,
-                                        hit: Hit.galleryImage(pos),
-                                        nativeEvent: e,
-                                    })
-                                }
+                                onClick={(e) => handleEmptySlotClick(pos, e)}
                             />
 
                             {renderItemCaption(pos, blockItem)}
@@ -214,17 +255,104 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Pr
                     );
                 }
 
-                // --- HAVE artId: resolve art ---
-                const img = resolveArt(imgId);
-
-                // --- MISSING ART (not found in catalog) ---
-                if (!img) {
+                // --- EVENT ITEM ---
+                if (isEventItem(blockItem)) {
                     return (
                         <div
-                            key={`${imgId}-${pos}`}
-                            className={`${slotBaseClass} blk-gallery__slot-missing`}
+                            key={`event-${pos}`}
+                            className={`${slotBaseClass} blk-gallery__slot-event`}
+                            role="button"
+                            onClick={(e) =>
+                                onHit({
+                                    block: item,
+                                    hit: Hit.galleryEventSlot(pos),
+                                    nativeEvent: e,
+                                })
+                            }
                         >
+                            <GalleryEventSlot
+                                item={blockItem}
+                                isEditor={isEditor}
+                                artItems={artItems}
+                                resolvedBgSrc={
+                                    blockItem.backgroundArtId
+                                        ? resolveArt(blockItem.backgroundArtId)?.images.preview
+                                              .jpeg
+                                        : undefined
+                                }
+                                onChangeEvent={(eventId) => {
+                                    const newItems = item.items.map((i) =>
+                                        i.position === pos && isEventItem(i)
+                                            ? { ...i, eventId }
+                                            : i,
+                                    );
+                                    setValue({ ...item, items: newItems });
+                                }}
+                                onChangeBackground={(artId) => {
+                                    const newItems = item.items.map((i) =>
+                                        i.position === pos && isEventItem(i)
+                                            ? {
+                                                  ...i,
+                                                  backgroundArtId: artId || undefined,
+                                              }
+                                            : i,
+                                    );
+                                    setValue({ ...item, items: newItems });
+                                }}
+                            />
+                        </div>
+                    );
+                }
+
+                // --- ART ITEM ---
+                if (isArtItem(blockItem)) {
+                    const imgId = blockItem.artId;
+
+                    if (!imgId) {
+                        return (
+                            <div key={pos} className={`${slotBaseClass} blk-gallery__slot-empty`}>
+                                <div
+                                    role="button"
+                                    className="blk-gallery__slot-media"
+                                    onClick={(e) => handleEmptySlotClick(pos, e)}
+                                />
+                                {renderItemCaption(pos, blockItem)}
+                            </div>
+                        );
+                    }
+
+                    const img = resolveArt(imgId);
+
+                    // --- MISSING ART (not found in catalog) ---
+                    if (!img) {
+                        return (
                             <div
+                                key={`${imgId}-${pos}`}
+                                className={`${slotBaseClass} blk-gallery__slot-missing`}
+                            >
+                                <div
+                                    role="button"
+                                    className="blk-gallery__slot-media"
+                                    onClick={(e) =>
+                                        onHit({
+                                            block: item,
+                                            hit: Hit.galleryImage(pos),
+                                            nativeEvent: e,
+                                        })
+                                    }
+                                >
+                                    Missing art: {imgId}
+                                </div>
+
+                                {renderItemCaption(pos, blockItem)}
+                            </div>
+                        );
+                    }
+
+                    // --- NORMAL ART ---
+                    return (
+                        <div key={`${imgId}-${pos}`} className={slotBaseClass}>
+                            <picture
                                 role="button"
                                 className="blk-gallery__slot-media"
                                 onClick={(e) =>
@@ -235,43 +363,34 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Pr
                                     })
                                 }
                             >
-                                Missing art: {imgId}
-                            </div>
+                                <source type="image/avif" srcSet={img.images.preview.avif} />
+                                <source type="image/webp" srcSet={img.images.preview.webp} />
+                                <img
+                                    src={img.images.preview.jpeg}
+                                    alt={img.images.alt?.en || ''}
+                                    loading="lazy"
+                                />
+                            </picture>
 
                             {renderItemCaption(pos, blockItem)}
                         </div>
                     );
                 }
 
-                // --- NORMAL ART ---
-                return (
-                    <div key={`${imgId}-${pos}`} className={slotBaseClass}>
-                        <picture
-                            role="button"
-                            className="blk-gallery__slot-media"
-                            onClick={(e) =>
-                                onHit({
-                                    block: item,
-                                    hit: Hit.galleryImage(pos),
-                                    nativeEvent: e,
-                                })
-                            }
-                        >
-                            <source type="image/avif" srcSet={img.images.preview.avif} />
-                            <source type="image/webp" srcSet={img.images.preview.webp} />
-                            <img
-                                src={img.images.preview.jpeg}
-                                alt={img.images.alt?.en || ''}
-                                loading="lazy"
-                            />
-                        </picture>
-
-                        {renderItemCaption(pos, blockItem)}
-                    </div>
-                );
+                return null;
             })}
 
             {renderBlockCaption()}
+
+            {slotChoice && (
+                <SlotChoiceMenu
+                    top={slotChoice.top}
+                    left={slotChoice.left}
+                    onChooseArt={() => handleChooseArt(slotChoice.pos)}
+                    onChooseEvent={() => handleChooseEvent(slotChoice.pos)}
+                    onClose={() => setSlotChoice(null)}
+                />
+            )}
         </figure>
     );
 }

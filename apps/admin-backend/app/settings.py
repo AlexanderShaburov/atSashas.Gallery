@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     session_expire_minutes: int = 240  # 4 hours
     activity_timeout_minutes: int = 30  # 30 minutes of inactivity
 
+    # Stripe settings
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
+    site_url: str = "http://localhost:8080"
+
     class Config:
         env_prefix = ""
         env_file = ".env"

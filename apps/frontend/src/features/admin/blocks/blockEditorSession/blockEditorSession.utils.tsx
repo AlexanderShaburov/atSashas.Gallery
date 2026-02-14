@@ -1,8 +1,22 @@
 // src/features/admin/blocks/blockEditorSession/blockEditorSession.utils.tsx
 
-import { Block, EditTarget, ItemPosition } from '@/entities/block';
+import type { Block, GalleryArtItem, GalleryBlockItem, GalleryEventItem } from '@/entities/block';
+import { EditTarget, ItemPosition } from '@/entities/block';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 import { generateId } from '@/shared/lib/id/generateId';
+
+export function isArtItem(item: GalleryBlockItem): item is GalleryArtItem {
+    return !('kind' in item) || item.kind === 'art';
+}
+
+export function isEventItem(item: GalleryBlockItem): item is GalleryEventItem {
+    return 'kind' in item && item.kind === 'eventCta';
+}
+
+function normalizeGalleryItem(raw: GalleryBlockItem): GalleryBlockItem {
+    if (!('kind' in raw)) return { ...(raw as GalleryArtItem), kind: 'art' };
+    return raw;
+}
 
 export const hitToTarget = (e: BlockHitEvent): EditTarget => {
     switch (e.hit.blockKind) {
@@ -10,6 +24,7 @@ export const hitToTarget = (e: BlockHitEvent): EditTarget => {
             switch (e.hit.kind) {
                 case 'image':
                 case 'imageCaption':
+                case 'eventSlot':
                     return {
                         blockKind: 'gallery',
                         kind: e.hit.kind,
@@ -66,7 +81,7 @@ export function normalizeBlock(block: Block): Block {
                 layout: block.layout,
                 tags: block.tags ?? [],
                 dateCreated: block.dateCreated,
-                items: block.items,
+                items: block.items.map(normalizeGalleryItem),
                 caption: block.caption ?? { en: '' },
             };
 

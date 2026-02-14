@@ -11,6 +11,7 @@ export type BlockHit =
     // Gallery block
     | { blockKind: 'gallery'; kind: 'image'; slot: ItemPosition }
     | { blockKind: 'gallery'; kind: 'imageCaption'; slot: ItemPosition }
+    | { blockKind: 'gallery'; kind: 'eventSlot'; slot: ItemPosition }
     | { blockKind: 'gallery'; kind: 'blockCaption' }
 
     // Text block
@@ -59,6 +60,11 @@ export const Hit = {
     ctaButton: (): BlockHit => ({
         blockKind: 'cta',
         kind: 'ctaButton',
+    }),
+    galleryEventSlot: (slot: ItemPosition): BlockHit => ({
+        blockKind: 'gallery',
+        kind: 'eventSlot',
+        slot,
     }),
     eventCtaButton: (): BlockHit => ({
         blockKind: 'eventCta',

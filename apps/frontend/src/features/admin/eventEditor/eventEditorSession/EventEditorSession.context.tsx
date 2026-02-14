@@ -16,6 +16,7 @@ export interface EventDraft {
   dateTime: string;
   durationMinutes: string;
   location: string;
+  mapUrl: string;
   priceAmount: string;
   priceCurrency: string;
   status: EventStatus;
@@ -29,6 +30,7 @@ const EMPTY_DRAFT: EventDraft = {
   dateTime: '',
   durationMinutes: '',
   location: '',
+  mapUrl: '',
   priceAmount: '',
   priceCurrency: 'EUR',
   status: 'draft',
@@ -44,6 +46,7 @@ function eventToFormDraft(e: EventData): EventDraft {
     dateTime: e.dateTime,
     durationMinutes: e.durationMinutes?.toString() ?? '',
     location: e.location,
+    mapUrl: e.mapUrl ?? '',
     priceAmount: e.price?.amount?.toString() ?? '',
     priceCurrency: e.price?.currency ?? 'EUR',
     status: e.status,
@@ -70,6 +73,7 @@ function formDraftToPayload(draft: EventDraft): CreateEventPayload {
     dateTime: draft.dateTime,
     durationMinutes,
     location: draft.location,
+    mapUrl: draft.mapUrl || undefined,
     price,
     status: draft.status,
     streamSlug: draft.streamSlug || undefined,

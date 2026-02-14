@@ -55,6 +55,53 @@ function EventList() {
   );
 }
 
+function EnrollmentsList({ eventId }: { eventId: string }) {
+  const { events } = useEventEditorSession();
+  const event = events.find((e) => e.id === eventId);
+  const enrollments = event?.enrollments ? Object.values(event.enrollments) : [];
+
+  if (enrollments.length === 0) {
+    return (
+      <div className="eve__enrollments">
+        <h3 className="eve__enrollments-title">Enrollments (0)</h3>
+        <div className="eve__empty" style={{ padding: '1rem' }}>
+          No enrollments yet.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="eve__enrollments">
+      <h3 className="eve__enrollments-title">Enrollments ({enrollments.length})</h3>
+      <table className="eve__enrollments-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Date</th>
+            <th>Payment</th>
+          </tr>
+        </thead>
+        <tbody>
+          {enrollments.map((en) => (
+            <tr key={en.id}>
+              <td>{en.fullName}</td>
+              <td>{en.email}</td>
+              <td>{new Date(en.createdAt).toLocaleDateString()}</td>
+              <td>
+                <span className={`eve__badge eve__badge--${en.paymentStatus}`}>
+                  {en.paymentStatus}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function EventForm() {
   const { screenMode, draft, isSaving, setDraftField, save, deleteEvent, back } =
     useEventEditorSession();
@@ -124,6 +171,16 @@ function EventForm() {
             value={draft.location}
             onChange={(e) => setDraftField('location', e.target.value)}
             placeholder="Gallery address"
+          />
+        </div>
+
+        <div className="eve__field">
+          <label>Map URL</label>
+          <input
+            type="url"
+            value={draft.mapUrl}
+            onChange={(e) => setDraftField('mapUrl', e.target.value)}
+            placeholder="https://maps.google.com/..."
           />
         </div>
 
@@ -199,6 +256,8 @@ function EventForm() {
           )}
         </div>
       </div>
+
+      {isEdit && draft.id && <EnrollmentsList eventId={draft.id} />}
     </>
   );
 }

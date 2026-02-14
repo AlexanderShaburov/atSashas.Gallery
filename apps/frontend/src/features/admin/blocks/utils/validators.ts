@@ -10,7 +10,10 @@ export function validateBlockForm(form: Block): boolean {
             return (
                 Array.isArray(form.items) &&
                 form.items.length > 0 &&
-                form.items.every((item) => hasFilledString(item.artId))
+                form.items.every((item) => {
+                    if ('eventId' in item) return hasFilledString(item.eventId);
+                    return hasFilledString(item.artId);
+                })
             );
         case 'text':
             return hasLocalizedContent(form.body);

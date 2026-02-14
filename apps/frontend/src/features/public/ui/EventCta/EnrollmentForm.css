@@ -1,0 +1,203 @@
+/* ================================================================
+   Enrollment Modal — Warm Workshop Dialog
+   ================================================================ */
+
+/* ── Backdrop ── */
+.enroll-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+}
+
+/* ── Modal card ── */
+.enroll-card {
+    width: min(92vw, 400px);
+    padding: 2rem 1.75rem 1.5rem;
+    border-radius: 1rem;
+    background: #fffcf9;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.15),
+        0 4px 16px rgba(0, 0, 0, 0.08);
+    text-align: left;
+}
+
+.enroll-card form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Title + subtitle ── */
+.enroll-card__title {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.2;
+}
+
+.enroll-card__subtitle {
+    margin: 0.35rem 0 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+/* ── Fields ── */
+.enroll-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.enroll-field:first-of-type {
+    margin-top: 1.25rem;
+}
+
+.enroll-field + .enroll-field {
+    margin-top: 0.875rem;
+}
+
+.enroll-field__label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.enroll-field__input {
+    width: 100%;
+    padding: 0.7rem 0.875rem;
+    border: 1.5px solid #e5e0db;
+    border-radius: 0.625rem;
+    background: #faf7f5;
+    font-size: 0.9375rem;
+    font-family: inherit;
+    color: #1f2937;
+    box-sizing: border-box;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+}
+
+.enroll-field__input::placeholder {
+    color: #b8b0a8;
+}
+
+.enroll-field__input:focus {
+    outline: none;
+    border-color: #E07A5F;
+    box-shadow: 0 0 0 3px rgba(224, 122, 95, 0.15);
+    background: #fff;
+}
+
+.enroll-field__input--invalid {
+    border-color: #e57373;
+}
+
+.enroll-field__input--invalid:focus {
+    box-shadow: 0 0 0 3px rgba(229, 115, 115, 0.15);
+}
+
+.enroll-field__hint {
+    font-size: 0.75rem;
+    color: #e57373;
+    padding-left: 0.125rem;
+}
+
+/* ── Error ── */
+.enroll-error {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
+/* ── Actions ── */
+.enroll-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.enroll-btn--primary {
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 0.625rem;
+    background: #E07A5F;
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.enroll-btn--primary:hover:not(:disabled) {
+    background: #c96a52;
+}
+
+.enroll-btn--primary:focus-visible {
+    outline: 2px solid #E07A5F;
+    outline-offset: 2px;
+}
+
+.enroll-btn--primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.enroll-btn--cancel {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    background: none;
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.enroll-btn--cancel:hover {
+    color: #374151;
+}
+
+/* ── Success state ── */
+.enroll-card--success {
+    text-align: center;
+    padding: 2.5rem 2rem 2rem;
+}
+
+.enroll-success-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 0.75rem;
+    border-radius: 50%;
+    background: #ecfdf5;
+    color: #059669;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.enroll-card--success .enroll-card__title {
+    text-align: center;
+}
+
+.enroll-card--success .enroll-card__subtitle {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.enroll-card--success .enroll-btn--primary {
+    margin: 0 auto;
+}

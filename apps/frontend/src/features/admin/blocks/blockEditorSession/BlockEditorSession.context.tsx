@@ -416,6 +416,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         setPendingSelection(v.command.pendingSelection);
                         // Create new gallery block item form loot and ticket
                         const newItem: GalleryBlockItem = {
+                            kind: 'art',
                             artId: v.loot.id,
                             position: v.command.pendingSelection.hit.slot,
                         };

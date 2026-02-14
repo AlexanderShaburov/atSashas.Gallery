@@ -203,3 +203,52 @@
   gap: 1rem;
   padding-top: 0.5rem;
 }
+
+/* Enrollments */
+
+.eve__enrollments {
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.eve__enrollments-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.eve__enrollments-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.eve__enrollments-table th,
+.eve__enrollments-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.eve__enrollments-table th {
+  font-weight: 600;
+  color: #374151;
+  background: #f9fafb;
+}
+
+.eve__badge--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.eve__badge--paid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.eve__badge--failed {
+  background: #fee2e2;
+  color: #991b1b;
+}

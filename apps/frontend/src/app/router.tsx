@@ -23,6 +23,8 @@ const BlocksPage = lazy(() => import('@/pages/admin/BlocksPage/BlocksPage'));
 const StreamsPage = lazy(() => import('@/pages/admin/StreamPage/StreamsPage'));
 const EventsPage = lazy(() => import('@/pages/admin/EventsPage'));
 const PublicStreamPage = lazy(() => import('@/pages/admin/PublicStreamPage'));
+const EnrollmentSuccessPage = lazy(() => import('@/pages/public/EnrollmentSuccessPage'));
+const EnrollmentCancelPage = lazy(() => import('@/pages/public/EnrollmentCancelPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 // Public root wrap:
@@ -61,6 +63,8 @@ export const router = createBrowserRouter([
             { index: true, element: <HomePage /> },
             { path: 'gallery/:slug', element: <GalleryPage /> },
             { path: 'about', element: <AboutPage /> },
+            { path: 'enrollment/success', element: <EnrollmentSuccessPage /> },
+            { path: 'enrollment/cancel', element: <EnrollmentCancelPage /> },
         ],
     },
     {

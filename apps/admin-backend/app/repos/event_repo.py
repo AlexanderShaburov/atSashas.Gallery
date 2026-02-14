@@ -19,6 +19,12 @@ def generate_event_id() -> str:
     return f"event-{today}-{suffix}"
 
 
+def generate_enrollment_id() -> str:
+    today = datetime.now(timezone.utc).strftime("%Y%m%d")
+    suffix = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(6))
+    return f"enroll-{today}-{suffix}"
+
+
 class EventRepo:
     def __init__(self) -> None:
         self._path = (

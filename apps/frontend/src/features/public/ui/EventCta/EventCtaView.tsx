@@ -2,12 +2,15 @@
 
 import type { EventCtaBlock } from '@/entities/block';
 import { useEvent } from '@/shared/EventsProvider/useEvent';
+import { useState } from 'react';
+import { EnrollmentForm } from './EnrollmentForm';
 import './EventCtaView.css';
 
 type Props = { block: EventCtaBlock };
 
 export default function EventCtaView({ block }: Props) {
     const event = useEvent(block.eventId);
+    const [showForm, setShowForm] = useState(false);
 
     if (!event) {
         return (
@@ -19,6 +22,8 @@ export default function EventCtaView({ block }: Props) {
 
     const isClosed = event.status === 'closed';
     const isDraft = event.status === 'draft';
+    const canEnroll = !isClosed && !isDraft;
+    const isFree = !event.price || event.price.amount <= 0;
     const dateStr = new Date(event.dateTime).toLocaleDateString();
     const buttonText = block.buttonLabel?.en ?? 'Learn more';
 
@@ -28,7 +33,22 @@ export default function EventCtaView({ block }: Props) {
             <h3 className="event-cta__title">{event.title.en}</h3>
             <div className="event-cta__meta">
                 <span className="event-cta__date">{dateStr}</span>
-                {event.location && <span className="event-cta__location">{event.location}</span>}
+                {event.location && (
+                    <span className="event-cta__location">
+                        {event.mapUrl ? (
+                            <a
+                                href={event.mapUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="event-cta__map-link"
+                            >
+                                {event.location}
+                            </a>
+                        ) : (
+                            event.location
+                        )}
+                    </span>
+                )}
                 {event.price && (
                     <span className="event-cta__price">
                         {event.price.amount} {event.price.currency}
@@ -38,9 +58,22 @@ export default function EventCtaView({ block }: Props) {
             {event.description?.en && (
                 <p className="event-cta__description">{event.description.en}</p>
             )}
-            <button className="event-cta__button" disabled={isClosed || isDraft}>
+
+            <button
+                className="event-cta__button"
+                disabled={!canEnroll}
+                onClick={() => canEnroll && setShowForm(true)}
+            >
                 {isClosed ? 'Registration closed' : buttonText}
             </button>
+
+            {showForm && canEnroll && (
+                <EnrollmentForm
+                    eventId={event.id}
+                    isFree={isFree}
+                    onCancel={() => setShowForm(false)}
+                />
+            )}
         </div>
     );
 }

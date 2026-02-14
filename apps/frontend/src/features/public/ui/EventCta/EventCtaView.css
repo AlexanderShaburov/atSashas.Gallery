@@ -82,3 +82,13 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+.event-cta__map-link {
+    color: #3b82f6;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.event-cta__map-link:hover {
+    color: #2563eb;
+}

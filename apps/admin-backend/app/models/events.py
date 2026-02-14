@@ -16,6 +16,23 @@ class EventStatus(str, Enum):
     closed = "closed"
 
 
+class PaymentStatus(str, Enum):
+    pending = "pending"
+    paid = "paid"
+    failed = "failed"
+
+
+class Enrollment(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    fullName: str
+    email: str
+    createdAt: str  # ISO datetime
+    paymentStatus: PaymentStatus = PaymentStatus.pending
+    stripeSessionId: Optional[str] = None
+
+
 class EventData(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -26,9 +43,11 @@ class EventData(BaseModel):
     dateTime: str  # ISO datetime string
     durationMinutes: Optional[int] = None
     location: str = ""
+    mapUrl: Optional[str] = None
     price: Optional[Money] = None
     status: EventStatus = EventStatus.draft
     streamSlug: Optional[str] = None
+    enrollments: dict[str, Enrollment] = Field(default_factory=dict)
 
 
 class CreateEventRequest(BaseModel):
@@ -40,9 +59,17 @@ class CreateEventRequest(BaseModel):
     dateTime: str
     durationMinutes: Optional[int] = None
     location: str = ""
+    mapUrl: Optional[str] = None
     price: Optional[Money] = None
     status: EventStatus = EventStatus.draft
     streamSlug: Optional[str] = None
+
+
+class EnrollRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    fullName: str = Field(min_length=1)
+    email: str = Field(min_length=1)
 
 
 class EventCatalog(BaseModel):

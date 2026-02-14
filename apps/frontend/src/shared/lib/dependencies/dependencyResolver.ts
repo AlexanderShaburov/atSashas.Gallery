@@ -29,21 +29,22 @@ class DependencyResolver {
                 const usedPositions: number[] = [];
 
                 block.items.forEach((item, idx) => {
-                    if (item.artId === artId) {
+                    if ('artId' in item && item.artId === artId) {
                         usedPositions.push(idx + 1);
                     }
                 });
 
                 if (usedPositions.length > 0) {
                     const positions = usedPositions.join(', ');
+                    const blockLabel = block.caption?.en || blockId;
                     dependents.push({
                         parent: {
                             kind: 'block',
                             id: blockId,
-                            title: block.title || blockId,
+                            title: blockLabel,
                         },
                         child: { kind: 'artItem', id: artId },
-                        context: `Gallery block "${block.title || blockId}" (position${usedPositions.length > 1 ? 's' : ''}: ${positions})`,
+                        context: `Gallery block "${blockLabel}" (position${usedPositions.length > 1 ? 's' : ''}: ${positions})`,
                     });
                 }
             }

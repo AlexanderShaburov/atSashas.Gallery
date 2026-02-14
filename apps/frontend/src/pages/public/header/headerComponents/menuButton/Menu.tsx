@@ -1,106 +1,159 @@
 import '@/pages/public/header/headerComponents/menuButton/Menu.css';
 import MenuIcon from '@/pages/public/header/headerComponents/menuButton/MenuIcon';
-import { useEffect, useState } from 'react';
+import { usePublicStream } from '@/features/public/hooks/usePublicStream';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 export default function Menu() {
     const [open, setOpen] = useState(false);
-    const close = () => setOpen(false);
     const location = useLocation();
+    const { streams } = usePublicStream();
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const sheetRef = useRef<HTMLElement>(null);
 
-    // Закрывать при переходе по роуту
+    const close = useCallback(() => {
+        setOpen(false);
+        // Return focus to trigger
+        requestAnimationFrame(() => triggerRef.current?.focus());
+    }, []);
+
+    // Close on route change
     useEffect(() => {
-        close();
+        setOpen(false);
     }, [location.pathname]);
 
-    // Закрытие по Esc + фиксация скролла body
+    // ESC + body scroll lock + focus trap
     useEffect(() => {
         if (!open) return;
 
-        function onKey(e: KeyboardEvent) {
-            if (e.key === 'Escape') close();
-        }
         const prevOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
 
+        function onKey(e: KeyboardEvent) {
+            if (e.key === 'Escape') {
+                close();
+                return;
+            }
+            // Focus trap
+            if (e.key === 'Tab' && sheetRef.current) {
+                const focusable = sheetRef.current.querySelectorAll<HTMLElement>(
+                    'a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])',
+                );
+                if (focusable.length === 0) return;
+                const first = focusable[0]!;
+                const last = focusable[focusable.length - 1]!;
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        }
+
         window.addEventListener('keydown', onKey);
+
+        // Auto-focus first link
+        requestAnimationFrame(() => {
+            const firstLink = sheetRef.current?.querySelector<HTMLElement>('a, button');
+            firstLink?.focus();
+        });
+
         return () => {
             window.removeEventListener('keydown', onKey);
             document.body.style.overflow = prevOverflow;
         };
-    }, [open]);
+    }, [open, close]);
+
+    const isActive = (path: string) => location.pathname === path;
+    const isStreamActive = (id: string) => location.pathname === `/gallery/${id}`;
 
     return (
         <>
-            <button className="menu-trigger" aria-label="Open menu" onClick={() => setOpen(true)}>
+            <button
+                ref={triggerRef}
+                className="menu-trigger"
+                aria-label="Open menu"
+                aria-expanded={open}
+                onClick={() => setOpen(true)}
+            >
                 <MenuIcon />
             </button>
 
             {open && (
                 <>
-                    <div className="menu-backdrop is-open" onClick={close} />
-                    <aside
-                        className={`menu-panel ${open ? 'is-open' : ''}`}
+                    <div className="menu-overlay" onClick={close} />
+                    <nav
+                        ref={sheetRef}
+                        className="menu-sheet"
                         role="dialog"
                         aria-modal="true"
+                        aria-label="Navigation menu"
                     >
-                        <div className="menu-head">
-                            <div className="menu-title">Menu</div>
-                            <button className="menu-close" aria-label="Close" onClick={close}>
-                                ×
+                        <header className="menu-topbar">
+                            <button
+                                className="menu-close"
+                                aria-label="Close menu"
+                                onClick={close}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                                    <line x1="4" y1="4" x2="16" y2="16" />
+                                    <line x1="16" y1="4" x2="4" y2="16" />
+                                </svg>
                             </button>
-                        </div>
+                        </header>
 
-                        <ul className="menu-list">
-                            {/* internal links */}
-                            <li className="menu-item">
-                                <Link className="router-link" to="/about" onClick={close}>
-                                    About
-                                </Link>
-                            </li>
-                            <li className="menu-item">
-                                <Link className="router-link" to="/watercolor" onClick={close}>
-                                    Watercolor
-                                </Link>
-                            </li>
-                            <li className="menu-item">
-                                <Link className="router-link" to="/mixed-media" onClick={close}>
-                                    Mix Media
-                                </Link>
-                            </li>
-                            <li className="menu-item">
-                                <Link className="router-link" to="/contacts" onClick={close}>
-                                    Contacts
-                                </Link>
-                            </li>
+                        <div className="menu-primary">
+                            <Link
+                                className={`menu-link${isActive('/about') ? ' is-active' : ''}`}
+                                to="/about"
+                                onClick={close}
+                            >
+                                About
+                            </Link>
 
-                            {/* внешние */}
-                            <li className="menu-item">
-                                <a
-                                    href="https://instagram.com/alexanrshaburo"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                            {streams.map((s) => (
+                                <Link
+                                    key={s.streamId}
+                                    className={`menu-link${isStreamActive(s.streamId) ? ' is-active' : ''}`}
+                                    to={`/gallery/${s.streamId}`}
                                     onClick={close}
                                 >
-                                    Instagram
-                                </a>
-                            </li>
-                            <li className="menu-item">
-                                <a
-                                    href="https://www.behance.net/alexanrshaburo"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={close}
-                                >
-                                    Behance
-                                </a>
-                            </li>
-                        </ul>
+                                    {s.title}
+                                </Link>
+                            ))}
 
-                        <div className="menu-foot">
-                            © {new Date().getFullYear()} — Watercolor / Mix Media
+                            <Link
+                                className={`menu-link${isActive('/contacts') ? ' is-active' : ''}`}
+                                to="/contacts"
+                                onClick={close}
+                            >
+                                Contacts
+                            </Link>
                         </div>
-                    </aside>
+
+                        <div className="menu-secondary">
+                            <a
+                                className="menu-link-secondary"
+                                href="https://instagram.com/alexanrshaburo"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={close}
+                            >
+                                Instagram
+                            </a>
+                            <a
+                                className="menu-link-secondary"
+                                href="https://www.behance.net/alexanrshaburo"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={close}
+                            >
+                                Behance
+                            </a>
+                        </div>
+                    </nav>
                 </>
             )}
         </>

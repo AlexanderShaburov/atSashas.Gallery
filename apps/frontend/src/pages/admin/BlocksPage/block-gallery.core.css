@@ -245,6 +245,110 @@
     pointer-events: auto; /* must stay clickable */
 }
 
+/* Event slot inside gallery */
+.blk-gallery__slot-event {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--card-bg) 90%, var(--border) 10%);
+    border: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.blk-gallery__event-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.blk-gallery__event-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.blk-gallery__event-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.blk-gallery__event-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    width: 100%;
+}
+
+.blk-gallery__event-bg-btn {
+    margin-top: 0.15rem;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    background: var(--card-bg);
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.blk-gallery__event-bg-btn:hover {
+    color: var(--text);
+    border-color: var(--text);
+}
+
+.blk-gallery__event-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.blk-gallery__event-meta {
+    display: flex;
+    gap: 0.4rem;
+    font-size: 0.55rem;
+    color: var(--muted);
+}
+
+.blk-gallery__event-status {
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.blk-gallery__event-empty {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 0.6rem;
+}
+
+.blk-gallery__event-select {
+    width: 90%;
+    max-width: 160px;
+    margin-top: 0.25rem;
+    padding: 0.2rem 0.3rem;
+    font-size: 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    background: var(--card-bg);
+    color: var(--text);
+}
+
 /* Inline editor input should look like the caption itself */
 .blk-inline-input {
     width: 100%;

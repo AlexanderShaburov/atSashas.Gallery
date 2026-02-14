@@ -1,3 +1,4 @@
+import type { GalleryArtItem } from '@/entities/block';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { generateId } from '@/shared/lib/id/generateId';
 import { JourneyTicket } from '@/shared/nav';
@@ -68,7 +69,7 @@ export function printoutTicket(hit: BlockHitEvent): JourneyTicket | undefined {
                         destination: {
                             editor: 'catalog',
                             mode: 'edit',
-                            objectId: hit.block.items[idx]?.artId ?? '__none__',
+                            objectId: (hit.block.items[idx] as GalleryArtItem | undefined)?.artId ?? '__none__',
                         },
                         returnTo: {
                             editor: 'block',
