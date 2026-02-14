@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from .routers.hopper import hopper, upload
 
 from app.routers.art import catalog
+from app.routers.auth import auth
 from app.routers.block import blocks
 from app.routers.streams import streams
 from app.routers.public_stream import public_stream
@@ -61,11 +62,13 @@ app.mount(
 
 # Routers
 app.include_router(health.router)
+app.include_router(auth.router)  # Auth endpoints (login/logout)
 app.include_router(json_kv.router)
 app.include_router(upload.router)
 app.include_router(hopper.router)
 app.include_router(catalog.router)
 app.include_router(blocks.router)
-app.include_router(streams.router)
+app.include_router(streams.public_router)  # Public streams endpoint
+app.include_router(streams.router)  # Admin streams endpoints
 app.include_router(public_stream.public_router)  # Public endpoint
 app.include_router(public_stream.admin_router)  # Admin endpoints

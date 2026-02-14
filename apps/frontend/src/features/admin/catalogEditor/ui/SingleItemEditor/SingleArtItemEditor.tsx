@@ -15,63 +15,10 @@ export type SAProps = {
 export default function SingleArtItemEditor(props: SAProps) {
     const { editorProps, toolbarProps } = props;
     const { draft, thumb, isDirty } = editorProps;
-    const { canSave, isSaving, exit, save } = toolbarProps;
+    const { canSave, isSaving, exit, save, onDelete } = toolbarProps;
 
-    // *********************************************
-    // ❗️ To be moved to the context provider ❗️
-    async function deleteFromCatalog() {
-        if (!thumb?.id) return;
-
-        try {
-            // Check dependencies:
-            const depsResp = await fetch(`/api/art/dependencies/${thumb.id}`);
-            const deps = await depsResp.json();
-
-            let message = `Delete item "${thumb.id}" permanently?`;
-
-            // User message
-            if (deps.blocks?.length || deps.streams?.length) {
-                message =
-                    `This item is used in:\n\n` +
-                    (deps.blocks.length ? `Blocks:\n- ${deps.blocks.join('\n- ')}\n\n` : '') +
-                    (deps.streams.length ? `Streams:\n- ${deps.streams.join('\n- ')}` : '') +
-                    `\n\nAre you sure you want to delete it?`;
-            }
-
-            // Confirmation
-            if (!confirm(message)) return;
-
-            // Deleting
-            const delResp = await fetch(`/api/catalog/${thumb.id}`, {
-                method: 'DELETE',
-            });
-
-            if (!delResp.ok) {
-                alert('Failed to delete item');
-                return;
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Error during deletion');
-        }
-    }
-
-    async function onDelete() {
-        switch (draft?.lifecycle) {
-            case 'saved':
-                await deleteFromCatalog();
-                break;
-            case 'draft':
-                if (thumb && thumb.id) {
-                    await deleteFromHopper(thumb.id);
-                }
-                break;
-        }
-        exit();
-    }
-
-    // Until this ❗️❗️❗️
-    // *********************************************
+    // onDelete now comes from toolbarProps (context's deleteById)
+    // which uses the dependency-aware deletion system
     // Cmd + S, Esc
     //Cmd/Ctrl + S to save, Exc to cancel:
     useEffect(() => {
@@ -100,7 +47,7 @@ export default function SingleArtItemEditor(props: SAProps) {
         isSaving,
         save,
         exit,
-        onDelete: onDelete,
+        onDelete, // Use onDelete from toolbarProps (context's deleteById)
     };
     const tbTools = ['delButton', 'exit', 'save'] as ToolKey[];
 

@@ -40,7 +40,8 @@ export function contextDataConsistencyCheck(
     if (
         kind !== 'streamInsertBlock' &&
         kind !== 'streamReplaceBlock' &&
-        kind !== 'streamUpdateBlock'
+        kind !== 'streamUpdateBlock' &&
+        kind !== 'streamSelectThumbnail'
     ) {
         throw new Error(
             `Ticket came having wrong return instructions kind: ${ticket.returnEffect.kind}`,

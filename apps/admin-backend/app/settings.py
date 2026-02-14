@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     blocks: str = "/block_collection"
     catalog_file: str = "art_catalog.json"
 
+    # Authentication settings
+    secret_key: str = "CHANGE_THIS_IN_PRODUCTION_TO_RANDOM_SECRET"
+    session_expire_minutes: int = 240  # 4 hours
+    activity_timeout_minutes: int = 30  # 30 minutes of inactivity
+
     class Config:
         env_prefix = ""
         env_file = ".env"

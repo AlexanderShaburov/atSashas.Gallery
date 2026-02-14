@@ -1,0 +1,15 @@
+{
+  "streamId": "stream-20260214-7j50kb",
+  "title": "Perfect stream",
+  "status": "ready",
+  "tags": [],
+  "description": "",
+  "thumbnail": "/media/arts/fullsize/art-20260214-73hnkz.jpeg",
+  "version": 2,
+  "createdAt": "2026-02-14T06:32:05.682482+00:00",
+  "updatedAt": "2026-02-14T06:37:12.588343+00:00",
+  "blockIds": [
+    "block-gallery-triptychleft-92e5362b",
+    "block-gallery-triptychhorizontal-184ed773"
+  ]
+}

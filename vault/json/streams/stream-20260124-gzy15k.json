@@ -1,15 +1,18 @@
 {
   "streamId": "stream-20260124-gzy15k",
   "title": "opplala",
-  "status": "draft",
-  "tags": [],
+  "status": "ready",
+  "tags": [
+    "ooo"
+  ],
   "description": "",
-  "version": 4,
+  "thumbnail": "/media/arts/fullsize/art-20251226-tfemnz.jpeg",
+  "version": 7,
   "createdAt": "2026-01-24T14:37:29.761460+00:00",
-  "updatedAt": "2026-02-12T19:41:26.323074+00:00",
+  "updatedAt": "2026-02-14T05:43:35.863065+00:00",
   "blockIds": [
-    "block-gallery-single-a9fde4cf",
     "block-gallery-pairhorizontal-5314cf4f",
-    "block-gallery-single-466e6378"
+    "block-gallery-single-466e6378",
+    "block-gallery-single-a9fde4cf"
   ]
 }

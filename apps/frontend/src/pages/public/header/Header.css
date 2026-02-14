@@ -10,7 +10,9 @@
   display: grid;
   grid-template-columns: 2rem 1fr 2rem 2rem;
   align-items: center;
-  padding: 0 1rem;
+  padding: 0 var(--gutter);
+  max-width: calc(var(--page-max) + 2 * var(--gutter));
+  margin-inline: auto;
 }
 
 .logoSign {

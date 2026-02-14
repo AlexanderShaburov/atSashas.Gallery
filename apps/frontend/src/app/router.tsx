@@ -2,6 +2,7 @@
 
 import AdminLayout from '@/app/layouts/AdminLayout';
 import PublicLayout from '@/app/layouts/PublicLayout';
+import { RequireAuth } from '@/app/guards/RequireAuth';
 import { BlockEditorSessionProvider } from '@/features/admin/blocks/blockEditorSession/BlockEditorSession.context';
 import { CatalogEditorSessionProvider } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
 import { EditorWorkspaceProvider } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
@@ -13,6 +14,7 @@ import { createBrowserRouter } from 'react-router-dom';
 const HomePage = lazy(() => import('@/pages/public/HomePage'));
 const GalleryPage = lazy(() => import('@/pages/public/GalleryPage'));
 const AboutPage = lazy(() => import('@/pages/public/AboutPage'));
+const LoginPage = lazy(() => import('@/pages/admin/LoginPage'));
 const AdminIndex = lazy(() => import('@/pages/admin/AdminIndexPage'));
 const UploadPage = lazy(() => import('@/pages/admin/UploadPage'));
 const CatalogEditorPage = lazy(() => import('@/pages/admin/catalogEditorPage/CatalogEditorPage'));
@@ -35,11 +37,13 @@ function PublicRoot() {
 // eslint-disable-next-line react-refresh/only-export-components
 function AdminRoot() {
     return (
-        <ArtCatalogLoader mode="admin">
-            <EditorWorkspaceProvider>
-                <AdminLayout />
-            </EditorWorkspaceProvider>
-        </ArtCatalogLoader>
+        <RequireAuth>
+            <ArtCatalogLoader mode="admin">
+                <EditorWorkspaceProvider>
+                    <AdminLayout />
+                </EditorWorkspaceProvider>
+            </ArtCatalogLoader>
+        </RequireAuth>
     );
 }
 
@@ -52,6 +56,10 @@ export const router = createBrowserRouter([
             { path: 'gallery/:slug', element: <GalleryPage /> },
             { path: 'about', element: <AboutPage /> },
         ],
+    },
+    {
+        path: '/admin/login',
+        element: <LoginPage />,
     },
     {
         path: '/admin',

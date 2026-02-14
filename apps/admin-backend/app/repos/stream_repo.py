@@ -144,8 +144,8 @@ class StreamRepo:
     def _upsert_index_item_unlocked(
         self, index: StreamsIndex, stream: StreamData
     ) -> None:
-        # Generate thumbnail from first block's first art item
-        thumbnail = self._generate_thumbnail(stream)
+        # Prioritize explicit thumbnail, fall back to auto-generation
+        thumbnail = stream.thumbnail if stream.thumbnail else self._generate_thumbnail(stream)
 
         # Upsert by streamId
         for i, item in enumerate(index.streams):
@@ -192,6 +192,7 @@ class StreamRepo:
         title: str,
         tags: Optional[list[str]] = None,
         description: str = "",
+        thumbnail: str = "",
     ) -> StreamData:
         async with self._lock:
             path = self._stream_path(stream_id)
@@ -205,6 +206,7 @@ class StreamRepo:
                 status=StreamStatus.draft,
                 tags=tags or [],
                 description=description or "",
+                thumbnail=thumbnail or "",
                 version=1,
                 createdAt=now,
                 updatedAt=now,

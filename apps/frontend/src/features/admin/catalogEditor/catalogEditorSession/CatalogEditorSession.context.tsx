@@ -4,6 +4,7 @@ import { ArtItem, ArtItemData, TechniquesJson } from '@/entities/art';
 import { ArtCatalog } from '@/entities/catalog';
 import { GridItem } from '@/entities/grid';
 import { CatalogEditorScreenMode } from '@/features/admin/catalogEditor/catalogEditorSession/catalogEditorSession.types';
+import { artItemToGridItem } from '@/features/admin/shared/ui/ArtItemGrid/utils';
 import { draftToShipmentConvertor } from '@/features/admin/catalogEditor/catalogEditorSession/editorLogic/editorLogic';
 import { printoutTicket } from '@/features/admin/catalogEditor/catalogEditorSession/journeyService';
 import { isMinimalValid, sanitizeForm } from '@/features/admin/catalogEditor/utils/Validators';
@@ -498,11 +499,16 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                 console.log(
                     `[finalizeAfterSave]: in journey, returning home with artItemId: ${savedId}`,
                 );
-                returnHome('catalog', { ok: true, id: savedId });
+
+                // Include GridItem in output for consumers that need it (e.g., thumbnail selection)
+                const item = catalog?.items?.[savedId];
+                const output = item ? artItemToGridItem(item) : undefined;
+
+                returnHome('catalog', { ok: true, id: savedId, output });
             }
             resetSession();
         },
-        [isJourney, returnHome, resetSession],
+        [isJourney, returnHome, resetSession, catalog],
     );
 
     // ----------------- Save procedure -----------------

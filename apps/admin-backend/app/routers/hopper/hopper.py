@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from app.auth.dependencies import get_current_user
 from pathlib import Path
 from logging import getLogger
 from urllib.parse import quote
@@ -9,7 +11,11 @@ from app.storage import UPLOAD_DIR, BASE
 
 
 logger = getLogger(__name__)
-router = APIRouter(prefix="/hopper", tags=["hopper"])
+router = APIRouter(
+    prefix="/hopper",
+    tags=["hopper"],
+    dependencies=[Depends(get_current_user)],  # Require authentication
+)
 
 
 @router.get("/content")

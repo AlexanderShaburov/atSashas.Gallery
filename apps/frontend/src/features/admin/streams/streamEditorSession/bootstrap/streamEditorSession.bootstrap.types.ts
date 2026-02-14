@@ -7,6 +7,7 @@ export const STREAM_RETURN_KINDS = [
     'streamInsertBlock',
     'streamReplaceBlock',
     'streamUpdateBlock',
+    'streamSelectThumbnail',
 ] as const;
 
 export type StreamReturnKind = (typeof STREAM_RETURN_KINDS)[number];

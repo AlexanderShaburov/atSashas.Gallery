@@ -1,15 +1,63 @@
 # app/routers/streams_router.py
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+
+from app.auth.dependencies import get_current_user
 from pydantic import BaseModel, Field
 
 from app.models.streams import StreamData, StreamIndexItem, StreamStatus
 from app.repos.stream_repo import StreamRepo
 from app.repos.public_stream_repo import public_stream_repo
 
-router = APIRouter(prefix="/admin/streams", tags=["admin-streams"])
+# Public router (no authentication required)
+public_router = APIRouter(
+    prefix="/public/streams",
+    tags=["public-streams"],
+)
+
+# Admin router (authentication required)
+router = APIRouter(
+    prefix="/admin/streams",
+    tags=["admin-streams"],
+    dependencies=[Depends(get_current_user)],  # Require authentication
+)
 repo = StreamRepo()
+
+
+# --- Public Endpoints (for frontend visitors) ---
+
+
+@public_router.get("/published", response_model=list[StreamIndexItem])
+async def get_published_streams() -> list[StreamIndexItem]:
+    """
+    Get published streams from index (public endpoint, no auth required).
+    Returns StreamIndexItem[] with thumbnails for streams in PublicStream.
+    """
+    try:
+        # Get list of published stream IDs
+        public_stream = await public_stream_repo.get()
+        published_ids = set(public_stream.streamIds)
+
+        # Get streams index
+        index = await repo.list_index()
+
+        # Filter to only published streams, preserve PublicStream order
+        id_to_item = {item.streamId: item for item in index.streams}
+        published_items = [
+            id_to_item[stream_id]
+            for stream_id in public_stream.streamIds
+            if stream_id in id_to_item
+        ]
+
+        return published_items
+    except Exception as e:
+        # If PublicStream or index doesn't exist, return empty list
+        print(f"Error loading published streams: {e}")
+        return []
+
+
+# --- Admin Endpoints ---
 
 
 class CreateStreamBody(
@@ -26,6 +74,7 @@ class CreateStreamRequest(BaseModel):
     title: str = Field(min_length=1)
     tags: list[str] = Field(default_factory=list)
     description: str = ""
+    thumbnail: str = ""
 
 
 @router.get("", response_model=list[StreamIndexItem])
@@ -62,6 +111,7 @@ async def create_stream(body: CreateStreamRequest) -> StreamData:
             title=body.title,
             tags=body.tags,
             description=body.description,
+            thumbnail=body.thumbnail,
         )
     except FileExistsError as e:
         raise HTTPException(status_code=409, detail=str(e))

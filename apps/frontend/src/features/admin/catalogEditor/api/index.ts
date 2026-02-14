@@ -132,3 +132,21 @@ export async function getDependents(id: string) {
         data: raw.data,
     };
 }
+
+/**
+ * Delete an art item from the catalog
+ */
+export async function deleteArtItem(artId: string): Promise<void> {
+    const url = `${API_BASE}/art/catalog/${encodeURIComponent(artId)}`;
+    const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        throw new Error(`Failed to delete art item ${artId}: ${response.status} ${errorText}`);
+    }
+}

@@ -1,6 +1,6 @@
 // features/admin/publicStream/publicStreamSession/PublicStreamSession.context.tsx
 
-import { PublicStream, type PublicStreamData } from '@/entities/publicStream';
+import type { PublicStreamData } from '@/entities/publicStream';
 import type { StreamIndexItem } from '@/entities/stream';
 import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
@@ -69,10 +69,8 @@ export function PublicStreamSessionProvider({ children }: Props) {
     const addStream = useCallback(
         (streamId: string) => {
             if (!draft) return;
-
-            const entity = PublicStream.fromJSON(draft);
-            const updated = entity.addStream(streamId);
-            setDraft(updated.toJSON());
+            if (draft.streamIds.includes(streamId)) return;
+            setDraft({ ...draft, streamIds: [...draft.streamIds, streamId] });
         },
         [draft],
     );
@@ -81,10 +79,7 @@ export function PublicStreamSessionProvider({ children }: Props) {
     const removeStream = useCallback(
         (streamId: string) => {
             if (!draft) return;
-
-            const entity = PublicStream.fromJSON(draft);
-            const updated = entity.removeStream(streamId);
-            setDraft(updated.toJSON());
+            setDraft({ ...draft, streamIds: draft.streamIds.filter((id) => id !== streamId) });
         },
         [draft],
     );
@@ -93,22 +88,15 @@ export function PublicStreamSessionProvider({ children }: Props) {
     const reorderStreams = useCallback(
         (streamIds: string[]) => {
             if (!draft) return;
-
-            try {
-                const entity = PublicStream.fromJSON(draft);
-                const updated = entity.reorder(streamIds);
-                setDraft(updated.toJSON());
-            } catch (err) {
-                console.error('[PublicStreamSession]: Reorder failed', err);
-                alert(`Reorder failed: ${err}`);
-            }
+            setDraft({ ...draft, streamIds: [...streamIds] });
         },
         [draft],
     );
 
-    /** Save changes */
+    /** Save all draft changes with confirmation */
     const save = useCallback(async () => {
         if (!draft) return;
+        if (!confirm('Apply changes to the public site?')) return;
 
         try {
             setIsSaving(true);
@@ -168,28 +156,21 @@ export function PublicStreamSessionProvider({ children }: Props) {
         setSelectedIds(new Set());
     }, []);
 
-    /** Batch publish selected streams */
+    /** Batch publish selected streams (draft only) */
     const publishSelected = useCallback(() => {
         if (!draft || selectedIds.size === 0) return;
-
-        let updated = PublicStream.fromJSON(draft);
-        selectedIds.forEach((id) => {
-            updated = updated.addStream(id);
-        });
-        setDraft(updated.toJSON());
-        setSelectedIds(new Set()); // Clear selection after batch operation
+        const currentIds = new Set(draft.streamIds);
+        selectedIds.forEach((id) => currentIds.add(id));
+        setDraft({ ...draft, streamIds: [...currentIds] });
+        setSelectedIds(new Set());
     }, [draft, selectedIds]);
 
-    /** Batch unpublish selected streams */
+    /** Batch unpublish selected streams (draft only) */
     const unpublishSelected = useCallback(() => {
         if (!draft || selectedIds.size === 0) return;
-
-        let updated = PublicStream.fromJSON(draft);
-        selectedIds.forEach((id) => {
-            updated = updated.removeStream(id);
-        });
-        setDraft(updated.toJSON());
-        setSelectedIds(new Set()); // Clear selection after batch operation
+        const remaining = draft.streamIds.filter((id) => !selectedIds.has(id));
+        setDraft({ ...draft, streamIds: remaining });
+        setSelectedIds(new Set());
     }, [draft, selectedIds]);
 
     const session: PublicStreamSession = {

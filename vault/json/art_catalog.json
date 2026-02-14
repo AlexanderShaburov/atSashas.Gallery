@@ -1,6 +1,6 @@
 {
-  "catalogVersion": 89,
-  "updatedAt": "2026-02-12T19:56:13.377825+00:00",
+  "catalogVersion": 107,
+  "updatedAt": "2026-02-14T06:36:45.255616+00:00",
   "items": {
     "art-20251118-4gpfj3": {
       "id": "art-20251118-4gpfj3",
@@ -82,34 +82,6 @@
       "alt": null,
       "title": {
         "en": "More fish",
-        "ru": "",
-        "it": null,
-        "es": null,
-        "pt": null
-      },
-      "price": null,
-      "series": null,
-      "tags": null,
-      "notes": null
-    },
-    "art-20251226-vs1ped": {
-      "id": "art-20251226-vs1ped",
-      "dateCreated": "2025-12-26",
-      "images": {
-        "full": "/media/arts/fullsize/art-20251226-vs1ped.jpeg",
-        "preview": {
-          "avif": "/media/arts/previews/art-20251226-vs1ped.avif",
-          "webp": "/media/arts/previews/art-20251226-vs1ped.webp",
-          "jpeg": "/media/arts/previews/art-20251226-vs1ped.jpeg"
-        },
-        "alt": null
-      },
-      "techniques": null,
-      "availability": null,
-      "dimensions": null,
-      "alt": null,
-      "title": {
-        "en": "hue",
         "ru": "",
         "it": null,
         "es": null,
@@ -564,38 +536,6 @@
       "tags": [],
       "notes": null
     },
-    "art-20260210-as208q": {
-      "id": "art-20260210-as208q",
-      "dateCreated": "2026-02-10",
-      "images": {
-        "full": "/media/arts/fullsize/art-20260210-as208q.jpg",
-        "preview": {
-          "avif": "/media/arts/previews/art-20260210-as208q.avif",
-          "webp": "/media/arts/previews/art-20260210-as208q.webp",
-          "jpeg": "/media/arts/previews/art-20260210-as208q.jpeg"
-        },
-        "alt": null
-      },
-      "techniques": [],
-      "availability": "available",
-      "dimensions": {
-        "width": 0.0,
-        "height": 0.0,
-        "unit": "cm"
-      },
-      "alt": null,
-      "title": {
-        "en": "Pajero",
-        "ru": "",
-        "it": null,
-        "es": null,
-        "pt": null
-      },
-      "price": null,
-      "series": null,
-      "tags": [],
-      "notes": null
-    },
     "art-20260210-79ejgk": {
       "id": "art-20260210-79ejgk",
       "dateCreated": "2026-02-10",
@@ -884,38 +824,6 @@
       "tags": [],
       "notes": null
     },
-    "art-20260212-x7ynbc": {
-      "id": "art-20260212-x7ynbc",
-      "dateCreated": "2026-02-12",
-      "images": {
-        "full": "/media/arts/fullsize/art-20260212-x7ynbc.jpeg",
-        "preview": {
-          "avif": "/media/arts/previews/art-20260212-x7ynbc.avif",
-          "webp": "/media/arts/previews/art-20260212-x7ynbc.webp",
-          "jpeg": "/media/arts/previews/art-20260212-x7ynbc.jpeg"
-        },
-        "alt": null
-      },
-      "techniques": [],
-      "availability": "available",
-      "dimensions": {
-        "width": 0.0,
-        "height": 0.0,
-        "unit": "cm"
-      },
-      "alt": null,
-      "title": {
-        "en": "nniga",
-        "ru": "",
-        "it": null,
-        "es": null,
-        "pt": null
-      },
-      "price": null,
-      "series": null,
-      "tags": [],
-      "notes": null
-    },
     "art-20260212-32qq5n": {
       "id": "art-20260212-32qq5n",
       "dateCreated": "2026-02-12",
@@ -979,12 +887,440 @@
       "series": null,
       "tags": [],
       "notes": null
+    },
+    "art-20260213-49a65n": {
+      "id": "art-20260213-49a65n",
+      "dateCreated": "2026-02-13",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260213-49a65n.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260213-49a65n.avif",
+          "webp": "/media/arts/previews/art-20260213-49a65n.webp",
+          "jpeg": "/media/arts/previews/art-20260213-49a65n.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "George",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260213-4ww8g1": {
+      "id": "art-20260213-4ww8g1",
+      "dateCreated": "2026-02-13",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260213-4ww8g1.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260213-4ww8g1.avif",
+          "webp": "/media/arts/previews/art-20260213-4ww8g1.webp",
+          "jpeg": "/media/arts/previews/art-20260213-4ww8g1.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "madonna",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260214-9q8rds": {
+      "id": "art-20260214-9q8rds",
+      "dateCreated": "2026-02-14",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260214-9q8rds.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260214-9q8rds.avif",
+          "webp": "/media/arts/previews/art-20260214-9q8rds.webp",
+          "jpeg": "/media/arts/previews/art-20260214-9q8rds.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "stranger",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260214-f30275": {
+      "id": "art-20260214-f30275",
+      "dateCreated": "2026-02-14",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260214-f30275.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260214-f30275.avif",
+          "webp": "/media/arts/previews/art-20260214-f30275.webp",
+          "jpeg": "/media/arts/previews/art-20260214-f30275.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "zohr",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260214-p91mv5": {
+      "id": "art-20260214-p91mv5",
+      "dateCreated": "2026-02-14",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260214-p91mv5.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260214-p91mv5.avif",
+          "webp": "/media/arts/previews/art-20260214-p91mv5.webp",
+          "jpeg": "/media/arts/previews/art-20260214-p91mv5.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "red",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260214-ncewbm": {
+      "id": "art-20260214-ncewbm",
+      "dateCreated": "2026-02-14",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260214-ncewbm.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260214-ncewbm.avif",
+          "webp": "/media/arts/previews/art-20260214-ncewbm.webp",
+          "jpeg": "/media/arts/previews/art-20260214-ncewbm.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "pink",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260214-73hnkz": {
+      "id": "art-20260214-73hnkz",
+      "dateCreated": "2026-02-14",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260214-73hnkz.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260214-73hnkz.avif",
+          "webp": "/media/arts/previews/art-20260214-73hnkz.webp",
+          "jpeg": "/media/arts/previews/art-20260214-73hnkz.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "MOLNI",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260214-bxfyf4": {
+      "id": "art-20260214-bxfyf4",
+      "dateCreated": "2026-02-14",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260214-bxfyf4.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260214-bxfyf4.avif",
+          "webp": "/media/arts/previews/art-20260214-bxfyf4.webp",
+          "jpeg": "/media/arts/previews/art-20260214-bxfyf4.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "TRUE",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260214-ty0gkh": {
+      "id": "art-20260214-ty0gkh",
+      "dateCreated": "2026-02-14",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260214-ty0gkh.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260214-ty0gkh.avif",
+          "webp": "/media/arts/previews/art-20260214-ty0gkh.webp",
+          "jpeg": "/media/arts/previews/art-20260214-ty0gkh.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "Belly",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260214-27gwsn": {
+      "id": "art-20260214-27gwsn",
+      "dateCreated": "2026-02-14",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260214-27gwsn.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260214-27gwsn.avif",
+          "webp": "/media/arts/previews/art-20260214-27gwsn.webp",
+          "jpeg": "/media/arts/previews/art-20260214-27gwsn.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "Girl",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260214-58zj7y": {
+      "id": "art-20260214-58zj7y",
+      "dateCreated": "2026-02-14",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260214-58zj7y.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260214-58zj7y.avif",
+          "webp": "/media/arts/previews/art-20260214-58zj7y.webp",
+          "jpeg": "/media/arts/previews/art-20260214-58zj7y.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "another stranger",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260214-14qhr6": {
+      "id": "art-20260214-14qhr6",
+      "dateCreated": "2026-02-14",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260214-14qhr6.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260214-14qhr6.avif",
+          "webp": "/media/arts/previews/art-20260214-14qhr6.webp",
+          "jpeg": "/media/arts/previews/art-20260214-14qhr6.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "Sasha",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
+    },
+    "art-20260214-6fbtsp": {
+      "id": "art-20260214-6fbtsp",
+      "dateCreated": "2026-02-14",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260214-6fbtsp.jpeg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260214-6fbtsp.avif",
+          "webp": "/media/arts/previews/art-20260214-6fbtsp.webp",
+          "jpeg": "/media/arts/previews/art-20260214-6fbtsp.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "ocula",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
     }
   },
   "order": [
+    "art-20260214-6fbtsp",
+    "art-20260214-14qhr6",
+    "art-20260214-58zj7y",
+    "art-20260214-27gwsn",
+    "art-20260214-ty0gkh",
+    "art-20260214-bxfyf4",
+    "art-20260214-73hnkz",
+    "art-20260214-ncewbm",
+    "art-20260214-p91mv5",
+    "art-20260214-f30275",
+    "art-20260214-9q8rds",
+    "art-20260213-4ww8g1",
+    "art-20260213-49a65n",
     "art-20260212-8k04bp",
     "art-20260212-32qq5n",
-    "art-20260212-x7ynbc",
     "art-20260212-h5wr0b",
     "art-20260212-g57kb9",
     "art-20260212-jfa67w",
@@ -994,7 +1330,6 @@
     "art-20260210-wdzf6d",
     "art-20260210-vh7azm",
     "art-20260210-79ejgk",
-    "art-20260210-as208q",
     "art-20260210-6p1kz0",
     "art-20260210-1ywd8q",
     "art-20260210-hbwf03",
@@ -1010,7 +1345,6 @@
     "art-20251226-7vqxmz",
     "art-20251226-t1y5qn",
     "art-20251226-52p602",
-    "art-20251226-vs1ped",
     "art-20251120-9td10a",
     "art-20251120-jcsrbr",
     "art-20251118-4gpfj3"

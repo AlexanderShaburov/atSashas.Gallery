@@ -22,3 +22,23 @@
         padding: 1rem var(--gutter) 2rem;
     }
 }
+/* src/app/layouts/AdminLayout.css */
+.admin-layout {
+    position: relative; /* ok */
+    min-height: 100vh;
+}
+
+/* src/features/admin/shared/ui/DestructiveOverlay/DestructiveOverlay.css */
+.destrOverlay__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999; /* above header */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* add your backdrop styling */
+}
+
+.destrOverlay__card {
+    /* your modal card styles */
+}

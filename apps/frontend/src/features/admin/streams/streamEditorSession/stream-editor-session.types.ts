@@ -35,4 +35,5 @@ export type StreamEditorSession = {
     commitMetaEditor: (req: StreamMetadata) => Promise<void>;
     publishStream: () => Promise<void>;
     unpublishStream: () => Promise<void>;
+    selectThumbnail: () => void;
 };

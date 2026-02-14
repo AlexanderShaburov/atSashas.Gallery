@@ -14,6 +14,10 @@ type Props = {
 
     headerText?: string;
     submitText?: string;
+
+    // NEW: Thumbnail selection
+    currentThumbnail?: string;
+    onSelectThumbnail?: () => void;
 };
 
 export function StreamMetaComponent(props: Props) {
@@ -59,6 +63,7 @@ export function StreamMetaComponent(props: Props) {
                                 title: title.trim(),
                                 tags,
                                 description: description.trim() ? description.trim() : '',
+                                thumbnail: props.currentThumbnail,
                             })
                         }
                         disabled={!canSubmit}
@@ -108,6 +113,41 @@ export function StreamMetaComponent(props: Props) {
                         disabled={props.isLoading}
                     />
                 </label>
+
+                {props.onSelectThumbnail && (
+                    <label className="csc__field">
+                        <div className="csc__label">
+                            stream thumbnail
+                            <span className="csc__required">* required for publishing</span>
+                        </div>
+                        {props.currentThumbnail ? (
+                            <div className="csc__thumbnailPreview">
+                                <img
+                                    src={props.currentThumbnail}
+                                    alt="Stream thumbnail"
+                                    className="csc__thumbnailImg"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={props.onSelectThumbnail}
+                                    disabled={props.isLoading}
+                                    className="csc__thumbnailChange"
+                                >
+                                    Change thumbnail
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={props.onSelectThumbnail}
+                                disabled={props.isLoading}
+                                className="csc__thumbnailSelect"
+                            >
+                                Select thumbnail from catalog
+                            </button>
+                        )}
+                    </label>
+                )}
 
                 {!validation.ok && (
                     <div className="csc__validation">

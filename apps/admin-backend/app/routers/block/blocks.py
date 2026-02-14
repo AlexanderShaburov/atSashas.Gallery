@@ -1,9 +1,10 @@
 # app/routers/blocks.py
 
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 # поправь пути под свой проект:
+from app.auth.dependencies import get_current_user
 from app.models.block_collection import BlockCollection, Block
 from app.repos.collection_repo import block_collection_repo
 from app.services.block_collection_service import generate_block_id
@@ -11,6 +12,7 @@ from app.services.block_collection_service import generate_block_id
 router = APIRouter(
     prefix="/blocks",
     tags=["admin-blocks"],
+    dependencies=[Depends(get_current_user)],  # Require authentication for all endpoints
 )
 
 

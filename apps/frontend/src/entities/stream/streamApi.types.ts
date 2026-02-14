@@ -6,6 +6,7 @@ export type StreamMetadata = {
     title: string;
     tags: string[];
     description: string;
+    thumbnail?: string; // Optional: set via journey, not form input
 };
 
 export type CreateStreamResponse = StreamData;

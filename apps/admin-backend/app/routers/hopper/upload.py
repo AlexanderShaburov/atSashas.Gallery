@@ -1,4 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+
+from app.auth.dependencies import get_current_user
 from fastapi.responses import FileResponse
 from pathlib import Path
 from logging import getLogger
@@ -8,7 +10,11 @@ import shutil
 from app.deps import require_admin_token
 from app.storage import UPLOAD_DIR
 
-router = APIRouter(prefix="/upload", tags=["upload"])
+router = APIRouter(
+    prefix="/upload",
+    tags=["upload"],
+    dependencies=[Depends(get_current_user)],  # Require authentication
+)
 logger = getLogger(__name__)
 ALLOWED_MIME = {
     "image/png",

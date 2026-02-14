@@ -3,11 +3,11 @@ import { usePublicStream } from '@/features/public/hooks/usePublicStream';
 import { Link } from 'react-router-dom';
 
 export default function HomePage() {
-    const { streams, loading, error } = usePublicStream();
+    const { streams, loading, error, isPreview } = usePublicStream();
 
     if (loading) {
         return (
-            <section className="styles.container home">
+            <section className="home">
                 <div className="infoContainer">Loading gallery...</div>
             </section>
         );
@@ -15,7 +15,7 @@ export default function HomePage() {
 
     if (error) {
         return (
-            <section className="styles.container home">
+            <section className="home">
                 <div className="infoContainer">Error: {error}</div>
             </section>
         );
@@ -23,14 +23,19 @@ export default function HomePage() {
 
     if (streams.length === 0) {
         return (
-            <section className="styles.container home">
+            <section className="home">
                 <div className="infoContainer">No published streams yet.</div>
             </section>
         );
     }
 
     return (
-        <section className="styles.container home">
+        <section className="home">
+            {isPreview && (
+                <div className="preview-banner">
+                    Draft Preview — changes are not live
+                </div>
+            )}
             <div className="tiles">
                 {streams.map((stream, index) => {
                     // Calculate position with slight offset for visual variety
@@ -52,10 +57,17 @@ export default function HomePage() {
                                     } as React.CSSProperties
                                 }
                             >
-                                {/* TODO: Add stream thumbnail once available */}
-                                <div className="tile-img tile-img--placeholder" aria-hidden="true">
-                                    <span>{stream.title.charAt(0)}</span>
-                                </div>
+                                {stream.thumbnail ? (
+                                    <img
+                                        src={stream.thumbnail}
+                                        alt={stream.title}
+                                        className="tile-img"
+                                    />
+                                ) : (
+                                    <div className="tile-img tile-img--placeholder" aria-hidden="true">
+                                        <span>{stream.title.charAt(0)}</span>
+                                    </div>
+                                )}
                                 <span className="tile-label">{stream.title}</span>
                             </Link>
                         </nav>

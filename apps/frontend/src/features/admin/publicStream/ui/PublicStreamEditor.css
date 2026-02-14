@@ -79,20 +79,29 @@
 .pse__content {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    grid-template-rows: auto 1fr;
+    gap: 1rem 2rem;
+}
+
+@media (max-width: 899px) {
+    .pse__content {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+    }
 }
 
 .pse__section {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-row: span 2;
+    grid-template-rows: subgrid;
     gap: 1rem;
 }
 
 .pse__section-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
+    align-items: start;
+    gap: 0.75rem;
     flex-wrap: wrap;
 }
 
@@ -114,7 +123,18 @@
 .pse__batch-controls {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
+}
+
+.pse__select-all {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    color: var(--muted, #6b7280);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
 }
 
 .pse__batch-btn {

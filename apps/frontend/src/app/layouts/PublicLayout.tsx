@@ -1,3 +1,5 @@
+// src/app/layouts/PublicLayout.tsx
+
 import { CatalogProvider } from '@/features/public/api/CatalogProvider';
 import Footer from '@/pages/public/footer/BottomBar';
 import Header from '@/pages/public/header/Header';

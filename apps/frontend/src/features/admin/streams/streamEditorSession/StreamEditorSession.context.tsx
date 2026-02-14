@@ -369,6 +369,29 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
                     console.log(`[BOOTSTRAP]: streamUpdateBlock branch selected`);
                     focusBlockId = v.loot.id ? v.loot.id : v.command.blockId;
                     break;
+                case 'streamSelectThumbnail':
+                    console.log(`[BOOTSTRAP]: streamSelectThumbnail - updating thumbnail`);
+
+                    if (!v.loot?.output?.thumbUrl) {
+                        console.warn('[BOOTSTRAP]: No thumbnail URL in loot');
+                        break;
+                    }
+
+                    // Update draft with new thumbnail
+                    if (v.storeData.draft) {
+                        const updatedDraft = {
+                            ...v.storeData.draft,
+                            thumbnail: v.loot.output.thumbUrl,
+                        };
+                        streamStoreDirectSave(updatedDraft);
+                        console.log(`[BOOTSTRAP]: Thumbnail updated to ${v.loot.output.thumbUrl}`);
+                    }
+
+                    // Return to metadata editor so user can see the updated thumbnail
+                    // Set metaIntent to 'edit' so the form knows this is an edit operation
+                    metaIntent.current = { action: 'edit' };
+                    pushMode({ kind: 'meta' });
+                    break;
             }
 
             // CRITICAL: Refresh blocks collection to include newly created/updated block
@@ -540,6 +563,12 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     const publishStream = useCallback(async () => {
         if (!selectedStreamId || !draft) return;
 
+        // Validate thumbnail exists
+        if (!draft.thumbnail) {
+            alert('Cannot publish stream without thumbnail. Please select a thumbnail first.');
+            return;
+        }
+
         try {
             console.log(`[publishStream]: Publishing stream ${selectedStreamId}`);
             const updated = await publicStreamApi.addStream(selectedStreamId);
@@ -679,6 +708,39 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         [dispatch, selectedStreamId],
     );
 
+    const jumpToCatalogForThumbnail = useCallback(() => {
+        if (!selectedStreamId) return;
+
+        const returnTo: ReturnAddress = {
+            editor: 'stream',
+            mode: 'edit',
+            objectId: selectedStreamId,
+        };
+
+        const ticket: JourneyTicket = {
+            journeyId: generateId('travel'),
+            destination: {
+                editor: 'catalog',
+                mode: 'select',
+            },
+            returnTo,
+            phase: 'outbound',
+            nonce: createNonce(),
+            createdAt: nowIso(),
+            returnEffect: {
+                kind: 'streamSelectThumbnail',
+                streamId: selectedStreamId,
+            },
+        };
+
+        const home: JourneyHome = {
+            editor: 'stream',
+            objectId: selectedStreamId,
+        };
+
+        dispatch(ticket, home);
+    }, [dispatch, selectedStreamId]);
+
     // ************* METADATA EDITOR ************
 
     const editMetadata = useCallback(() => {
@@ -735,6 +797,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
                 title: data.title,
                 tags: data.tags,
                 description: data.description,
+                thumbnail: data.thumbnail ?? draft.thumbnail ?? '',
             };
             setDraft(nextDraft);
             popIfTopIs('meta');
@@ -991,6 +1054,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             commitMetaEditor,
             publishStream,
             unpublishStream,
+            selectThumbnail: jumpToCatalogForThumbnail,
         }),
         [
             selectedStreamId,
@@ -1019,6 +1083,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             commitMetaEditor,
             publishStream,
             unpublishStream,
+            jumpToCatalogForThumbnail,
         ],
     );
     return <StreamEditorCtx.Provider value={value}>{children}</StreamEditorCtx.Provider>;

@@ -4,67 +4,52 @@ import { useState } from 'react';
 
 export function AddBlockButton({ onClick }: { onClick: () => void }) {
     return (
-        <div className="set-actions">
-            <button type="button" className="set-btn" onClick={onClick}>
-                Add
-            </button>
-        </div>
+        <button type="button" className="set-btn" onClick={onClick}>
+            Add
+        </button>
     );
 }
 export function EditMetadata({ onEdit }: { onEdit: () => void }) {
     return (
-        <div className="set-actions">
-            <button type="button" className="set-btn" onClick={onEdit}>
-                Edit Meta
-            </button>
-        </div>
+        <button type="button" className="set-btn" onClick={onEdit}>
+            Edit Meta
+        </button>
     );
 }
 export function ApplyButton({ onApply }: { onApply: () => void }) {
     return (
-        <div className="set-actions">
-            <button type="button" className="set-btn" onClick={onApply}>
-                Apply
-            </button>
-        </div>
+        <button type="button" className="set-btn" onClick={onApply}>
+            Apply
+        </button>
     );
 }
 export function DeleteButton({ onDelete }: { onDelete: () => void }) {
     return (
-        <>
-            {/* LEFT */}
-            <div className="set-actions set-actions--left">
-                <button type="button" className="set-btn set-btn--danger" onClick={onDelete}>
-                    🗑 Delete
-                </button>
-            </div>
-        </>
+        <button type="button" className="set-btn set-btn--danger" onClick={onDelete}>
+            Delete
+        </button>
     );
 }
 
 export function PublishButton({ onPublish }: { onPublish: () => void }) {
     return (
-        <div className="set-actions">
-            <button type="button" className="set-btn set-btn--success" onClick={onPublish}>
-                🌐 Publish
-            </button>
-        </div>
+        <button type="button" className="set-btn set-btn--success" onClick={onPublish}>
+            Publish
+        </button>
     );
 }
 
 export function UnpublishButton({ onUnpublish }: { onUnpublish: () => void }) {
     return (
-        <div className="set-actions">
-            <button type="button" className="set-btn set-btn--warning" onClick={onUnpublish}>
-                🔒 Unpublish
-            </button>
-        </div>
+        <button type="button" className="set-btn set-btn--warning" onClick={onUnpublish}>
+            Unpublish
+        </button>
     );
 }
 export function ExitButton({ onExit }: { onExit: () => void }) {
     return (
-        <button type="button" className="set-btn set-btn--secondary" onClick={onExit}>
-            ✖ Exit
+        <button type="button" className="set-btn" onClick={onExit}>
+            Exit
         </button>
     );
 }
@@ -85,7 +70,7 @@ export function SaveButton({
             onClick={() => !saving && canSave && onClick()}
             title={saving ? 'Saving...' : 'Save'}
         >
-            {!saving ? '💾 Save' : 'Saving…'}
+            {!saving ? 'Save' : 'Saving\u2026'}
         </button>
     );
 }
@@ -131,33 +116,29 @@ export function TagsEditor({
         if (e.key === 'Escape') cancel();
     }
     return (
-        <>
-            {
-                <div className="set-tags">
-                    {!editing ? (
-                        <div
-                            className={`set-tags__view ${!hasTags ? 'is-empty' : ''}`}
-                            role="button"
-                            onClick={startEdit}
-                        >
-                            <span className="set-tags__label">Tags:</span>
-                            <span className="set-tags__value">
-                                {hasTags ? trueTags.join(', ') : 'Add tags…'}
-                            </span>
-                        </div>
-                    ) : (
-                        <input
-                            className="set-tags__input"
-                            autoFocus
-                            value={draft}
-                            onChange={(e) => setDraft(e.target.value)}
-                            onKeyDown={onKeyDown}
-                            onBlur={commit}
-                            placeholder="tag1, tag2, tag3"
-                        />
-                    )}
+        <div className="set-tags">
+            {!editing ? (
+                <div
+                    className={`set-tags__view ${!hasTags ? 'is-empty' : ''}`}
+                    role="button"
+                    onClick={startEdit}
+                >
+                    <span className="set-tags__label">Tags:</span>
+                    <span className="set-tags__value">
+                        {hasTags ? trueTags.join(', ') : 'Add tags\u2026'}
+                    </span>
                 </div>
-            }
-        </>
+            ) : (
+                <input
+                    className="set-tags__input"
+                    autoFocus
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={onKeyDown}
+                    onBlur={commit}
+                    placeholder="tag1, tag2, tag3"
+                />
+            )}
+        </div>
     );
 }

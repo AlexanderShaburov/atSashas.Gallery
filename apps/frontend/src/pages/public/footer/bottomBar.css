@@ -2,7 +2,9 @@
   border-top: 1px solid var(--border);
   background: var(--card-bg);
   color: var(--muted);
-  padding-block: 20px 28px;
+  padding: 20px var(--gutter) 28px;
+  max-width: calc(var(--page-max) + 2 * var(--gutter));
+  margin-inline: auto;
   font-size: 0.95rem;
 }
 

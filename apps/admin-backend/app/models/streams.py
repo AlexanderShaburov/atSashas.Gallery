@@ -27,6 +27,7 @@ class StreamData(BaseModel):
         default_factory=list
     )  # For filtering in the stream list
     description: str = ""  # Optional short text for admin/SEO
+    thumbnail: str = ""  # URL to user-selected thumbnail image (optional)
 
     version: int = Field(ge=0, default=1)  # Optimistic concurrency
     createdAt: str  # ISO string

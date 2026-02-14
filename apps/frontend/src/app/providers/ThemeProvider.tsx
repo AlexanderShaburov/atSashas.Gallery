@@ -1,6 +1,8 @@
-import { PropsWithChildren } from "react";
-import { ThemeProvider as InnerThemeProvider } from "@/shared/lib/theme/ThemeContext";
+// src/app/providers/ThemeProvider.tsx
+
+import { PropsWithChildren } from 'react';
+import { ThemeProvider as InnerThemeProvider } from '@/shared/lib/theme/ThemeContext';
 
 export function ThemeProvider({ children }: PropsWithChildren) {
-    return <InnerThemeProvider>{children}</InnerThemeProvider>
+    return <InnerThemeProvider>{children}</InnerThemeProvider>;
 }

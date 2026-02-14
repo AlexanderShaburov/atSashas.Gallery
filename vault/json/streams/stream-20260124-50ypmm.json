@@ -1,15 +1,21 @@
 {
   "streamId": "stream-20260124-50ypmm",
   "title": "Second one",
-  "status": "draft",
-  "tags": [],
+  "status": "ready",
+  "tags": [
+    "baby",
+    "my baby"
+  ],
   "description": "",
-  "version": 10,
+  "thumbnail": "/media/arts/fullsize/art-20260210-79ejgk.jpg",
+  "version": 16,
   "createdAt": "2026-01-24T05:45:39.648429+00:00",
-  "updatedAt": "2026-02-13T12:20:51.015320+00:00",
+  "updatedAt": "2026-02-14T05:44:53.918476+00:00",
   "blockIds": [
-    "block-gallery-pairhorizontal-fcda4039",
+    "block-gallery-single-a9fde4cf",
     "block-gallery-single-e39ec931",
-    "block-gallery-pairhorizontal-5314cf4f"
+    "block-gallery-pairhorizontal-5314cf4f",
+    "block-gallery-pairvertical-73ea50ee",
+    "block-gallery-triptychhorizontal-bdbb22ca"
   ]
 }

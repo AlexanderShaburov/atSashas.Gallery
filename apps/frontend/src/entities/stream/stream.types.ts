@@ -9,6 +9,7 @@ export type StreamData = {
 
     tags: string[]; // For filtering in the stream list
     description: string; // Optional short text for admin/SEO
+    thumbnail: string; // URL to user-selected thumbnail image (optional)
 
     version: number; // Optimistic concurrency
     createdAt: string; // ISO string

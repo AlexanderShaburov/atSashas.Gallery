@@ -1,12 +1,25 @@
+# app/routers/art/catalog.py
+
+
 from fastapi import APIRouter, Depends, HTTPException
+
+from app.auth.dependencies import get_current_user
 from logging import getLogger
 from app.deps import require_admin_token
 from app.services.catalog_service import update_catalog
 from app.repos.catalog_repo import catalog_repo
+from app.repos.collection_repo import block_collection_repo
+from app.repos.stream_repo import stream_repo
 from app.models.shipment import ArtShipmentModel
+from app.models.block_collection import GalleryBlock
+from typing import List
 
 
-router = APIRouter(prefix="/art", tags=["catalog"])
+router = APIRouter(
+    prefix="/art",
+    tags=["catalog"],
+    dependencies=[Depends(get_current_user)],  # Require authentication
+)
 logger = getLogger(__name__)
 
 
@@ -18,10 +31,61 @@ async def updater(payload: ArtShipmentModel):
     return {"status": "ok"}
 
 
-# 👷‍♂️😓 this endpoint should retrun lists of blocks and streams that use the artItem with id
 @router.get("/dependencies/{id}")
-async def get_dependencies(id):
-    return {"blocks": [], "streams": []}
+async def get_dependencies(id: str):
+    """
+    Find all blocks and streams that depend on the given art item.
+    Returns lists of block IDs and stream IDs that use this art item.
+    """
+    dependent_blocks: List[str] = []
+    dependent_streams: List[str] = []
+
+    # 1. Find all blocks that use this art item
+    async with block_collection_repo.session() as collection:
+        for block_id, block in collection.blocks.items():
+            # Only gallery blocks can contain art items
+            if isinstance(block, GalleryBlock):
+                # Check if any item in this block references our art item
+                for item in block.items:
+                    if item.artId == id:
+                        dependent_blocks.append(block_id)
+                        break  # Found it, no need to check other items in this block
+
+    # 2. Find all streams that use any of the dependent blocks
+    if dependent_blocks:
+        streams_index = await stream_repo.list_index()
+
+        # For each stream in the index, we need to load it and check its blockIds
+        for stream_item in streams_index.streams:
+            try:
+                stream = await stream_repo.get_stream(stream_item.streamId)
+
+                # Check if this stream contains any of the dependent blocks
+                for block_id in dependent_blocks:
+                    if block_id in stream.blockIds:
+                        dependent_streams.append(stream.streamId)
+                        break  # Found one, no need to check other blocks
+            except FileNotFoundError:
+                # Stream in index but file missing - skip it
+                logger.warning(
+                    f"Stream {stream_item.streamId} in index but file not found"
+                )
+                continue
+
+    logger.info(
+        f"Art item {id} dependencies: {len(dependent_blocks)} blocks, "
+        f"{len(dependent_streams)} streams"
+    )
+
+    return {
+        "artItemId": id,
+        "blocks": dependent_blocks,
+        "streams": dependent_streams,
+        "summary": {
+            "totalBlocks": len(dependent_blocks),
+            "totalStreams": len(dependent_streams),
+        },
+    }
 
 
 # this endpoint should delete item from catalog and everywere it is in use
@@ -46,10 +110,5 @@ async def delete_art_item(id):
             catalog.order = [x for x in catalog.order if x != id]
         # 4. Touch version + updatedAt
         catalog._touch()
-
-        # TODO:
-        # - scan blocks for this art_id
-        # - scan streams for blocks containing it
-        # - prevent deletion or return dependency list
 
     return {"status": "delete endcup"}

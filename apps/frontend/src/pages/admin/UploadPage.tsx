@@ -33,7 +33,11 @@ export default function UploadPage() {
     const isJourney = useJourneyStatus('hopper');
 
     // React Strict Mode protection for bootstrap
-    const bootstrapRef = useRef<{ processed: boolean; ticket: any }>({ processed: false, ticket: null });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bootstrapRef = useRef<{ processed: boolean; ticket: any }>({
+        processed: false,
+        ticket: null,
+    });
 
     // Handle grid selection ( deselect: undefined)
     const handleSelect = (item: GridItem | undefined) => {
@@ -214,14 +218,6 @@ export default function UploadPage() {
             <section className="upload-list">
                 <div className="upload-list-header">
                     <h2>Uploaded Files</h2>
-
-                    <button
-                        className="btn btn-danger"
-                        disabled={!selectedId}
-                        onClick={handleDelete}
-                    >
-                        Delete Selected
-                    </button>
                 </div>
 
                 <ArtItemGrid

@@ -1,44 +1,58 @@
 {
   "version": 1,
-  "updatedAt": "2026-02-12T19:41:26.329845+00:00",
+  "updatedAt": "2026-02-14T06:37:12.592249+00:00",
   "streams": [
     {
       "streamId": "stream-20260124-50ypmm",
       "title": "Second one",
-      "thumbnail": "/media/arts/previews/art-20251226-52p602.jpeg",
-      "status": "draft",
-      "tags": [],
+      "thumbnail": "/media/arts/fullsize/art-20260210-79ejgk.jpg",
+      "status": "ready",
+      "tags": [
+        "baby",
+        "my baby"
+      ],
       "description": "",
-      "updatedAt": "2026-02-12T19:40:55.504692+00:00"
+      "updatedAt": "2026-02-14T05:44:53.918476+00:00"
     },
     {
       "streamId": "stream-20260124-gzy15k",
       "title": "opplala",
-      "thumbnail": "/media/arts/previews/art-20260210-kfb5q7.jpeg",
-      "status": "draft",
-      "tags": [],
-      "description": "",
-      "updatedAt": "2026-02-12T19:41:26.323074+00:00"
-    },
-    {
-      "streamId": "stream-20260124-3jt4bb",
-      "title": "sdfasfd",
-      "thumbnail": "/media/arts/previews/art-20251226-7vqxmz.jpeg",
-      "status": "draft",
+      "thumbnail": "/media/arts/fullsize/art-20251226-tfemnz.jpeg",
+      "status": "ready",
       "tags": [
-        "lopez"
+        "ooo"
       ],
       "description": "",
-      "updatedAt": "2026-02-12T19:40:36.202874+00:00"
+      "updatedAt": "2026-02-14T05:43:35.863065+00:00"
     },
     {
-      "streamId": "stream-20260125-vchkav",
-      "title": "pps",
-      "thumbnail": "/media/arts/previews/art-20260124-est8wp.jpeg",
-      "status": "draft",
+      "streamId": "stream-20260213-e22tmv",
+      "title": "full throttle",
+      "thumbnail": "/media/arts/fullsize/art-20260210-1ywd8q.jpg",
+      "status": "ready",
       "tags": [],
       "description": "",
-      "updatedAt": "2026-02-12T19:39:47.401085+00:00"
+      "updatedAt": "2026-02-14T05:44:23.066389+00:00"
+    },
+    {
+      "streamId": "stream-20260214-yrp2q1",
+      "title": "one more stream",
+      "thumbnail": "/media/arts/fullsize/art-20260214-58zj7y.jpeg",
+      "status": "ready",
+      "tags": [
+        "thumbnail"
+      ],
+      "description": "",
+      "updatedAt": "2026-02-14T05:52:38.774284+00:00"
+    },
+    {
+      "streamId": "stream-20260214-7j50kb",
+      "title": "Perfect stream",
+      "thumbnail": "/media/arts/fullsize/art-20260214-73hnkz.jpeg",
+      "status": "ready",
+      "tags": [],
+      "description": "",
+      "updatedAt": "2026-02-14T06:37:12.588343+00:00"
     }
   ]
 }

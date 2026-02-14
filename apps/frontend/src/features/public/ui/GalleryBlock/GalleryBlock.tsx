@@ -1,7 +1,7 @@
 import type { Block, GalleryBlock as GalleryBlockType, TextBlock } from '@/entities/block';
 import ImageComponent from '@/features/public/ui/Image/ImageComponent';
 import TextComponent from '@/features/public/ui/Text/TextComponent';
-import './gallery.css';
+import './Gallery.css';
 
 type GalleryBlockProps = { block: Block };
 

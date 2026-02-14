@@ -53,6 +53,10 @@ export type ReturnCommand =
     | {
           kind: 'dependencyResolved';
           targetId: string; // ID of the object that was being deleted
+      }
+    | {
+          kind: 'streamSelectThumbnail';
+          streamId: string;
       };
 
 // Phase of journey:

@@ -1,17 +1,24 @@
 # app/routers/public_stream/public_stream.py
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+
+from app.auth.dependencies import get_current_user
 from pydantic import BaseModel, Field
 
 from app.models.public_stream import PublicStreamData
 from app.repos.public_stream_repo import public_stream_repo
+from app.repos.stream_repo import stream_repo
 
 # Public router (no authentication required)
 public_router = APIRouter(prefix="/public", tags=["public"])
 
 # Admin router (authentication required)
-admin_router = APIRouter(prefix="/admin/public_stream", tags=["admin-public-stream"])
+admin_router = APIRouter(
+    prefix="/admin/public_stream",
+    tags=["admin-public-stream"],
+    dependencies=[Depends(get_current_user)],  # Require authentication
+)
 
 
 # --- Public Endpoints (for frontend visitors) ---
@@ -68,8 +75,17 @@ async def add_stream_to_public(body: AddStreamRequest) -> PublicStreamData:
     """
     Add a stream to PublicStream
     Prevents duplicates automatically
+    Requires stream to have a thumbnail
     """
     try:
+        # Validate stream has thumbnail before publishing
+        stream = await stream_repo.get_stream(body.streamId)
+        if not stream.thumbnail:
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot publish stream without thumbnail. Please select a thumbnail first."
+            )
+
         return await public_stream_repo.add_stream(body.streamId)
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))

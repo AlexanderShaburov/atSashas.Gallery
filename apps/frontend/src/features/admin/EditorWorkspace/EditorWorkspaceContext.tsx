@@ -1,11 +1,13 @@
 // EditorWorkspaceContext.tsx
 import type { BlocksCollectionJSON } from '@/entities/block';
 import { ArtCatalog } from '@/entities/catalog';
+import type { StreamIndexItem } from '@/entities/stream';
 
 import { getCollection } from '@/features/admin/blocks/api/blocksApi';
 import { getCatalog } from '@/features/admin/catalogEditor/api';
+import { streamsApi } from '@/features/admin/streams/api/streamsApi';
 
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 // Narrow global editor session state
 export interface EditorWorkspaceState {
@@ -19,6 +21,9 @@ export interface EditorWorkspaceState {
 
     currentArtItemId?: string;
     currentArtCatalog?: ArtCatalog;
+
+    // NEW: Streams index for dependency tracking
+    streamsIndex: StreamIndexItem[] | null;
 }
 
 // Context value: state + simple setters
@@ -35,6 +40,11 @@ export interface EditorWorkspaceContextValue extends EditorWorkspaceState {
     setArtCatalog(catalog: ArtCatalog): void;
 
     reset(): void;
+
+    // NEW: Refresh methods for dependency-aware deletion
+    refreshCatalog(): Promise<void>;
+    refreshBlocks(): Promise<void>;
+    refreshStreams(): Promise<void>;
 }
 
 const EditorWorkspaceContext = createContext<EditorWorkspaceContextValue | undefined>(undefined);
@@ -50,7 +60,36 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
         currentBlockId: undefined,
         currentArtItemId: undefined,
         currentArtCatalog: undefined,
+        streamsIndex: null,
     });
+
+    // Refresh methods
+    const refreshCatalog = useCallback(async () => {
+        try {
+            const catalog = await getCatalog();
+            setState((prev) => ({ ...prev, currentArtCatalog: catalog }));
+        } catch (error) {
+            console.error('Failed to refresh catalog:', error);
+        }
+    }, []);
+
+    const refreshBlocks = useCallback(async () => {
+        try {
+            const collection = await getCollection();
+            setState((prev) => ({ ...prev, currentBlocksCollection: collection }));
+        } catch (error) {
+            console.error('Failed to refresh blocks:', error);
+        }
+    }, []);
+
+    const refreshStreams = useCallback(async () => {
+        try {
+            const index = await streamsApi.list();
+            setState((prev) => ({ ...prev, streamsIndex: index }));
+        } catch (error) {
+            console.error('Failed to refresh streams:', error);
+        }
+    }, []);
 
     const value = useMemo<EditorWorkspaceContextValue>(
         () => ({
@@ -99,21 +138,27 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
                     currentBlockId: undefined,
                     currentArtItemId: undefined,
                     currentArtCatalog: undefined,
+                    streamsIndex: null,
                 });
             },
+
+            refreshCatalog,
+            refreshBlocks,
+            refreshStreams,
         }),
-        [state],
+        [state, refreshCatalog, refreshBlocks, refreshStreams],
     );
 
-    // Download art catalog + blocks collection on provider mount
+    // Download art catalog + blocks collection + streams index on provider mount
     useEffect(() => {
         let cancelled = false;
 
         const load = async () => {
             try {
-                const [catalog, blocksCollection] = await Promise.all([
+                const [catalog, blocksCollection, streamsIndex] = await Promise.all([
                     getCatalog(),
                     getCollection(),
+                    streamsApi.list(),
                 ]);
 
                 if (cancelled) return;
@@ -122,6 +167,7 @@ export function EditorWorkspaceProvider({ children }: EditorWorkspaceProviderPro
                     ...prev,
                     currentArtCatalog: catalog,
                     currentBlocksCollection: blocksCollection,
+                    streamsIndex,
                 }));
             } catch (error) {
                 console.error('Failed to load workspace data in EditorWorkspaceProvider', error);

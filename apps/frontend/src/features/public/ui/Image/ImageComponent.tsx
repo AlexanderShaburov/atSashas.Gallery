@@ -4,7 +4,7 @@ import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
 type ImageComponentProps = { block: GalleryBlock };
 
 export default function ImageComponent({ block }: ImageComponentProps) {
-    const { layout, items } = { ...block };
+    const { layout, items, caption } = block;
     const catalog = useArtCatalog();
 
     return (
@@ -24,6 +24,7 @@ export default function ImageComponent({ block }: ImageComponentProps) {
                     </picture>
                 );
             })}
+            {caption?.en && <figcaption>{caption.en}</figcaption>}
         </figure>
     );
 }

@@ -1,3 +1,5 @@
+// src/app/main.tsx
+
 import { AppProviders } from '@/app/providers/AppProviders';
 import React from 'react';
 import { createRoot } from 'react-dom/client';

@@ -162,7 +162,8 @@ export function PublicStreamEditor() {
         .filter((s) => s !== undefined);
 
     const handlePreview = () => {
-        window.open('/', '_blank', 'noopener,noreferrer');
+        localStorage.setItem('__preview_streams', JSON.stringify(orderedPublicStreams));
+        window.open('/?preview=true', '_blank', 'noopener,noreferrer');
     };
 
     return (
@@ -175,10 +176,7 @@ export function PublicStreamEditor() {
                         onClick={handlePreview}
                         title="View public site in new tab"
                     >
-                        👁️ Preview
-                    </button>
-                    <button className="pse__btn pse__btn--secondary" onClick={exit}>
-                        Exit
+                        Preview
                     </button>
                     {isDirty && (
                         <button className="pse__btn pse__btn--secondary" onClick={discard}>
@@ -251,29 +249,36 @@ export function PublicStreamEditor() {
                         </h2>
                         {nonPublicStreams.length > 0 && (
                             <div className="pse__batch-controls">
-                                <button
-                                    className="pse__batch-btn"
-                                    onClick={selectAll}
-                                    disabled={selectedIds.size === availableStreams.length}
-                                >
-                                    Select All
-                                </button>
-                                <button
-                                    className="pse__batch-btn"
-                                    onClick={deselectAll}
-                                    disabled={selectedIds.size === 0}
-                                >
-                                    Deselect
-                                </button>
-                                <span className="pse__selection-count">
-                                    {selectedIds.size > 0 && `${selectedIds.size} selected`}
-                                </span>
+                                <label className="pse__select-all">
+                                    <input
+                                        type="checkbox"
+                                        className="pse__checkbox"
+                                        checked={
+                                            selectedIds.size > 0 &&
+                                            selectedIds.size >= nonPublicStreams.length
+                                        }
+                                        ref={(el) => {
+                                            if (el) {
+                                                el.indeterminate =
+                                                    selectedIds.size > 0 &&
+                                                    selectedIds.size < nonPublicStreams.length;
+                                            }
+                                        }}
+                                        onChange={() =>
+                                            selectedIds.size >= nonPublicStreams.length
+                                                ? deselectAll()
+                                                : selectAll()
+                                        }
+                                    />
+                                    Select all
+                                </label>
                                 <button
                                     className="pse__batch-btn pse__batch-btn--action"
                                     onClick={publishSelected}
                                     disabled={selectedIds.size === 0}
                                 >
-                                    Publish Selected
+                                    Publish selected
+                                    {selectedIds.size > 0 && ` (${selectedIds.size})`}
                                 </button>
                             </div>
                         )}

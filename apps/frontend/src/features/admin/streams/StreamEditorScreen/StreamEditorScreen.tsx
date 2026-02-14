@@ -71,6 +71,9 @@ export function StreamEditor() {
         console.log(`[StreamEditor] isValid: ${isValid} `);
         console.log(`[StreamEditor] isJourney: ${isJourney} `);
 
+        // Can only publish if stream has a thumbnail
+        const canPublish = !isPublished && !!draft.thumbnail;
+
         return {
             canSave: isDirty && !isLoading && isValid,
             isSaving,
@@ -83,7 +86,7 @@ export function StreamEditor() {
             save,
             exit: onEscape,
             onChangeTags: updateTags,
-            onPublish: () => void publishStream(),
+            onPublish: canPublish ? () => void publishStream() : undefined,
             onUnpublish: () => void unpublishStream(),
         };
     }, [
@@ -111,6 +114,7 @@ export function StreamEditor() {
         title: draft?.title ?? '',
         tags: draft?.tags ?? [],
         description: draft?.description ?? '',
+        thumbnail: draft?.thumbnail ?? '',
     };
 
     const [filter, setFilter] = useState<StreamFilterState>(DEFAULT_STREAM_FILTER);
@@ -237,6 +241,8 @@ export function StreamEditor() {
                     <ScreenHeaderRow left={<h1 className="se__title">Streams</h1>} right={null} />
                     <StreamMetaComponent
                         initial={initial}
+                        currentThumbnail={draft?.thumbnail}
+                        onSelectThumbnail={session.selectThumbnail}
                         onCancel={onEscape}
                         onSubmit={commitMetaEditor}
                         isLoading={isLoading}

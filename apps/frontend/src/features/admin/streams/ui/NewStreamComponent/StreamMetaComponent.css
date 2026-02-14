@@ -172,6 +172,54 @@
     margin: 2px 0;
 }
 
+/* Thumbnail preview and selection */
+.csc__thumbnailPreview {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0;
+}
+
+.csc__thumbnailImg {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.csc__thumbnailChange,
+.csc__thumbnailSelect {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 6px;
+    color: inherit;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.csc__thumbnailChange:hover,
+.csc__thumbnailSelect:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.24);
+}
+
+.csc__thumbnailChange:disabled,
+.csc__thumbnailSelect:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.csc__required {
+    color: #ff6b6b;
+    font-size: 0.75rem;
+    font-weight: 400;
+    margin-left: 0.5rem;
+}
+
 /* Small responsive polishing */
 @media (max-width: 520px) {
     .csc {

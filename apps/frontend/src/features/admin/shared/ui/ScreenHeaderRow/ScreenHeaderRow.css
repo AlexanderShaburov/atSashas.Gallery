@@ -15,10 +15,21 @@
 }
 
 .shr__left {
+    flex: 0 0 auto;
     min-width: 0;
 }
 .shr__right {
+    flex: 1 1 auto;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    min-width: 0;
+}
+
+@media (max-width: 599px) {
+    .shr {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
 }

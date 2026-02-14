@@ -1,63 +1,60 @@
 // features/public/hooks/usePublicStream.ts
 
-import type { PublicStreamData } from '@/entities/publicStream';
-import type { StreamData } from '@/entities/stream';
+import type { StreamIndexItem } from '@/entities/stream';
 import { useEffect, useState } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 /**
- * Hook to load PublicStream and its streams for public gallery
+ * Hook to load published streams for public gallery.
+ * Supports preview mode: when URL has ?preview=true, reads draft data
+ * from sessionStorage instead of the API (no changes to the live site).
  */
 export function usePublicStream() {
-    const [publicStream, setPublicStream] = useState<PublicStreamData | null>(null);
-    const [streams, setStreams] = useState<StreamData[]>([]);
+    const [streams, setStreams] = useState<StreamIndexItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isPreview, setIsPreview] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
+
+        // Check for preview mode
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('preview') === 'true') {
+            try {
+                const raw = localStorage.getItem('__preview_streams');
+                localStorage.removeItem('__preview_streams');
+                if (raw) {
+                    const previewStreams: StreamIndexItem[] = JSON.parse(raw);
+                    if (!cancelled) {
+                        setStreams(previewStreams);
+                        setIsPreview(true);
+                    }
+                }
+            } catch {
+                // Fall through to normal load if preview data is invalid
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+            return () => {
+                cancelled = true;
+            };
+        }
 
         async function load() {
             try {
                 setLoading(true);
                 setError(null);
 
-                // Load PublicStream
-                const psRes = await fetch(`${API_BASE}/public/public_stream`);
-                if (!psRes.ok) {
-                    throw new Error(`Failed to load PublicStream: ${psRes.status}`);
+                const res = await fetch(`${API_BASE}/public/streams/published`);
+                if (!res.ok) {
+                    throw new Error(`Failed to load published streams: ${res.status}`);
                 }
-                const psData: PublicStreamData = await psRes.json();
-
-                if (cancelled) return;
-                setPublicStream(psData);
-
-                // Load each stream via API
-                const streamPromises = psData.streamIds.map(async (id) => {
-                    try {
-                        const url = `${API_BASE}/admin/streams/${id}`;
-                        const res = await fetch(url);
-                        if (!res.ok) {
-                            console.warn(`Failed to load stream ${id}: ${res.status}`);
-                            return null;
-                        }
-                        return (await res.json()) as StreamData;
-                    } catch (err) {
-                        console.warn(`Error loading stream ${id}:`, err);
-                        return null;
-                    }
-                });
-
-                const loadedStreams = await Promise.all(streamPromises);
-
-                // Filter out null (failed loads) and preserve order
-                const validStreams = loadedStreams.filter(
-                    (s): s is StreamData => s !== null,
-                );
+                const publishedStreams: StreamIndexItem[] = await res.json();
 
                 if (!cancelled) {
-                    setStreams(validStreams);
+                    setStreams(publishedStreams);
                 }
             } catch (e: unknown) {
                 if (!cancelled) {
@@ -81,5 +78,5 @@ export function usePublicStream() {
         };
     }, []);
 
-    return { publicStream, streams, loading, error };
+    return { streams, loading, error, isPreview };
 }
