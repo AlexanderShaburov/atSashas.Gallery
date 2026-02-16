@@ -2,9 +2,9 @@
 # 🌠 Vault: keep folder tree + JSON, but ignore binaries
 # ====================================
 vault/**                # ignore everything under vault
-!vault/**/              # BUT keep all subdirectories (so Git can descend)
-!vault/**/*.json
-!vault/**/.gitkeep
+#!vault/**/              # BUT keep all subdirectories (so Git can descend)
+#!vault/**/*.json
+#!vault/**/.gitkeep
 # ====================================
 # 🌐 FRONTEND (Node / React / Vite)
 # ====================================
@@ -52,7 +52,7 @@ venv/
 ENV/
 env/
 Pipfile.lock
-poetry.lock
+# poetry.lock
 
 # Mypy / Pyright / Pylint caches
 .mypy_cache/
