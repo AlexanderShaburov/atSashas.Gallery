@@ -17,6 +17,7 @@ export function createNewStreamDraft(): StreamData {
         status: 'draft',
         tags: [],
         description: '',
+        thumbnail: '',
         version: 0,
         createdAt: todayISO(),
         updatedAt: todayISO(),

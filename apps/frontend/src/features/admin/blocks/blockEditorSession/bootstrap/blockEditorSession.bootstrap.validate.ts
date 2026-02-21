@@ -47,7 +47,7 @@ function assertPendingSelectionSlotMatchesLayout<L extends GalleryLayout>(
 }
 
 export function isBlockReturnKind(kind: ReturnCommand['kind']): kind is BlockReturnKind {
-    return kind === 'blockInsertArt' || kind === 'blockUpdateArt';
+    return kind === 'blockInsertArt' || kind === 'blockUpdateArt' || kind === 'blockSetEventId' || kind === 'blockSetEventBackground';
 }
 
 export function isBlockReturnCommand(

@@ -5,7 +5,7 @@ export type EditTarget =
     | {
           blockKind: 'gallery';
           slot: ItemPosition | undefined;
-          kind: 'imageCaption' | 'blockCaption' | 'image' | 'eventSlot';
+          kind: 'imageCaption' | 'blockCaption' | 'image' | 'eventSlot' | 'eventPickEvent' | 'eventPickBackground';
       }
     | { blockKind: 'text'; kind: 'title' | 'body' }
     | { blockKind: 'cta'; kind: 'label' | 'url' }

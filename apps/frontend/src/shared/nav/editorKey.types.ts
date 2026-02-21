@@ -1,6 +1,6 @@
 import { JumpResult } from './journey.types';
 
-export type EditorKind = 'stream' | 'block' | 'catalog' | 'hopper';
+export type EditorKind = 'stream' | 'block' | 'catalog' | 'hopper' | 'events';
 
 export type EditorKey =
     | { kind: 'stream'; id: string }

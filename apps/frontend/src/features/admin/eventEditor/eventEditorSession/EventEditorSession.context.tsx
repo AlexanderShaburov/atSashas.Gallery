@@ -3,10 +3,15 @@
 import type { EventData, EventStatus } from '@/entities/event';
 import type { Localized, Money } from '@/entities/common';
 import { useRefreshEvents } from '@/shared/EventsProvider/EventsProvider';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import {
+    useArrival,
+    useJourneyStatus,
+    useReturnHome,
+} from '@/features/admin/shared/transporter/transporter';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { eventsAdminApi, type CreateEventPayload } from '../api/eventsAdminApi';
 
-type ScreenMode = 'list' | 'edit' | 'create';
+type ScreenMode = 'list' | 'edit' | 'create' | 'select';
 
 export interface EventDraft {
   id?: string;
@@ -94,6 +99,9 @@ export interface EventEditorSession {
   deleteEvent: (id: string) => Promise<void>;
   back: () => void;
   refreshEvents: () => Promise<void>;
+  isJourney: boolean;
+  selectAndReturn: (eventId: string) => void;
+  cancelSelect: () => void;
 }
 
 const EventEditorSessionContext = createContext<EventEditorSession | undefined>(undefined);
@@ -113,6 +121,18 @@ export function EventEditorSessionProvider({ children }: { children: React.React
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Journey hooks
+  const arrival = useArrival();
+  const returnHome = useReturnHome();
+  const isJourney = useJourneyStatus('events');
+
+  // React Strict Mode protection for bootstrap
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const bootstrapRef = useRef<{ processed: boolean; ticket: any }>({
+    processed: false,
+    ticket: null,
+  });
+
   const loadEvents = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -125,9 +145,44 @@ export function EventEditorSessionProvider({ children }: { children: React.React
     }
   }, []);
 
+  // Bootstrap: check for journey ticket on mount
   useEffect(() => {
-    void loadEvents();
-  }, [loadEvents]);
+    if (bootstrapRef.current.processed) return;
+
+    const ticket = arrival('events');
+    bootstrapRef.current = { processed: true, ticket };
+
+    void (async () => {
+      await loadEvents();
+
+      if (!ticket) {
+        setScreenMode('list');
+        return;
+      }
+
+      if (!ticket.loot) {
+        // Outbound: block editor wants us to select an event
+        switch (ticket.destination.mode) {
+          case 'select':
+            setScreenMode('select');
+            return;
+          case 'edit': {
+            const id = ticket.destination.objectId;
+            if (!id) throw new Error('[Events BOOTSTRAP]: outbound edit missing objectId');
+            const catalog = await eventsAdminApi.getAll();
+            const found = Object.values(catalog.events).find((e) => e.id === id);
+            if (found) {
+              setDraft(eventToFormDraft(found));
+              setScreenMode('edit');
+            }
+            return;
+          }
+        }
+      }
+      // Events editor is always a leaf — no return handling needed
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const selectEvent = useCallback(
     (id: string) => {
@@ -199,6 +254,19 @@ export function EventEditorSessionProvider({ children }: { children: React.React
     [],
   );
 
+  const selectAndReturn = useCallback(
+    (eventId: string) => {
+      if (!isJourney) return;
+      returnHome('events', { ok: true, id: eventId });
+    },
+    [isJourney, returnHome],
+  );
+
+  const cancelSelect = useCallback(() => {
+    if (!isJourney) return;
+    returnHome('events', { ok: false, reason: 'cancel' });
+  }, [isJourney, returnHome]);
+
   const session: EventEditorSession = {
     events,
     screenMode,
@@ -212,6 +280,9 @@ export function EventEditorSessionProvider({ children }: { children: React.React
     deleteEvent,
     back,
     refreshEvents: loadEvents,
+    isJourney,
+    selectAndReturn,
+    cancelSelect,
   };
 
   return (

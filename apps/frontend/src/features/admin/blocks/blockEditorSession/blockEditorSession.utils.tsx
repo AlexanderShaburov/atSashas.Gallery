@@ -25,6 +25,8 @@ export const hitToTarget = (e: BlockHitEvent): EditTarget => {
                 case 'image':
                 case 'imageCaption':
                 case 'eventSlot':
+                case 'eventPickEvent':
+                case 'eventPickBackground':
                     return {
                         blockKind: 'gallery',
                         kind: e.hit.kind,

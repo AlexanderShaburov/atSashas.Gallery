@@ -4,6 +4,7 @@ import AdminLayout from '@/app/layouts/AdminLayout';
 import PublicLayout from '@/app/layouts/PublicLayout';
 import { RequireAuth } from '@/app/guards/RequireAuth';
 import { BlockEditorSessionProvider } from '@/features/admin/blocks/blockEditorSession/BlockEditorSession.context';
+import { EventEditorSessionProvider } from '@/features/admin/eventEditor/eventEditorSession/EventEditorSession.context';
 import { CatalogEditorSessionProvider } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
 import { EditorWorkspaceProvider } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { StreamEditorSessionProvider } from '@/features/admin/streams/streamEditorSession/StreamEditorSession.context';
@@ -125,7 +126,11 @@ export const router = createBrowserRouter([
             },
             {
                 path: 'events',
-                element: <EventsPage />,
+                element: (
+                    <EventEditorSessionProvider>
+                        <EventsPage />
+                    </EventEditorSessionProvider>
+                ),
             },
             {
                 path: 'public-stream',

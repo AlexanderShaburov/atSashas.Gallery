@@ -1,6 +1,5 @@
 // src/features/admin/blocks/ui/BlockPreview/GalleryComponent.tsx
 
-import type { ArtItemData } from '@/entities/art';
 import {
     Block,
     BlockParent,
@@ -23,9 +22,8 @@ import { TEMPLATE_BLOCKS } from '@/features/admin/blocks/ui/BlockTemplates/templ
 import { GalleryEventSlot } from '@/features/admin/shared/ui/BlockPreview/GalleryEventSlot';
 import { InlineEditableText } from '@/features/admin/shared/ui/BlockPreview';
 import { SlotChoiceMenu } from '@/features/admin/shared/ui/BlockPreview/SlotChoiceMenu';
-import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { useResolveArtAdaptive } from '@/shared/ArtCatalogProvider/useResolveArtAdaptive';
-import { JSX, ReactNode, useMemo, useState } from 'react';
+import { JSX, ReactNode, useState } from 'react';
 
 const ITEM_POSITIONS: Record<GalleryLayout, ItemPosition[]> = {
     single: ['Center'],
@@ -68,14 +66,6 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Pr
     const imgPositions = ITEM_POSITIONS[item.layout];
     const resolveArt = useResolveArtAdaptive();
     const [slotChoice, setSlotChoice] = useState<{ pos: ItemPosition; top: number; left: number } | null>(null);
-
-    // Art catalog list for event slot background picker
-    const workspace = useEditorWorkspace();
-    const artItems = useMemo<ArtItemData[]>(() => {
-        const catalog = workspace.currentArtCatalog;
-        if (!catalog) return [];
-        return Object.values(catalog.items);
-    }, [workspace.currentArtCatalog]);
 
     const tpl = TEMPLATE_BLOCKS.find((t) => t.kind === item.blockKind && t.layout === item.layout);
     const label = tpl?.label;
@@ -261,43 +251,31 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Pr
                         <div
                             key={`event-${pos}`}
                             className={`${slotBaseClass} blk-gallery__slot-event`}
-                            role="button"
-                            onClick={(e) =>
-                                onHit({
-                                    block: item,
-                                    hit: Hit.galleryEventSlot(pos),
-                                    nativeEvent: e,
-                                })
-                            }
                         >
                             <GalleryEventSlot
                                 item={blockItem}
                                 isEditor={isEditor}
-                                artItems={artItems}
                                 resolvedBgSrc={
                                     blockItem.backgroundArtId
                                         ? resolveArt(blockItem.backgroundArtId)?.images.preview
                                               .jpeg
                                         : undefined
                                 }
-                                onChangeEvent={(eventId) => {
-                                    const newItems = item.items.map((i) =>
-                                        i.position === pos && isEventItem(i)
-                                            ? { ...i, eventId }
-                                            : i,
-                                    );
-                                    setValue({ ...item, items: newItems });
+                                onPickEvent={() => {
+                                    onHit({
+                                        block: item,
+                                        hit: Hit.galleryEventPickEvent(pos),
+                                        nativeEvent:
+                                            new MouseEvent('click') as unknown as React.MouseEvent<HTMLElement>,
+                                    });
                                 }}
-                                onChangeBackground={(artId) => {
-                                    const newItems = item.items.map((i) =>
-                                        i.position === pos && isEventItem(i)
-                                            ? {
-                                                  ...i,
-                                                  backgroundArtId: artId || undefined,
-                                              }
-                                            : i,
-                                    );
-                                    setValue({ ...item, items: newItems });
+                                onPickBackground={() => {
+                                    onHit({
+                                        block: item,
+                                        hit: Hit.galleryEventPickBackground(pos),
+                                        nativeEvent:
+                                            new MouseEvent('click') as unknown as React.MouseEvent<HTMLElement>,
+                                    });
                                 }}
                             />
                         </div>

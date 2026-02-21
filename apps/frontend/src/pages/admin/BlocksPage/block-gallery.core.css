@@ -297,21 +297,6 @@
     width: 100%;
 }
 
-.blk-gallery__event-bg-btn {
-    margin-top: 0.15rem;
-    padding: 0.15rem 0.5rem;
-    font-size: 0.5rem;
-    border: 1px solid var(--border);
-    border-radius: 0.25rem;
-    background: var(--card-bg);
-    color: var(--muted);
-    cursor: pointer;
-}
-
-.blk-gallery__event-bg-btn:hover {
-    color: var(--text);
-    border-color: var(--text);
-}
 
 .blk-gallery__event-title {
     font-size: 0.7rem;
@@ -337,16 +322,23 @@
     font-size: 0.6rem;
 }
 
-.blk-gallery__event-select {
-    width: 90%;
-    max-width: 160px;
-    margin-top: 0.25rem;
-    padding: 0.2rem 0.3rem;
-    font-size: 0.55rem;
+.blk-gallery__event-pick-btn {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.5rem;
     border: 1px solid var(--border);
     border-radius: 0.25rem;
     background: var(--card-bg);
+    color: var(--muted);
+    cursor: pointer;
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.blk-gallery__event-pick-btn:hover {
     color: var(--text);
+    border-color: var(--text);
 }
 
 /* Inline editor input should look like the caption itself */

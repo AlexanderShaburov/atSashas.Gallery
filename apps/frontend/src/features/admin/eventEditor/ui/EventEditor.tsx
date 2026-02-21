@@ -15,6 +15,46 @@ function slugify(text: string): string {
     .replace(/-+/g, '-');
 }
 
+function EventSelectList() {
+  const { events, isLoading, selectAndReturn, cancelSelect } = useEventEditorSession();
+
+  if (isLoading) {
+    return <div className="eve__loading">Loading events...</div>;
+  }
+
+  return (
+    <>
+      <div className="eve__header">
+        <h1 className="eve__title">Select Event</h1>
+        <div className="eve__actions">
+          <button className="eve__btn eve__btn--secondary" onClick={cancelSelect}>
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      {events.length === 0 ? (
+        <div className="eve__empty">No events available.</div>
+      ) : (
+        <div className="eve__list">
+          {events.map((ev) => (
+            <div key={ev.id} className="eve__item" onClick={() => selectAndReturn(ev.id)}>
+              <div className="eve__item-info">
+                <h3 className="eve__item-title">{ev.title.en || ev.id}</h3>
+                <div className="eve__item-meta">
+                  {ev.dateTime && new Date(ev.dateTime).toLocaleDateString()}
+                  {ev.location && ` \u2022 ${ev.location}`}
+                </div>
+              </div>
+              <span className={`eve__badge eve__badge--${ev.status}`}>{ev.status}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 function EventList() {
   const { events, isLoading, selectEvent, createNew } = useEventEditorSession();
 
@@ -266,6 +306,14 @@ export function EventEditor() {
   const { screenMode } = useEventEditorSession();
 
   return (
-    <div className="eve">{screenMode === 'list' ? <EventList /> : <EventForm />}</div>
+    <div className="eve">
+      {screenMode === 'select' ? (
+        <EventSelectList />
+      ) : screenMode === 'list' ? (
+        <EventList />
+      ) : (
+        <EventForm />
+      )}
+    </div>
   );
 }

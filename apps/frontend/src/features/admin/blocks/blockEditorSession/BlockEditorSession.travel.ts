@@ -1,4 +1,4 @@
-import type { GalleryArtItem } from '@/entities/block';
+import type { GalleryArtItem, ItemPosition } from '@/entities/block';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { generateId } from '@/shared/lib/id/generateId';
 import { JourneyTicket } from '@/shared/nav';
@@ -94,4 +94,50 @@ export function printoutTicket(hit: BlockHitEvent): JourneyTicket | undefined {
             }
         }
     }
+}
+
+export function createEventPickTicket(blockId: string, position: ItemPosition): JourneyTicket {
+    return {
+        journeyId: generateId('travel'),
+        destination: {
+            editor: 'events',
+            mode: 'select',
+        },
+        returnTo: {
+            editor: 'block',
+            mode: 'edit',
+            objectId: blockId,
+        },
+        phase: 'outbound',
+        nonce: createNonce(),
+        createdAt: nowIso(),
+        returnEffect: {
+            kind: 'blockSetEventId',
+            blockId,
+            position,
+        },
+    };
+}
+
+export function createBackgroundPickTicket(blockId: string, position: ItemPosition): JourneyTicket {
+    return {
+        journeyId: generateId('travel'),
+        destination: {
+            editor: 'catalog',
+            mode: 'select',
+        },
+        returnTo: {
+            editor: 'block',
+            mode: 'edit',
+            objectId: blockId,
+        },
+        phase: 'outbound',
+        nonce: createNonce(),
+        createdAt: nowIso(),
+        returnEffect: {
+            kind: 'blockSetEventBackground',
+            blockId,
+            position,
+        },
+    };
 }

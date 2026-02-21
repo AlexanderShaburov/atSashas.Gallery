@@ -1,5 +1,6 @@
 // src/shared/nav/ReturnStack.types.ts
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
+import type { ItemPosition } from '@/entities/block';
 import { EditorKind } from './editorKey.types';
 import { GridItem } from '@/entities/grid';
 
@@ -57,6 +58,16 @@ export type ReturnCommand =
     | {
           kind: 'streamSelectThumbnail';
           streamId: string;
+      }
+    | {
+          kind: 'blockSetEventId';
+          blockId: string;
+          position: ItemPosition;
+      }
+    | {
+          kind: 'blockSetEventBackground';
+          blockId: string;
+          position: ItemPosition;
       };
 
 // Phase of journey:

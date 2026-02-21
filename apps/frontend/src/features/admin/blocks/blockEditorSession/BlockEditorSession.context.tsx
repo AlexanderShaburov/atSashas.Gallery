@@ -41,7 +41,11 @@ import {
     useUnsavedChanges,
 } from '@/shared/state';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { printoutTicket } from './BlockEditorSession.travel';
+import {
+    printoutTicket,
+    createEventPickTicket,
+    createBackgroundPickTicket,
+} from './BlockEditorSession.travel';
 import { hitToTarget, instantiateFromTemplate } from './blockEditorSession.utils';
 import { resolveBlockBootstrapData } from './bootstrap';
 import {
@@ -460,6 +464,56 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         return;
                     }
 
+                    case 'blockSetEventId': {
+                        console.log(`[INIT SESSION]: return instruction recognized as blockSetEventId`);
+                        const loot = ticket.loot;
+                        if (!loot?.ok) {
+                            // User cancelled — just restore editor
+                            setModeStack(['select', 'edit']);
+                            return;
+                        }
+                        // Find event item at position and set eventId
+                        const pos = (effect as { position: string }).position;
+                        if (block?.draft && block.draft.blockKind === 'gallery') {
+                            const { isEventItem } = await import('./blockEditorSession.utils');
+                            const updatedItems = block.draft.items.map((item) =>
+                                item.position === pos && isEventItem(item)
+                                    ? { ...item, eventId: loot.id }
+                                    : item,
+                            );
+                            const newDraft = { ...block.draft, items: updatedItems };
+                            editSessionsDataStore.saveDraft(key, newDraft);
+                        }
+                        setModeStack(['select', 'edit']);
+                        return;
+                    }
+
+                    case 'blockSetEventBackground': {
+                        console.log(`[INIT SESSION]: return instruction recognized as blockSetEventBackground`);
+                        const loot = ticket.loot;
+                        if (!loot?.ok) {
+                            setModeStack(['select', 'edit']);
+                            return;
+                        }
+                        const pos = (effect as { position: string }).position;
+                        if (block?.draft && block.draft.blockKind === 'gallery') {
+                            const { isEventItem } = await import('./blockEditorSession.utils');
+                            const updatedItems = block.draft.items.map((item) =>
+                                item.position === pos && isEventItem(item)
+                                    ? { ...item, backgroundArtId: loot.id }
+                                    : item,
+                            );
+                            const newDraft = { ...block.draft, items: updatedItems };
+                            editSessionsDataStore.saveDraft(key, newDraft);
+
+                            // Refresh catalog to resolve the new background art image
+                            const freshCatalog = await getCatalog();
+                            gCtxt.setArtCatalog(freshCatalog);
+                        }
+                        setModeStack(['select', 'edit']);
+                        return;
+                    }
+
                     default: {
                         // Should be unreachable due to isBlockReturnCommand, but keep as safety net
                         throw new Error(`[Bootstrap]: Unsupported returnEffect kind`);
@@ -630,6 +684,16 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                     editor: 'block',
                     objectId: draft?.id,
                 };
+                dispatch(ticket, home);
+            } else if (tg.blockKind === 'gallery' && tg.kind === 'eventPickEvent' && tg.slot) {
+                if (!draft?.id) return;
+                const ticket = createEventPickTicket(draft.id, tg.slot);
+                const home: JourneyHome = { editor: 'block', objectId: draft.id };
+                dispatch(ticket, home);
+            } else if (tg.blockKind === 'gallery' && tg.kind === 'eventPickBackground' && tg.slot) {
+                if (!draft?.id) return;
+                const ticket = createBackgroundPickTicket(draft.id, tg.slot);
+                const home: JourneyHome = { editor: 'block', objectId: draft.id };
                 dispatch(ticket, home);
             } else {
                 setCurrentTarget(tg);
