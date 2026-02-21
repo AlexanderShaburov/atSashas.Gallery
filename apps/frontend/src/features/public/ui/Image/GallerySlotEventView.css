@@ -6,7 +6,7 @@
 /* ── Container ── */
 .gse {
     position: relative;
-    container-type: size;
+    container-type: inline-size;
     width: 100%;
     height: 100%;
     box-sizing: border-box;
