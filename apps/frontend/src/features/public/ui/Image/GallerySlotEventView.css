@@ -60,6 +60,15 @@
     padding: 24% 8% 6%;
 }
 
+/* Wide slots (e.g. Right in triptychLeft) — reduce vertical padding
+   so the button isn't clipped when the slot has square proportions.
+   Uses width query (not cqh) for Safari compatibility. */
+@container (min-width: 400px) {
+    .gse__content {
+        padding: 8% 8% 3%;
+    }
+}
+
 /* ── Header zone — ~25% ── */
 .gse__header {
     display: flex;
