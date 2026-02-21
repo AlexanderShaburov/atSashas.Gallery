@@ -162,8 +162,12 @@ export function PublicStreamEditor() {
         .filter((s) => s !== undefined);
 
     const handlePreview = () => {
-        localStorage.setItem('__preview_streams', JSON.stringify(orderedPublicStreams));
-        window.open('/?preview=true', '_blank', 'noopener,noreferrer');
+        // Save draft stream IDs to localStorage for the preview page to read.
+        // Only IDs are stored (always available), not full StreamIndexItem[]
+        // which would depend on gCtx.streamsIndex being loaded.
+        const draftIds = publicStream?.streamIds ?? [];
+        localStorage.setItem('__preview_stream_ids', JSON.stringify(draftIds));
+        window.open('/preview', '_blank', 'noopener,noreferrer');
     };
 
     return (

@@ -7,7 +7,7 @@ from .routers.hopper import hopper, upload
 
 from app.routers.art import catalog
 from app.routers.auth import auth
-from app.routers.block import blocks
+from app.routers.block import blocks, public_blocks
 from app.routers.streams import streams
 from app.routers.enrollments import enrollments
 from app.routers.events import events
@@ -70,6 +70,7 @@ app.include_router(upload.router)
 app.include_router(hopper.router)
 app.include_router(catalog.router)
 app.include_router(blocks.router)
+app.include_router(public_blocks.public_router)  # Public blocks endpoint
 app.include_router(streams.public_router)  # Public streams endpoint
 app.include_router(streams.router)  # Admin streams endpoints
 app.include_router(public_stream.public_router)  # Public endpoint

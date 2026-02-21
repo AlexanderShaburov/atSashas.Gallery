@@ -2,8 +2,8 @@ import '@/pages/public/Home.css';
 import { usePublicStream } from '@/features/public/hooks/usePublicStream';
 import { Link } from 'react-router-dom';
 
-export default function HomePage() {
-    const { streams, loading, error, isPreview } = usePublicStream();
+export default function HomePage({ mode = 'public' }: { mode?: 'public' | 'preview' }) {
+    const { streams, loading, error, isPreview } = usePublicStream(mode);
 
     if (loading) {
         return (
@@ -29,6 +29,8 @@ export default function HomePage() {
         );
     }
 
+    const linkPrefix = isPreview ? '/preview' : '/gallery';
+
     return (
         <section className="home">
             {isPreview && (
@@ -46,7 +48,7 @@ export default function HomePage() {
                     return (
                         <nav key={stream.streamId} className="home-nav">
                             <Link
-                                to={`/gallery/${stream.streamId}`}
+                                to={`${linkPrefix}/${stream.streamId}`}
                                 className="tile"
                                 aria-label={stream.title}
                                 style={

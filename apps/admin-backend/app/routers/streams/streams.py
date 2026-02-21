@@ -57,6 +57,22 @@ async def get_published_streams() -> list[StreamIndexItem]:
         return []
 
 
+@public_router.get("/{stream_id}", response_model=StreamData)
+async def get_published_stream(stream_id: str) -> StreamData:
+    """Get a single stream — only if published (in PublicStream list)."""
+    public_stream = await public_stream_repo.get()
+    if stream_id not in public_stream.streamIds:
+        raise HTTPException(
+            status_code=404, detail=f"Stream not found: {stream_id}"
+        )
+    try:
+        return await repo.get_stream(stream_id)
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404, detail=f"Stream not found: {stream_id}"
+        )
+
+
 # --- Admin Endpoints ---
 
 

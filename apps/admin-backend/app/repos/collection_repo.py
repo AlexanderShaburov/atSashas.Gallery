@@ -31,6 +31,11 @@ class BlockCollectionRepo:
                 indent=2,
             )
 
+    async def read(self) -> BlockCollection:
+        """Read-only access — does NOT re-save."""
+        async with self._lock:
+            return self._load()
+
     @asynccontextmanager
     async def session(self) -> AsyncIterator[BlockCollection]:
         async with self._lock:

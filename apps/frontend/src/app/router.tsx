@@ -39,6 +39,20 @@ function PublicRoot() {
     );
 }
 
+// Preview root wrap (auth required, public layout):
+// eslint-disable-next-line react-refresh/only-export-components
+function PreviewRoot() {
+    return (
+        <RequireAuth>
+            <ArtCatalogLoader mode="admin">
+                <EventsLoader>
+                    <PublicLayout />
+                </EventsLoader>
+            </ArtCatalogLoader>
+        </RequireAuth>
+    );
+}
+
 // Admin root wrap:
 // eslint-disable-next-line react-refresh/only-export-components
 function AdminRoot() {
@@ -65,6 +79,14 @@ export const router = createBrowserRouter([
             { path: 'about', element: <AboutPage /> },
             { path: 'enrollment/success', element: <EnrollmentSuccessPage /> },
             { path: 'enrollment/cancel', element: <EnrollmentCancelPage /> },
+        ],
+    },
+    {
+        path: '/preview',
+        element: <PreviewRoot />,
+        children: [
+            { index: true, element: <HomePage mode="preview" /> },
+            { path: ':slug', element: <GalleryPage mode="preview" /> },
         ],
     },
     {

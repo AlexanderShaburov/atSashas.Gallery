@@ -1,3 +1,5 @@
+// apps/frontend/src/features/public/hooks/useGallery.ts
+
 import type { StreamData } from '@/entities/stream';
 import { useEffect, useState } from 'react';
 
@@ -7,7 +9,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
  * Hook to load a single stream for public gallery page
  * Uses the API endpoint for consistency with usePublicStream
  */
-export function useGallery(slug: string) {
+export function useGallery(slug: string, mode: 'public' | 'preview' = 'public') {
     const [stream, setStream] = useState<StreamData | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -20,8 +22,8 @@ export function useGallery(slug: string) {
                 setLoading(true);
                 setError(null);
 
-                // Load stream via API (consistent with usePublicStream)
-                const url = `${API_BASE}/admin/streams/${slug}`;
+                const apiPath = mode === 'preview' ? 'admin/streams' : 'public/streams';
+                const url = `${API_BASE}/${apiPath}/${slug}`;
                 const res = await fetch(url);
 
                 if (!res.ok) {
@@ -53,7 +55,7 @@ export function useGallery(slug: string) {
         return () => {
             cancelled = true;
         };
-    }, [slug]);
+    }, [slug, mode]);
 
     return { stream, loading, error };
 }

@@ -3,17 +3,21 @@ import { GalleryStream } from '@/features/public/ui/GalleryStream/GalleryStream'
 import { JSX } from 'react';
 import { useParams } from 'react-router-dom';
 
-export default function GalleryPage(): JSX.Element {
+export default function GalleryPage({
+    mode = 'public',
+}: {
+    mode?: 'public' | 'preview';
+}): JSX.Element {
     const { slug = '' } = useParams();
 
-    const { stream, loading, error } = useGallery(slug);
+    const { stream, loading, error } = useGallery(slug, mode);
 
     if (loading) return <div className="infoContainer">Loading...</div>;
     if (error) return <div className="infoContainer">Error: {error}</div>;
     if (!stream) return <div className="infoContainer">Not found.</div>;
     return (
         <div className="???">
-            <GalleryStream {...stream} />
+            <GalleryStream stream={stream} mode={mode} />
         </div>
     );
 }
