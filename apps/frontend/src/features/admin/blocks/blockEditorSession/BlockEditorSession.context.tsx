@@ -5,16 +5,18 @@ import type {
     BlockEditorScreenMode,
     BlocksCollectionJSON,
     EditTarget,
+    GalleryBlock,
     GalleryBlockItem,
+    ItemPosition,
 } from '@/entities/block';
 import type { UiErrorState } from '@/entities/common';
 import {
     addNewBlock,
-    deleteBlock,
     getCollection,
     updateBlock,
 } from '@/features/admin/blocks/api/blocksApi';
 import { getCatalog } from '@/features/admin/catalogEditor/api';
+import { refreshStreamsIndex } from '@/features/admin/streams/api/streamsApi';
 import { normalizeBlock } from '@/features/admin/blocks/blockEditorSession';
 import type {
     BlockEditorSession,
@@ -24,8 +26,6 @@ import { BlockEditorCtx } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import { useBlockDependencyAwareDeletion } from '@/features/admin/blocks/hooks/useBlockDependencyAwareDeletion';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { validateBlockForm } from '@/features/admin/blocks/utils';
-import type { EditorWorkspaceContextValue } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
-import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import {
     useArrival,
     useDispatch,
@@ -35,9 +35,12 @@ import {
 import { deepEqual } from '@/shared/lib/checkers/checkers';
 import { EditorKey, JourneyHome, SerializableBlockHitEvent } from '@/shared/nav';
 import {
+    blocksCollectionStore,
+    catalogStore,
     editSessionsDataStore,
     unsavedChangesStore,
     useSessionDataStore,
+    useStoreData,
     useUnsavedChanges,
 } from '@/shared/state';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -56,14 +59,12 @@ type ProviderProps = { children: ReactNode };
 type SaveResult = { ok: true; id: string } | { ok: false };
 
 export function BlockEditorSessionProvider({ children }: ProviderProps) {
-    // Global context
-    const gCtxt: EditorWorkspaceContextValue = useEditorWorkspace();
+    // Domain stores (data plane)
+    const collection = useStoreData(blocksCollectionStore);
+
     //*******************************************************/
     // Core state:
     const [selectedBlockId, setSelectedBlockId] = useState<string | undefined>(undefined);
-    // 2. Blocks collection
-    const [collection, setCollection] = useState<BlocksCollectionJSON | undefined>(undefined);
-    // 4. Editor block draft:
     // 5. Editor mode, used to decide if show grid or single block editor:
     const [modeStack, setModeStack] = useState<BlockEditorScreenMode[]>(['select']);
     // 6. Target used to choose if input has to shown on place of text in inlineEditor
@@ -73,16 +74,12 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     // UI / derived state
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(false);
-    // editorIsReady is to identify if now a block is under editing!!!
-    // LEGACY !!!!!!!!!!!!!
-    // const [editorIsReady, setEditorIsReady] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [pendingSelection, setPendingSelection] = useState<SerializableBlockHitEvent | undefined>(
         undefined,
     );
     // Errors processing preparation, unimplemented.
     const [uiError, setUiError] = useState<UiErrorState | undefined>(undefined);
-    // to be replaced with external stor!!!!
     //*******************************************************/
 
     // React Strict Mode protection for bootstrap
@@ -99,7 +96,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         ? { kind: 'block', id: selectedBlockId }
         : undefined;
     const sessionData = useSessionDataStore<Block>(key);
-    const { storeData, setDraft, commit, clear } = sessionData;
+    const { storeData, setDraft, commit } = sessionData;
     const draft = storeData?.draft;
     const snapshot = storeData?.snapshot;
 
@@ -177,10 +174,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
     // ************** STACK CONTROL **************
 
-    // TODO: pushMode will be used when multi-step editing is implemented
-    // const pushMode = (next: BlockEditorScreenMode) => {
-    //     setModeStack((s) => (s[s.length - 1] === next ? s : [...s, next]));
-    // };
     const onEscape = useCallback(() => {
         setModeStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
     }, []);
@@ -202,8 +195,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             const cl = await getCollection();
             console.log(`[BlockEditorSession.context][refreshCollection] cl:`);
             console.dir(cl);
-            setCollection(cl);
-            gCtxt.currentBlocksCollection = cl;
+            blocksCollectionStore.set(cl);
 
             return cl;
         } catch (e) {
@@ -222,7 +214,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     }, []);
 
     // Store refreshCollection in ref for deletion hook
-    refreshCallbackRef.current = refreshCollection;
+    refreshCallbackRef.current = async () => void (await refreshCollection());
 
     // Inline editable text helper:
     const isEditingTarget = useCallback(
@@ -271,14 +263,13 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         // Mark as processed and store ticket
         bootstrapRef.current = { processed: true, ticket };
 
-        let cl = undefined;
+        let cl: BlocksCollectionJSON | undefined = undefined;
         (async () => {
             try {
                 setLoading(true);
                 // Refresh collection state
                 cl = await refreshCollection();
                 if (!cl) return;
-                setCollection(cl);
             } catch (e) {
                 throw new Error(`Error loading blocks collection ${e}`);
             } finally {
@@ -345,7 +336,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
                     await Promise.all([
                         refreshCollection(),
-                        gCtxt.refreshStreams(),
+                        refreshStreamsIndex(),
                     ]);
 
                     console.log(`[Block BOOTSTRAP]: All data refreshed`);
@@ -395,18 +386,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 console.log(`[INIT SESSION]: saved block read as:`);
                 console.dir(block.draft);
 
-                /*                   
-                    3) Ensure collection has the block and restore draft+snapshot into external store
-                    if (!cl.blocks)
-                    throw new Error('[Bootstrap]: Collection.blocks does not exist');
-                    if (!block)
-                    throw new Error(`[Bootstrap]: Block not found in collection: ${blockId}`);
-                    
-                    const key: EditorKey = { kind: 'block', id: blockId };
-                    editSessionsDataStore.saveDraft(key, block);
-                    editSessionsDataStore.setSnapshot(key, block);
-                    */
-
                 // 4) Execute return instruction
                 switch (effect.kind) {
                     case 'blockInsertArt': {
@@ -441,7 +420,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         // CRITICAL: Refresh catalog to include newly created art item
                         // This ensures the gallery can render the art item that was just created
                         const freshCatalog = await getCatalog();
-                        gCtxt.setArtCatalog(freshCatalog);
+                        catalogStore.set(freshCatalog);
                         console.log(`[INIT SESSION]: catalog refreshed with new art item`);
 
                         // Set edited block id
@@ -451,7 +430,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         console.log(
                             `[INIT SESSION]: screen mode set to edit, and block id is: ${newDraft.id}`,
                         );
-                        // setIsJourney(false);
                         return;
                     }
 
@@ -460,7 +438,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         // We only open the block in edit mode.
                         setPendingSelection(undefined);
                         setModeStack(['select', 'edit']);
-                        // setIsJourney(false);
                         return;
                     }
 
@@ -508,7 +485,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
                             // Refresh catalog to resolve the new background art image
                             const freshCatalog = await getCatalog();
-                            gCtxt.setArtCatalog(freshCatalog);
+                            catalogStore.set(freshCatalog);
                         }
                         setModeStack(['select', 'edit']);
                         return;
@@ -653,24 +630,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     // edit mode onBlock click handler
     const handleEditHit = useCallback(
         (hit: BlockHitEvent) => {
-            // 🚧 Construction Yard:
-            // Here not galleries type blocks have to be processed.
-            /*
-            At the moment there are two types of reactions for clicks:
-                1. If clicked element is image -> editor makes journey to 
-                    catalog editor
-
-                2. If clicked element is editable text, it gets set as target
-                    and element switch to editable mode.
-            TO DO:
-                - check if all text element are editable;
-                - think out CTA block click behavior 
-                    - time and date: text;
-                    - place of event: text with link (point on the map: coordinates);
-                    - description: text;
-                    - images or videos ????;
-
-            */
             console.log(`[handleEditHit]: edit mode hit detected`);
             console.dir(hit);
             if (currentStack.screenMode !== 'edit') return;
@@ -760,70 +719,45 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         setCurrentTarget(undefined);
     }, []);
 
-    // Selected (journey-like) ArtItem to editing block to pos:
-    // const setSelectedArtItem = useCallback(
-    //     (item: GridItem | undefined) => {
-    //         console.log(`[setSelectedArtItem]: Called wit item:`);
-    //         console.dir(item);
+    /** Add event placeholder at a gallery slot position */
+    const addEventPlaceholder = useCallback(
+        (pos: ItemPosition) => {
+            if (!draft || draft.blockKind !== 'gallery') return;
+            const newEventItem: GalleryBlockItem = {
+                kind: 'eventCta',
+                eventId: '',
+                position: pos,
+            };
+            setDraft({ ...draft, items: [...draft.items, newEventItem] });
+        },
+        [draft, setDraft],
+    );
 
-    //         if (!item || !item.id) {
-    //             setPendingSelection(undefined);
-    //             unHit();
-    //             return;
-    //         }
-    //         console.log(`[setSelectedArtItem]: Called with status:`);
+    /** Update a gallery item caption at a given position */
+    const updateItemCaption = useCallback(
+        (pos: ItemPosition, caption: string) => {
+            if (!draft || draft.blockKind !== 'gallery') return;
+            const newItems = (draft as GalleryBlock).items.map((i) =>
+                i.position === pos
+                    ? { ...i, caption: { ...('caption' in i ? i.caption ?? {} : {}), en: caption } }
+                    : i,
+            );
+            setDraft({ ...draft, items: newItems });
+        },
+        [draft, setDraft],
+    );
 
-    //         console.dir('item:');
-    //         console.dir(item);
-    //         console.dir('pendingSelection:');
-    //         console.dir(pendingSelection);
-    //         if (!gCtxt.currentArtCatalog)
-    //             throw new Error('[setSelectedArtItem]: Catalog not loaded yet');
-    //         if (!gCtxt.currentArtCatalog.items[item.id])
-    //             throw new Error(
-    //                 '[setSelectedArtItem]: Selected ArtItem not found in current catalog',
-    //             );
-    //         if (
-    //             pendingSelection &&
-    //             pendingSelection.hit.blockKind === 'gallery' &&
-    //             pendingSelection.hit.kind === 'image' &&
-    //             pendingSelection.block.blockKind === 'gallery'
-    //         ) {
-    //             console.log(`[setSelectedArtItem]: All conditions met`);
-    //             const next: GalleryBlockItem = {
-    //                 artId: item.id,
-    //                 position: pendingSelection.hit.slot,
-    //                 caption: { en: '' },
-    //             };
-    //             const idx = findArtItemByPos(pendingSelection, next.position);
-    //             if (!idx) {
-    //                 throw new Error(`Image selected for wrong block type`);
-    //             }
-    //             let nextItems = [];
-    //             console.log(`[setSelectedArtItem]: Selected blockItem found with index ${idx}`);
-
-    //             // If block item with pos not found ?????
-    //             if (idx === -1) {
-    //                 nextItems = [...pendingSelection.block.items, next];
-    //             } else {
-    //                 nextItems = pendingSelection.block.items.map((it, i) =>
-    //                     i === idx ? next : it,
-    //                 );
-    //             }
-    //             const nextBlock = { ...pendingSelection.block, items: nextItems };
-
-    //             setDraft(normalizeBlock(nextBlock));
-    //             console.log(`[setSelectedArtItem]: Updated block set to:`);
-    //             console.dir(nextBlock);
-    //             pushMode('edit');
-    //             setPendingSelection(undefined);
-    //             unHit();
-    //         } else {
-    //             throw new Error(`[pendingSelected]: Received data doesn't match expected`);
-    //         }
-    //     },
-    //     [pendingSelection, gCtxt.currentArtCatalog, unHit, setDraft],
-    // );
+    /** Update the block-level caption */
+    const updateBlockCaption = useCallback(
+        (caption: string) => {
+            if (!draft || draft.blockKind !== 'gallery') return;
+            setDraft({
+                ...draft,
+                caption: { ...(draft.caption ?? {}), en: caption },
+            } as GalleryBlock);
+        },
+        [draft, setDraft],
+    );
 
     const value: BlockEditorSession = useMemo(
         () => ({
@@ -831,8 +765,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             collection,
             setDraft,
             currentStack,
-            setCollection,
-            // setSelectedArtItem,
             isDirty,
             isValid,
             canSave,
@@ -848,6 +780,9 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             updateTags,
             isEditingTarget,
             onApply,
+            addEventPlaceholder,
+            updateItemCaption,
+            updateBlockCaption,
         }),
         [
             draft,
@@ -859,8 +794,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             saving,
             uiError,
             isJourney,
-            setCollection,
-            // setSelectedArtItem,
             currentStack,
             onSaveClick,
             exit,
@@ -871,6 +804,9 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             isEditingTarget,
             onApply,
             setDraft,
+            addEventPlaceholder,
+            updateItemCaption,
+            updateBlockCaption,
         ],
     );
 

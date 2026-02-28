@@ -68,6 +68,9 @@ export type ReturnCommand =
           kind: 'blockSetEventBackground';
           blockId: string;
           position: ItemPosition;
+      }
+    | {
+          kind: 'homeInsertBlock';
       };
 
 // Phase of journey:

@@ -1,9 +1,9 @@
 // src/features/admin/streams/ui/SingleStreamEditor/SingleStreamEditor.tsx
 
 import { StreamData } from '@/entities/stream';
-import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { BlockRenderer } from '@/features/admin/shared/ui/BlockPreview/BlockRenderer';
 import { BlockWrapper } from '@/features/admin/streams/ui/Wrapper/BlockWrapper';
+import { useStoreData, blocksCollectionStore } from '@/shared/state';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
 import './SingleStreamEditor.css';
 
@@ -25,8 +25,7 @@ type Props = {
 };
 
 export function SingleStreamEditor({ stream, threeDotMenu, editBlock, toolbarProps, toolbarTools }: Props) {
-    const gCtx = useEditorWorkspace();
-    const collection = gCtx.currentBlocksCollection?.blocks ?? {};
+    const collection = useStoreData(blocksCollectionStore)?.blocks ?? {};
 
     const threeDot = useThreeDotController<{ streamId: string; blockId: string }>({
         buildOwner: ({ streamId, blockId }) => ({ kind: 'stream', streamId, blockId }),
@@ -60,17 +59,6 @@ export function SingleStreamEditor({ stream, threeDotMenu, editBlock, toolbarPro
         [],
     );
 
-    // Move block to the top
-    // Move block up to one position
-    // ---------
-    // Insert block after
-    // Edit block
-    // Replace block
-    // Delete block
-    // ---------
-    // Move block down to one position
-    // Move block to the end
-    //
     // Close only the menu on Escape (don't close the editor here)
 
     useEffect(() => {

@@ -14,24 +14,23 @@ import { artItemToGridItem } from '@/features/admin/shared/ui/ArtItemGrid/utils'
 import { bindToolbarCtx } from '@/pages/admin/catalogEditorPage/catalogEditor.adapter';
 import { ToolbarCtx, ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export default function CatalogEditorPage() {
     const {
         editorProps,
         toolbarModel,
         catalog,
-        // draft,
         onEscape,
         editorIsReady,
         isLoading,
         screenMode,
         isSelected,
+        selectedItemId,
+        selectItem,
     } = useCatalogEditorSession();
 
     const [displayGrid, setDisplayGrid] = useState<GridItem[]>([]);
-
-    const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
 
     const tbCtx: ToolbarCtx = bindToolbarCtx({ ...toolbarModel, selectedId: selectedItemId });
     const props: SAProps = {
@@ -59,21 +58,17 @@ export default function CatalogEditorPage() {
             setDisplayGrid(c_grid ?? []);
         }
     }, [catalog]);
-    const onSelectHandler = (item: GridItem | undefined): void => {
-        if (!item) return;
-        setSelectedItemId(item.id);
-    };
+
+    const onSelectHandler = useCallback(
+        (item: GridItem | undefined): void => {
+            selectItem(item?.id);
+        },
+        [selectItem],
+    );
 
     // Toolbar settings:
     const gridToolbar: ToolKey[] = ['add', 'delete', 'edit', 'exit', 'apply'];
-    // Here toolbar needed.
-    // ❗️IMPORTANT: below selected means internal ArtItemGrid state,
-    // NOT context state ❗️
-    // if not selected toolbar menu = grid menu
-    // if selected and editor is ready, menu = edit menu
 
-    // ArtItemGrid make item selected (internal), but all operation through
-    // toolbar menu
     switch (screenMode) {
         case 'edit':
             return (

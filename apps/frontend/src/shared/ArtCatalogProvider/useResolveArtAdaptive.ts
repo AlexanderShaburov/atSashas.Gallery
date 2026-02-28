@@ -1,37 +1,31 @@
 // src/shared/ArtCatalogProvider/useResolveArtAdaptive.ts
 import { ArtItemData } from '@/entities/art';
-import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { useResolveArt } from '@/shared/ArtCatalogProvider/CatalogHook';
+import { catalogStore, useStoreData } from '@/shared/state';
 
 export type ResolveArt = (id: string) => ArtItemData | undefined;
 
 /**
  * Adaptive hook that resolves art items from the correct catalog source:
- * - In admin/editor context: uses EditorWorkspaceContext.currentArtCatalog (dynamically updated)
+ * - In admin/editor context: uses catalogStore (external store, dynamically updated)
  * - In public context: uses ArtCatalogContext (static, loaded once)
  *
  * This fixes the issue where newly created art items weren't visible in the Block editor
  * because GalleryComponent was reading from the stale ArtCatalogContext instead of the
- * updated EditorWorkspaceContext.
+ * updated catalog store.
  */
 export function useResolveArtAdaptive(): ResolveArt {
-    // Try to get editor workspace context (only available in admin area)
-    let editorWorkspace;
-    try {
-        editorWorkspace = useEditorWorkspace();
-    } catch {
-        // Not in editor workspace, will fall back to public catalog
-        editorWorkspace = undefined;
-    }
+    // Read from external catalog store (populated in admin area by AdminDataPreloader)
+    const storeCatalog = useStoreData(catalogStore);
 
     // Fallback: public catalog context (from ArtCatalogLoader)
     const publicResolveArt = useResolveArt();
 
-    // If in editor workspace and it has a catalog, use that (it's dynamically updated)
-    if (editorWorkspace?.currentArtCatalog) {
-        return (artId: string) => editorWorkspace.currentArtCatalog!.items[artId];
+    // If store has catalog data, use that (it's dynamically updated)
+    if (storeCatalog) {
+        return (artId: string) => storeCatalog.items[artId];
     }
 
-    // Otherwise use public catalog (public pages or editor workspace not initialized yet)
+    // Otherwise use public catalog (public pages or store not populated yet)
     return publicResolveArt;
 }

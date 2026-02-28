@@ -97,6 +97,9 @@ export function BlockEditor() {
                             onHit={testHit}
                             setValue={session.setDraft}
                             toolbarProps={toolbarProps}
+                            addEventPlaceholder={session.addEventPlaceholder}
+                            updateItemCaption={session.updateItemCaption}
+                            updateBlockCaption={session.updateBlockCaption}
                         />
                     </div>
                 </div>

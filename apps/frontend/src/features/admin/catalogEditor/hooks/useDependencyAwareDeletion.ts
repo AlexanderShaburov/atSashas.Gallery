@@ -1,17 +1,17 @@
 // src/features/admin/catalogEditor/hooks/useDependencyAwareDeletion.ts
 
 import type { ArtItem } from '@/entities/art';
-import { deleteBlock } from '@/features/admin/blocks/api/blocksApi';
-import { deleteArtItem as deleteArtItemApi } from '@/features/admin/catalogEditor/api';
-import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import { deleteBlock, refreshBlocksCollection } from '@/features/admin/blocks/api/blocksApi';
+import { deleteArtItem as deleteArtItemApi, refreshCatalog } from '@/features/admin/catalogEditor/api';
 import { useJourneyGuard } from '@/features/admin/shared/hooks/useJourneyGuard';
 import { useDispatch } from '@/features/admin/shared/transporter/transporter';
-import { streamsApi } from '@/features/admin/streams/api/streamsApi';
+import { refreshStreamsIndex, streamsApi } from '@/features/admin/streams/api/streamsApi';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { dependencyResolver } from '@/shared/lib/dependencies';
 import { generateId } from '@/shared/lib/id/generateId';
 import type { JourneyHome, JourneyTicket } from '@/shared/nav';
 import { destructiveActionsStore } from '@/shared/state/destructiveActions.store';
+import { blocksCollectionStore, streamsIndexStore } from '@/shared/state/domain';
 import { useCallback } from 'react';
 
 /**
@@ -19,7 +19,6 @@ import { useCallback } from 'react';
  * Handles checking dependencies, showing resolution UI, and cascade deletion
  */
 export function useDependencyAwareDeletion(options?: { onRefresh?: () => Promise<void> }) {
-    const gCtx = useEditorWorkspace();
     const dispatch = useDispatch();
     const { canStartDeletion } = useJourneyGuard('catalog');
 
@@ -44,8 +43,8 @@ export function useDependencyAwareDeletion(options?: { onRefresh?: () => Promise
                 const depTree = await dependencyResolver.buildArtItemDependencyTree(
                     artItem.data.id,
                     artItem.data.title?.en || artItem.data.title?.ru || 'Untitled',
-                    gCtx.currentBlocksCollection!,
-                    gCtx.streamsIndex || [],
+                    blocksCollectionStore.get()!,
+                    streamsIndexStore.get() || [],
                 );
 
                 console.log(`[useDependencyAwareDeletion]: Dependency tree:`, depTree);
@@ -64,8 +63,8 @@ export function useDependencyAwareDeletion(options?: { onRefresh?: () => Promise
                             console.log(
                                 `[useDependencyAwareDeletion]: Art item deleted successfully`,
                             );
-                            // Refresh both global and local catalog
-                            await gCtx.refreshCatalog();
+                            // Refresh catalog store
+                            await refreshCatalog();
                             if (options?.onRefresh) {
                                 await options.onRefresh();
                             }
@@ -168,9 +167,9 @@ export function useDependencyAwareDeletion(options?: { onRefresh?: () => Promise
                         console.log(`[useDependencyAwareDeletion]: Cascade delete completed`);
                         // Refresh all relevant data
                         await Promise.all([
-                            gCtx.refreshCatalog(),
-                            gCtx.refreshBlocks(),
-                            gCtx.refreshStreams(),
+                            refreshCatalog(),
+                            refreshBlocksCollection(),
+                            refreshStreamsIndex(),
                         ]);
                         if (options?.onRefresh) {
                             await options.onRefresh();
@@ -183,7 +182,7 @@ export function useDependencyAwareDeletion(options?: { onRefresh?: () => Promise
                 destructiveActionsStore.close();
             }
         },
-        [gCtx, dispatch, canStartDeletion, options],
+        [dispatch, canStartDeletion, options],
     );
 
     return { deleteArtItem };

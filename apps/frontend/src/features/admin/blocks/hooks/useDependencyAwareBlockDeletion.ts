@@ -2,11 +2,13 @@
 
 import { useCallback } from 'react';
 import type { Block } from '@/entities/block';
-import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import { refreshBlocksCollection } from '@/features/admin/blocks/api/blocksApi';
+import { refreshStreamsIndex } from '@/features/admin/streams/api/streamsApi';
 import { useDispatch } from '@/features/admin/shared/transporter/transporter';
 import { useJourneyGuard } from '@/features/admin/shared/hooks/useJourneyGuard';
 import { dependencyResolver } from '@/shared/lib/dependencies';
 import { destructiveActionsStore } from '@/shared/state/destructiveActions.store';
+import { streamsIndexStore } from '@/shared/state/domain';
 import type { JourneyHome, JourneyTicket } from '@/shared/nav';
 import { generateId } from '@/shared/lib/id/generateId';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
@@ -17,7 +19,6 @@ import { deleteBlock as deleteBlockApi } from '@/features/admin/blocks/api/block
  * Hook that provides dependency-aware deletion for blocks
  */
 export function useDependencyAwareBlockDeletion() {
-    const gCtx = useEditorWorkspace();
     const dispatch = useDispatch();
     const { canStartDeletion } = useJourneyGuard('block');
 
@@ -39,10 +40,13 @@ export function useDependencyAwareBlockDeletion() {
             destructiveActionsStore.setPhase('checking-dependencies');
 
             try {
+                const blockTitle =
+                    ('title' in block && block.title ? String(block.title) : undefined) ||
+                    'Untitled Block';
                 const depTree = await dependencyResolver.buildBlockDependencyTree(
                     block.id,
-                    block.title || 'Untitled Block',
-                    gCtx.streamsIndex || [],
+                    blockTitle,
+                    streamsIndexStore.get() || [],
                 );
 
                 console.log(`[useDependencyAwareBlockDeletion]: Dependency tree:`, depTree);
@@ -51,7 +55,7 @@ export function useDependencyAwareBlockDeletion() {
                 if (depTree.dependents.length === 0) {
                     destructiveActionsStore.open({
                         title: 'Delete Block',
-                        message: `Delete "${block.title || block.id}"? No streams are using this block.`,
+                        message: `Delete "${blockTitle}"? No streams are using this block.`,
                         resolutionMode: 'simple',
                         confirmLabel: 'Delete',
                         run: async () => {
@@ -59,7 +63,7 @@ export function useDependencyAwareBlockDeletion() {
                         },
                         onSuccess: () => {
                             console.log(`[useDependencyAwareBlockDeletion]: Block deleted successfully`);
-                            gCtx.refreshBlocks();
+                            refreshBlocksCollection();
                         },
                     });
                     return;
@@ -67,7 +71,7 @@ export function useDependencyAwareBlockDeletion() {
 
                 // STEP 4: Has dependencies - show resolution options
                 destructiveActionsStore.open({
-                    title: `Delete "${block.title || block.id}"`,
+                    title: `Delete "${blockTitle}"`,
                     message: `This block is used in ${depTree.dependents.length} stream${depTree.dependents.length !== 1 ? 's' : ''}. Choose how to proceed:`,
                     resolutionMode: 'manual',
                     dependencies: depTree,
@@ -141,8 +145,8 @@ export function useDependencyAwareBlockDeletion() {
                     onSuccess: () => {
                         console.log(`[useDependencyAwareBlockDeletion]: Cascade delete completed`);
                         // Refresh relevant data
-                        gCtx.refreshBlocks();
-                        gCtx.refreshStreams();
+                        refreshBlocksCollection();
+                        refreshStreamsIndex();
                     },
                 });
             } catch (err) {
@@ -151,7 +155,7 @@ export function useDependencyAwareBlockDeletion() {
                 destructiveActionsStore.close();
             }
         },
-        [gCtx, dispatch, canStartDeletion],
+        [dispatch, canStartDeletion],
     );
 
     return { deleteBlock };

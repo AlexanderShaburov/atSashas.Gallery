@@ -6,6 +6,7 @@ import type {
     BlockEditorScreenMode,
     BlocksCollectionJSON,
     EditTarget,
+    ItemPosition,
 } from '@/entities/block';
 import type { UiErrorState } from '@/entities/common';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
@@ -24,13 +25,19 @@ export type BlockEditorSession = {
     setDraft: (next: Block) => void;
     // setMode: (m: BlockEditorMode) => void;
     currentStack: ScreenModeStack;
-    setCollection: (c: BlocksCollectionJSON | undefined) => void;
     // setSelectedArtItem: (i: GridItem | undefined) => void;
     onHit: (h: BlockHitEvent) => void;
     unHit: () => void;
     onDelete: () => void;
     updateTags: (t: string[]) => void;
     onApply: () => void;
+
+    /** Add event placeholder at a gallery slot position */
+    addEventPlaceholder: (pos: ItemPosition) => void;
+    /** Update a gallery item caption */
+    updateItemCaption: (pos: ItemPosition, caption: string) => void;
+    /** Update the block-level caption */
+    updateBlockCaption: (caption: string) => void;
 
     /** Editor lifecycle */
     // editorIsReady: boolean;

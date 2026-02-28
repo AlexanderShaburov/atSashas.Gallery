@@ -60,8 +60,6 @@ class DependencyResolver {
         blockId: string,
         streamsIndex: StreamIndexItem[],
     ): Promise<DependencyEdge[]> {
-        const dependents: DependencyEdge[] = [];
-
         // Load each stream to check if it contains the block
         const streamChecks = streamsIndex.map(async (streamMeta) => {
             try {
@@ -86,7 +84,7 @@ class DependencyResolver {
         });
 
         const results = await Promise.all(streamChecks);
-        return results.filter((dep): dep is DependencyEdge => dep !== null);
+        return results.filter((dep): dep is NonNullable<typeof dep> => dep !== null);
     }
 
     /**
@@ -123,7 +121,6 @@ class DependencyResolver {
         const cascadePreview = this.calculateArtItemCascade(
             affectedBlockIds,
             streamDependents,
-            streamsIndex,
         );
 
         return {
@@ -153,7 +150,7 @@ class DependencyResolver {
         // Calculate cascade preview (just remove block from streams, delete if empty)
         const cascadePreview =
             dependents.length > 0
-                ? this.calculateBlockCascade(blockId, dependents, streamsIndex)
+                ? this.calculateBlockCascade(blockId, dependents)
                 : undefined;
 
         return {
@@ -169,7 +166,6 @@ class DependencyResolver {
     private calculateArtItemCascade(
         affectedBlockIds: string[],
         streamDependents: DependencyEdge[],
-        streamsIndex: StreamIndexItem[],
     ): CascadePreview {
         const blocks = new Set(affectedBlockIds);
         const streams = new Set(streamDependents.map((dep) => dep.parent.id));
@@ -193,7 +189,6 @@ class DependencyResolver {
     private calculateBlockCascade(
         blockId: string,
         streamDependents: DependencyEdge[],
-        streamsIndex: StreamIndexItem[],
     ): CascadePreview {
         const streams = new Set(streamDependents.map((dep) => dep.parent.id));
 

@@ -1,5 +1,7 @@
 # app/routers/block/public_blocks.py
 
+from typing import Optional
+
 from fastapi import APIRouter, HTTPException, Query
 
 from app.repos.collection_repo import block_collection_repo
@@ -36,5 +38,29 @@ async def get_blocks_for_published_stream(
     return {
         bid: collection.blocks[bid]
         for bid in stream.blockIds
+        if bid in collection.blocks
+    }
+
+
+@public_router.get("/by-ids")
+async def get_blocks_by_ids(
+    ids: Optional[str] = Query(None, min_length=1),
+):
+    """
+    Return blocks by their IDs (comma-separated).
+    Used by Home page to load block tiles without a stream context.
+    No authentication required.
+    """
+    if not ids:
+        return {}
+
+    block_ids = [bid.strip() for bid in ids.split(",") if bid.strip()]
+    if not block_ids:
+        return {}
+
+    collection = await block_collection_repo.read()
+    return {
+        bid: collection.blocks[bid]
+        for bid in block_ids
         if bid in collection.blocks
     }

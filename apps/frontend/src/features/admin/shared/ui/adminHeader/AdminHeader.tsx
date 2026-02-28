@@ -1,5 +1,6 @@
 import { useAuth } from '@/features/auth/authContext';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { GuardedNavLink } from './GuardedNavLink';
 import './adminHeader.css';
 
 export function AdminHeader() {
@@ -20,7 +21,7 @@ export function AdminHeader() {
                 </div>
 
                 <nav className="admin-nav">
-                    <NavLink
+                    <GuardedNavLink
                         to="/admin"
                         end
                         className={({ isActive }) =>
@@ -28,55 +29,55 @@ export function AdminHeader() {
                         }
                     >
                         Dashboard
-                    </NavLink>
-                    <NavLink
+                    </GuardedNavLink>
+                    <GuardedNavLink
                         to="/admin/upload"
                         className={({ isActive }) =>
                             'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
                         }
                     >
                         Upload
-                    </NavLink>
-                    <NavLink
+                    </GuardedNavLink>
+                    <GuardedNavLink
                         to="/admin/catalog"
                         className={({ isActive }) =>
                             'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
                         }
                     >
                         Catalog
-                    </NavLink>
-                    <NavLink
+                    </GuardedNavLink>
+                    <GuardedNavLink
                         to="/admin/blocks"
                         className={({ isActive }) =>
                             'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
                         }
                     >
                         Blocks
-                    </NavLink>
-                    <NavLink
+                    </GuardedNavLink>
+                    <GuardedNavLink
                         to="/admin/streams"
                         className={({ isActive }) =>
                             'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
                         }
                     >
                         Streams
-                    </NavLink>
-                    <NavLink
+                    </GuardedNavLink>
+                    <GuardedNavLink
                         to="/admin/events"
                         className={({ isActive }) =>
                             'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
                         }
                     >
                         Events
-                    </NavLink>
-                    <NavLink
+                    </GuardedNavLink>
+                    <GuardedNavLink
                         to="/admin/public-stream"
                         className={({ isActive }) =>
                             'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
                         }
                     >
                         Public
-                    </NavLink>
+                    </GuardedNavLink>
                 </nav>
 
                 <div className="admin-header__user">

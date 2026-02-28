@@ -98,6 +98,12 @@
   outline-offset: 3px;
 }
 
+/* Large tile (full-width) */
+.tile--large {
+  grid-column: 1 / -1;
+  aspect-ratio: 2 / 1;
+}
+
 /* Placeholder for streams without thumbnails */
 .tile-img--placeholder {
   display: flex;

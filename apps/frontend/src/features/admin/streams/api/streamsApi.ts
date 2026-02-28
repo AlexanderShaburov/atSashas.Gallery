@@ -1,6 +1,7 @@
 // src/shared/api/streamsApi.ts
 import type { StreamData, StreamIndexItem } from '@/entities/stream/';
 import { StreamMetadata } from '@/entities/stream/streamApi.types';
+import { streamsIndexStore } from '@/shared/state/domain';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
@@ -57,3 +58,13 @@ export const streamsApi = {
         });
     },
 };
+
+/** Fetch streams index from API and write to external store */
+export async function refreshStreamsIndex(): Promise<void> {
+    try {
+        const index = await streamsApi.list();
+        streamsIndexStore.set(index);
+    } catch (error) {
+        console.error('Failed to refresh streams index:', error);
+    }
+}

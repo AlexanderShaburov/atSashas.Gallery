@@ -8,6 +8,7 @@ import {
     useJourneyStatus,
     useReturnHome,
 } from '@/features/admin/shared/transporter/transporter';
+import { slugify } from '@/shared/lib/text/slugify';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { eventsAdminApi, type CreateEventPayload } from '../api/eventsAdminApi';
 
@@ -93,6 +94,7 @@ export interface EventEditorSession {
   isSaving: boolean;
 
   setDraftField: <K extends keyof EventDraft>(field: K, value: EventDraft[K]) => void;
+  onTitleChange: (value: string) => void;
   selectEvent: (id: string) => void;
   createNew: () => void;
   save: () => Promise<void>;
@@ -254,6 +256,19 @@ export function EventEditorSessionProvider({ children }: { children: React.React
     [],
   );
 
+  const onTitleChange = useCallback(
+    (value: string) => {
+      setDraft((prev) => {
+        const next = { ...prev, titleEn: value };
+        if (screenMode === 'create') {
+          next.slug = slugify(value);
+        }
+        return next;
+      });
+    },
+    [screenMode],
+  );
+
   const selectAndReturn = useCallback(
     (eventId: string) => {
       if (!isJourney) return;
@@ -274,6 +289,7 @@ export function EventEditorSessionProvider({ children }: { children: React.React
     isLoading,
     isSaving,
     setDraftField,
+    onTitleChange,
     selectEvent,
     createNew,
     save,

@@ -1,6 +1,8 @@
 // features/admin/publicStream/ui/PublicStreamEditor.tsx
 
-import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import type { Block } from '@/entities/block';
+import type { HomeItem } from '@/entities/homeDoc';
+import type { StreamIndexItem } from '@/entities/stream';
 import { usePublicStreamSession } from '../publicStreamSession/PublicStreamSession.context';
 import {
     DndContext,
@@ -20,22 +22,64 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import './PublicStreamEditor.css';
-import { StreamIndexItem } from '@/entities/stream';
 
-// Sortable stream item component
-function SortableStreamItem({
-    stream,
+// ── Unique key for a HomeItem (used by dnd-kit) ──
+function itemKey(item: HomeItem, index: number): string {
+    if (item.kind === 'streamRef') return `stream:${item.streamSlug}`;
+    if (item.kind === 'blockRef') return `block:${item.blockId}`;
+    return `item:${index}`;
+}
+
+// ── Resolve display info for a HomeItem ──
+function useResolvedItem(
+    item: HomeItem,
+    allStreams: StreamIndexItem[],
+    allBlocks: Block[],
+): { title: string; thumbnail?: string; badge: string; badgeClass: string } {
+    if (item.kind === 'streamRef') {
+        const stream = allStreams.find((s) => s.streamId === item.streamSlug);
+        return {
+            title: stream?.title ?? item.streamSlug,
+            thumbnail: item.thumbOverrideUrl ?? stream?.thumbnail,
+            badge: 'Stream',
+            badgeClass: 'pse__badge--stream',
+        };
+    }
+    if (item.kind === 'blockRef') {
+        const block = allBlocks.find((b) => b.id === item.blockId);
+        const title =
+            (block && 'title' in block && block.title?.en) ||
+            block?.caption?.en ||
+            item.blockId;
+        return {
+            title,
+            badge: block?.blockKind ?? 'Block',
+            badgeClass: 'pse__badge--block',
+        };
+    }
+    return { title: 'Unknown', badge: '?', badgeClass: '' };
+}
+
+// ── Sortable item component ──
+function SortableHomeItem({
+    item,
+    index,
+    dndId,
+    allStreams,
+    allBlocks,
     onRemove,
-    onToggleSelection,
-    isSelected,
+    onSizeChange,
 }: {
-    stream: StreamIndexItem;
-    onRemove: (id: string) => void;
-    onToggleSelection: (id: string) => void;
-    isSelected: boolean;
+    item: HomeItem;
+    index: number;
+    dndId: string;
+    allStreams: StreamIndexItem[];
+    allBlocks: Block[];
+    onRemove: (index: number) => void;
+    onSizeChange: (index: number, size: 'S' | 'M' | 'L') => void;
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-        id: stream.streamId,
+        id: dndId,
     });
 
     const style = {
@@ -44,6 +88,8 @@ function SortableStreamItem({
         opacity: isDragging ? 0.5 : 1,
     };
 
+    const resolved = useResolvedItem(item, allStreams, allBlocks);
+
     return (
         <div
             ref={setNodeRef}
@@ -51,36 +97,41 @@ function SortableStreamItem({
             className="pse__stream-item pse__stream-item--public pse__stream-item--draggable"
         >
             <div className="pse__drag-handle" {...attributes} {...listeners}>
-                ⋮⋮
+                &#x22EE;&#x22EE;
             </div>
-            <input
-                type="checkbox"
-                className="pse__checkbox"
-                checked={isSelected}
-                onChange={() => onToggleSelection(stream.streamId)}
-            />
-            {stream.thumbnail && (
+            {resolved.thumbnail && (
                 <img
-                    src={stream.thumbnail}
-                    alt={stream.title}
+                    src={resolved.thumbnail}
+                    alt={resolved.title}
                     className="pse__stream-thumbnail"
                 />
             )}
             <div className="pse__stream-info">
-                <h3 className="pse__stream-title">{stream.title}</h3>
+                <h3 className="pse__stream-title">{resolved.title}</h3>
                 <div className="pse__stream-meta">
-                    <span className="pse__badge pse__badge--public">PUBLIC</span>
-                    {' • '}
-                    {stream.status}
+                    <span className={`pse__badge ${resolved.badgeClass}`}>{resolved.badge}</span>
+                    {' '}
+                    <select
+                        className="pse__size-select"
+                        value={item.size ?? 'M'}
+                        onChange={(e) =>
+                            onSizeChange(index, e.target.value as 'S' | 'M' | 'L')
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                    </select>
                 </div>
             </div>
             <div className="pse__stream-actions">
                 <button
                     className="pse__icon-btn pse__icon-btn--danger"
-                    onClick={() => onRemove(stream.streamId)}
-                    title="Unpublish"
+                    onClick={() => onRemove(index)}
+                    title="Remove"
                 >
-                    ✕
+                    &#x2715;
                 </button>
             </div>
         </div>
@@ -89,25 +140,21 @@ function SortableStreamItem({
 
 export function PublicStreamEditor() {
     const session = usePublicStreamSession();
-    const gCtx = useEditorWorkspace();
     const {
-        publicStream,
-        availableStreams,
+        homeDoc,
+        availableBlocks,
         isLoading,
         isSaving,
         isDirty,
-        selectedIds,
         addStream,
-        removeStream,
-        reorderStreams,
+        addBlockViaJourney,
+        removeItem,
+        reorderItems,
+        setItemSize,
         save,
         discard,
-        exit,
-        toggleSelection,
-        selectAll,
-        deselectAll,
-        publishSelected,
-        unpublishSelected,
+        preview,
+        nonPublicStreams,
     } = session;
 
     // Drag and drop sensors
@@ -118,16 +165,21 @@ export function PublicStreamEditor() {
         }),
     );
 
+    const items = homeDoc?.items ?? [];
+    const allStreams = session.availableStreams;
+    const allBlocks = availableBlocks;
+
+    // dnd-kit IDs
+    const dndIds = items.map((item, index) => itemKey(item, index));
+
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-
         if (over && active.id !== over.id) {
-            const oldIndex = publicStream?.streamIds.indexOf(active.id as string) ?? -1;
-            const newIndex = publicStream?.streamIds.indexOf(over.id as string) ?? -1;
-
-            if (oldIndex !== -1 && newIndex !== -1 && publicStream) {
-                const newOrder = arrayMove(publicStream.streamIds, oldIndex, newIndex);
-                reorderStreams(newOrder);
+            const oldIndex = dndIds.indexOf(active.id as string);
+            const newIndex = dndIds.indexOf(over.id as string);
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const newOrder = arrayMove(items, oldIndex, newIndex);
+                reorderItems(newOrder);
             }
         }
     };
@@ -135,50 +187,28 @@ export function PublicStreamEditor() {
     if (isLoading) {
         return (
             <div className="pse">
-                <div className="pse__loading">Loading PublicStream...</div>
+                <div className="pse__loading">Loading Home Composer...</div>
             </div>
         );
     }
 
-    if (!publicStream) {
+    if (!homeDoc) {
         return (
             <div className="pse">
-                <div className="pse__loading">Failed to load PublicStream</div>
+                <div className="pse__loading">Failed to load Home Composer</div>
             </div>
         );
     }
-
-    // Get streams that are in public stream (from FULL index, not filtered)
-    const publicStreamIds = new Set(publicStream.streamIds);
-    const allStreams = gCtx.streamsIndex || [];
-    const publicStreams = allStreams.filter((s) => publicStreamIds.has(s.streamId));
-
-    // Get streams that are NOT in public stream AND have valid status (available to add)
-    const nonPublicStreams = availableStreams.filter((s) => !publicStreamIds.has(s.streamId));
-
-    // Preserve order from publicStream.streamIds
-    const orderedPublicStreams = publicStream.streamIds
-        .map((id) => publicStreams.find((s) => s.streamId === id))
-        .filter((s) => s !== undefined);
-
-    const handlePreview = () => {
-        // Save draft stream IDs to localStorage for the preview page to read.
-        // Only IDs are stored (always available), not full StreamIndexItem[]
-        // which would depend on gCtx.streamsIndex being loaded.
-        const draftIds = publicStream?.streamIds ?? [];
-        localStorage.setItem('__preview_stream_ids', JSON.stringify(draftIds));
-        window.open('/preview', '_blank', 'noopener,noreferrer');
-    };
 
     return (
         <div className="pse">
             <div className="pse__header">
-                <h1 className="pse__title">Public Stream</h1>
+                <h1 className="pse__title">Home Composer</h1>
                 <div className="pse__actions">
                     <button
                         className="pse__btn pse__btn--preview"
-                        onClick={handlePreview}
-                        title="View public site in new tab"
+                        onClick={preview}
+                        title="Preview public home in new tab"
                     >
                         Preview
                     </button>
@@ -198,44 +228,39 @@ export function PublicStreamEditor() {
             </div>
 
             <div className="pse__content">
-                {/* Public Streams (current) */}
+                {/* Left panel: Home Tiles (current items) */}
                 <div className="pse__section">
                     <div className="pse__section-header">
                         <h2 className="pse__section-title">
-                            Published Streams
-                            <span className="pse__count">({orderedPublicStreams.length})</span>
+                            Home Tiles
+                            <span className="pse__count">({items.length})</span>
                         </h2>
-                        {orderedPublicStreams.length > 0 && (
-                            <div className="pse__batch-controls">
-                                {selectedIds.size > 0 && (
-                                    <button
-                                        className="pse__batch-btn pse__batch-btn--danger"
-                                        onClick={unpublishSelected}
-                                    >
-                                        Unpublish Selected ({selectedIds.size})
-                                    </button>
-                                )}
-                            </div>
-                        )}
                     </div>
-                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
                         <div className="pse__list">
-                            {orderedPublicStreams.length === 0 ? (
+                            {items.length === 0 ? (
                                 <div className="pse__empty">
-                                    No streams published yet. Add streams from the right panel.
+                                    No tiles yet. Add streams or blocks from the right panel.
                                 </div>
                             ) : (
                                 <SortableContext
-                                    items={orderedPublicStreams.map((s) => s.streamId)}
+                                    items={dndIds}
                                     strategy={verticalListSortingStrategy}
                                 >
-                                    {orderedPublicStreams.map((stream) => (
-                                        <SortableStreamItem
-                                            key={stream.streamId}
-                                            stream={stream}
-                                            onRemove={removeStream}
-                                            onToggleSelection={toggleSelection}
-                                            isSelected={selectedIds.has(stream.streamId)}
+                                    {items.map((item, index) => (
+                                        <SortableHomeItem
+                                            key={dndIds[index]}
+                                            item={item}
+                                            index={index}
+                                            dndId={dndIds[index]!}
+                                            allStreams={allStreams}
+                                            allBlocks={allBlocks}
+                                            onRemove={removeItem}
+                                            onSizeChange={setItemSize}
                                         />
                                     ))}
                                 </SortableContext>
@@ -244,63 +269,37 @@ export function PublicStreamEditor() {
                     </DndContext>
                 </div>
 
-                {/* Available Streams (to add) */}
+                {/* Right panel: Add Stream + Add Block button */}
                 <div className="pse__section">
+                    {/* Add Block via Journey */}
                     <div className="pse__section-header">
+                        <h2 className="pse__section-title">Add Block</h2>
+                    </div>
+                    <div className="pse__add-block-panel">
+                        <p className="pse__add-block-desc">
+                            Open the block editor to select an existing block or create a new one.
+                        </p>
+                        <button
+                            className="pse__btn pse__btn--block-journey"
+                            onClick={addBlockViaJourney}
+                        >
+                            + Add Block
+                        </button>
+                    </div>
+
+                    {/* Add Stream sub-section */}
+                    <div className="pse__section-header" style={{ marginTop: '1.5rem' }}>
                         <h2 className="pse__section-title">
-                            Available Streams
+                            Add Stream
                             <span className="pse__count">({nonPublicStreams.length})</span>
                         </h2>
-                        {nonPublicStreams.length > 0 && (
-                            <div className="pse__batch-controls">
-                                <label className="pse__select-all">
-                                    <input
-                                        type="checkbox"
-                                        className="pse__checkbox"
-                                        checked={
-                                            selectedIds.size > 0 &&
-                                            selectedIds.size >= nonPublicStreams.length
-                                        }
-                                        ref={(el) => {
-                                            if (el) {
-                                                el.indeterminate =
-                                                    selectedIds.size > 0 &&
-                                                    selectedIds.size < nonPublicStreams.length;
-                                            }
-                                        }}
-                                        onChange={() =>
-                                            selectedIds.size >= nonPublicStreams.length
-                                                ? deselectAll()
-                                                : selectAll()
-                                        }
-                                    />
-                                    Select all
-                                </label>
-                                <button
-                                    className="pse__batch-btn pse__batch-btn--action"
-                                    onClick={publishSelected}
-                                    disabled={selectedIds.size === 0}
-                                >
-                                    Publish selected
-                                    {selectedIds.size > 0 && ` (${selectedIds.size})`}
-                                </button>
-                            </div>
-                        )}
                     </div>
                     <div className="pse__list">
                         {nonPublicStreams.length === 0 ? (
-                            <div className="pse__empty">
-                                All ready streams are already published.
-                            </div>
+                            <div className="pse__empty">All ready streams are already added.</div>
                         ) : (
                             nonPublicStreams.map((stream) => (
                                 <div key={stream.streamId} className="pse__stream-item">
-                                    <input
-                                        type="checkbox"
-                                        className="pse__checkbox"
-                                        checked={selectedIds.has(stream.streamId)}
-                                        onChange={() => toggleSelection(stream.streamId)}
-                                    />
                                     {stream.thumbnail && (
                                         <img
                                             src={stream.thumbnail}
@@ -316,7 +315,7 @@ export function PublicStreamEditor() {
                                         <button
                                             className="pse__icon-btn"
                                             onClick={() => addStream(stream.streamId)}
-                                            title="Publish"
+                                            title="Add to home"
                                         >
                                             +
                                         </button>

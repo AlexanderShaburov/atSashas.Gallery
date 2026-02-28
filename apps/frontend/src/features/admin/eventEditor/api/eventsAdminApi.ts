@@ -1,6 +1,7 @@
 // features/admin/eventEditor/api/eventsAdminApi.ts
 
 import type { EventCatalog, EventData } from '@/entities/event';
+import { eventsStore } from '@/shared/state/domain';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 const EVENTS_URL = `${API_BASE}/admin/events`;
@@ -48,3 +49,13 @@ export const eventsAdminApi = {
     }
   },
 };
+
+/** Fetch events from API and write to external store */
+export async function refreshEvents(): Promise<void> {
+    try {
+        const catalog = await eventsAdminApi.getAll();
+        eventsStore.set(catalog);
+    } catch (error) {
+        console.error('Failed to refresh events:', error);
+    }
+}

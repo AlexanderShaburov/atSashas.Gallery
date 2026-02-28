@@ -9,10 +9,6 @@ import { draftToShipmentConvertor } from '@/features/admin/catalogEditor/catalog
 import { printoutTicket } from '@/features/admin/catalogEditor/catalogEditorSession/journeyService';
 import { isMinimalValid, sanitizeForm } from '@/features/admin/catalogEditor/utils/Validators';
 import {
-    EditorWorkspaceContextValue,
-    useEditorWorkspace,
-} from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
-import {
     useArrival,
     useDispatch,
     useJourneyStatus,
@@ -25,11 +21,15 @@ import {
 import { deepEqual } from '@/shared/lib/checkers/checkers';
 import { EditorKey, JourneyHome } from '@/shared/nav';
 import {
+    catalogStore,
     editSessionsDataStore,
     unsavedChangesStore,
     useSessionDataStore,
+    useStoreData,
     useUnsavedChanges,
 } from '@/shared/state';
+import { refreshBlocksCollection } from '@/features/admin/blocks/api/blocksApi';
+import { refreshStreamsIndex } from '@/features/admin/streams/api/streamsApi';
 import {
     CatalogCommands,
     CatalogToolbarModel,
@@ -64,7 +64,8 @@ export const useCatalogEditorSession = () => {
 };
 
 export function CatalogEditorSessionProvider({ children }: ProviderProps) {
-    const gCtx: EditorWorkspaceContextValue = useEditorWorkspace();
+    // Domain stores (data plane)
+    const catalog = useStoreData(catalogStore);
 
     // Ref to hold refresh callback for deletion hook
     const refreshCallbackRef = useRef<(() => Promise<void>) | null>(null);
@@ -81,8 +82,6 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     // Core state:
     // 1. Use as logic trigger and reference:
     const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
-    // 2. Catalog dataset:
-    const [catalog, setCatalog] = useState<ArtCatalog | undefined>(undefined);
 
     // 3. Current techniques database analytics result
     const [techniquesRange, setTechniquesRange] = useState<TechniquesJson>({});
@@ -169,8 +168,6 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
 
     const canSave = useMemo(() => !isSaving && isDirty && isValid, [isSaving, isDirty, isValid]);
 
-    // 🚧 Construction Yard:
-
     // -----------------------------
     // Base refresh (catalog + hopper)
     // -----------------------------
@@ -180,16 +177,14 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
             setIsLoading(true);
             const cat = await getCatalog();
             console.log(`[refreshBase]: current catalog received`);
-            setCatalog(cat);
-            console.log(`[refreshBase]: current catalog saved to state`);
-            gCtx.setArtCatalog(cat); //LEGACY
-            console.log(`[refreshBase]: current catalog saved to global context`);
+            catalogStore.set(cat);
+            console.log(`[refreshBase]: current catalog saved to store`);
         } catch (e) {
             console.error(`[CatalogEditorSessionProvider]: Failed to load server data: ${e}`);
         } finally {
             setIsLoading(false);
         }
-    }, [gCtx]);
+    }, []);
 
     // Store refreshBase in ref for deletion hook
     refreshCallbackRef.current = refreshBase;
@@ -231,34 +226,7 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
         };
     }, []);
 
-    // Keep global workspace catalog in sync ????
-    useEffect(() => {
-        if (catalog) gCtx.setArtCatalog(catalog);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [catalog]);
-
     // *********** MOUNT BOOTSTRAP ***********
-
-    /*
-    ❗️❗️❗️ 
-    According previous logic new artItem been created by setting mode to create
-    what switched UI to Hopper view and user could select item.
-    Selected item returned to editor as GridItem (as it was saving in hopper)
-
-    Now we have to either prolong Journey mechanics to hopper or emulate create mode
-    by another state or trigger.
-
-    As a good idea looks to add toolbar to select mode with new artItem button
-    or add template as first thumbnail to art items grid. Or both of two.
-
-    For new item template and add item button, handler can create ticket and 
-    jump to hopper. 
-    The issue is hopper page doesn't have context yet. Maybe it can be 
-    done by code in component with direct access or using hooks 
-
-    Yes, having external store for journey data, context isn't necessary.
-    ❗️❗️❗️
-    */
 
     useEffect(() => {
         console.log('[Catalog BOOTSTRAP]: Effect started');
@@ -291,9 +259,6 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
             if (!ticket.loot) {
                 // OUTBOUND: Someone navigated TO catalog editor
                 // isJourney now derived from useJourneyStatus() - no manual setting needed
-                // We support:
-                // - destination.mode === 'select' (pick an art item)
-                // - destination.mode === 'edit'   (open specific item id)
                 switch (ticket.destination.mode) {
                     case 'select': {
                         setScreenMode('select');
@@ -306,8 +271,7 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
 
                         // We need catalog to resolve item
                         const cat = (await getCatalog()) as ArtCatalog;
-                        setCatalog(cat);
-                        gCtx.setArtCatalog(cat);
+                        catalogStore.set(cat);
 
                         const item = cat.items?.[id];
                         if (!item)
@@ -339,8 +303,8 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                     // Refresh in parallel
                     await Promise.all([
                         refreshBase(),
-                        gCtx.refreshBlocks(),
-                        gCtx.refreshStreams(),
+                        refreshBlocksCollection(),
+                        refreshStreamsIndex(),
                     ]);
 
                     console.log(`[Catalog BOOTSTRAP]: All data refreshed`);
@@ -362,10 +326,6 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                     return;
                 }
 
-                /*❗️
-                    Important notice: as a result, journey to hopper has to have left created artItem
-                    object added into the catalog with id, initially transferred to ticket
-                    ❗️*/
                 console.log(`[Catalog BOOTSTRAP]: RETURN ticket presented.`);
                 if (ticket.returnTo.mode !== 'edit')
                     throw new Error(`Impossible return to catalog  editor`);
@@ -375,10 +335,9 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
 
                 // Fetch catalog directly to avoid stale state from refreshBase()
                 const cat = (await getCatalog()) as ArtCatalog;
-                setCatalog(cat);
+                catalogStore.set(cat);
                 console.log(`[Catalog BOOTSTRAP]: Catalog renewed`);
-                // Save catalog to the global context /LEGACY -> TO BE REFACTORED
-                gCtx.setArtCatalog(cat);
+
                 // Get loot id, this particular case it is hopper temporal image id, means nothing.
                 // Get looted image:
                 const loot = ticket.loot.output;
@@ -535,8 +494,6 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
             setIsSaving(false);
         }
 
-        // 🚧 Here, after item has saved, journey inspection has to be implemented:
-        // if we are in journey, return home procedure should be completed, as in the block editor.
         return { ok: true, id: draft.id };
     }, [commit, draft, refreshBase]);
     // ******** After save processing ********
@@ -624,6 +581,12 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
     );
 
     const onDraftChange = useCallback((next: ArtItemData) => setDraft(next), [setDraft]);
+
+    /** Select item in grid (for toolbar binding) */
+    const selectItem = useCallback((id: string | undefined) => {
+        setSelectedItemId(id);
+    }, []);
+
     // ************** END OF HANDLERS DEPARTMENT **************
 
     // Single item editor props object:
@@ -691,6 +654,10 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
             catalog,
             draft,
 
+            // Grid selection:
+            selectedItemId,
+            selectItem,
+
             // Handlers
             onEscape: exit,
 
@@ -706,6 +673,8 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
             draft,
             catalog,
             toolbarModel,
+            selectedItemId,
+            selectItem,
             editorIsReady,
             isSelected,
             isLoading,

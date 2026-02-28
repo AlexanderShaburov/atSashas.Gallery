@@ -1,6 +1,5 @@
 // src/features/admin/catalogEditor/ui/SingleItemEditor/SingleArtItemEditor.tsx
 
-import { deleteFromHopper } from '@/features/admin/catalogEditor/api';
 import { CreateForm } from '@/features/admin/catalogEditor/ui/CreateForm/CreateForm';
 import '@/features/admin/catalogEditor/ui/SingleItemEditor/SingleItemEditor.css';
 import { SingleItemEditorProps } from '@/pages/admin/catalogEditorPage/catalogEditor.types';

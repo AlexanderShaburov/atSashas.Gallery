@@ -12,6 +12,7 @@ from app.routers.streams import streams
 from app.routers.enrollments import enrollments
 from app.routers.events import events
 from app.routers.public_stream import public_stream
+from app.routers.home_doc import home_doc
 from app.settings import settings
 from app.routers import health, json_kv
 from app.storage import BASE
@@ -79,3 +80,5 @@ app.include_router(events.public_router)  # Public events endpoint
 app.include_router(events.admin_router)  # Admin events endpoints
 app.include_router(enrollments.public_router)  # Public enrollment + Stripe webhook
 app.include_router(enrollments.admin_router)  # Admin enrollment list
+app.include_router(home_doc.public_router)  # Public home doc endpoint
+app.include_router(home_doc.admin_router)  # Admin home doc endpoints

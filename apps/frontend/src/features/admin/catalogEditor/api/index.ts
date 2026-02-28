@@ -4,6 +4,7 @@ import type { ArtCatalog } from '@/entities/catalog';
 import type { ApiResponse } from '@/entities/common';
 import type { GridItem } from '@/entities/grid';
 import type { StreamData } from '@/entities/stream';
+import { catalogStore } from '@/shared/state/domain';
 export const VAULT_BASE = import.meta.env.VITE_VAULT_BASE_URL;
 export const API_BASE = import.meta.env.VITE_API_BASE_URL;
 export const STREAMS_URL = import.meta.env.VITE_STREAMS_BASE_URL;
@@ -12,6 +13,16 @@ export const HOPPER_LIST_URL = `${API_BASE}/hopper/content`;
 export const HOPPER_DEL = `${API_BASE}/hopper`;
 export const JSON_VAULT = `${API_BASE}/json`;
 export const UPLOAD_URL = `${API_BASE}/upload`;
+
+/** Fetch catalog from API and write to external store */
+export async function refreshCatalog(): Promise<void> {
+    try {
+        const catalog = await getCatalog();
+        catalogStore.set(catalog);
+    } catch (error) {
+        console.error('Failed to refresh catalog:', error);
+    }
+}
 
 // Load current catalog version:
 export async function getCatalog(): Promise<ArtCatalog> {

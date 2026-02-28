@@ -2,6 +2,7 @@
 
 import type { Block, BlocksCollectionJSON } from '@/entities/block';
 import { generateId } from '@/shared/lib/id/generateId';
+import { blocksCollectionStore } from '@/shared/state/domain';
 
 export const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 export const BLOCK_VAULT = `${API_BASE}/blocks`;
@@ -76,6 +77,16 @@ export async function updateBlock(block: Block): Promise<Block> {
     });
     if (!res.ok) throw new Error(`Update block error: ${res.status}`);
     return await res.json();
+}
+
+/** Fetch blocks collection from API and write to external store */
+export async function refreshBlocksCollection(): Promise<void> {
+    try {
+        const collection = await getCollection();
+        blocksCollectionStore.set(collection);
+    } catch (error) {
+        console.error('Failed to refresh blocks collection:', error);
+    }
 }
 
 export async function deleteBlock(id: string) {

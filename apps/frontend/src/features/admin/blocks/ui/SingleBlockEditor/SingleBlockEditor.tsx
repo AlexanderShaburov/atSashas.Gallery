@@ -1,5 +1,5 @@
 //src/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor.tsx
-import { Block, CtaBlock, EventCtaBlock, GalleryBlock, TextBlock } from '@/entities/block';
+import { Block, CtaBlock, EventCtaBlock, GalleryBlock, ItemPosition, TextBlock } from '@/entities/block';
 import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 import {
     CtaBlockComponent,
@@ -27,8 +27,11 @@ type Props = {
         onChangeTags?: (tags: string[]) => void;
         onApply: () => void;
     };
+    addEventPlaceholder?: (pos: ItemPosition) => void;
+    updateItemCaption?: (pos: ItemPosition, caption: string) => void;
+    updateBlockCaption?: (caption: string) => void;
 };
-export function SingleBlockEditor({ item, onHit, setValue, toolbarProps }: Props) {
+export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEventPlaceholder, updateItemCaption, updateBlockCaption }: Props) {
     let content: JSX.Element | undefined = undefined;
     const { isJourney, ...tbCtx } = toolbarProps;
 
@@ -50,6 +53,9 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps }: Props
                     onHit={onHit}
                     parent="editor"
                     setValue={setValue}
+                    onAddEventPlaceholder={addEventPlaceholder}
+                    onUpdateItemCaption={updateItemCaption}
+                    onUpdateBlockCaption={updateBlockCaption}
                 />
             );
             break;

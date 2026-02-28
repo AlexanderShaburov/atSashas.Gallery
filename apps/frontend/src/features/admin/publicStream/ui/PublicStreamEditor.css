@@ -79,21 +79,19 @@
 .pse__content {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto 1fr;
     gap: 1rem 2rem;
+    align-items: start;
 }
 
 @media (max-width: 899px) {
     .pse__content {
         grid-template-columns: 1fr;
-        grid-template-rows: auto;
     }
 }
 
 .pse__section {
-    display: grid;
-    grid-row: span 2;
-    grid-template-rows: subgrid;
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
 }
 
@@ -323,6 +321,60 @@
 .pse__badge--public {
     background: #dbeafe;
     color: #1e40af;
+}
+
+.pse__badge--stream {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.pse__badge--block {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.pse__size-select {
+    padding: 0.15rem 0.4rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    background: white;
+    cursor: pointer;
+    margin-left: 0.5rem;
+}
+
+.pse__add-block-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+    border: 2px dashed #d1d5db;
+    text-align: center;
+}
+
+.pse__add-block-desc {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.pse__btn--block-journey {
+    background: #f59e0b;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.pse__btn--block-journey:hover {
+    background: #d97706;
 }
 
 .pse__loading {

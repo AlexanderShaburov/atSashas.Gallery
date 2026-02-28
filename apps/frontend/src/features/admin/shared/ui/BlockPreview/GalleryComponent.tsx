@@ -40,6 +40,12 @@ type Props = {
     parent: BlockParent; // 'grid' | 'editor'
     setValue: (next: Block) => void; // to set new value session.setValue()
     readOnly?: boolean;
+    /** Optional callback: add event placeholder at slot (from context) */
+    onAddEventPlaceholder?: (pos: ItemPosition) => void;
+    /** Optional callback: update item caption at slot (from context) */
+    onUpdateItemCaption?: (pos: ItemPosition, caption: string) => void;
+    /** Optional callback: update block-level caption (from context) */
+    onUpdateBlockCaption?: (caption: string) => void;
 };
 
 function posClass(pos: ItemPosition) {
@@ -61,7 +67,7 @@ type CaptionRenderOptions = {
     renderWrapper?: (p: Record<string, unknown>, content: ReactNode) => JSX.Element;
 };
 
-export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Props) {
+export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onAddEventPlaceholder, onUpdateItemCaption, onUpdateBlockCaption }: Props) {
     const isEditor = parent === 'editor';
     const imgPositions = ITEM_POSITIONS[item.layout];
     const resolveArt = useResolveArtAdaptive();
@@ -132,15 +138,19 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Pr
             hit: Hit.galleryCaption(pos),
             onCommit: (draft) => {
                 const next = draft ?? '';
-                const newItem = {
-                    ...item,
-                    items: item.items.map((i) =>
-                        i.position === pos
-                            ? { ...i, caption: { ...('caption' in i ? i.caption ?? {} : {}), en: next } }
-                            : i,
-                    ),
-                };
-                setValue(newItem);
+                if (onUpdateItemCaption) {
+                    onUpdateItemCaption(pos, next);
+                } else {
+                    const newItem = {
+                        ...item,
+                        items: item.items.map((i) =>
+                            i.position === pos
+                                ? { ...i, caption: { ...('caption' in i ? i.caption ?? {} : {}), en: next } }
+                                : i,
+                        ),
+                    };
+                    setValue(newItem);
+                }
             },
         });
     };
@@ -171,12 +181,15 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Pr
                 hit={Hit.galleryBlockCaption()}
                 onCommit={(draft) => {
                     const next = draft ?? '';
-                    const newItem = {
-                        ...item,
-                        caption: { ...(item.caption ?? {}), en: next },
-                    } as GalleryBlock;
-
-                    setValue(newItem);
+                    if (onUpdateBlockCaption) {
+                        onUpdateBlockCaption(next);
+                    } else {
+                        const newItem = {
+                            ...item,
+                            caption: { ...(item.caption ?? {}), en: next },
+                        } as GalleryBlock;
+                        setValue(newItem);
+                    }
                 }}
             >
                 {(p) => (
@@ -212,13 +225,17 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly }: Pr
 
     const handleChooseEvent = (pos: ItemPosition) => {
         setSlotChoice(null);
-        // Insert a GalleryEventItem placeholder with empty eventId
-        const newEventItem: GalleryBlockItem = {
-            kind: 'eventCta',
-            eventId: '',
-            position: pos,
-        };
-        setValue({ ...item, items: [...item.items, newEventItem] });
+        if (onAddEventPlaceholder) {
+            onAddEventPlaceholder(pos);
+        } else {
+            // Fallback for non-editor contexts (CollectionGrid/readOnly)
+            const newEventItem: GalleryBlockItem = {
+                kind: 'eventCta',
+                eventId: '',
+                position: pos,
+            };
+            setValue({ ...item, items: [...item.items, newEventItem] });
+        }
     };
 
     return (

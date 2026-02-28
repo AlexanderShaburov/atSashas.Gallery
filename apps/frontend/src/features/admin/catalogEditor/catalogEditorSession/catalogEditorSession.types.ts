@@ -11,6 +11,11 @@ export type CatalogEditorSession = {
     catalog: ArtCatalog | undefined;
     draft: ArtItemData | undefined;
 
+    /** Currently selected item in grid (select mode) */
+    selectedItemId: string | undefined;
+    /** Set selected item in grid (select mode) */
+    selectItem: (id: string | undefined) => void;
+
     /** Handlers */
     onEscape: () => void;
 

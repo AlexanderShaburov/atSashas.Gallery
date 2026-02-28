@@ -1,14 +1,18 @@
 // features/admin/publicStream/publicStreamSession/publicStreamSession.types.ts
 
-import type { PublicStreamData } from '@/entities/publicStream';
+import type { Block } from '@/entities/block';
+import type { HomeDoc, HomeItem } from '@/entities/homeDoc';
 import type { StreamIndexItem } from '@/entities/stream';
 
 export type PublicStreamSession = {
-    /** Current PublicStream data */
-    publicStream: PublicStreamData | null;
+    /** Current HomeDoc data (draft) */
+    homeDoc: HomeDoc | null;
 
     /** All available streams from index */
     availableStreams: StreamIndexItem[];
+
+    /** All available blocks from collection */
+    availableBlocks: Block[];
 
     /** Loading state */
     isLoading: boolean;
@@ -19,17 +23,20 @@ export type PublicStreamSession = {
     /** Has unsaved changes */
     isDirty: boolean;
 
-    /** Selected stream IDs for batch operations */
-    selectedIds: Set<string>;
+    /** Add stream ref to HomeDoc */
+    addStream: (streamSlug: string) => void;
 
-    /** Add stream to PublicStream */
-    addStream: (streamId: string) => void;
+    /** Navigate to Block editor via Journey to select/create a block */
+    addBlockViaJourney: () => void;
 
-    /** Remove stream from PublicStream */
-    removeStream: (streamId: string) => void;
+    /** Remove item at index from HomeDoc */
+    removeItem: (index: number) => void;
 
-    /** Reorder streams (pass new ordered list) */
-    reorderStreams: (streamIds: string[]) => void;
+    /** Reorder items (pass new ordered list) */
+    reorderItems: (items: HomeItem[]) => void;
+
+    /** Set item size at index */
+    setItemSize: (index: number, size: 'S' | 'M' | 'L') => void;
 
     /** Save changes */
     save: () => Promise<void>;
@@ -37,24 +44,15 @@ export type PublicStreamSession = {
     /** Discard changes and reload */
     discard: () => void;
 
-    /** Navigate to stream editor */
-    editStream: (streamId: string) => void;
+    /** Preview HomeDoc in a new tab */
+    preview: () => void;
 
-    /** Exit PublicStream editor */
+    /** Streams not yet added to HomeDoc (filtered from available) */
+    nonPublicStreams: StreamIndexItem[];
+
+    /** Navigate to stream editor via Journey */
+    editStreamViaJourney: (streamId: string) => void;
+
+    /** Exit editor */
     exit: () => void;
-
-    /** Toggle stream selection for batch operations */
-    toggleSelection: (streamId: string) => void;
-
-    /** Select all available streams */
-    selectAll: () => void;
-
-    /** Deselect all streams */
-    deselectAll: () => void;
-
-    /** Publish all selected streams */
-    publishSelected: () => void;
-
-    /** Unpublish all selected streams */
-    unpublishSelected: () => void;
 };

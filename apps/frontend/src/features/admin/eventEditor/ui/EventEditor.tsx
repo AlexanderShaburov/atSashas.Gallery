@@ -6,15 +6,6 @@ import { CURRENCIES } from '@/entities/common/money';
 import { useEventEditorSession } from '../eventEditorSession/EventEditorSession.context';
 import './EventEditor.css';
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_]+/g, '-')
-    .replace(/-+/g, '-');
-}
-
 function EventSelectList() {
   const { events, isLoading, selectAndReturn, cancelSelect } = useEventEditorSession();
 
@@ -143,18 +134,11 @@ function EnrollmentsList({ eventId }: { eventId: string }) {
 }
 
 function EventForm() {
-  const { screenMode, draft, isSaving, setDraftField, save, deleteEvent, back } =
+  const { draft, isSaving, screenMode, setDraftField, onTitleChange, save, deleteEvent, back } =
     useEventEditorSession();
 
   const isEdit = screenMode === 'edit';
   const heading = isEdit ? 'Edit Event' : 'New Event';
-
-  const handleTitleChange = (value: string) => {
-    setDraftField('titleEn', value);
-    if (!isEdit) {
-      setDraftField('slug', slugify(value));
-    }
-  };
 
   return (
     <>
@@ -168,7 +152,7 @@ function EventForm() {
           <input
             type="text"
             value={draft.titleEn}
-            onChange={(e) => handleTitleChange(e.target.value)}
+            onChange={(e) => onTitleChange(e.target.value)}
             placeholder="Event title"
           />
         </div>

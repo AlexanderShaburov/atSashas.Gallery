@@ -1,16 +1,16 @@
 // src/features/admin/blocks/hooks/useBlockDependencyAwareDeletion.ts
 
 import type { Block } from '@/entities/block';
-import { deleteBlock } from '@/features/admin/blocks/api/blocksApi';
-import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
+import { deleteBlock, refreshBlocksCollection } from '@/features/admin/blocks/api/blocksApi';
 import { useJourneyGuard } from '@/features/admin/shared/hooks/useJourneyGuard';
 import { useDispatch, useReturnHome } from '@/features/admin/shared/transporter/transporter';
-import { streamsApi } from '@/features/admin/streams/api/streamsApi';
+import { refreshStreamsIndex, streamsApi } from '@/features/admin/streams/api/streamsApi';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { dependencyResolver } from '@/shared/lib/dependencies';
 import { generateId } from '@/shared/lib/id/generateId';
 import type { JourneyHome, JourneyTicket } from '@/shared/nav';
 import { destructiveActionsStore } from '@/shared/state/destructiveActions.store';
+import { streamsIndexStore } from '@/shared/state/domain';
 import { useCallback } from 'react';
 
 /**
@@ -22,7 +22,6 @@ export function useBlockDependencyAwareDeletion(options?: {
     onComplete?: () => void;
     isInJourney?: boolean;
 }) {
-    const gCtx = useEditorWorkspace();
     const dispatch = useDispatch();
     const returnHome = useReturnHome();
     const { canStartDeletion } = useJourneyGuard('block');
@@ -45,10 +44,12 @@ export function useBlockDependencyAwareDeletion(options?: {
 
             // STEP 2: Analyze dependencies
             try {
+                const blockTitle =
+                    ('title' in block && block.title ? String(block.title) : undefined) || block.id;
                 const depTree = await dependencyResolver.buildBlockDependencyTree(
                     block.id,
-                    block.title || block.id,
-                    gCtx.streamsIndex || [],
+                    blockTitle,
+                    streamsIndexStore.get() || [],
                 );
 
                 console.log(`[useBlockDependencyAwareDeletion]: Dependency tree:`, depTree);
@@ -57,7 +58,7 @@ export function useBlockDependencyAwareDeletion(options?: {
                 if (depTree.dependents.length === 0) {
                     destructiveActionsStore.open({
                         title: 'Delete Block',
-                        message: `Delete "${block.title || block.id}"? No dependencies found.`,
+                        message: `Delete "${blockTitle}"? No dependencies found.`,
                         resolutionMode: 'simple',
                         confirmLabel: 'Delete',
                         run: async () => {
@@ -68,8 +69,8 @@ export function useBlockDependencyAwareDeletion(options?: {
                                 `[useBlockDependencyAwareDeletion]: Block deleted successfully`,
                             );
                             // Refresh data
-                            await gCtx.refreshBlocks();
-                            await gCtx.refreshStreams();
+                            await refreshBlocksCollection();
+                            await refreshStreamsIndex();
                             if (options?.onRefresh) {
                                 await options.onRefresh();
                             }
@@ -93,7 +94,7 @@ export function useBlockDependencyAwareDeletion(options?: {
 
                 // STEP 4: Has dependencies - show resolution options
                 destructiveActionsStore.open({
-                    title: `Delete "${block.title || block.id}"`,
+                    title: `Delete "${blockTitle}"`,
                     message: `This block is used in ${depTree.dependents.length} stream${depTree.dependents.length !== 1 ? 's' : ''}. Choose how to proceed:`,
                     resolutionMode: 'manual',
                     dependencies: depTree,
@@ -177,7 +178,7 @@ export function useBlockDependencyAwareDeletion(options?: {
                     onSuccess: async () => {
                         console.log(`[useBlockDependencyAwareDeletion]: Cascade delete completed`);
                         // Refresh all relevant data
-                        await Promise.all([gCtx.refreshBlocks(), gCtx.refreshStreams()]);
+                        await Promise.all([refreshBlocksCollection(), refreshStreamsIndex()]);
                         if (options?.onRefresh) {
                             await options.onRefresh();
                         }
@@ -202,7 +203,7 @@ export function useBlockDependencyAwareDeletion(options?: {
                 destructiveActionsStore.close();
             }
         },
-        [gCtx, dispatch, returnHome, canStartDeletion, options],
+        [dispatch, returnHome, canStartDeletion, options],
     );
 
     return { deleteBlockWithDeps };

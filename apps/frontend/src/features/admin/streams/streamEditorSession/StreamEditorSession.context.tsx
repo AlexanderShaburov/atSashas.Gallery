@@ -3,10 +3,9 @@
 import { MetaIntent } from '@/entities/common/lifecycle';
 import type { PublicStreamData } from '@/entities/publicStream';
 import type { StreamMetadata } from '@/entities/stream';
-import { StreamData, StreamIndexItem, type StreamScreenMode } from '@/entities/stream';
+import { StreamData, type StreamScreenMode } from '@/entities/stream';
 import { SaveLifecycle, StreamScreenModeStack } from '@/entities/stream/stream-editor-screen.types';
 import { getCollection } from '@/features/admin/blocks/api/blocksApi';
-import { useEditorWorkspace } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { publicStreamApi } from '@/features/admin/publicStream/api/publicStreamApi';
 import {
     useArrival,
@@ -23,7 +22,12 @@ import { generateId } from '@/shared/lib/id/generateId';
 import type { JourneyHome, OkJumpResult } from '@/shared/nav';
 import { EditorKey } from '@/shared/nav';
 import { JourneyTicket, ReturnAddress, ReturnCommand, ToAddress } from '@/shared/nav/journey.types';
-import { useUnsavedChanges } from '@/shared/state';
+import {
+    blocksCollectionStore,
+    streamsIndexStore,
+    useStoreData,
+    useUnsavedChanges,
+} from '@/shared/state';
 import { destructiveActionsStore } from '@/shared/state/destructiveActions.store';
 import { editSessionsDataStore } from '@/shared/state/editorSessionsData.store';
 import { unsavedChangesStore } from '@/shared/state/unsavedChanges.store';
@@ -51,15 +55,15 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     // ****************** UI LAYER ******************
 
     // Mode of stream screen
-    // Stack of mode sequence instead of screenMode
-    // const [screenMode, setScreenMode] = useState<StreamScreenMode>({ kind: 'select' });
     const [modeStack, setModeStack] = useState<StreamScreenMode[]>([{ kind: 'select' }]);
 
-    // Id of selected stream: ?????????????????
+    // Id of selected stream
     const [selectedStreamId, setSelectedStreamId] = useState<string | undefined>(undefined);
 
-    // Streams list object
-    const [streamsIndex, setStreamsIndex] = useState<StreamIndexItem[]>([]);
+    // Streams list from external store
+    const storeStreamsIndex = useStoreData(streamsIndexStore);
+    const streamsIndex = useMemo(() => storeStreamsIndex ?? [], [storeStreamsIndex]);
+
     // Saving lifecycle -> all about SAVING
     const [lifecycle, setLifecycle] = useState<SaveLifecycle>({ saveState: 'idle' });
     // isLoading flag
@@ -82,12 +86,6 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     const { storeData, setDraft, commit } = sessionData;
     const draft = storeData?.draft;
     const snapshot = storeData?.snapshot;
-
-    //  ?????????????? TO CHANGE ??????????????
-    const gCtx = useEditorWorkspace();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const collection = gCtx.currentBlocksCollection?.blocks ?? {};
-    //  ?????????????? TO CHANGE END ??????????????
 
     // ************* NAVIGATION *************
 
@@ -170,7 +168,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             const lst = await loadStreamsIndex();
             console.log(`[renewStreamsIndex]: streams index loaded`);
             if (!lst) throw new Error('Streams list loading error');
-            setStreamsIndex(lst);
+            streamsIndexStore.set(lst);
         } catch (err) {
             console.error(`StreamEditorSession error: ${err}`);
         } finally {
@@ -398,7 +396,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             // This ensures the stream can render the block that was just saved
             console.log(`[BOOTSTRAP]: Refreshing blocks collection...`);
             const freshCollection = await getCollection();
-            gCtx.setBlocksCollection(freshCollection);
+            blocksCollectionStore.set(freshCollection);
             console.log(`[BOOTSTRAP]: Blocks collection refreshed with new block`);
 
             if (focusBlockId) {
@@ -574,8 +572,6 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             const updated = await publicStreamApi.addStream(selectedStreamId);
             setPublicStream(updated);
 
-            // No need to update stream status - being in PublicStream.streamIds
-            // is what makes it "published". Status stays as 'ready'.
             console.log(`[publishStream]: Stream published successfully`);
         } catch (err) {
             console.error('[publishStream]: Failed to publish stream', err);
@@ -591,8 +587,6 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             const updated = await publicStreamApi.removeStream(selectedStreamId);
             setPublicStream(updated);
 
-            // No need to update stream status - removal from PublicStream.streamIds
-            // is what makes it "unpublished". Status remains unchanged.
             console.log(`[unpublishStream]: Stream unpublished successfully`);
         } catch (err) {
             console.error('[unpublishStream]: Failed to unpublish stream', err);
