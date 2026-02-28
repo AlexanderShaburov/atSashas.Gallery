@@ -2,7 +2,7 @@
 
 import { CreateForm } from '@/features/admin/catalogEditor/ui/CreateForm/CreateForm';
 import '@/features/admin/catalogEditor/ui/SingleItemEditor/SingleItemEditor.css';
-import { SingleItemEditorProps } from '@/pages/admin/catalogEditorPage/catalogEditor.types';
+import { SingleItemEditorProps } from '@/features/admin/catalogEditor/catalogEditorSession/catalogEditorSession.types';
 import { ToolbarCtx, ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
 import { useEffect } from 'react';

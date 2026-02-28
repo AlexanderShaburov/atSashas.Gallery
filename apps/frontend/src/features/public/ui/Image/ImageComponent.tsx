@@ -1,5 +1,5 @@
 import { GalleryBlock, GalleryBlockItem, GalleryLayout, ItemPosition } from '@/entities/block';
-import { isEventItem } from '@/features/admin/blocks/blockEditorSession/blockEditorSession.utils';
+import { isEventItem } from '@/shared/lib/checkers/blockItemGuards';
 import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
 import { GallerySlotEventView } from './GallerySlotEventView';
 

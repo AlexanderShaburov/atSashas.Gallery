@@ -1,9 +1,8 @@
 // src/features/admin/blocks/ui/CollectionGrid/CollectionGrid.tsx
 
-import { Block, BlocksCollectionJSON } from '@/entities/block';
+import { type Block, type BlockHitEvent, type BlocksCollectionJSON } from '@/entities/block';
 import { createGalleryTemplateBlock } from '@/features/admin/blocks/ui/BlockTemplates';
 import { TemplateRaw } from '@/features/admin/blocks/ui/BlockTemplates/TemplateBlockCard';
-import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 
 import { BlockRenderer } from '@/features/admin/shared/ui/BlockPreview/BlockRenderer';
 import { todayISO } from '@/shared/lib/dateAndLabels/today';

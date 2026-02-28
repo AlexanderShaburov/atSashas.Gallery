@@ -47,6 +47,7 @@ export function useDependencyAwareBlockDeletion() {
                     block.id,
                     blockTitle,
                     streamsIndexStore.get() || [],
+                    streamsApi.get,
                 );
 
                 console.log(`[useDependencyAwareBlockDeletion]: Dependency tree:`, depTree);

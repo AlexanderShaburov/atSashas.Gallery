@@ -4,12 +4,12 @@ import type {
     Block,
     // BlockEditorMode,
     BlockEditorScreenMode,
+    BlockHitEvent,
     BlocksCollectionJSON,
     EditTarget,
     ItemPosition,
 } from '@/entities/block';
 import type { UiErrorState } from '@/entities/common';
-import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 
 export type BlockEditorTarget = { mode: 'create' } | { mode: 'edit'; block: Block };
 

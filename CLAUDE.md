@@ -142,7 +142,7 @@ Allowed entities ONLY:
 - Block
 - Stream
 - Event
-- HomePage
+- HomeDoc
 
 Rules:
 
@@ -277,7 +277,7 @@ Rules:
 
 ## 10. Workflow Model (Canonical)
 
-Hopper → ArtItem → Block → Stream → HomePage → Publish
+Hopper → ArtItem → Block → Stream → HomeDoc → Publish
 
 Rules:
 
@@ -339,7 +339,7 @@ DO NOT:
 Current focus:
 
 1. Restore architecture compliance
-2. Implement HomePage model
+2. Implement HomeDoc model
 3. Define rendering rules (grid + responsiveness)
 4. Unify toolbar system
 5. Complete filtering

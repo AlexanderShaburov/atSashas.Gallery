@@ -6,7 +6,7 @@ import LangInput from '@/features/admin/catalogEditor/ui/CreateForm/UX/LangInput
 import MoneyInput from '@/features/admin/catalogEditor/ui/CreateForm/UX/MoneyInput';
 // import TechniqueListEditor from '@/features/admin/ui/CreateForm/UX/TechniqueListEditor';
 import TechniqueListEditor from '@/features/admin/catalogEditor/ui/CreateForm/UX/TechniqueListEditor';
-import { SingleItemEditorProps } from '@/pages/admin/catalogEditorPage/catalogEditor.types';
+import { SingleItemEditorProps } from '@/features/admin/catalogEditor/catalogEditorSession/catalogEditorSession.types';
 
 export function CreateForm(props: SingleItemEditorProps) {
     const { seriesOptions, editorIsReady, draft, onDraftChange } = props;

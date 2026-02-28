@@ -1,8 +1,8 @@
 // src/shared/nav/ReturnStack.types.ts
-import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
+import type { BlockHitEvent } from '@/entities/block';
 import type { ItemPosition } from '@/entities/block';
 import { EditorKind } from './editorKey.types';
-import { GridItem } from '@/entities/grid';
+import { GridItem } from '@/shared/ui/grid';
 
 export type EditorKey =
     | { kind: 'stream'; id: string }

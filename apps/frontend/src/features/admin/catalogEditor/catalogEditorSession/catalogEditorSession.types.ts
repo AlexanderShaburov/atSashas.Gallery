@@ -1,7 +1,26 @@
-import { ArtItemData } from '@/entities/art';
+import { ArtItemData, TechniquesJson } from '@/entities/art';
 import { ArtCatalog } from '@/entities/catalog';
-import { SingleItemEditorProps } from '@/pages/admin/catalogEditorPage/catalogEditor.types';
+import { GridItem } from '@/shared/ui/grid';
 import { CatalogToolbarModel } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
+
+export type ProviderProps = { children: React.ReactNode };
+
+export type SingleItemEditorProps = {
+    // Data:
+    id: string | undefined;
+    techniquesRange: TechniquesJson;
+    seriesOptions: string[];
+    thumb: GridItem | undefined;
+    draft: ArtItemData | undefined;
+
+    // Derived states:
+    isDirty: boolean;
+    editorIsReady: boolean;
+
+    // Setter:
+    onDraftChange: (next: ArtItemData) => void;
+};
+
 export type CatalogEditorScreenMode = 'edit' | 'select';
 export type CatalogEditorSession = {
     editorProps: SingleItemEditorProps;

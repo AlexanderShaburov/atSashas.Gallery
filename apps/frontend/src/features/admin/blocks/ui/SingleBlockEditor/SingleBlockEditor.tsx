@@ -1,6 +1,5 @@
 //src/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor.tsx
-import { Block, CtaBlock, EventCtaBlock, GalleryBlock, ItemPosition, TextBlock } from '@/entities/block';
-import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
+import { type Block, type BlockHitEvent, type CtaBlock, type EventCtaBlock, type GalleryBlock, type ItemPosition, type TextBlock } from '@/entities/block';
 import {
     CtaBlockComponent,
     EventCtaBlockComponent,

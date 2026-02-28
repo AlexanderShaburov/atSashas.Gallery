@@ -3,6 +3,7 @@
 import type {
     Block,
     BlockEditorScreenMode,
+    BlockHitEvent,
     BlocksCollectionJSON,
     EditTarget,
     GalleryBlock,
@@ -24,7 +25,6 @@ import type {
 } from '@/features/admin/blocks/blockEditorSession/block-editor.types';
 import { BlockEditorCtx } from '@/features/admin/blocks/hooks/useBlocksEditor';
 import { useBlockDependencyAwareDeletion } from '@/features/admin/blocks/hooks/useBlockDependencyAwareDeletion';
-import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { validateBlockForm } from '@/features/admin/blocks/utils';
 import {
     useArrival,
@@ -452,7 +452,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         // Find event item at position and set eventId
                         const pos = (effect as { position: string }).position;
                         if (block?.draft && block.draft.blockKind === 'gallery') {
-                            const { isEventItem } = await import('./blockEditorSession.utils');
+                            const { isEventItem } = await import('@/shared/lib/checkers/blockItemGuards');
                             const updatedItems = block.draft.items.map((item) =>
                                 item.position === pos && isEventItem(item)
                                     ? { ...item, eventId: loot.id }
@@ -474,7 +474,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         }
                         const pos = (effect as { position: string }).position;
                         if (block?.draft && block.draft.blockKind === 'gallery') {
-                            const { isEventItem } = await import('./blockEditorSession.utils');
+                            const { isEventItem } = await import('@/shared/lib/checkers/blockItemGuards');
                             const updatedItems = block.draft.items.map((item) =>
                                 item.position === pos && isEventItem(item)
                                     ? { ...item, backgroundArtId: loot.id }

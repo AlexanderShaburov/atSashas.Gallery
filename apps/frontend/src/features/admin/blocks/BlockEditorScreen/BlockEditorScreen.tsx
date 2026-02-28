@@ -1,7 +1,7 @@
 //@/features/admin/blocks/BlockEditor/BlockEditor.tsx
+import type { BlockHitEvent } from '@/entities/block';
 import type { BlockEditorSession } from '@/features/admin/blocks/blockEditorSession';
 import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
-import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
 import { CollectionGrid } from '@/features/admin/blocks/ui/CollectionGrid/CollectionGrid';
 import { FilterControl, type BlockFilterState } from '@/features/admin/blocks/ui/FilterControl';
 import { SingleBlockEditor } from '@/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor';

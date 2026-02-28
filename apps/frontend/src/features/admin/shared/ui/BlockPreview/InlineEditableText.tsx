@@ -1,8 +1,7 @@
 //src/features/admin/blocks/ui/BlockPreview/InlineEditableText.tsx
 
-import { Block, EditTarget } from '@/entities/block';
+import { type Block, type BlockHit, type EditTarget } from '@/entities/block';
 import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
-import { BlockHit } from '@/features/admin/blocks/ui/BlockTemplates';
 import { useEffect, useState } from 'react';
 
 export type InlineEditableTextProps = {

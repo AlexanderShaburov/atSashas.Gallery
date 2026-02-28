@@ -1,4 +1,6 @@
 export type { BlocksCollectionJSON } from './block-collection.types';
+export { Hit } from './blockHit.types';
+export type { BlockHit, BlockHitEvent } from './blockHit.types';
 export type {
     BlockEditorMode,
     BlockEditorScreenMode,

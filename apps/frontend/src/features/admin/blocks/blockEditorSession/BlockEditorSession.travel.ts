@@ -1,8 +1,7 @@
-import type { GalleryArtItem, ItemPosition } from '@/entities/block';
+import type { BlockHitEvent, GalleryArtItem, ItemPosition } from '@/entities/block';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { generateId } from '@/shared/lib/id/generateId';
 import { JourneyTicket } from '@/shared/nav';
-import { BlockHitEvent } from '../ui/BlockTemplates';
 import { findArtItemByPos } from './blockEditorSession.utils';
 
 export function printoutTicket(hit: BlockHitEvent): JourneyTicket | undefined {

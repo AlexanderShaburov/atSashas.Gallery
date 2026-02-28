@@ -1,6 +1,6 @@
 // TechniqueListEditor.tsx
 import type { TechniquesJson } from '@/entities/art';
-import { SingleItemEditorProps } from '@/pages/admin/catalogEditorPage/catalogEditor.types';
+import { SingleItemEditorProps } from '@/features/admin/catalogEditor/catalogEditorSession/catalogEditorSession.types';
 import { useMemo, useState } from 'react';
 type TechniqueItem = { key: string; label: string };
 

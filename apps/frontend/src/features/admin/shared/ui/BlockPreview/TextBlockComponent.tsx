@@ -1,5 +1,4 @@
-import { Block, BlockParent, TextBlock } from '@/entities/block';
-import { BlockHitEvent, Hit } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
+import { type Block, type BlockHitEvent, type BlockParent, Hit, type TextBlock } from '@/entities/block';
 
 type Props = {
     item: TextBlock;

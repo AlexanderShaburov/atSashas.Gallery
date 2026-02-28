@@ -1,6 +1,6 @@
 // src/features/admin/shared/ui/ArtItemGrid/ArtItemGrid.tsx
 
-import { GridItem } from '@/entities/grid';
+import { GridItem } from '@/shared/ui/grid';
 import { useEffect } from 'react';
 import './ArtItemGrid.css';
 

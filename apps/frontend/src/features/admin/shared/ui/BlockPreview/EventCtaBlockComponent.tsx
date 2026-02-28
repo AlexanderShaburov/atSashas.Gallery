@@ -1,9 +1,8 @@
 // features/admin/shared/ui/BlockPreview/EventCtaBlockComponent.tsx
 
-import type { Block, BlockParent, EventCtaBlock } from '@/entities/block';
+import { type Block, type BlockHitEvent, type BlockParent, type EventCtaBlock, Hit } from '@/entities/block';
 import '@/features/admin/blocks/ui/BlockTemplates/block.templates.css';
 import { EventPicker } from '@/features/admin/blocks/ui/EventPicker/EventPicker';
-import { BlockHitEvent, Hit } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 import { useEvent } from '@/shared/EventsProvider/useEvent';
 
 type Props = {

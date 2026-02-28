@@ -1,7 +1,7 @@
 // applyArtCatalogFilter.ts
 import type { ArtItemData } from '@/entities/art/artUnit';
 import type { PreviewPath, PreviewSources } from '@/entities/art/images';
-import type { GridItem, GridItemSources } from '@/entities/grid/gridItem';
+import type { GridItem, GridItemSources } from '@/shared/ui/grid/gridItem';
 import type { ArtCatalogFilterState } from './artCatalogFilter.types';
 
 const norm = (s: string) => s.trim().toLowerCase();

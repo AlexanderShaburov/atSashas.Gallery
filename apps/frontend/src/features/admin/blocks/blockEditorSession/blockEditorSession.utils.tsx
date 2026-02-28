@@ -1,17 +1,8 @@
 // src/features/admin/blocks/blockEditorSession/blockEditorSession.utils.tsx
 
-import type { Block, GalleryArtItem, GalleryBlockItem, GalleryEventItem } from '@/entities/block';
-import { EditTarget, ItemPosition } from '@/entities/block';
-import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
+import type { Block, BlockHitEvent, GalleryArtItem, GalleryBlockItem } from '@/entities/block';
+import { type EditTarget, type ItemPosition } from '@/entities/block';
 import { generateId } from '@/shared/lib/id/generateId';
-
-export function isArtItem(item: GalleryBlockItem): item is GalleryArtItem {
-    return !('kind' in item) || item.kind === 'art';
-}
-
-export function isEventItem(item: GalleryBlockItem): item is GalleryEventItem {
-    return 'kind' in item && item.kind === 'eventCta';
-}
 
 function normalizeGalleryItem(raw: GalleryBlockItem): GalleryBlockItem {
     if (!('kind' in raw)) return { ...(raw as GalleryArtItem), kind: 'art' };

@@ -2,7 +2,7 @@
 
 import { ArtItem, ArtItemData, TechniquesJson } from '@/entities/art';
 import { ArtCatalog } from '@/entities/catalog';
-import { GridItem } from '@/entities/grid';
+import { GridItem } from '@/shared/ui/grid';
 import { CatalogEditorScreenMode } from '@/features/admin/catalogEditor/catalogEditorSession/catalogEditorSession.types';
 import { artItemToGridItem } from '@/features/admin/shared/ui/ArtItemGrid/utils';
 import { draftToShipmentConvertor } from '@/features/admin/catalogEditor/catalogEditorSession/editorLogic/editorLogic';
@@ -17,7 +17,7 @@ import {
 import {
     ProviderProps,
     SingleItemEditorProps,
-} from '@/pages/admin/catalogEditorPage/catalogEditor.types';
+} from '@/features/admin/catalogEditor/catalogEditorSession/catalogEditorSession.types';
 import { deepEqual } from '@/shared/lib/checkers/checkers';
 import { EditorKey, JourneyHome } from '@/shared/nav';
 import {

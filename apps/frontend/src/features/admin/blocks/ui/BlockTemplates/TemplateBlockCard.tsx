@@ -1,4 +1,4 @@
-import { Block } from '@/entities/block';
+import { type Block, type BlockHitEvent } from '@/entities/block';
 import {
     CtaBlockComponent,
     EventCtaBlockComponent,
@@ -6,7 +6,6 @@ import {
     TextBlockComponent,
 } from '@/features/admin/shared/ui/BlockPreview';
 import './block.templates.css';
-import { BlockHitEvent } from './editorTypes';
 import {
     TEMPLATE_BLOCKS,
     createCtaTemplateBlock,

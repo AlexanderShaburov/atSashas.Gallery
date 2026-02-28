@@ -1,6 +1,6 @@
 // src/pages/admin/UploadPage.tsx
 
-import { GridItem } from '@/entities/grid';
+import { GridItem } from '@/shared/ui/grid';
 import {
     deleteFromHopper,
     getHopperContent,

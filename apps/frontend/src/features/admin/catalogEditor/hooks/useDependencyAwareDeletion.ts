@@ -45,6 +45,7 @@ export function useDependencyAwareDeletion(options?: { onRefresh?: () => Promise
                     artItem.data.title?.en || artItem.data.title?.ru || 'Untitled',
                     blocksCollectionStore.get()!,
                     streamsIndexStore.get() || [],
+                    streamsApi.get,
                 );
 
                 console.log(`[useDependencyAwareDeletion]: Dependency tree:`, depTree);

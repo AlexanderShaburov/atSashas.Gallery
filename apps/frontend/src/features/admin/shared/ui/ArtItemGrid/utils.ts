@@ -1,5 +1,5 @@
 import { ArtItemData } from '@/entities/art';
-import { GridItem } from '@/entities/grid';
+import { GridItem } from '@/shared/ui/grid';
 
 export function artItemToGridItem(a: ArtItemData): GridItem {
     const thumbUrl = a.images.full as string;

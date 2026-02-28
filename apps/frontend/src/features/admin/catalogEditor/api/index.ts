@@ -2,7 +2,7 @@ import type { ArtItemDependents, TechniquesJson } from '@/entities/art';
 import { ArtShipment } from '@/entities/art/shipment';
 import type { ArtCatalog } from '@/entities/catalog';
 import type { ApiResponse } from '@/entities/common';
-import type { GridItem } from '@/entities/grid';
+import type { GridItem } from '@/shared/ui/grid';
 import type { StreamData } from '@/entities/stream';
 import { catalogStore } from '@/shared/state/domain';
 export const VAULT_BASE = import.meta.env.VITE_VAULT_BASE_URL;

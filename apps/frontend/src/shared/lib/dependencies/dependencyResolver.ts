@@ -2,12 +2,12 @@
 
 import type { BlocksCollectionJSON } from '@/entities/block';
 import type { StreamData, StreamIndexItem } from '@/entities/stream';
-import { streamsApi } from '@/features/admin/streams/api/streamsApi';
 import type {
     CascadePreview,
     DependencyEdge,
     DependencyNode,
     DependencyTree,
+    StreamFetcher,
 } from './dependency.types';
 
 /**
@@ -59,11 +59,12 @@ class DependencyResolver {
     async findBlockDependents(
         blockId: string,
         streamsIndex: StreamIndexItem[],
+        fetchStream: StreamFetcher,
     ): Promise<DependencyEdge[]> {
         // Load each stream to check if it contains the block
         const streamChecks = streamsIndex.map(async (streamMeta) => {
             try {
-                const stream = await streamsApi.get(streamMeta.streamId);
+                const stream = await fetchStream(streamMeta.streamId);
                 const index = stream.blockIds.indexOf(blockId);
 
                 if (index >= 0) {
@@ -96,6 +97,7 @@ class DependencyResolver {
         artTitle: string | undefined,
         blocksCollection: BlocksCollectionJSON,
         streamsIndex: StreamIndexItem[],
+        fetchStream: StreamFetcher,
     ): Promise<DependencyTree> {
         const target: DependencyNode = {
             kind: 'artItem',
@@ -109,7 +111,9 @@ class DependencyResolver {
         // Find all streams that use those blocks (transitive dependencies)
         const affectedBlockIds = blockDependents.map((dep) => dep.parent.id);
         const streamDependentsArrays = await Promise.all(
-            affectedBlockIds.map((blockId) => this.findBlockDependents(blockId, streamsIndex)),
+            affectedBlockIds.map((blockId) =>
+                this.findBlockDependents(blockId, streamsIndex, fetchStream),
+            ),
         );
         const streamDependents = streamDependentsArrays.flat();
 
@@ -137,6 +141,7 @@ class DependencyResolver {
         blockId: string,
         blockTitle: string | undefined,
         streamsIndex: StreamIndexItem[],
+        fetchStream: StreamFetcher,
     ): Promise<DependencyTree> {
         const target: DependencyNode = {
             kind: 'block',
@@ -145,7 +150,7 @@ class DependencyResolver {
         };
 
         // Find all streams that use this block
-        const dependents = await this.findBlockDependents(blockId, streamsIndex);
+        const dependents = await this.findBlockDependents(blockId, streamsIndex, fetchStream);
 
         // Calculate cascade preview (just remove block from streams, delete if empty)
         const cascadePreview =

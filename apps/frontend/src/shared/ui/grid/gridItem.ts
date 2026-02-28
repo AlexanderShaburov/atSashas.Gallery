@@ -1,4 +1,4 @@
-// src/entities/grid/gridItem.ts
+// src/shared/ui/grid/gridItem.ts
 import { PreviewPath } from '@/entities/art';
 
 export interface GridItemSources {

@@ -34,7 +34,7 @@ Adding a new entity requires an explicit decision (ADR).
   - Optional background (ArtItem reference).
 - **Stream** — narrative composition of Blocks.
 - **Event** — offline workshop/event entity, editable via a dedicated form/editor.
-- **HomePage (singleton)** — site portrait composed of HomeItems.
+- **HomeDoc (singleton)** — site portrait composed of HomeItems.
 
 ### 3.2 Non-entities
 - **Hopper** — pipeline/staging for media ingestion (not a domain entity).
@@ -108,7 +108,7 @@ Unit workflows:
 - WF-B: Event create/edit — standalone
 - WF-C: Block create/edit — ArtItem slots / Event embeds / Text blocks (+ optional background)
 - WF-D: Stream create/edit — composition of Blocks
-- WF-E: HomePage compose — HomeItems referencing Streams/Blocks
+- WF-E: HomeDoc compose — HomeItems referencing Streams/Blocks
 
 Composite workflows:
 - WF-J1: Nested Journey — may start from any editor; supports deep chaining and return.
@@ -116,7 +116,7 @@ Composite workflows:
 ## 7. Current Priorities
 1) Bring the codebase back into compliance with this Constitution.
 2) Define the responsive public rendering rules for Home items (grid columns, sizing, breakpoints).
-3) Implement the HomePage model (HomeItems referencing Streams/Blocks).
+3) Implement the HomeDoc model (HomeItems referencing Streams/Blocks).
 4) To-Be features:
    - Unified toolbar behavior across editors
    - Working filtering in Select Mode

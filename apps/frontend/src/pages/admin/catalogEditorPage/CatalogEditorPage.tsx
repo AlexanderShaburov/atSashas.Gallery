@@ -1,6 +1,6 @@
 // src/pages/admin/catalogEditorPage/CatalogEditorPage.tsx
 
-import { GridItem } from '@/entities/grid';
+import { GridItem } from '@/shared/ui/grid';
 import { useCatalogEditorSession } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
 import SingleArtItemEditor, {
     SAProps,

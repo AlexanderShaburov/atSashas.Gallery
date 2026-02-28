@@ -1,7 +1,6 @@
 // src/features/admin/shared/ui/BlockPreview/BlockRenderer.tsx
 
-import { Block, BlockParent } from '@/entities/block';
-import { BlockHitEvent } from '@/features/admin/blocks/ui/BlockTemplates';
+import { type Block, type BlockHitEvent, type BlockParent } from '@/entities/block';
 import { resolveSetter } from '@/shared/lib/resolvers/resolvers';
 import { CtaBlockComponent } from './CtaBlockComponent';
 import { EventCtaBlockComponent } from './EventCtaBlockComponent';

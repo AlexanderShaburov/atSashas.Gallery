@@ -1,5 +1,7 @@
 // src/shared/lib/dependencies/dependency.types.ts
 
+import type { StreamData } from '@/entities/stream';
+
 /**
  * Represents a node in the dependency graph
  */
@@ -44,3 +46,5 @@ export type CascadePreview = {
 export type DependencyCheckResult =
     | { hasDependencies: false }
     | { hasDependencies: true; tree: DependencyTree };
+
+export type StreamFetcher = (streamId: string) => Promise<StreamData>;

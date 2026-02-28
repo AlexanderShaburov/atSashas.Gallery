@@ -1,6 +1,6 @@
 import type { ArtItemData } from '@/entities/art';
 import type { ImagesJSON } from '@/entities/art/images';
-import type { GridItem } from '@/entities/grid';
+import type { GridItem } from '@/shared/ui/grid';
 import { todayISO } from '@/shared/lib/dateAndLabels/today';
 import { generateId } from '@/shared/lib/id/generateId';
 

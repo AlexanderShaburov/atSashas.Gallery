@@ -2,8 +2,7 @@
 
 import type { Block } from '@/entities/block';
 import type { StreamData } from '@/entities/stream';
-import { getCollection } from '@/features/admin/blocks/api/blocksApi';
-import { getPublicBlocks } from '@/features/public/api/publicBlocksApi';
+import { getBlockCollection, getPublicBlocks } from '@/features/public/api/publicBlocksApi';
 import GalleryBlock from '@/features/public/ui/GalleryBlock/GalleryBlock';
 import { useEffect, useState } from 'react';
 
@@ -19,9 +18,9 @@ export function GalleryStream({ stream, mode = 'public' }: GalleryStreamProps) {
         (async () => {
             try {
                 if (mode === 'preview') {
-                    const call = await getCollection();
-                    if (!call) throw new Error('Collection download failed.');
-                    setCollection(call.blocks);
+                    const collection = await getBlockCollection();
+                    if (!collection) throw new Error('Collection download failed.');
+                    setCollection(collection.blocks);
                 } else {
                     const blocks = await getPublicBlocks(stream.streamId);
                     setCollection(blocks);

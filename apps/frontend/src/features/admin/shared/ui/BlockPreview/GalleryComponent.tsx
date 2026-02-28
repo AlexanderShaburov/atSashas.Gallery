@@ -1,23 +1,18 @@
 // src/features/admin/blocks/ui/BlockPreview/GalleryComponent.tsx
 
 import {
-    Block,
-    BlockParent,
-    EditTarget,
-    GalleryBlock,
-    GalleryBlockItem,
-    GalleryLayout,
-    ItemPosition,
-} from '@/entities/block';
-import {
-    isArtItem,
-    isEventItem,
-} from '@/features/admin/blocks/blockEditorSession/blockEditorSession.utils';
-import {
-    BlockHit,
-    BlockHitEvent,
+    type Block,
+    type BlockHit,
+    type BlockHitEvent,
+    type BlockParent,
+    type EditTarget,
+    type GalleryBlock,
+    type GalleryBlockItem,
+    type GalleryLayout,
     Hit,
-} from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
+    type ItemPosition,
+} from '@/entities/block';
+import { isArtItem, isEventItem } from '@/shared/lib/checkers/blockItemGuards';
 import { TEMPLATE_BLOCKS } from '@/features/admin/blocks/ui/BlockTemplates/templateTypes';
 import { GalleryEventSlot } from '@/features/admin/shared/ui/BlockPreview/GalleryEventSlot';
 import { InlineEditableText } from '@/features/admin/shared/ui/BlockPreview';

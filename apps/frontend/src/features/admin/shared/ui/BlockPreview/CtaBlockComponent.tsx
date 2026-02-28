@@ -1,6 +1,5 @@
-import { Block, BlockParent, CtaBlock } from '@/entities/block';
+import { type Block, type BlockHitEvent, type BlockParent, type CtaBlock, Hit } from '@/entities/block';
 import '@/features/admin/blocks/ui/BlockTemplates/block.templates.css';
-import { BlockHitEvent, Hit } from '@/features/admin/blocks/ui/BlockTemplates/editorTypes';
 type Props = {
     item: CtaBlock;
     onHit: (hit: BlockHitEvent) => void;
