@@ -3,8 +3,9 @@ import json
 from pathlib import Path
 
 from app.auth.models import User
+from app.storage import JSON_DIR
 
-USERS_FILE = Path('/media/json/users.json')
+USERS_FILE = JSON_DIR / 'users.json'
 
 
 class UserRepository:
