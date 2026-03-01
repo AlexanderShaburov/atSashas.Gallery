@@ -21,10 +21,32 @@
     }
 }
 .grid-collection > * {
-    aspect-ratio: 4 / 3;
     width: 100%;
 }
 
-.grid-collection > * > * {
-    height: 100%;
+.grid-collection__card {
+    position: relative;
+}
+
+.grid-collection__dots {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.85);
+    color: #333;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 1;
+}
+
+.grid-collection__card:hover .grid-collection__dots {
+    opacity: 1;
 }

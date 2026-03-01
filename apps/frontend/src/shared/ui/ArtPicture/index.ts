@@ -1,0 +1,1 @@
+export { ArtPicture } from './ArtPicture';

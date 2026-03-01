@@ -1,0 +1,31 @@
+/* shared/ui/Frame/Frame.css */
+
+.frame {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Card mode: aspect-ratio container with overflow hidden */
+.frame--card {
+    border-radius: 4px;
+    width: 100%;
+}
+
+.frame--card > * {
+    height: 100%;
+}
+
+/* Embedded mode: full-width, no constraints */
+.frame--embedded {
+    width: 100%;
+}
+
+/* Thumbnail mode: small fixed sizing */
+.frame--thumbnail {
+    width: 80px;
+    height: 60px;
+}
+
+.frame--thumbnail > * {
+    height: 100%;
+}

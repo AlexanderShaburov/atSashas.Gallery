@@ -3,30 +3,14 @@
 import type { GalleryEventItem } from '@/entities/block';
 import { useEvent } from '@/shared/EventsProvider/useEvent';
 import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
+import { canEnrollEvent, isEventClosed, isEventFree } from '@/shared/lib/checkers/eventStatusHelpers';
+import { formatEventDate, formatPrice } from '@/shared/lib/dateAndLabels/formatters';
+import { ArtPicture } from '@/shared/ui/ArtPicture';
 import { useState } from 'react';
 import { EnrollmentForm } from '@/features/public/ui/EventCta/EnrollmentForm';
 import './GallerySlotEventView.css';
 
 type Props = { item: GalleryEventItem };
-
-function formatDate(iso: string): string {
-    const d = new Date(iso);
-    const day = d.getDate();
-    const month = d.toLocaleDateString('en', { month: 'short' });
-    const hours = String(d.getHours()).padStart(2, '0');
-    const mins = String(d.getMinutes()).padStart(2, '0');
-    return `${day} ${month} ${hours}:${mins}`;
-}
-
-function formatPrice(price: { amount: number; currency: string }): string {
-    const sym =
-        price.currency === 'EUR'
-            ? '\u20AC'
-            : price.currency === 'USD'
-              ? '$'
-              : price.currency;
-    return `${price.amount}${sym}`;
-}
 
 export function GallerySlotEventView({ item }: Props) {
     const event = useEvent(item.eventId);
@@ -43,24 +27,19 @@ export function GallerySlotEventView({ item }: Props) {
         );
     }
 
-    const isClosed = event.status === 'closed';
-    const isDraft = event.status === 'draft';
-    const canEnroll = !isClosed && !isDraft;
-    const isFree = !event.price || event.price.amount <= 0;
+    const isClosed = isEventClosed(event);
+    const canEnroll = canEnrollEvent(event);
+    const isFree = isEventFree(event);
     const buttonText = item.buttonLabel?.en ?? (isFree ? 'Book a seat' : 'Join workshop');
 
     return (
         <div className={`gse gse--${event.status}`}>
             {bgArt && (
-                <picture className="gse__bg">
-                    {bgArt.images.preview.avif && (
-                        <source type="image/avif" srcSet={bgArt.images.preview.avif} />
-                    )}
-                    {bgArt.images.preview.webp && (
-                        <source type="image/webp" srcSet={bgArt.images.preview.webp} />
-                    )}
-                    <img src={bgArt.images.preview.jpeg} alt="" draggable={false} />
-                </picture>
+                <ArtPicture
+                    className="gse__bg"
+                    sources={bgArt.images.preview}
+                    draggable={false}
+                />
             )}
 
             <div className="gse__content">
@@ -80,7 +59,7 @@ export function GallerySlotEventView({ item }: Props) {
                 {/* ── Metadata row ── */}
                 <div className="gse__meta">
                     <span className="gse__meta-item">
-                        🗓 {formatDate(event.dateTime)}
+                        🗓 {formatEventDate(event.dateTime)}
                     </span>
                     {event.location && (
                         <span className="gse__meta-item">

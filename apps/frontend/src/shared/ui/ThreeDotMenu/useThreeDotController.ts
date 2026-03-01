@@ -90,6 +90,8 @@ function shallowSameOwner(a: ThreeDotOwner, b: ThreeDotOwner): boolean {
             return b.kind === 'stream' && a.streamId === b.streamId && a.blockId === b.blockId;
         case 'block':
             return b.kind === 'block' && a.blockId === b.blockId && a.artId === b.artId;
+        case 'blockCollection':
+            return b.kind === 'blockCollection' && a.blockId === b.blockId;
         case 'catalog':
             return b.kind === 'catalog' && a.artId === b.artId;
         default:

@@ -2,6 +2,7 @@
 
 import type { EventCtaBlock } from '@/entities/block';
 import { useEvent } from '@/shared/EventsProvider/useEvent';
+import { canEnrollEvent, isEventClosed, isEventDraft, isEventFree } from '@/shared/lib/checkers/eventStatusHelpers';
 import { useState } from 'react';
 import { EnrollmentForm } from './EnrollmentForm';
 import './EventCtaView.css';
@@ -20,10 +21,10 @@ export default function EventCtaView({ block }: Props) {
         );
     }
 
-    const isClosed = event.status === 'closed';
-    const isDraft = event.status === 'draft';
-    const canEnroll = !isClosed && !isDraft;
-    const isFree = !event.price || event.price.amount <= 0;
+    const isClosed = isEventClosed(event);
+    const isDraft = isEventDraft(event);
+    const canEnroll = canEnrollEvent(event);
+    const isFree = isEventFree(event);
     const dateStr = new Date(event.dateTime).toLocaleDateString();
     const buttonText = block.buttonLabel?.en ?? 'Learn more';
 

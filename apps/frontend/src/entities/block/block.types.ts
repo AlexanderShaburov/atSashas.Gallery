@@ -41,7 +41,7 @@ export const LAYOUT_SCHEME = {
     pairHorizontal: ['Left', 'Right'],
     pairVertical: ['Up', 'Bottom'],
     triptychHorizontal: ['Left', 'Center', 'Right'],
-    triptychLeft: ['LBC', 'LUC', 'Right'],
+    triptychLeft: ['LUC', 'LBC', 'Right'],
     triptychRight: ['Left', 'RUC', 'RBC'],
 } as const satisfies Record<GalleryLayout, readonly ItemPosition[]>;
 

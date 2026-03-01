@@ -11,23 +11,16 @@ import {
     type GalleryLayout,
     Hit,
     type ItemPosition,
+    LAYOUT_SCHEME,
 } from '@/entities/block';
 import { isArtItem, isEventItem } from '@/shared/lib/checkers/blockItemGuards';
+import { ArtPicture } from '@/shared/ui/ArtPicture';
 import { TEMPLATE_BLOCKS } from '@/features/admin/blocks/ui/BlockTemplates/templateTypes';
 import { GalleryEventSlot } from '@/features/admin/shared/ui/BlockPreview/GalleryEventSlot';
 import { InlineEditableText } from '@/features/admin/shared/ui/BlockPreview';
 import { SlotChoiceMenu } from '@/features/admin/shared/ui/BlockPreview/SlotChoiceMenu';
 import { useResolveArtAdaptive } from '@/shared/ArtCatalogProvider/useResolveArtAdaptive';
 import { JSX, ReactNode, useState } from 'react';
-
-const ITEM_POSITIONS: Record<GalleryLayout, ItemPosition[]> = {
-    single: ['Center'],
-    pairHorizontal: ['Left', 'Right'],
-    pairVertical: ['Up', 'Bottom'],
-    triptychLeft: ['LBC', 'LUC', 'Right'],
-    triptychRight: ['Left', 'RUC', 'RBC'],
-    triptychHorizontal: ['Left', 'Center', 'Right'],
-};
 
 type Props = {
     item: GalleryBlock;
@@ -64,7 +57,7 @@ type CaptionRenderOptions = {
 
 export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onAddEventPlaceholder, onUpdateItemCaption, onUpdateBlockCaption }: Props) {
     const isEditor = parent === 'editor';
-    const imgPositions = ITEM_POSITIONS[item.layout];
+    const imgPositions = LAYOUT_SCHEME[item.layout];
     const resolveArt = useResolveArtAdaptive();
     const [slotChoice, setSlotChoice] = useState<{ pos: ItemPosition; top: number; left: number } | null>(null);
 
@@ -342,9 +335,11 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onAd
                     // --- NORMAL ART ---
                     return (
                         <div key={`${imgId}-${pos}`} className={slotBaseClass}>
-                            <picture
+                            <ArtPicture
                                 role="button"
                                 className="blk-gallery__slot-media"
+                                sources={img.images.preview}
+                                alt={img.images.alt?.en || ''}
                                 onClick={(e) =>
                                     onHit({
                                         block: item,
@@ -352,15 +347,7 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onAd
                                         nativeEvent: e,
                                     })
                                 }
-                            >
-                                <source type="image/avif" srcSet={img.images.preview.avif} />
-                                <source type="image/webp" srcSet={img.images.preview.webp} />
-                                <img
-                                    src={img.images.preview.jpeg}
-                                    alt={img.images.alt?.en || ''}
-                                    loading="lazy"
-                                />
-                            </picture>
+                            />
 
                             {renderItemCaption(pos, blockItem)}
                         </div>

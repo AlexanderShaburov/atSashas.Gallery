@@ -1,7 +1,8 @@
 # ADR-005: Unified Rendering Model (Frame + Renderable)
 
-**Status:** Proposed (To-Be)  
+**Status:** In Progress
 **Date:** 2026-02-23
+**Updated:** 2026-03-01
 
 ## Context
 Rendering of core entities (Block / Stream thumbnail / ArtItem preview/full) drifted across screens.
@@ -36,6 +37,21 @@ Introduce a unified rendering system:
 ## Open Questions
 - Exact appearance schema (per entity vs shared)
 - Persistence of appearance (stored in entities vs dedicated style layer)
+
+## Implementation Notes (Wave 4 — 2026-03-01)
+
+### Completed
+- **Frame component** created at `shared/ui/Frame/` with modes: `embedded | card | thumbnail`
+- **ArtPicture component** created at `shared/ui/ArtPicture/` — shared `<picture>` element replacing 4 duplicated render paths
+- **LAYOUT_SCHEME unified** — single source of truth in `entities/block/block.types.ts`, duplicate constants (`ITEM_POSITIONS`, `RENDER_ORDER`) deleted
+- **Shared formatters** extracted — `formatEventDate`, `formatPrice`, event status helpers moved to `shared/lib/`
+- **QuickView panel** implemented at `shared/ui/QuickView/` — metadata-first click behavior per Constitution Section 11
+- **ThreeDotMenu** extended to block collection grid per Constitution Section 7
+- **Frame adopted** in CollectionGrid — each block card wrapped in `<Frame mode="card" aspectRatio="4/3">`
+
+### Deferred
+- Full Renderable type contract — will be introduced when custom appearance (colors, spacing) is implemented
+- Frame adoption in stream thumbnails and public pages — incremental convergence per touch-and-converge strategy
 
 ## Alternatives Considered
 - Screen-specific rendering (continues drift)

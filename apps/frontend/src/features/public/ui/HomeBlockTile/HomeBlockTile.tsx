@@ -3,6 +3,9 @@
 import type { Block, CtaBlock, EventCtaBlock, GalleryBlock, TextBlock } from '@/entities/block';
 import { useEvent } from '@/shared/EventsProvider/useEvent';
 import { useResolveArt } from '@/shared/ArtCatalogProvider/CatalogHook';
+import { canEnrollEvent, isEventClosed, isEventFree } from '@/shared/lib/checkers/eventStatusHelpers';
+import { formatEventDate, formatPrice } from '@/shared/lib/dateAndLabels/formatters';
+import { ArtPicture } from '@/shared/ui/ArtPicture';
 import { useState } from 'react';
 import { EnrollmentForm } from '@/features/public/ui/EventCta/EnrollmentForm';
 import './HomeBlockTile.css';
@@ -11,25 +14,6 @@ type Props = {
     block: Block;
     size?: 'S' | 'M' | 'L';
 };
-
-function formatDate(iso: string): string {
-    const d = new Date(iso);
-    const day = d.getDate();
-    const month = d.toLocaleDateString('en', { month: 'short' });
-    const hours = String(d.getHours()).padStart(2, '0');
-    const mins = String(d.getMinutes()).padStart(2, '0');
-    return `${day} ${month} ${hours}:${mins}`;
-}
-
-function formatPrice(price: { amount: number; currency: string }): string {
-    const sym =
-        price.currency === 'EUR'
-            ? '\u20AC'
-            : price.currency === 'USD'
-              ? '$'
-              : price.currency;
-    return `${price.amount}${sym}`;
-}
 
 function EventCtaTile({ block }: { block: EventCtaBlock }) {
     const event = useEvent(block.eventId);
@@ -42,10 +26,9 @@ function EventCtaTile({ block }: { block: EventCtaBlock }) {
 
     // Try to find a background art from gallery blocks that reference this event
     // For home tiles, we don't have gallery context so just show without background
-    const isClosed = event.status === 'closed';
-    const isDraft = event.status === 'draft';
-    const canEnroll = !isClosed && !isDraft;
-    const isFree = !event.price || event.price.amount <= 0;
+    const isClosed = isEventClosed(event);
+    const canEnroll = canEnrollEvent(event);
+    const isFree = isEventFree(event);
     const buttonText = block.buttonLabel?.en ?? (isFree ? 'Book a seat' : 'Join workshop');
 
     // If the event has a streamSlug, try to find background art from a related gallery
@@ -68,7 +51,7 @@ function EventCtaTile({ block }: { block: EventCtaBlock }) {
                 )}
 
                 <div className="hbt__event-meta">
-                    <span className="hbt__event-meta-item">{formatDate(event.dateTime)}</span>
+                    <span className="hbt__event-meta-item">{formatEventDate(event.dateTime)}</span>
                     {event.location && (
                         <span className="hbt__event-meta-item">
                             {event.mapUrl ? (
@@ -131,15 +114,11 @@ function GalleryTile({ block }: { block: GalleryBlock }) {
     return (
         <div className={`hbt__inner hbt__inner--gallery${hasBg ? ' hbt__inner--has-bg' : ''}`}>
             {art && (
-                <picture className="hbt__gallery-bg">
-                    {art.images.preview.avif && (
-                        <source type="image/avif" srcSet={art.images.preview.avif} />
-                    )}
-                    {art.images.preview.webp && (
-                        <source type="image/webp" srcSet={art.images.preview.webp} />
-                    )}
-                    <img src={art.images.preview.jpeg} alt="" draggable={false} />
-                </picture>
+                <ArtPicture
+                    className="hbt__gallery-bg"
+                    sources={art.images.preview}
+                    draggable={false}
+                />
             )}
             {block.caption?.en && <span className="hbt__gallery-caption">{block.caption.en}</span>}
             {!hasBg && !block.caption?.en && (

@@ -1,23 +1,15 @@
-import { GalleryBlock, GalleryBlockItem, GalleryLayout, ItemPosition } from '@/entities/block';
+import type { ArtItemData } from '@/entities/art';
+import { type GalleryBlock, type GalleryBlockItem, type GalleryLayout, LAYOUT_SCHEME } from '@/entities/block';
 import { isEventItem } from '@/shared/lib/checkers/blockItemGuards';
 import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
+import { ArtPicture } from '@/shared/ui/ArtPicture';
+import Lightbox from '@/shared/ui/lightbox/Lightbox';
+import { QuickView } from '@/shared/ui/QuickView';
+import { useState } from 'react';
 import { GallerySlotEventView } from './GallerySlotEventView';
 
-/**
- * CSS :nth-child() render order for each layout.
- * Must match the grid-column/grid-row assignments in Gallery.css.
- */
-const RENDER_ORDER: Record<GalleryLayout, ItemPosition[]> = {
-    single: ['Center'],
-    pairHorizontal: ['Left', 'Right'],
-    pairVertical: ['Up', 'Bottom'],
-    triptychHorizontal: ['Left', 'Center', 'Right'],
-    triptychLeft: ['LUC', 'LBC', 'Right'],
-    triptychRight: ['Left', 'RUC', 'RBC'],
-};
-
 function sortByLayout(items: GalleryBlockItem[], layout: GalleryLayout): GalleryBlockItem[] {
-    const order = RENDER_ORDER[layout];
+    const order: readonly string[] = LAYOUT_SCHEME[layout];
     return [...items].sort((a, b) => {
         const ai = order.indexOf(a.position);
         const bi = order.indexOf(b.position);
@@ -31,6 +23,22 @@ export default function ImageComponent({ block }: ImageComponentProps) {
     const { layout, items, caption } = block;
     const catalog = useArtCatalog();
     const sorted = sortByLayout(items, layout);
+
+    const [quickViewArt, setQuickViewArt] = useState<ArtItemData | null>(null);
+    const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+    const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+
+    const handleArtClick = (art: ArtItemData, e: React.MouseEvent<HTMLElement>) => {
+        setAnchorRect(e.currentTarget.getBoundingClientRect());
+        setQuickViewArt(art);
+    };
+
+    const handleViewFull = () => {
+        if (!quickViewArt) return;
+        setQuickViewArt(null);
+        setAnchorRect(null);
+        setLightboxSrc(quickViewArt.images.full);
+    };
 
     return (
         <figure className={`block ${layout}`}>
@@ -47,18 +55,32 @@ export default function ImageComponent({ block }: ImageComponentProps) {
                 const img = catalog?.items?.[item.artId];
                 if (!img) return null;
                 return (
-                    <picture key={img.id} role="button" onClick={() => open(img.images.full)}>
-                        <source type="image/avif" srcSet={img.images.preview.avif} />
-                        <source type="image/webp" srcSet={img.images.preview.webp} />
-                        <img
-                            src={img.images.preview.jpeg}
-                            alt={img.images.alt?.en || img.title?.en || ''}
-                            loading="lazy"
-                        />
-                    </picture>
+                    <ArtPicture
+                        key={img.id}
+                        role="button"
+                        sources={img.images.preview}
+                        alt={img.images.alt?.en || img.title?.en || ''}
+                        onClick={(e) => handleArtClick(img, e)}
+                    />
                 );
             })}
             {caption?.en && <figcaption>{caption.en}</figcaption>}
+
+            {quickViewArt && anchorRect && (
+                <QuickView
+                    art={quickViewArt}
+                    anchorRect={anchorRect}
+                    onClose={() => { setQuickViewArt(null); setAnchorRect(null); }}
+                    onViewFull={handleViewFull}
+                />
+            )}
+
+            {lightboxSrc && (
+                <Lightbox
+                    src={lightboxSrc}
+                    onClose={() => setLightboxSrc(null)}
+                />
+            )}
         </figure>
     );
 }

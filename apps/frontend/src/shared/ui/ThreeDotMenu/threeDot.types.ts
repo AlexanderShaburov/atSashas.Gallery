@@ -3,6 +3,7 @@
 export type ThreeDotOwner =
     | { kind: 'stream'; streamId: string; blockId: string }
     | { kind: 'block'; blockId: string; artId: string }
+    | { kind: 'blockCollection'; blockId: string }
     | { kind: 'catalog'; artId: string };
 
 export type ThreeDotAction =
@@ -13,7 +14,8 @@ export type ThreeDotAction =
     | { kind: 'shift'; dir: 'up' | 'down' }
     | { kind: 'move'; pos: 'end' | 'start' }
     | { kind: 'editArt' }
-    | { kind: 'replaceArt' };
+    | { kind: 'replaceArt' }
+    | { kind: 'duplicateBlock' };
 
 export type ThreeDotCommand = {
     owner: ThreeDotOwner;
