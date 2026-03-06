@@ -29,6 +29,7 @@ export type CatalogEditorSession = {
     // Data
     catalog: ArtCatalog | undefined;
     draft: ArtItemData | undefined;
+    techniquesRange: TechniquesJson;
 
     /** Currently selected item in grid (select mode) */
     selectedItemId: string | undefined;

@@ -85,6 +85,43 @@
 }
 
 /* =========================================================
+   AUTOCOMPLETE DROPDOWN
+   ========================================================= */
+
+.art-filter-control__autocomplete {
+    position: relative;
+    min-width: 0;
+}
+
+.art-filter-control__dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    margin: 4px 0 0;
+    padding: 4px 0;
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 10px;
+    border: 1px solid var(--form-border);
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+}
+
+.art-filter-control__dropdown-item {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.art-filter-control__dropdown-item:hover {
+    background: color-mix(in srgb, var(--accent) 15%, var(--card-bg));
+}
+
+/* =========================================================
    TAGS: INPUT + CHIPS
    ========================================================= */
 

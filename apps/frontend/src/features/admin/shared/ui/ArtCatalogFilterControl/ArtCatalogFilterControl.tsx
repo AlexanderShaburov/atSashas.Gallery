@@ -1,32 +1,37 @@
 // src/features/admin/artCatalog/ui/ArtCatalogFilterControl/ArtCatalogFilterControl.tsx
 
-import type { ArtItemData } from '@/entities/art/artUnit';
-import { useEffect, useMemo, useState } from 'react';
+import type { ArtItemData, TechniquesJson } from '@/entities/art';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ArtCatalogFilterState } from './artCatalogFilter.types';
 import './ArtCatalogFilterControl.css';
 
 type Props = {
     // Catalog items (source of options lists)
     items: Record<string, ArtItemData> | undefined;
+    /** Full techniques reference (categorized). If provided, dropdown shows all available techniques. */
+    techniquesRange?: TechniquesJson;
 
     filter: ArtCatalogFilterState;
     updateFilter: (patch: Partial<ArtCatalogFilterState>) => void;
     onBack?: () => void;
 };
 
-export function ArtCatalogFilterControl({ items, filter, updateFilter, onBack }: Props) {
+export function ArtCatalogFilterControl({ items, techniquesRange, filter, updateFilter, onBack }: Props) {
     const { extended, technique, availability, series } = filter;
 
     const [tagDraft, setTagDraft] = useState('');
     const [techList, setTechList] = useState<string[]>([]);
+    const [techFocused, setTechFocused] = useState(false);
+    const [availFocused, setAvailFocused] = useState(false);
+    const [seriesFocused, setSeriesFocused] = useState(false);
+    const techWrapRef = useRef<HTMLDivElement>(null);
+    const availWrapRef = useRef<HTMLDivElement>(null);
+    const seriesWrapRef = useRef<HTMLDivElement>(null);
     const [tagList, setTagList] = useState<string[]>([]);
     const [seriesList, setSeriesList] = useState<string[]>([]);
     const [availabilityList, setAvailabilityList] = useState<string[]>([]);
 
     const tagsListId = 'acfc-tags';
-    const techListId = 'acfc-tech';
-    const seriesListId = 'acfc-series';
-    const availabilityListId = 'acfc-availability';
 
     const allItemsArray = useMemo(() => (items ? Object.values(items) : []), [items]);
 
@@ -51,11 +56,57 @@ export function ArtCatalogFilterControl({ items, filter, updateFilter, onBack }:
             if (it.availability) availabilitySet.add(String(it.availability));
         }
 
+        // If full techniques reference is available, use it instead of catalog-derived list
+        if (techniquesRange) {
+            for (const cat of Object.values(techniquesRange)) {
+                for (const item of cat.items) {
+                    techs.add(typeof item === 'string' ? item : item.key);
+                }
+            }
+        }
+
         setTagList(Array.from(tags).sort());
         setTechList(Array.from(techs).sort());
         setSeriesList(Array.from(seriesSet).sort());
         setAvailabilityList(Array.from(availabilitySet).sort());
-    }, [items]);
+    }, [items, techniquesRange]);
+
+    // Close dropdowns on click outside
+    useEffect(() => {
+        if (!techFocused && !availFocused && !seriesFocused) return;
+        const onClick = (e: MouseEvent) => {
+            const target = e.target as Node;
+            if (techFocused && techWrapRef.current && !techWrapRef.current.contains(target)) {
+                setTechFocused(false);
+            }
+            if (availFocused && availWrapRef.current && !availWrapRef.current.contains(target)) {
+                setAvailFocused(false);
+            }
+            if (seriesFocused && seriesWrapRef.current && !seriesWrapRef.current.contains(target)) {
+                setSeriesFocused(false);
+            }
+        };
+        document.addEventListener('mousedown', onClick);
+        return () => document.removeEventListener('mousedown', onClick);
+    }, [techFocused, availFocused, seriesFocused]);
+
+    const techSuggestions = useMemo(() => {
+        const q = (technique ?? '').toLowerCase();
+        if (!q) return techList;
+        return techList.filter((t) => t.toLowerCase().includes(q));
+    }, [technique, techList]);
+
+    const availSuggestions = useMemo(() => {
+        const q = (availability ?? '').toLowerCase();
+        if (!q) return availabilityList;
+        return availabilityList.filter((v) => v.toLowerCase().includes(q));
+    }, [availability, availabilityList]);
+
+    const seriesSuggestions = useMemo(() => {
+        const q = (series ?? '').toLowerCase();
+        if (!q) return seriesList;
+        return seriesList.filter((v) => v.toLowerCase().includes(q));
+    }, [series, seriesList]);
 
     const commitTag = (v: string) => {
         const t = v.trim();
@@ -129,18 +180,34 @@ export function ArtCatalogFilterControl({ items, filter, updateFilter, onBack }:
                 </div>
 
                 {/* Technique */}
-                <input
-                    list={techListId}
-                    className="art-filter-control__input"
-                    value={technique ?? ''}
-                    onChange={(e) => updateFilter({ technique: e.target.value || undefined })}
-                    placeholder="Technique"
-                />
-                <datalist id={techListId}>
-                    {techList.map((t) => (
-                        <option key={t} value={t} />
-                    ))}
-                </datalist>
+                <div className="art-filter-control__autocomplete" ref={techWrapRef}>
+                    <input
+                        className="art-filter-control__input"
+                        value={technique ?? ''}
+                        onChange={(e) => {
+                            updateFilter({ technique: e.target.value || undefined });
+                            setTechFocused(true);
+                        }}
+                        onFocus={() => setTechFocused(true)}
+                        placeholder="Technique"
+                    />
+                    {techFocused && techSuggestions.length > 0 && (
+                        <ul className="art-filter-control__dropdown">
+                            {techSuggestions.map((t) => (
+                                <li
+                                    key={t}
+                                    className="art-filter-control__dropdown-item"
+                                    onMouseDown={() => {
+                                        updateFilter({ technique: t });
+                                        setTechFocused(false);
+                                    }}
+                                >
+                                    {t}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
 
                 {/* Mode switch */}
                 <div className="art-filter-control__mode-selector">
@@ -179,34 +246,64 @@ export function ArtCatalogFilterControl({ items, filter, updateFilter, onBack }:
             {extended && (
                 <div className="art-filter-control__advanced">
                     {/* Availability */}
-                    <input
-                        list={availabilityListId}
-                        className="art-filter-control__input"
-                        value={availability ?? ''}
-                        onChange={(e) =>
-                            updateFilter({ availability: e.target.value || undefined })
-                        }
-                        placeholder="Availability"
-                    />
-                    <datalist id={availabilityListId}>
-                        {availabilityList.map((v) => (
-                            <option key={v} value={v} />
-                        ))}
-                    </datalist>
+                    <div className="art-filter-control__autocomplete" ref={availWrapRef}>
+                        <input
+                            className="art-filter-control__input"
+                            value={availability ?? ''}
+                            onChange={(e) => {
+                                updateFilter({ availability: e.target.value || undefined });
+                                setAvailFocused(true);
+                            }}
+                            onFocus={() => setAvailFocused(true)}
+                            placeholder="Availability"
+                        />
+                        {availFocused && availSuggestions.length > 0 && (
+                            <ul className="art-filter-control__dropdown">
+                                {availSuggestions.map((v) => (
+                                    <li
+                                        key={v}
+                                        className="art-filter-control__dropdown-item"
+                                        onMouseDown={() => {
+                                            updateFilter({ availability: v });
+                                            setAvailFocused(false);
+                                        }}
+                                    >
+                                        {v}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
 
                     {/* Series */}
-                    <input
-                        list={seriesListId}
-                        className="art-filter-control__input"
-                        value={series ?? ''}
-                        onChange={(e) => updateFilter({ series: e.target.value || undefined })}
-                        placeholder="Series"
-                    />
-                    <datalist id={seriesListId}>
-                        {seriesList.map((v) => (
-                            <option key={v} value={v} />
-                        ))}
-                    </datalist>
+                    <div className="art-filter-control__autocomplete" ref={seriesWrapRef}>
+                        <input
+                            className="art-filter-control__input"
+                            value={series ?? ''}
+                            onChange={(e) => {
+                                updateFilter({ series: e.target.value || undefined });
+                                setSeriesFocused(true);
+                            }}
+                            onFocus={() => setSeriesFocused(true)}
+                            placeholder="Series"
+                        />
+                        {seriesFocused && seriesSuggestions.length > 0 && (
+                            <ul className="art-filter-control__dropdown">
+                                {seriesSuggestions.map((v) => (
+                                    <li
+                                        key={v}
+                                        className="art-filter-control__dropdown-item"
+                                        onMouseDown={() => {
+                                            updateFilter({ series: v });
+                                            setSeriesFocused(false);
+                                        }}
+                                    >
+                                        {v}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
 
                     {/* Has price (simple toggle-like button) */}
                     <button

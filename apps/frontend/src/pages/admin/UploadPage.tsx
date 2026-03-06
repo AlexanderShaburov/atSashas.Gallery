@@ -23,7 +23,7 @@ export default function UploadPage() {
     const [files, setFiles] = useState<File[]>([]);
     const [uploading, setUploading] = useState(false);
     const [uploaded, setUploaded] = useState<GridItem[]>([]);
-    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
     const [isDragging, setIsDragging] = useState(false);
 
     const arrival = useArrival();
@@ -42,7 +42,7 @@ export default function UploadPage() {
     // Handle grid selection ( deselect: undefined)
     const handleSelect = (item: GridItem | undefined) => {
         if (!item) {
-            setSelectedId(null);
+            setSelectedId(undefined);
             return;
         }
         setSelectedId(item.id);
@@ -126,7 +126,7 @@ export default function UploadPage() {
         setUploaded((prev) => prev.filter((t) => t.id !== selectedId));
         console.log(`filename to be deleted: ${selectedId}`);
         deleteFromHopper(selectedId);
-        setSelectedId(null);
+        setSelectedId(undefined);
     }
 
     // ---- Drag & drop handlers for drop zone ----
@@ -222,7 +222,7 @@ export default function UploadPage() {
 
                 <ArtItemGrid
                     artCollection={uploaded}
-                    selectedItemId={undefined}
+                    selectedItemId={selectedId}
                     setItemSelected={handleSelect}
                 />
                 <SingleEditorToolbar tools={tools} ctx={ctx} />

@@ -653,6 +653,7 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
             // Data:
             catalog,
             draft,
+            techniquesRange,
 
             // Grid selection:
             selectedItemId,
@@ -672,6 +673,7 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
             screenMode,
             draft,
             catalog,
+            techniquesRange,
             toolbarModel,
             selectedItemId,
             selectItem,

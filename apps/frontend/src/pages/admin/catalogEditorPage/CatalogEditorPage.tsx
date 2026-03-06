@@ -8,9 +8,9 @@ import SingleArtItemEditor, {
 import {
     ArtCatalogFilterControl,
     ArtCatalogFilterState,
+    applyArtCatalogFilter,
 } from '@/features/admin/shared/ui/ArtCatalogFilterControl';
 import ArtItemGrid from '@/features/admin/shared/ui/ArtItemGrid/ArtItemGrid';
-import { artItemToGridItem } from '@/features/admin/shared/ui/ArtItemGrid/utils';
 import { bindToolbarCtx } from '@/pages/admin/catalogEditorPage/catalogEditor.adapter';
 import { ToolbarCtx, ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
@@ -21,6 +21,7 @@ export default function CatalogEditorPage() {
         editorProps,
         toolbarModel,
         catalog,
+        techniquesRange,
         onEscape,
         editorIsReady,
         isLoading,
@@ -54,10 +55,9 @@ export default function CatalogEditorPage() {
 
     useEffect(() => {
         if (catalog && catalog.items) {
-            const c_grid = Object.values(catalog.items).map(artItemToGridItem);
-            setDisplayGrid(c_grid ?? []);
+            setDisplayGrid(applyArtCatalogFilter(catalog.items, artFilter));
         }
-    }, [catalog]);
+    }, [catalog, artFilter]);
 
     const onSelectHandler = useCallback(
         (item: GridItem | undefined): void => {
@@ -86,6 +86,7 @@ export default function CatalogEditorPage() {
                             <div className="catalog-editor__toolbar">
                                 <ArtCatalogFilterControl
                                     items={catalog?.items}
+                                    techniquesRange={techniquesRange}
                                     filter={artFilter}
                                     updateFilter={updateArtFilter}
                                     onBack={onEscape}
