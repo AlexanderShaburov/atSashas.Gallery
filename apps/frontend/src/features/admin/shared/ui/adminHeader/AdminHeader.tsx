@@ -1,15 +1,15 @@
 import { useAuth } from '@/features/auth/authContext';
-import { useNavigate } from 'react-router-dom';
+import { useGuardedNavigate } from '@/features/admin/shared/hooks/useGuardedNavigate';
 import { GuardedNavLink } from './GuardedNavLink';
 import './adminHeader.css';
 
 export function AdminHeader() {
     const { user, logout } = useAuth();
-    const navigate = useNavigate();
+    const guardedNavigate = useGuardedNavigate();
 
     async function handleLogout() {
         await logout();
-        navigate('/admin/login');
+        guardedNavigate('/admin/login');
     }
 
     return (

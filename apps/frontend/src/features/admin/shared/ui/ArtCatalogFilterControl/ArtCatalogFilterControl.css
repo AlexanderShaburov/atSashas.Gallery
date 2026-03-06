@@ -195,8 +195,8 @@
     flex: 1.35 1 0;
 }
 
-/* Back segment: fixed on the right */
-.art-filter-control__mode--back {
+/* Clear segment: fixed on the right */
+.art-filter-control__mode--clear {
     flex: 0 0 auto;
     margin-left: auto;
     border-left: 1px solid var(--form-border);
@@ -204,7 +204,7 @@
 
 /* Buttons must fill their segment (this fixes “button is only 60% of the div”) */
 .art-filter-control__mode button,
-.art-filter-control__back {
+.art-filter-control__clear {
     appearance: none;
     border: 0;
     background: transparent;
@@ -235,7 +235,7 @@
 }
 
 .art-filter-control__mode button:hover,
-.art-filter-control__back:hover {
+.art-filter-control__clear:hover {
     opacity: 0.92;
     color: var(--text);
 }

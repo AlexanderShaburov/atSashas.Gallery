@@ -2,15 +2,17 @@
 
 import type { EventData, EventStatus } from '@/entities/event';
 import type { Localized, Money } from '@/entities/common';
-import { useRefreshEvents } from '@/shared/EventsProvider/EventsProvider';
+import type { EditorKey } from '@/shared/nav';
+import { invalidateEventsCache } from '@/shared/EventsProvider/eventsApi';
+import { editSessionsDataStore, eventsStore, useSessionDataStore, useStoreData } from '@/shared/state';
 import {
     useArrival,
     useJourneyStatus,
     useReturnHome,
 } from '@/features/admin/shared/transporter/transporter';
 import { slugify } from '@/shared/lib/text/slugify';
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { eventsAdminApi, type CreateEventPayload } from '../api/eventsAdminApi';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { eventsAdminApi, refreshEvents, type CreateEventPayload } from '../api/eventsAdminApi';
 
 type ScreenMode = 'list' | 'edit' | 'create' | 'select';
 
@@ -115,31 +117,47 @@ export function useEventEditorSession(): EventEditorSession {
   return ctx;
 }
 
+function makeEditorKey(id: string | null): EditorKey | undefined {
+  if (!id) return undefined;
+  return { kind: 'events', id };
+}
+
 export function EventEditorSessionProvider({ children }: { children: React.ReactNode }) {
-  const refreshGlobalEvents = useRefreshEvents();
-  const [events, setEvents] = useState<EventData[]>([]);
+  // ── External store: events list ──
+  const catalog = useStoreData(eventsStore);
+  const events = useMemo(() => (catalog ? Object.values(catalog.events) : []), [catalog]);
+
+  // ── External store: editor draft ──
+  const [editorKeyId, setEditorKeyId] = useState<string | null>(null);
+  const editorKey = useMemo(() => makeEditorKey(editorKeyId), [editorKeyId]);
+  const { storeData, setDraft: setStoreDraft, clear: clearSession } = useSessionDataStore<EventDraft>(editorKey);
+  const draft = storeData?.draft ?? EMPTY_DRAFT;
+
+  // ── Transient UI state (stays in Context — per ADR-003) ──
   const [screenMode, setScreenMode] = useState<ScreenMode>('list');
-  const [draft, setDraft] = useState<EventDraft>(EMPTY_DRAFT);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Journey hooks
+  // ── Journey hooks ──
   const arrival = useArrival();
   const returnHome = useReturnHome();
   const isJourney = useJourneyStatus('events');
 
-  // React Strict Mode protection for bootstrap
+  // ── React Strict Mode protection for bootstrap ──
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const bootstrapRef = useRef<{ processed: boolean; ticket: any }>({
     processed: false,
     ticket: null,
   });
 
+  // Track editorKey for cleanup on unmount
+  const editorKeyRef = useRef(editorKey);
+  editorKeyRef.current = editorKey;
+
   const loadEvents = useCallback(async () => {
     try {
       setIsLoading(true);
-      const catalog = await eventsAdminApi.getAll();
-      setEvents(Object.values(catalog.events));
+      await refreshEvents(); // populates eventsStore
     } catch (err) {
       console.error('[EventEditorSession] Failed to load events', err);
     } finally {
@@ -163,7 +181,7 @@ export function EventEditorSessionProvider({ children }: { children: React.React
       }
 
       if (!ticket.loot) {
-        // Outbound: block editor wants us to select an event
+        // Outbound: another editor wants us to select/edit an event
         switch (ticket.destination.mode) {
           case 'select':
             setScreenMode('select');
@@ -171,10 +189,15 @@ export function EventEditorSessionProvider({ children }: { children: React.React
           case 'edit': {
             const id = ticket.destination.objectId;
             if (!id) throw new Error('[Events BOOTSTRAP]: outbound edit missing objectId');
-            const catalog = await eventsAdminApi.getAll();
-            const found = Object.values(catalog.events).find((e) => e.id === id);
+            // Read store imperatively for bootstrap
+            const currentCatalog = eventsStore.getSnapshot();
+            const found = currentCatalog
+              ? Object.values(currentCatalog.events).find((e) => e.id === id)
+              : undefined;
             if (found) {
-              setDraft(eventToFormDraft(found));
+              const key: EditorKey = { kind: 'events', id };
+              editSessionsDataStore.setSnapshot(key, eventToFormDraft(found));
+              setEditorKeyId(id);
               setScreenMode('edit');
             }
             return;
@@ -186,25 +209,42 @@ export function EventEditorSessionProvider({ children }: { children: React.React
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Cleanup editSessionsDataStore on unmount
+  useEffect(() => {
+    return () => {
+      const key = editorKeyRef.current;
+      if (key) {
+        editSessionsDataStore.clear(key);
+      }
+    };
+  }, []);
+
   const selectEvent = useCallback(
     (id: string) => {
       const found = events.find((e) => e.id === id);
       if (!found) return;
-      setDraft(eventToFormDraft(found));
+      const key: EditorKey = { kind: 'events', id };
+      editSessionsDataStore.setSnapshot(key, eventToFormDraft(found));
+      setEditorKeyId(id);
       setScreenMode('edit');
     },
     [events],
   );
 
   const createNew = useCallback(() => {
-    setDraft({ ...EMPTY_DRAFT });
+    const key: EditorKey = { kind: 'events', id: '__new__' };
+    editSessionsDataStore.setSnapshot(key, { ...EMPTY_DRAFT });
+    setEditorKeyId('__new__');
     setScreenMode('create');
   }, []);
 
   const back = useCallback(() => {
+    if (editorKey) {
+      clearSession();
+    }
+    setEditorKeyId(null);
     setScreenMode('list');
-    setDraft(EMPTY_DRAFT);
-  }, []);
+  }, [editorKey, clearSession]);
 
   const save = useCallback(async () => {
     try {
@@ -217,17 +257,22 @@ export function EventEditorSessionProvider({ children }: { children: React.React
         const full: EventData = { id: draft.id, ...payload };
         await eventsAdminApi.update(draft.id, full);
       }
-      await loadEvents();
-      void refreshGlobalEvents();
+      // Clear editor session
+      if (editorKey) {
+        clearSession();
+      }
+      setEditorKeyId(null);
+      // Refresh both admin store and public cache
+      await refreshEvents();
+      invalidateEventsCache();
       setScreenMode('list');
-      setDraft(EMPTY_DRAFT);
     } catch (err) {
       console.error('[EventEditorSession] Save failed', err);
       alert(`Failed to save event: ${err}`);
     } finally {
       setIsSaving(false);
     }
-  }, [screenMode, draft, loadEvents, refreshGlobalEvents]);
+  }, [screenMode, draft, editorKey, clearSession]);
 
   const deleteEvent = useCallback(
     async (id: string) => {
@@ -235,10 +280,15 @@ export function EventEditorSessionProvider({ children }: { children: React.React
       try {
         setIsSaving(true);
         await eventsAdminApi.remove(id);
-        await loadEvents();
-        void refreshGlobalEvents();
+        // Clear editor session
+        if (editorKey) {
+          clearSession();
+        }
+        setEditorKeyId(null);
+        // Refresh both admin store and public cache
+        await refreshEvents();
+        invalidateEventsCache();
         setScreenMode('list');
-        setDraft(EMPTY_DRAFT);
       } catch (err) {
         console.error('[EventEditorSession] Delete failed', err);
         alert(`Failed to delete event: ${err}`);
@@ -246,27 +296,29 @@ export function EventEditorSessionProvider({ children }: { children: React.React
         setIsSaving(false);
       }
     },
-    [loadEvents, refreshGlobalEvents],
+    [editorKey, clearSession],
   );
 
   const setDraftField = useCallback(
     <K extends keyof EventDraft>(field: K, value: EventDraft[K]) => {
-      setDraft((prev) => ({ ...prev, [field]: value }));
+      const current = editorKey ? editSessionsDataStore.get<EventDraft>(editorKey)?.draft : null;
+      if (!current) return;
+      setStoreDraft({ ...current, [field]: value });
     },
-    [],
+    [editorKey, setStoreDraft],
   );
 
   const onTitleChange = useCallback(
     (value: string) => {
-      setDraft((prev) => {
-        const next = { ...prev, titleEn: value };
-        if (screenMode === 'create') {
-          next.slug = slugify(value);
-        }
-        return next;
-      });
+      const current = editorKey ? editSessionsDataStore.get<EventDraft>(editorKey)?.draft : null;
+      if (!current) return;
+      const next = { ...current, titleEn: value };
+      if (screenMode === 'create') {
+        next.slug = slugify(value);
+      }
+      setStoreDraft(next);
     },
-    [screenMode],
+    [editorKey, screenMode, setStoreDraft],
   );
 
   const selectAndReturn = useCallback(

@@ -6,10 +6,23 @@ import LangInput from '@/features/admin/catalogEditor/ui/CreateForm/UX/LangInput
 import MoneyInput from '@/features/admin/catalogEditor/ui/CreateForm/UX/MoneyInput';
 // import TechniqueListEditor from '@/features/admin/ui/CreateForm/UX/TechniqueListEditor';
 import TechniqueListEditor from '@/features/admin/catalogEditor/ui/CreateForm/UX/TechniqueListEditor';
+import AutocompleteInput from '@/features/admin/catalogEditor/ui/CreateForm/UX/AutocompleteInput';
 import { SingleItemEditorProps } from '@/features/admin/catalogEditor/catalogEditorSession/catalogEditorSession.types';
+import { useEffect, useRef, useState } from 'react';
 
 export function CreateForm(props: SingleItemEditorProps) {
     const { seriesOptions, editorIsReady, draft, onDraftChange } = props;
+
+    // Tags: keep raw string while typing so commas aren't swallowed
+    const [tagsRaw, setTagsRaw] = useState('');
+    const tagsEditing = useRef(false);
+
+    // Sync from draft → raw when draft changes externally (not during editing)
+    useEffect(() => {
+        if (!tagsEditing.current) {
+            setTagsRaw(draft?.tags?.join(', ') ?? '');
+        }
+    }, [draft?.tags]);
 
     if (!editorIsReady || !draft) return null;
 
@@ -45,24 +58,19 @@ export function CreateForm(props: SingleItemEditorProps) {
                 {/* Select techniques from the list */}
                 <TechniqueListEditor {...props} />
 
-                {/* Series with datalist */}
+                {/* Series with autocomplete */}
                 <div className="cf-row">
                     <label htmlFor="series" className="cf-label">
                         Series
                     </label>
-                    <input
+                    <AutocompleteInput
                         id="series"
-                        list="series-list"
                         className="cf-input"
                         value={draft?.series ?? ''}
-                        onChange={(e) => onDraftChange({ ...draft, series: e.target.value })}
+                        options={seriesOptions}
+                        onChange={(v) => onDraftChange({ ...draft, series: v })}
                         placeholder="Start typing or pick…"
                     />
-                    <datalist id="series-list">
-                        {seriesOptions.map((s) => (
-                            <option key={s} value={s} />
-                        ))}
-                    </datalist>
                 </div>
 
                 {/* Tags */}
@@ -73,14 +81,17 @@ export function CreateForm(props: SingleItemEditorProps) {
                     <input
                         id="tags"
                         className="cf-input"
-                        value={draft?.tags?.join(', ') ?? ''}
-                        onChange={(e) => {
-                            const raw = e.target.value;
-                            const tags = raw
+                        value={tagsRaw}
+                        onFocus={() => { tagsEditing.current = true; }}
+                        onChange={(e) => setTagsRaw(e.target.value)}
+                        onBlur={() => {
+                            tagsEditing.current = false;
+                            const tags = tagsRaw
                                 .split(',')
                                 .map((s) => s.trim())
                                 .filter(Boolean);
-                            if (!tags) return;
+                            const normalized = tags.join(', ');
+                            setTagsRaw(normalized || '');
                             onDraftChange({ ...draft, tags });
                         }}
                         placeholder="comma, separated (e.g. roses, landscape)"

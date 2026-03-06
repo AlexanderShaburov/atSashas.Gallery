@@ -13,25 +13,34 @@ type Props = {
 
     filter: ArtCatalogFilterState;
     updateFilter: (patch: Partial<ArtCatalogFilterState>) => void;
-    onBack?: () => void;
 };
 
-export function ArtCatalogFilterControl({ items, techniquesRange, filter, updateFilter, onBack }: Props) {
+const EMPTY_FILTER: ArtCatalogFilterState = {
+    query: '',
+    tags: [],
+    technique: undefined,
+    extended: false,
+    availability: undefined,
+    series: undefined,
+    hasPrice: undefined,
+};
+
+export function ArtCatalogFilterControl({ items, techniquesRange, filter, updateFilter }: Props) {
     const { extended, technique, availability, series } = filter;
 
     const [tagDraft, setTagDraft] = useState('');
+    const [tagFocused, setTagFocused] = useState(false);
     const [techList, setTechList] = useState<string[]>([]);
     const [techFocused, setTechFocused] = useState(false);
     const [availFocused, setAvailFocused] = useState(false);
     const [seriesFocused, setSeriesFocused] = useState(false);
+    const tagWrapRef = useRef<HTMLDivElement>(null);
     const techWrapRef = useRef<HTMLDivElement>(null);
     const availWrapRef = useRef<HTMLDivElement>(null);
     const seriesWrapRef = useRef<HTMLDivElement>(null);
     const [tagList, setTagList] = useState<string[]>([]);
     const [seriesList, setSeriesList] = useState<string[]>([]);
     const [availabilityList, setAvailabilityList] = useState<string[]>([]);
-
-    const tagsListId = 'acfc-tags';
 
     const allItemsArray = useMemo(() => (items ? Object.values(items) : []), [items]);
 
@@ -73,9 +82,12 @@ export function ArtCatalogFilterControl({ items, techniquesRange, filter, update
 
     // Close dropdowns on click outside
     useEffect(() => {
-        if (!techFocused && !availFocused && !seriesFocused) return;
+        if (!tagFocused && !techFocused && !availFocused && !seriesFocused) return;
         const onClick = (e: MouseEvent) => {
             const target = e.target as Node;
+            if (tagFocused && tagWrapRef.current && !tagWrapRef.current.contains(target)) {
+                setTagFocused(false);
+            }
             if (techFocused && techWrapRef.current && !techWrapRef.current.contains(target)) {
                 setTechFocused(false);
             }
@@ -88,7 +100,15 @@ export function ArtCatalogFilterControl({ items, techniquesRange, filter, update
         };
         document.addEventListener('mousedown', onClick);
         return () => document.removeEventListener('mousedown', onClick);
-    }, [techFocused, availFocused, seriesFocused]);
+    }, [tagFocused, techFocused, availFocused, seriesFocused]);
+
+    const tagSuggestions = useMemo(() => {
+        const q = tagDraft.toLowerCase();
+        const already = new Set(filter.tags);
+        const list = tagList.filter((t) => !already.has(t));
+        if (!q) return list;
+        return list.filter((t) => t.toLowerCase().includes(q));
+    }, [tagDraft, tagList, filter.tags]);
 
     const techSuggestions = useMemo(() => {
         const q = (technique ?? '').toLowerCase();
@@ -107,6 +127,19 @@ export function ArtCatalogFilterControl({ items, techniquesRange, filter, update
         if (!q) return seriesList;
         return seriesList.filter((v) => v.toLowerCase().includes(q));
     }, [series, seriesList]);
+
+    const hasActiveFilter =
+        filter.query !== '' ||
+        filter.tags.length > 0 ||
+        !!filter.technique ||
+        !!filter.availability ||
+        !!filter.series ||
+        !!filter.hasPrice;
+
+    const clearAll = () => {
+        updateFilter({ ...EMPTY_FILTER, extended: filter.extended });
+        setTagDraft('');
+    };
 
     const commitTag = (v: string) => {
         const t = v.trim();
@@ -131,25 +164,42 @@ export function ArtCatalogFilterControl({ items, techniquesRange, filter, update
 
                 {/* Tags (multi add) */}
                 <div className="art-filter-control__tags">
-                    <input
-                        list={tagsListId}
-                        className="art-filter-control__input"
-                        value={tagDraft}
-                        onChange={(e) => setTagDraft(e.target.value)}
-                        onBlur={() => commitTag(tagDraft)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ',') {
-                                e.preventDefault();
-                                commitTag(tagDraft);
-                            }
-                        }}
-                        placeholder="Add tag…"
-                    />
-                    <datalist id={tagsListId}>
-                        {tagList.map((t) => (
-                            <option key={t} value={t} />
-                        ))}
-                    </datalist>
+                    <div className="art-filter-control__autocomplete" ref={tagWrapRef}>
+                        <input
+                            className="art-filter-control__input"
+                            value={tagDraft}
+                            onChange={(e) => {
+                                setTagDraft(e.target.value);
+                                setTagFocused(true);
+                            }}
+                            onFocus={() => setTagFocused(true)}
+                            onBlur={() => commitTag(tagDraft)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ',') {
+                                    e.preventDefault();
+                                    commitTag(tagDraft);
+                                    setTagFocused(false);
+                                }
+                            }}
+                            placeholder="Add tag…"
+                        />
+                        {tagFocused && tagSuggestions.length > 0 && (
+                            <ul className="art-filter-control__dropdown">
+                                {tagSuggestions.map((t) => (
+                                    <li
+                                        key={t}
+                                        className="art-filter-control__dropdown-item"
+                                        onMouseDown={() => {
+                                            commitTag(t);
+                                            setTagFocused(false);
+                                        }}
+                                    >
+                                        {t}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
 
                     {/* Selected tags chips (minimal) */}
                     <div className="art-filter-control__chips">
@@ -229,14 +279,14 @@ export function ArtCatalogFilterControl({ items, techniquesRange, filter, update
                             Advanced
                         </button>
                     </div>
-                    {!!onBack && (
-                        <div className="art-filter-control__mode art-filter-control__mode--back">
+                    {hasActiveFilter && (
+                        <div className="art-filter-control__mode art-filter-control__mode--clear">
                             <button
                                 type="button"
-                                onClick={onBack}
-                                className="art-filter-control__back"
+                                onClick={clearAll}
+                                className="art-filter-control__clear"
                             >
-                                Back
+                                Clear
                             </button>
                         </div>
                     )}

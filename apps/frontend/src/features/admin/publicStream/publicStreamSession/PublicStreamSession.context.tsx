@@ -7,6 +7,7 @@ import type { JourneyHome } from '@/shared/nav/journeySession.types';
 import type { ReturnAddress, ToAddress } from '@/shared/nav/journey.types';
 import type { EditorKey } from '@/shared/nav';
 import { useArrival, useDispatch } from '@/features/admin/shared/transporter/transporter';
+import { useGuardedNavigate } from '@/features/admin/shared/hooks/useGuardedNavigate';
 import { generateId } from '@/shared/lib/id/generateId';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { deepEqual } from '@/shared/lib/checkers/checkers';
@@ -20,7 +21,6 @@ import {
     useUnsavedChanges,
 } from '@/shared/state';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { homeDocAdminApi } from '../api/homeDocAdminApi';
 import type { PublicStreamSession } from './publicStreamSession.types';
 
@@ -45,7 +45,7 @@ export function PublicStreamSessionProvider({ children }: Props) {
     const streamsIndex = useStoreData(streamsIndexStore);
     const blocksCollection = useStoreData(blocksCollectionStore);
 
-    const navigate = useNavigate();
+    const guardedNavigate = useGuardedNavigate();
     const dispatch = useDispatch();
     const arrival = useArrival();
 
@@ -298,8 +298,8 @@ export function PublicStreamSessionProvider({ children }: Props) {
 
     /** Exit editor */
     const exit = useCallback(() => {
-        navigate('/admin');
-    }, [navigate]);
+        guardedNavigate('/admin');
+    }, [guardedNavigate]);
 
     const session: PublicStreamSession = {
         homeDoc: draft,
