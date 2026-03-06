@@ -57,14 +57,27 @@ async def get_published_streams() -> list[StreamIndexItem]:
         return []
 
 
+@public_router.get("/by-ids", response_model=list[StreamIndexItem])
+async def get_streams_by_ids(
+    ids: str = Query("", min_length=0),
+) -> list[StreamIndexItem]:
+    """
+    Return stream index items by their IDs (comma-separated).
+    Used by the Home page to resolve streamRef items without the PublicStream gate.
+    No authentication required.
+    """
+    stream_ids = [sid.strip() for sid in ids.split(",") if sid.strip()]
+    if not stream_ids:
+        return []
+
+    index = await repo.list_index()
+    id_to_item = {item.streamId: item for item in index.streams}
+    return [id_to_item[sid] for sid in stream_ids if sid in id_to_item]
+
+
 @public_router.get("/{stream_id}", response_model=StreamData)
 async def get_published_stream(stream_id: str) -> StreamData:
-    """Get a single stream — only if published (in PublicStream list)."""
-    public_stream = await public_stream_repo.get()
-    if stream_id not in public_stream.streamIds:
-        raise HTTPException(
-            status_code=404, detail=f"Stream not found: {stream_id}"
-        )
+    """Get a single stream by ID (public, no auth required)."""
     try:
         return await repo.get_stream(stream_id)
     except FileNotFoundError:

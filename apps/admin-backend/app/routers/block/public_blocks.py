@@ -21,14 +21,9 @@ async def get_blocks_for_published_stream(
     stream_id: str = Query(..., min_length=1),
 ):
     """
-    Return blocks belonging to a published stream.
-    Only returns blocks for streams in the PublicStream list.
+    Return blocks belonging to a stream.
     No authentication required.
     """
-    public_stream = await public_stream_repo.get()
-    if stream_id not in public_stream.streamIds:
-        raise HTTPException(status_code=404, detail="Stream not found")
-
     try:
         stream = await _stream_repo.get_stream(stream_id)
     except FileNotFoundError:

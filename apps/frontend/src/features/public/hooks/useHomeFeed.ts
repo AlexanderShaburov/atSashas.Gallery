@@ -60,7 +60,7 @@ export function useHomeFeed(mode: 'public' | 'preview' = 'public'): HomeFeedResu
 
             const url = isAdmin
                 ? `${API_BASE}/admin/streams`
-                : `${API_BASE}/public/streams/published`;
+                : `${API_BASE}/public/streams/by-ids?ids=${encodeURIComponent(slugs.join(','))}`;
 
             const res = await fetch(url);
             if (!res.ok) throw new Error(`Failed to load streams: ${res.status}`);

@@ -3,13 +3,13 @@
 import type { ArtItemData } from '@/entities/art';
 import { formatPrice } from '@/shared/lib/dateAndLabels/formatters';
 import { ArtPicture } from '@/shared/ui/ArtPicture';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './QuickView.css';
 
 type Props = {
     art: ArtItemData;
-    anchorRect: DOMRect;
+    anchorPoint: { x: number; y: number };
     onClose: () => void;
     onViewFull: () => void;
 };
@@ -26,38 +26,88 @@ const AVAILABILITY_LABELS: Record<string, string> = {
     notForSale: 'Not for sale',
 };
 
-export function QuickView({ art, anchorRect, onClose, onViewFull }: Props) {
+// Module-level singleton: only one QuickView can be open at a time.
+// Stores the close trigger of the currently active instance.
+let activeDismiss: (() => void) | null = null;
+
+export function QuickView({ art, anchorPoint, onClose, onViewFull }: Props) {
+    const [closing, setClosing] = useState(false);
+
+    const startClose = useCallback(() => {
+        setClosing(true);
+    }, []);
+
+    // Dismiss any previous QuickView, register this one
+    useEffect(() => {
+        activeDismiss?.();
+        activeDismiss = startClose;
+        return () => {
+            if (activeDismiss === startClose) activeDismiss = null;
+        };
+    }, [startClose]);
+
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') onClose();
+            if (e.key === 'Escape') startClose();
         };
         document.addEventListener('keydown', onKey);
         return () => document.removeEventListener('keydown', onKey);
-    }, [onClose]);
+    }, [startClose]);
 
-    // Position the card near the click anchor
+    const cardRef = useRef<HTMLDivElement>(null);
+
+    const handleAnimationEnd = () => {
+        if (closing) onClose();
+    };
+
+    // anchorPoint is page-relative (clientX/Y + scroll at click time)
     const viewportW = window.innerWidth;
     const viewportH = window.innerHeight;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
     const cardW = Math.min(320, viewportW - 32);
-    const cardH = 400; // approximate max height
+    const margin = 16;
 
-    let left = anchorRect.left + anchorRect.width / 2 - cardW / 2;
-    let top = anchorRect.bottom + 8;
+    // Initial position: centered on click X, below click Y
+    let left = anchorPoint.x - cardW / 2;
+    let top = anchorPoint.y + 12;
 
-    // Keep within viewport
-    if (left < 16) left = 16;
-    if (left + cardW > viewportW - 16) left = viewportW - cardW - 16;
-    if (top + cardH > viewportH - 16) {
-        top = anchorRect.top - cardH - 8;
-        if (top < 16) top = 16;
-    }
+    // Horizontal clamping
+    if (left < scrollX + margin) left = scrollX + margin;
+    if (left + cardW > scrollX + viewportW - margin) left = scrollX + viewportW - cardW - margin;
+
+    // Measure actual card height and clamp to visible viewport (before paint)
+    useLayoutEffect(() => {
+        const card = cardRef.current;
+        if (!card) return;
+        const cardH = card.offsetHeight;
+        const visibleTop = scrollY + margin;
+        const visibleBottom = scrollY + viewportH - margin;
+        let adjustedTop = anchorPoint.y + 12;
+
+        // If card overflows bottom, try placing it above the click point
+        if (adjustedTop + cardH > visibleBottom) {
+            adjustedTop = anchorPoint.y - cardH - 12;
+        }
+
+        // If it still overflows top, pin to top of visible area
+        if (adjustedTop < visibleTop) {
+            adjustedTop = visibleTop;
+        }
+
+        card.style.top = `${adjustedTop}px`;
+    });
+
+    const stateClass = closing ? 'qv--closing' : 'qv--open';
 
     return createPortal(
-        <div className="qv-backdrop" onClick={onClose}>
+        <div className={`qv-backdrop ${stateClass}`} onClick={startClose}>
             <div
-                className="qv-card"
+                ref={cardRef}
+                className={`qv-card ${stateClass}`}
                 style={{ top, left, width: cardW }}
                 onClick={(e) => e.stopPropagation()}
+                onAnimationEnd={handleAnimationEnd}
             >
                 <ArtPicture
                     className="qv-card__preview"
@@ -68,11 +118,15 @@ export function QuickView({ art, anchorRect, onClose, onViewFull }: Props) {
                 <div className="qv-card__info">
                     {art.title?.en && <h3 className="qv-card__title">{art.title.en}</h3>}
 
-                    {art.techniques.length > 0 && (
+                    {art.notes && (
+                        <p className="qv-card__notes">{art.notes}</p>
+                    )}
+
+                    {art.techniques && art.techniques.length > 0 && (
                         <p className="qv-card__technique">{art.techniques.join(', ')}</p>
                     )}
 
-                    {art.dimensions.width > 0 && (
+                    {art.dimensions && art.dimensions.width > 0 && (
                         <p className="qv-card__dimensions">{formatDimensions(art.dimensions)}</p>
                     )}
 
@@ -80,16 +134,18 @@ export function QuickView({ art, anchorRect, onClose, onViewFull }: Props) {
                         <p className="qv-card__price">{formatPrice(art.price)}</p>
                     )}
 
-                    <p className="qv-card__availability">
-                        {AVAILABILITY_LABELS[art.availability] ?? art.availability}
-                    </p>
+                    {art.availability && (
+                        <p className="qv-card__availability">
+                            {AVAILABILITY_LABELS[art.availability] ?? art.availability}
+                        </p>
+                    )}
                 </div>
 
                 <div className="qv-card__actions">
                     <button className="qv-card__btn qv-card__btn--primary" onClick={onViewFull}>
                         View full
                     </button>
-                    <button className="qv-card__btn qv-card__btn--secondary" onClick={onClose}>
+                    <button className="qv-card__btn qv-card__btn--secondary" onClick={startClose}>
                         Close
                     </button>
                 </div>

@@ -25,18 +25,18 @@ export default function ImageComponent({ block }: ImageComponentProps) {
     const sorted = sortByLayout(items, layout);
 
     const [quickViewArt, setQuickViewArt] = useState<ArtItemData | null>(null);
-    const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+    const [anchorPoint, setAnchorPoint] = useState<{ x: number; y: number } | null>(null);
     const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
     const handleArtClick = (art: ArtItemData, e: React.MouseEvent<HTMLElement>) => {
-        setAnchorRect(e.currentTarget.getBoundingClientRect());
+        setAnchorPoint({ x: e.clientX + window.scrollX, y: e.clientY + window.scrollY });
         setQuickViewArt(art);
     };
 
     const handleViewFull = () => {
         if (!quickViewArt) return;
         setQuickViewArt(null);
-        setAnchorRect(null);
+        setAnchorPoint(null);
         setLightboxSrc(quickViewArt.images.full);
     };
 
@@ -66,11 +66,11 @@ export default function ImageComponent({ block }: ImageComponentProps) {
             })}
             {caption?.en && <figcaption>{caption.en}</figcaption>}
 
-            {quickViewArt && anchorRect && (
+            {quickViewArt && anchorPoint && (
                 <QuickView
                     art={quickViewArt}
-                    anchorRect={anchorRect}
-                    onClose={() => { setQuickViewArt(null); setAnchorRect(null); }}
+                    anchorPoint={anchorPoint}
+                    onClose={() => { setQuickViewArt(null); setAnchorPoint(null); }}
                     onViewFull={handleViewFull}
                 />
             )}
