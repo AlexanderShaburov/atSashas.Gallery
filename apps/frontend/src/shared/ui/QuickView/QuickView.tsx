@@ -55,10 +55,31 @@ export function QuickView({ art, anchorPoint, onClose, onViewFull }: Props) {
     }, [startClose]);
 
     const cardRef = useRef<HTMLDivElement>(null);
+    const backdropRef = useRef<HTMLDivElement>(null);
+    const initialScrollY = useRef(window.scrollY);
 
     const handleAnimationEnd = () => {
         if (closing) onClose();
     };
+
+    // Fade out on scroll: opacity goes from 1 → 0 over 30% of viewport height
+    useEffect(() => {
+        if (closing) return;
+        const fadeDistance = window.innerHeight * 0.3;
+
+        const onScroll = () => {
+            const delta = Math.abs(window.scrollY - initialScrollY.current);
+            const opacity = Math.max(0, 1 - delta / fadeDistance);
+
+            if (backdropRef.current) backdropRef.current.style.opacity = String(opacity);
+            if (cardRef.current) cardRef.current.style.opacity = String(opacity);
+
+            if (opacity <= 0) onClose();
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, [closing, onClose]);
 
     // anchorPoint is page-relative (clientX/Y + scroll at click time)
     const viewportW = window.innerWidth;
@@ -76,32 +97,44 @@ export function QuickView({ art, anchorPoint, onClose, onViewFull }: Props) {
     if (left < scrollX + margin) left = scrollX + margin;
     if (left + cardW > scrollX + viewportW - margin) left = scrollX + viewportW - cardW - margin;
 
-    // Measure actual card height and clamp to visible viewport (before paint)
-    useLayoutEffect(() => {
+    // Clamp card within visible viewport — called on mount and whenever card resizes
+    const clampCard = useCallback(() => {
         const card = cardRef.current;
         if (!card) return;
         const cardH = card.offsetHeight;
-        const visibleTop = scrollY + margin;
-        const visibleBottom = scrollY + viewportH - margin;
+        const sy = window.scrollY;
+        const vh = window.innerHeight;
+        const visibleTop = sy + margin;
+        const visibleBottom = sy + vh - margin;
         let adjustedTop = anchorPoint.y + 12;
 
-        // If card overflows bottom, try placing it above the click point
         if (adjustedTop + cardH > visibleBottom) {
             adjustedTop = anchorPoint.y - cardH - 12;
         }
-
-        // If it still overflows top, pin to top of visible area
         if (adjustedTop < visibleTop) {
             adjustedTop = visibleTop;
         }
 
         card.style.top = `${adjustedTop}px`;
-    });
+    }, [anchorPoint.y, margin]);
+
+    // Clamp before first paint
+    useLayoutEffect(clampCard);
+
+    // Re-clamp when card resizes (e.g. image loads and expands the card)
+    useEffect(() => {
+        const card = cardRef.current;
+        if (!card) return;
+        const observer = new ResizeObserver(clampCard);
+        observer.observe(card);
+        return () => observer.disconnect();
+    }, [clampCard]);
 
     const stateClass = closing ? 'qv--closing' : 'qv--open';
 
     return createPortal(
-        <div className={`qv-backdrop ${stateClass}`} onClick={startClose}>
+        <>
+            <div ref={backdropRef} className={`qv-backdrop ${stateClass}`} onClick={startClose} />
             <div
                 ref={cardRef}
                 className={`qv-card ${stateClass}`}
@@ -150,7 +183,7 @@ export function QuickView({ art, anchorPoint, onClose, onViewFull }: Props) {
                     </button>
                 </div>
             </div>
-        </div>,
+        </>,
         document.body,
     );
 }
