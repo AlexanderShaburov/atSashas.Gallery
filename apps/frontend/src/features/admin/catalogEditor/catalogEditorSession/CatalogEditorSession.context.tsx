@@ -540,9 +540,12 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
         }
         if (isDirty && !confirm(`Discard unsaved art item changes?`)) return;
         console.log(`[EXIT]: isDirty and Discard changes check passed`);
+        if (isJourney) {
+            returnHome('catalog', { ok: false, reason: 'cancel' });
+        }
         resetSession();
         console.log(`[EXIT]: Session reset`);
-    }, [isSaving, isDirty, resetSession]);
+    }, [isSaving, isDirty, isJourney, returnHome, resetSession]);
 
     // ----------- SAVE ----------
     // save button handler

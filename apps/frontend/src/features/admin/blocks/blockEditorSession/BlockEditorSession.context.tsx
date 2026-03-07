@@ -611,8 +611,11 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     const exit = useCallback(() => {
         if (saving) return;
         if (isDirty && !confirm('Discard unsaved block changes?')) return;
+        if (isJourney) {
+            returnHome('block', { ok: false, reason: 'cancel' });
+        }
         resetSession();
-    }, [saving, isDirty, resetSession]);
+    }, [saving, isDirty, isJourney, returnHome, resetSession]);
 
     // ----------- DELETE -----------
     // delete button handler

@@ -243,8 +243,12 @@ export function EventEditorSessionProvider({ children }: { children: React.React
       clearSession();
     }
     setEditorKeyId(null);
+    if (isJourney) {
+      returnHome('events', { ok: false, reason: 'cancel' });
+      return;
+    }
     setScreenMode('list');
-  }, [editorKey, clearSession]);
+  }, [editorKey, clearSession, isJourney, returnHome]);
 
   const save = useCallback(async () => {
     try {
