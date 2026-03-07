@@ -7,7 +7,7 @@ import { useEventEditorSession } from '../eventEditorSession/EventEditorSession.
 import './EventEditor.css';
 
 function EventSelectList() {
-  const { events, isLoading, selectAndReturn, cancelSelect } = useEventEditorSession();
+  const { events, isLoading, selectAndReturn, cancelSelect, createNew } = useEventEditorSession();
 
   if (isLoading) {
     return <div className="eve__loading">Loading events...</div>;
@@ -18,6 +18,9 @@ function EventSelectList() {
       <div className="eve__header">
         <h1 className="eve__title">Select Event</h1>
         <div className="eve__actions">
+          <button className="eve__btn eve__btn--primary" onClick={createNew}>
+            New Event
+          </button>
           <button className="eve__btn eve__btn--secondary" onClick={cancelSelect}>
             Cancel
           </button>

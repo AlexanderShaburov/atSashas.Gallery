@@ -253,13 +253,16 @@ export function EventEditorSessionProvider({ children }: { children: React.React
   const save = useCallback(async () => {
     try {
       setIsSaving(true);
+      let savedId: string | undefined;
       if (screenMode === 'create') {
         const payload = formDraftToPayload(draft);
-        await eventsAdminApi.create(payload);
+        const created = await eventsAdminApi.create(payload);
+        savedId = created.id;
       } else if (screenMode === 'edit' && draft.id) {
         const payload = formDraftToPayload(draft);
         const full: EventData = { id: draft.id, ...payload };
         await eventsAdminApi.update(draft.id, full);
+        savedId = draft.id;
       }
       // Clear editor session
       if (editorKey) {
@@ -269,6 +272,11 @@ export function EventEditorSessionProvider({ children }: { children: React.React
       // Refresh both admin store and public cache
       await refreshEvents();
       invalidateEventsCache();
+      // In journey mode, return with the saved event ID
+      if (isJourney && savedId) {
+        returnHome('events', { ok: true, id: savedId });
+        return;
+      }
       setScreenMode('list');
     } catch (err) {
       console.error('[EventEditorSession] Save failed', err);
@@ -276,7 +284,7 @@ export function EventEditorSessionProvider({ children }: { children: React.React
     } finally {
       setIsSaving(false);
     }
-  }, [screenMode, draft, editorKey, clearSession]);
+  }, [screenMode, draft, editorKey, clearSession, isJourney, returnHome]);
 
   const deleteEvent = useCallback(
     async (id: string) => {
