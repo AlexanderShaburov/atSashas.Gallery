@@ -259,36 +259,26 @@ export function ArtCatalogFilterControl({ items, techniquesRange, filter, update
                     )}
                 </div>
 
-                {/* Mode switch */}
-                <div className="art-filter-control__mode-selector">
-                    <div className="art-filter-control__mode art-filter-control__mode--basic">
-                        <button
-                            type="button"
-                            className={!extended ? 'active' : ''}
-                            onClick={() => updateFilter({ extended: false })}
-                        >
-                            Basic
-                        </button>
-                    </div>
-                    <div className="art-filter-control__mode art-filter-control__mode--advanced">
-                        <button
-                            type="button"
-                            className={extended ? 'active' : ''}
-                            onClick={() => updateFilter({ extended: true })}
-                        >
-                            Advanced
-                        </button>
-                    </div>
+                {/* Mode toggle + Clear */}
+                <div className="art-filter-control__actions">
+                    <button
+                        type="button"
+                        className={'art-filter-control__mode-toggle' + (extended ? ' on' : '')}
+                        onClick={() => updateFilter({ extended: !extended })}
+                    >
+                        <span className="art-filter-control__toggle-track">
+                            <span className="art-filter-control__toggle-thumb" />
+                        </span>
+                        {extended ? 'Advanced' : 'Basic'}
+                    </button>
                     {hasActiveFilter && (
-                        <div className="art-filter-control__mode art-filter-control__mode--clear">
-                            <button
-                                type="button"
-                                onClick={clearAll}
-                                className="art-filter-control__clear"
-                            >
-                                Clear
-                            </button>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={clearAll}
+                            className="art-filter-control__clear"
+                        >
+                            Clear
+                        </button>
                     )}
                 </div>
             </div>

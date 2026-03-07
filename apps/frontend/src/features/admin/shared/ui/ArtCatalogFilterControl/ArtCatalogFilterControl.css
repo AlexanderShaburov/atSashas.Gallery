@@ -163,86 +163,110 @@
 }
 
 /* =========================================================
-   MODE PILL: BASIC / ADVANCED / BACK
+   MODE TOGGLE + CLEAR
    ========================================================= */
 
-.art-filter-control__mode-selector {
+.art-filter-control__actions {
     display: flex;
-    width: fit-content;
+    gap: 6px;
     justify-self: end;
-    align-items: stretch;
-    height: 38px;
+    align-items: center;
+}
 
+/* --- Toggle switch button --- */
+.art-filter-control__mode-toggle {
+    appearance: none;
     border: 1px solid var(--form-border);
     border-radius: 999px;
-    overflow: hidden;
     background: color-mix(in srgb, var(--form-bg) 92%, var(--accent) 8%);
-}
-
-/* Each segment is a flex item */
-.art-filter-control__mode {
-    display: flex;
-    min-width: 0;
-}
-
-/* Basic segment */
-.art-filter-control__mode--basic {
-    flex: 1 1 0;
-}
-
-/* Advanced segment: intentionally wider so the label never collides */
-.art-filter-control__mode--advanced {
-    flex: 1.35 1 0;
-}
-
-/* Clear segment: fixed on the right */
-.art-filter-control__mode--clear {
-    flex: 0 0 auto;
-    margin-left: auto;
-    border-left: 1px solid var(--form-border);
-}
-
-/* Buttons must fill their segment (this fixes “button is only 60% of the div”) */
-.art-filter-control__mode button,
-.art-filter-control__clear {
-    appearance: none;
-    border: 0;
-    background: transparent;
 
     height: 38px;
-    line-height: 38px;
+    padding: 0 12px 0 42px; /* room for track on the left */
+    position: relative;
 
-    width: 100%;
-    display: block;
-    min-width: 0;
-
-    padding: 0 10px;
-
-    text-align: center;
+    display: inline-flex;
+    align-items: center;
     white-space: nowrap;
 
     color: var(--muted);
     cursor: pointer;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
 
     transition:
-        background-color 0.2s ease,
-        color 0.2s ease,
-        opacity 0.2s ease;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
+        border-color 0.2s ease,
+        color 0.2s ease;
 }
 
-.art-filter-control__mode button:hover,
-.art-filter-control__clear:hover {
-    opacity: 0.92;
+.art-filter-control__mode-toggle:hover {
+    border-color: var(--form-border-hover);
     color: var(--text);
 }
 
-.art-filter-control__mode button.active {
+/* Track */
+.art-filter-control__toggle-track {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    translate: 0 -50%;
+
+    width: 30px;
+    height: 16px;
+    border-radius: 999px;
+    background: var(--form-border);
+
+    transition: background-color 0.2s ease;
+}
+
+.art-filter-control__mode-toggle.on .art-filter-control__toggle-track {
     background: var(--accent);
-    color: var(--on-accent);
+}
+
+/* Thumb */
+.art-filter-control__toggle-thumb {
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    translate: 0 -50%;
+
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--form-bg);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+    transition: left 0.2s ease;
+}
+
+.art-filter-control__mode-toggle.on .art-filter-control__toggle-thumb {
+    left: 16px;
+}
+
+/* --- Clear button --- */
+.art-filter-control__clear {
+    appearance: none;
+    border: 1px solid var(--form-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--form-bg) 92%, var(--accent) 8%);
+
+    height: 38px;
+    padding: 0 12px;
+
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+
+    transition:
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.art-filter-control__clear:hover {
+    border-color: var(--form-border-hover);
+    color: var(--text);
 }
 
 /* =========================================================
@@ -305,14 +329,8 @@
         grid-auto-rows: auto;
     }
 
-    .art-filter-control__mode-selector {
-        width: 100%;
+    .art-filter-control__actions {
         justify-self: stretch;
-    }
-
-    /* In tight layouts give equal weight to Basic/Advanced */
-    .art-filter-control__mode--advanced {
-        flex: 1 1 0;
     }
 
     .art-filter-control__advanced {
