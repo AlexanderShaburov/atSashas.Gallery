@@ -76,6 +76,7 @@ export function normalizeBlock(block: Block): Block {
                 dateCreated: block.dateCreated,
                 items: block.items.map(normalizeGalleryItem),
                 caption: block.caption ?? { en: '' },
+                appearance: block.appearance,
             };
 
         case 'text':
