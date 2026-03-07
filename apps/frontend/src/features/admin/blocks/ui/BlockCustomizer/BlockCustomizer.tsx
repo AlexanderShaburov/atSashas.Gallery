@@ -1,5 +1,5 @@
 import type { BlockAppearance, GalleryBlock, ItemPosition } from '@/entities/block';
-import { LAYOUT_SCHEME } from '@/entities/block';
+import { defaultImageAppearance, LAYOUT_SCHEME } from '@/entities/block';
 import {
     blockGridStyle,
     slotImageStyle,
@@ -7,11 +7,12 @@ import {
 } from '@/features/public/ui/Image/applyAppearanceStyles';
 import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
 import { ArtPicture } from '@/shared/ui/ArtPicture';
-import { useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
+import './BlockCustomizer.css';
+import { ControlPanel } from './ControlPanel';
 import { useColumnDrag } from './useColumnDrag';
 import { useSlotInteraction } from './useSlotInteraction';
-import './BlockCustomizer.css';
 
 type Props = {
     block: GalleryBlock;
@@ -22,7 +23,7 @@ type Props = {
 export function BlockCustomizer({ block, appearance, onChange }: Props) {
     const catalog = useArtCatalog();
     const containerRef = useRef<HTMLDivElement>(null);
-    const positions = LAYOUT_SCHEME[block.layout] as readonly string[];
+    const positions = LAYOUT_SCHEME[block.layout];
 
     const { dividerPositions, onDividerPointerDown } = useColumnDrag({
         columnRatios: appearance.columnRatios,
@@ -35,37 +36,45 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
         onChange,
     });
 
+    const handleSnapSlot = useCallback(
+        (pos: ItemPosition) => {
+            const currentSlot = appearance.slots[pos];
+            if (!currentSlot) return;
+            onChange({
+                ...appearance,
+                slots: {
+                    ...appearance.slots,
+                    [pos]: { ...currentSlot, image: defaultImageAppearance() },
+                },
+            });
+        },
+        [appearance, onChange],
+    );
+
     const gridStyle = blockGridStyle(appearance);
 
     return (
         <div className="bcz">
             <div className="bcz__grid" ref={containerRef} style={gridStyle}>
                 {positions.map((pos) => {
-                    const slotApp = appearance.slots[pos as ItemPosition];
+                    const slotApp = appearance.slots[pos];
                     const item = block.items.find((i) => i.position === pos);
-                    const art =
-                        item && item.kind === 'art'
-                            ? catalog.items[item.artId]
-                            : undefined;
+                    const art = item && item.kind === 'art' ? catalog.items[item.artId] : undefined;
 
                     return (
-                        <div
-                            key={pos}
-                            className="bcz__slot"
-                            style={slotWrapperStyle(slotApp)}
-                        >
+                        <div key={pos} className="bcz__slot" style={slotWrapperStyle(slotApp)}>
                             <div
                                 className="bcz__frame-handle"
                                 onPointerDown={(e) =>
-                                    onFrameDragPointerDown(pos as ItemPosition, e)
+                                    onFrameDragPointerDown(pos, e)
                                 }
                             />
                             {art ? (
                                 <div
                                     className="bcz__slot-media"
-                                    onWheel={(e) => onWheel(pos as ItemPosition, e)}
+                                    onWheel={(e) => onWheel(pos, e)}
                                     onPointerDown={(e) =>
-                                        onImagePointerDown(pos as ItemPosition, e)
+                                        onImagePointerDown(pos, e)
                                     }
                                 >
                                     <ArtPicture
@@ -91,6 +100,14 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
                     />
                 ))}
             </div>
+
+            <ControlPanel
+                appearance={appearance}
+                layout={block.layout}
+                onChange={onChange}
+                onSnapSlot={handleSnapSlot}
+                slotPositions={positions}
+            />
         </div>
     );
 }
