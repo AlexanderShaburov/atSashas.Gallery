@@ -741,18 +741,26 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             if (!draft || draft.blockKind !== 'gallery') return;
 
             // Guard: one event per block
-            const hasEvent = (draft as GalleryBlock).items.some(
-                (i) => i.kind === 'eventCta',
-            );
+            const galleryDraft = draft as GalleryBlock;
+            const hasEvent = galleryDraft.items.some((i) => i.kind === 'eventCta');
             if (hasEvent) return;
 
-            // 1) Create event placeholder item
+            // 1) Create event placeholder; if an art item occupies the target slot,
+            //    convert its artId into the event's backgroundArtId and replace it.
+            const existing = galleryDraft.items.find((i) => i.position === pos);
+            const backgroundArtId =
+                existing && existing.kind === 'art' ? existing.artId : undefined;
+
             const newEventItem: GalleryBlockItem = {
                 kind: 'eventCta',
                 eventId: '',
                 position: pos,
+                ...(backgroundArtId ? { backgroundArtId } : {}),
             };
-            const newDraft = { ...draft, items: [...(draft as GalleryBlock).items, newEventItem] };
+
+            // Replace the existing item at this position (if any), then append the event
+            const filteredItems = galleryDraft.items.filter((i) => i.position !== pos);
+            const newDraft = { ...draft, items: [...filteredItems, newEventItem] };
 
             // 2) Save draft to external store (survives navigation).
             // NOTE: setDraft() is intentionally skipped — dispatch() navigates away,

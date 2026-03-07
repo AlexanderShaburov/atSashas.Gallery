@@ -19,7 +19,11 @@ export function GalleryEventSlot({
     const event = useEvent(item.eventId);
 
     return (
-        <div className="blk-gallery__event-card">
+        <div
+            className="blk-gallery__event-card"
+            role={isEditor ? 'button' : undefined}
+            onClick={isEditor ? onPickBackground : undefined}
+        >
             {resolvedBgSrc && (
                 <img
                     className="blk-gallery__event-bg"
@@ -40,19 +44,6 @@ export function GalleryEventSlot({
                 ) : (
                     <div className="blk-gallery__event-empty">
                         {item.eventId ? `Event: ${item.eventId}` : 'No event selected'}
-                    </div>
-                )}
-                {isEditor && (
-                    <div className="blk-gallery__event-controls">
-                        <button
-                            className="blk-gallery__event-pick-btn"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onPickBackground();
-                            }}
-                        >
-                            {item.backgroundArtId ? 'Change Background' : 'Select Background'}
-                        </button>
                     </div>
                 )}
             </div>
