@@ -10,14 +10,15 @@ type Props = {
     loading?: 'lazy' | 'eager';
     role?: string;
     draggable?: boolean;
+    imgStyle?: React.CSSProperties;
 };
 
-export function ArtPicture({ sources, alt = '', onClick, className, loading = 'lazy', role, draggable }: Props) {
+export function ArtPicture({ sources, alt = '', onClick, className, loading = 'lazy', role, draggable, imgStyle }: Props) {
     return (
         <picture role={role} className={className} onClick={onClick}>
             {sources.avif && <source type="image/avif" srcSet={sources.avif} />}
             {sources.webp && <source type="image/webp" srcSet={sources.webp} />}
-            <img src={sources.jpeg} alt={alt} loading={loading} draggable={draggable} />
+            <img src={sources.jpeg} alt={alt} loading={loading} draggable={draggable} style={imgStyle} />
         </picture>
     );
 }
