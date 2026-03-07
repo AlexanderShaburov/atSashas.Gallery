@@ -32,7 +32,7 @@ export function useCaptionDrag({ appearance, onChange }: UseCaptionDragProps) {
                 startPosY: slot.caption.posY,
             };
 
-            const slotEl = (e.target as HTMLElement).closest('.bcz__slot');
+            const slotEl = (e.target as HTMLElement).closest('.block__slot');
             if (!slotEl) return;
             const rect = slotEl.getBoundingClientRect();
 

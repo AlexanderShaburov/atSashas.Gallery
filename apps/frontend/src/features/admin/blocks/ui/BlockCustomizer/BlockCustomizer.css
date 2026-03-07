@@ -1,61 +1,6 @@
 .bcz {
     padding: 16px;
 }
-.bcz__grid {
-    position: relative;
-    display: grid;
-    gap: var(--gap);
-    overflow: visible;
-}
-.bcz__slot {
-    position: relative;
-    overflow: hidden;
-    min-width: 0;
-}
-.bcz__slot picture {
-    display: block;
-    width: 100%;
-}
-.bcz__slot img {
-    display: block;
-    width: 100%;
-    height: auto;
-}
-.bcz__slot-empty {
-    aspect-ratio: 4 / 3;
-    background: var(--card-bg);
-    border: 2px dashed var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-}
-
-/* ── Triptych grid placement ── */
-.bcz__grid--triptychLeft > .bcz__slot:nth-child(1) {
-    grid-column: 1;
-    grid-row: 1;
-}
-.bcz__grid--triptychLeft > .bcz__slot:nth-child(2) {
-    grid-column: 1;
-    grid-row: 2;
-}
-.bcz__grid--triptychLeft > .bcz__slot:nth-child(3) {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-}
-.bcz__grid--triptychRight > .bcz__slot:nth-child(1) {
-    grid-column: 1;
-    grid-row: 1 / span 2;
-}
-.bcz__grid--triptychRight > .bcz__slot:nth-child(2) {
-    grid-column: 2;
-    grid-row: 1;
-}
-.bcz__grid--triptychRight > .bcz__slot:nth-child(3) {
-    grid-column: 2;
-    grid-row: 2;
-}
 
 /* ── Frame handle (vertical drag) ── */
 .bcz__frame-handle {

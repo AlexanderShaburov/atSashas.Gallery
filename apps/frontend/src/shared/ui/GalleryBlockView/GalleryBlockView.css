@@ -1,6 +1,7 @@
 /* ── GalleryBlockView ── shared gallery block rendering styles ── */
 
 .block {
+  position: relative;
   display: grid;
   gap: var(--gap);
   margin: 0;

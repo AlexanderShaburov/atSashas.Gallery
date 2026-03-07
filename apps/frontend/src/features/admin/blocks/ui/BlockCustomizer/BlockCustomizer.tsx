@@ -1,12 +1,7 @@
 import type { BlockAppearance, GalleryBlock, ItemPosition } from '@/entities/block';
 import { defaultImageAppearance, LAYOUT_SCHEME } from '@/entities/block';
-import {
-    blockGridStyle,
-    slotImageStyle,
-    slotWrapperStyle,
-} from '@/shared/lib/appearance/applyAppearanceStyles';
 import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
-import { ArtPicture } from '@/shared/ui/ArtPicture';
+import { GalleryBlockView } from '@/shared/ui/GalleryBlockView';
 import { useCallback, useRef } from 'react';
 
 import './BlockCustomizer.css';
@@ -26,6 +21,9 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
     const catalog = useArtCatalog();
     const containerRef = useRef<HTMLDivElement>(null);
     const positions = LAYOUT_SCHEME[block.layout];
+
+    // Create a block copy with the draft appearance for GalleryBlockView
+    const blockWithAppearance = { ...block, appearance };
 
     const { dividerPositions, onDividerPointerDown } = useColumnDrag({
         columnRatios: appearance.columnRatios,
@@ -55,65 +53,50 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
         [appearance, onChange],
     );
 
-    const gridStyle = blockGridStyle(appearance);
+    const resolveArt = (artId: string) => catalog.items[artId];
 
     return (
-        <div className="bcz">
-            <div
-                className={`bcz__grid bcz__grid--${block.layout}`}
-                ref={containerRef}
-                style={gridStyle}
-            >
-                {positions.map((pos) => {
+        <div className="bcz" ref={containerRef}>
+            <GalleryBlockView
+                block={blockWithAppearance}
+                resolveArt={resolveArt}
+                renderArtContent={(art, pos, picture) => {
                     const slotApp = appearance.slots[pos];
-                    const item = block.items.find((i) => i.position === pos);
-                    const art = item && item.kind === 'art' ? catalog.items[item.artId] : undefined;
-
                     return (
-                        <div key={pos} className="bcz__slot" style={slotWrapperStyle(slotApp)}>
-                            {art ? (
-                                <div
-                                    className="bcz__slot-media"
-                                    onWheel={(e) => onWheel(pos, e)}
-                                    onPointerDown={(e) => onImagePointerDown(pos, e)}
-                                >
-                                    <ArtPicture
-                                        sources={art.images.preview}
-                                        alt={art.title?.en ?? ''}
-                                        imgStyle={slotImageStyle(slotApp)}
-                                    />
-                                </div>
-                            ) : (
-                                <div className="bcz__slot-empty">Empty</div>
-                            )}
+                        <>
+                            <div
+                                className="bcz__slot-media"
+                                onWheel={(e) => onWheel(pos, e)}
+                                onPointerDown={(e) => onImagePointerDown(pos, e)}
+                            >
+                                {picture}
+                            </div>
                             <div
                                 className="bcz__frame-handle"
                                 onPointerDown={(e) => onFrameDragPointerDown(pos, e)}
                             >
                                 <span className="bcz__frame-handle-icon">⋮⋮</span>
                             </div>
-                            {slotApp?.caption?.visible &&
-                                item?.kind === 'art' &&
-                                item.caption?.en && (
-                                    <span
-                                        className="bcz__caption-overlay"
-                                        style={{
-                                            left: `${slotApp.caption.posX}%`,
-                                            top: `${slotApp.caption.posY}%`,
-                                            fontFamily: `'${slotApp.caption.style.font}', serif`,
-                                            fontSize: `${slotApp.caption.style.size}px`,
-                                            color: slotApp.caption.style.color,
-                                        }}
-                                        onPointerDown={(e) => onCaptionPointerDown(pos, e)}
-                                    >
-                                        {item.caption.en}
-                                    </span>
-                                )}
-                        </div>
+                            {slotApp?.caption?.visible && art.title?.en && (
+                                <span
+                                    className="bcz__caption-overlay"
+                                    style={{
+                                        left: `${slotApp.caption.posX}%`,
+                                        top: `${slotApp.caption.posY}%`,
+                                        fontFamily: `'${slotApp.caption.style.font}', serif`,
+                                        fontSize: `${slotApp.caption.style.size}px`,
+                                        color: slotApp.caption.style.color,
+                                    }}
+                                    onPointerDown={(e) => onCaptionPointerDown(pos, e)}
+                                >
+                                    {art.title.en}
+                                </span>
+                            )}
+                        </>
                     );
-                })}
-
-                {/* Column dividers */}
+                }}
+            >
+                {/* Column dividers overlaid inside the grid */}
                 {dividerPositions.map((pct, i) => (
                     <div
                         key={`div-${i}`}
@@ -122,7 +105,7 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
                         onPointerDown={(e) => onDividerPointerDown(i, e)}
                     />
                 ))}
-            </div>
+            </GalleryBlockView>
 
             <ControlPanel
                 appearance={appearance}
