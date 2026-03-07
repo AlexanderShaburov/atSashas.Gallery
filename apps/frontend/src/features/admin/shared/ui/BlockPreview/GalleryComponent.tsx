@@ -13,13 +13,19 @@ import {
     type ItemPosition,
     LAYOUT_SCHEME,
 } from '@/entities/block';
-import { isArtItem, isEventItem } from '@/shared/lib/checkers/blockItemGuards';
-import { ArtPicture } from '@/shared/ui/ArtPicture';
 import { TEMPLATE_BLOCKS } from '@/features/admin/blocks/ui/BlockTemplates/templateTypes';
 import { GalleryEventSlot } from '@/features/admin/shared/ui/BlockPreview/GalleryEventSlot';
 import { InlineEditableText } from '@/features/admin/shared/ui/BlockPreview';
+import {
+    blockGridStyle,
+    slotImageStyle,
+    slotWrapperStyle,
+} from '@/features/public/ui/Image/applyAppearanceStyles';
 import { useResolveArtAdaptive } from '@/shared/ArtCatalogProvider/useResolveArtAdaptive';
-import { JSX, ReactNode } from 'react';
+import { isArtItem, isEventItem } from '@/shared/lib/checkers/blockItemGuards';
+import { loadGoogleFont } from '@/shared/lib/fonts/loadGoogleFont';
+import { ArtPicture } from '@/shared/ui/ArtPicture';
+import { JSX, ReactNode, useEffect } from 'react';
 
 type Props = {
     item: GalleryBlock;
@@ -56,6 +62,18 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onUp
     const isEditor = parent === 'editor';
     const imgPositions = LAYOUT_SCHEME[item.layout];
     const resolveArt = useResolveArtAdaptive();
+    const appearance = isEditor ? item.appearance : undefined;
+
+    // Load Google Fonts referenced by caption styles
+    useEffect(() => {
+        if (!appearance) return;
+        const fonts = new Set<string>();
+        if (appearance.blockCaption?.style.font) fonts.add(appearance.blockCaption.style.font);
+        for (const slot of Object.values(appearance.slots)) {
+            if (slot?.caption?.style.font) fonts.add(slot.caption.style.font);
+        }
+        fonts.forEach(loadGoogleFont);
+    }, [appearance]);
 
     const tpl = TEMPLATE_BLOCKS.find((t) => t.kind === item.blockKind && t.layout === item.layout);
     const label = tpl?.label;
@@ -192,18 +210,26 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onUp
     };
 
     return (
-        <figure className={`blk-${item.blockKind} ${isEditor ? 'blk--editor' : ''}`}>
+        <figure
+            className={`blk-${item.blockKind} ${isEditor ? 'blk--editor' : ''}${appearance ? ' block--custom' : ''}`}
+            style={blockGridStyle(appearance)}
+        >
             {imgPositions.map((pos) => {
                 const blockItem = item.items.find((i) => i.position === pos);
 
                 const slotBaseClass = `blk-gallery__slot blk-gallery__slot-${posClass(pos)}${
                     isTriptychHorizontal(item.layout) ? '-horizontal' : ''
                 }`;
+                const slotApp = appearance?.slots[pos];
 
                 // --- EMPTY SLOT (no item at this position) ---
                 if (!blockItem) {
                     return (
-                        <div key={pos} className={`${slotBaseClass} blk-gallery__slot-empty`}>
+                        <div
+                            key={pos}
+                            className={`${slotBaseClass} blk-gallery__slot-empty`}
+                            style={slotWrapperStyle(slotApp)}
+                        >
                             <div
                                 role="button"
                                 className="blk-gallery__slot-media"
@@ -221,6 +247,7 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onUp
                         <div
                             key={`event-${pos}`}
                             className={`${slotBaseClass} blk-gallery__slot-event`}
+                            style={slotWrapperStyle(slotApp)}
                         >
                             <GalleryEventSlot
                                 item={blockItem}
@@ -250,7 +277,11 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onUp
 
                     if (!imgId) {
                         return (
-                            <div key={pos} className={`${slotBaseClass} blk-gallery__slot-empty`}>
+                            <div
+                                key={pos}
+                                className={`${slotBaseClass} blk-gallery__slot-empty`}
+                                style={slotWrapperStyle(slotApp)}
+                            >
                                 <div
                                     role="button"
                                     className="blk-gallery__slot-media"
@@ -269,6 +300,7 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onUp
                             <div
                                 key={`${imgId}-${pos}`}
                                 className={`${slotBaseClass} blk-gallery__slot-missing`}
+                                style={slotWrapperStyle(slotApp)}
                             >
                                 <div
                                     role="button"
@@ -291,12 +323,17 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onUp
 
                     // --- NORMAL ART ---
                     return (
-                        <div key={`${imgId}-${pos}`} className={slotBaseClass}>
+                        <div
+                            key={`${imgId}-${pos}`}
+                            className={slotBaseClass}
+                            style={slotWrapperStyle(slotApp)}
+                        >
                             <ArtPicture
                                 role="button"
                                 className="blk-gallery__slot-media"
                                 sources={img.images.preview}
                                 alt={img.images.alt?.en || ''}
+                                imgStyle={slotImageStyle(slotApp)}
                                 onClick={(e) =>
                                     onHit({
                                         block: item,
