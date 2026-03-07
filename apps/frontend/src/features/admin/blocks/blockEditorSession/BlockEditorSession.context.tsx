@@ -11,13 +11,9 @@ import type {
     GalleryBlockItem,
     ItemPosition,
 } from '@/entities/block';
-import { defaultBlockAppearance } from '@/entities/block';
+import { defaultBlockAppearance, defaultSlotAppearance } from '@/entities/block';
 import type { UiErrorState } from '@/entities/common';
-import {
-    addNewBlock,
-    getCollection,
-    updateBlock,
-} from '@/features/admin/blocks/api/blocksApi';
+import { addNewBlock, getCollection, updateBlock } from '@/features/admin/blocks/api/blocksApi';
 import { getCatalog } from '@/features/admin/catalogEditor/api';
 import { refreshStreamsIndex } from '@/features/admin/streams/api/streamsApi';
 import { normalizeBlock } from '@/features/admin/blocks/blockEditorSession';
@@ -383,10 +379,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                     // Refresh all data and re-trigger dependency check for the target block
                     console.log(`[Block BOOTSTRAP]: Refreshing all data sources...`);
 
-                    await Promise.all([
-                        refreshCollection(),
-                        refreshStreamsIndex(),
-                    ]);
+                    await Promise.all([refreshCollection(), refreshStreamsIndex()]);
 
                     console.log(`[Block BOOTSTRAP]: All data refreshed`);
 
@@ -400,7 +393,9 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         // Re-trigger dependency-aware deletion
                         void deleteBlockWithDeps(block);
                     } else {
-                        console.warn(`[Block BOOTSTRAP]: Target block ${targetId} not found after dependency resolution`);
+                        console.warn(
+                            `[Block BOOTSTRAP]: Target block ${targetId} not found after dependency resolution`,
+                        );
                         setModeStack(['select']);
                     }
                     return;
@@ -444,6 +439,34 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                             `[INIT SESSION]: return instruction recognized as blockInsertArt`,
                         );
 
+                        // Check if target slot has custom appearance
+                        const targetSlot = v.command.pendingSelection.hit.slot;
+                        const savedGallery = v.savedData.draft;
+                        let updatedAppearance = savedGallery.appearance;
+                        const slotApp = updatedAppearance?.slots?.[targetSlot];
+                        const defSlot = defaultSlotAppearance();
+                        const isCustomSlot =
+                            slotApp &&
+                            (slotApp.image.scale !== defSlot.image.scale ||
+                                slotApp.image.offsetX !== defSlot.image.offsetX ||
+                                slotApp.image.offsetY !== defSlot.image.offsetY ||
+                                slotApp.frameOffsetY !== defSlot.frameOffsetY);
+
+                        if (isCustomSlot && updatedAppearance) {
+                            const keepAppearance = confirm(
+                                'This slot has custom appearance settings that may not fit the new image. Keep current appearance?',
+                            );
+                            if (!keepAppearance) {
+                                updatedAppearance = {
+                                    ...updatedAppearance,
+                                    slots: {
+                                        ...updatedAppearance.slots,
+                                        [targetSlot]: defaultSlotAppearance(),
+                                    },
+                                };
+                            }
+                        }
+
                         // Store pendingSelection so later setSelectedArtItem() can apply it
                         setPendingSelection(v.command.pendingSelection);
                         // Create new gallery block item form loot and ticket
@@ -458,7 +481,13 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         const items = v.savedData.draft.items;
 
                         // Make changes in the draft
-                        const newDraft = { ...v.savedData.draft, items: [...items, newItem] };
+                        const newDraft = {
+                            ...v.savedData.draft,
+                            items: [...items, newItem],
+                            ...(updatedAppearance !== savedGallery.appearance
+                                ? { appearance: updatedAppearance }
+                                : {}),
+                        };
                         console.log(`[INIT SESSION]: new art items list set as:`);
                         console.dir(newDraft.items);
 
@@ -491,7 +520,9 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                     }
 
                     case 'blockSetEventId': {
-                        console.log(`[INIT SESSION]: return instruction recognized as blockSetEventId`);
+                        console.log(
+                            `[INIT SESSION]: return instruction recognized as blockSetEventId`,
+                        );
                         const loot = ticket.loot;
                         if (!loot?.ok) {
                             // User cancelled — remove the empty event placeholder
@@ -517,7 +548,9 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         // Find event item at position and set eventId
                         const pos = (effect as { position: string }).position;
                         if (block?.draft && block.draft.blockKind === 'gallery') {
-                            const { isEventItem } = await import('@/shared/lib/checkers/blockItemGuards');
+                            const { isEventItem } = await import(
+                                '@/shared/lib/checkers/blockItemGuards'
+                            );
                             const updatedItems = block.draft.items.map((item) =>
                                 item.position === pos && isEventItem(item)
                                     ? { ...item, eventId: loot.id }
@@ -531,7 +564,9 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                     }
 
                     case 'blockSetEventBackground': {
-                        console.log(`[INIT SESSION]: return instruction recognized as blockSetEventBackground`);
+                        console.log(
+                            `[INIT SESSION]: return instruction recognized as blockSetEventBackground`,
+                        );
                         const loot = ticket.loot;
                         if (!loot?.ok) {
                             setModeStack(['select', 'edit']);
@@ -539,7 +574,9 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         }
                         const pos = (effect as { position: string }).position;
                         if (block?.draft && block.draft.blockKind === 'gallery') {
-                            const { isEventItem } = await import('@/shared/lib/checkers/blockItemGuards');
+                            const { isEventItem } = await import(
+                                '@/shared/lib/checkers/blockItemGuards'
+                            );
                             const updatedItems = block.draft.items.map((item) =>
                                 item.position === pos && isEventItem(item)
                                     ? { ...item, backgroundArtId: loot.id }
@@ -834,7 +871,10 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             if (!draft || draft.blockKind !== 'gallery') return;
             const newItems = (draft as GalleryBlock).items.map((i) =>
                 i.position === pos
-                    ? { ...i, caption: { ...('caption' in i ? i.caption ?? {} : {}), en: caption } }
+                    ? {
+                          ...i,
+                          caption: { ...('caption' in i ? (i.caption ?? {}) : {}), en: caption },
+                      }
                     : i,
             );
             setDraft({ ...draft, items: newItems });
