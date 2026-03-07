@@ -1,5 +1,5 @@
 //src/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor.tsx
-import { type Block, type BlockHitEvent, type CtaBlock, type EventCtaBlock, type GalleryBlock, type ItemPosition, type TextBlock } from '@/entities/block';
+import { type Block, type BlockHitEvent, type CtaBlock, type EventCtaBlock, type GalleryBlock, type GalleryLayout, type ItemPosition, type TextBlock } from '@/entities/block';
 import {
     CtaBlockComponent,
     EventCtaBlockComponent,
@@ -8,8 +8,17 @@ import {
 } from '@/features/admin/shared/ui/BlockPreview';
 import { ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
-import { JSX } from 'react';
+import { JSX, useCallback } from 'react';
 import './SingleBlockEditor.css';
+
+const EVENT_TARGET_SLOT: Record<GalleryLayout, ItemPosition> = {
+    single: 'Center',
+    pairHorizontal: 'Right',
+    pairVertical: 'Bottom',
+    triptychHorizontal: 'Center',
+    triptychLeft: 'Right',
+    triptychRight: 'Left',
+};
 
 type Props = {
     item: Block;
@@ -26,11 +35,11 @@ type Props = {
         onChangeTags?: (tags: string[]) => void;
         onApply: () => void;
     };
-    addEventPlaceholder?: (pos: ItemPosition) => void;
+    addEventAndJourney?: (pos: ItemPosition) => void;
     updateItemCaption?: (pos: ItemPosition, caption: string) => void;
     updateBlockCaption?: (caption: string) => void;
 };
-export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEventPlaceholder, updateItemCaption, updateBlockCaption }: Props) {
+export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEventAndJourney, updateItemCaption, updateBlockCaption }: Props) {
     let content: JSX.Element | undefined = undefined;
     const { isJourney, ...tbCtx } = toolbarProps;
 
@@ -40,9 +49,17 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEven
         console.log(`[SingleBlockEditor]: Oups! We got lost our ticket, baby`);
     }
 
+    const isGallery = item.blockKind === 'gallery';
+    const galleryLayout = isGallery ? (item as GalleryBlock).layout : undefined;
+
+    const onAddEvent = useCallback(() => {
+        if (!addEventAndJourney || !galleryLayout) return;
+        addEventAndJourney(EVENT_TARGET_SLOT[galleryLayout]);
+    }, [addEventAndJourney, galleryLayout]);
+
     const tbContent: ToolKey[] = isJourney
-        ? ['delete', 'tags', 'exit', 'apply', 'save']
-        : ['delete', 'tags', 'exit', 'save'];
+        ? ['delete', ...(isGallery ? ['addEvent' as ToolKey] : []), 'tags', 'exit', 'apply', 'save']
+        : ['delete', ...(isGallery ? ['addEvent' as ToolKey] : []), 'tags', 'exit', 'save'];
 
     switch (item.blockKind) {
         case 'gallery':
@@ -52,7 +69,6 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEven
                     onHit={onHit}
                     parent="editor"
                     setValue={setValue}
-                    onAddEventPlaceholder={addEventPlaceholder}
                     onUpdateItemCaption={updateItemCaption}
                     onUpdateBlockCaption={updateBlockCaption}
                 />
@@ -96,7 +112,10 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEven
             <div className="sbe-frame">
                 <div className="sbe-canvas">{content}</div>
             </div>
-            <SingleEditorToolbar tools={tbContent} ctx={tbCtx} />
+            <SingleEditorToolbar
+                tools={tbContent}
+                ctx={{ ...tbCtx, ...(isGallery && addEventAndJourney ? { onAddEvent } : {}) }}
+            />
         </div>
     );
 }

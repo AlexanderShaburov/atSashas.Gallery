@@ -97,7 +97,7 @@ export function BlockEditor() {
                             onHit={testHit}
                             setValue={session.setDraft}
                             toolbarProps={toolbarProps}
-                            addEventPlaceholder={session.addEventPlaceholder}
+                            addEventAndJourney={session.addEventAndJourney}
                             updateItemCaption={session.updateItemCaption}
                             updateBlockCaption={session.updateBlockCaption}
                         />

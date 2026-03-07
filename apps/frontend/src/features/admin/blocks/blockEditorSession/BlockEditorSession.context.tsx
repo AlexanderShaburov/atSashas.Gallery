@@ -719,18 +719,35 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         setCurrentTarget(undefined);
     }, []);
 
-    /** Add event placeholder at a gallery slot position */
-    const addEventPlaceholder = useCallback(
+    /** Add event placeholder at a gallery slot and dispatch journey to event editor */
+    const addEventAndJourney = useCallback(
         (pos: ItemPosition) => {
             if (!draft || draft.blockKind !== 'gallery') return;
+
+            // Guard: one event per block
+            const hasEvent = (draft as GalleryBlock).items.some(
+                (i) => 'kind' in i && i.kind === 'eventCta',
+            );
+            if (hasEvent) return;
+
+            // 1) Create event placeholder item
             const newEventItem: GalleryBlockItem = {
                 kind: 'eventCta',
                 eventId: '',
                 position: pos,
             };
-            setDraft({ ...draft, items: [...draft.items, newEventItem] });
+            const newDraft = { ...draft, items: [...(draft as GalleryBlock).items, newEventItem] };
+
+            // 2) Save draft to external store (survives navigation)
+            const key: EditorKey = { kind: 'block', id: draft.id };
+            editSessionsDataStore.saveDraft(key, newDraft);
+
+            // 3) Dispatch journey ticket to event editor
+            const ticket = createEventPickTicket(draft.id, pos);
+            const home: JourneyHome = { editor: 'block', objectId: draft.id };
+            dispatch(ticket, home);
         },
-        [draft, setDraft],
+        [draft, dispatch],
     );
 
     /** Update a gallery item caption at a given position */
@@ -780,7 +797,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             updateTags,
             isEditingTarget,
             onApply,
-            addEventPlaceholder,
+            addEventAndJourney,
             updateItemCaption,
             updateBlockCaption,
         }),
@@ -804,7 +821,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             isEditingTarget,
             onApply,
             setDraft,
-            addEventPlaceholder,
+            addEventAndJourney,
             updateItemCaption,
             updateBlockCaption,
         ],

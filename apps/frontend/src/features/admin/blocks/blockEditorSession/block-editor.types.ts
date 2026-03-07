@@ -32,8 +32,8 @@ export type BlockEditorSession = {
     updateTags: (t: string[]) => void;
     onApply: () => void;
 
-    /** Add event placeholder at a gallery slot position */
-    addEventPlaceholder: (pos: ItemPosition) => void;
+    /** Add event placeholder at a gallery slot and dispatch journey to event editor */
+    addEventAndJourney: (pos: ItemPosition) => void;
     /** Update a gallery item caption */
     updateItemCaption: (pos: ItemPosition, caption: string) => void;
     /** Update the block-level caption */
