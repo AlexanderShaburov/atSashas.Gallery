@@ -37,10 +37,8 @@ type Props = {
         onCustomize?: () => void;
     };
     addEventAndJourney?: (pos: ItemPosition) => void;
-    updateItemCaption?: (pos: ItemPosition, caption: string) => void;
-    updateBlockCaption?: (caption: string) => void;
 };
-export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEventAndJourney, updateItemCaption, updateBlockCaption }: Props) {
+export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEventAndJourney }: Props) {
     let content: JSX.Element | undefined = undefined;
     const { isJourney, ...tbCtx } = toolbarProps;
 
@@ -80,9 +78,6 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEven
                     item={item as GalleryBlock}
                     onHit={onHit}
                     parent="editor"
-                    setValue={setValue}
-                    onUpdateItemCaption={updateItemCaption}
-                    onUpdateBlockCaption={updateBlockCaption}
                 />
             );
             break;

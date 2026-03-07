@@ -25,7 +25,6 @@ export function BlockRenderer({ block, onHit, parent, setValue, readOnly }: Bloc
                     item={block}
                     onHit={onHit}
                     parent={parent}
-                    setValue={resolveSetter(setValue)}
                     readOnly={readOnly}
                 />
             );

@@ -101,8 +101,6 @@ export function BlockEditor() {
                             setValue={session.setDraft}
                             toolbarProps={toolbarProps}
                             addEventAndJourney={session.addEventAndJourney}
-                            updateItemCaption={session.updateItemCaption}
-                            updateBlockCaption={session.updateBlockCaption}
                         />
                     </div>
                 </div>

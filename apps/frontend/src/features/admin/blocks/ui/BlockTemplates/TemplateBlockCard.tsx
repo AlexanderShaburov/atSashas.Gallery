@@ -33,7 +33,6 @@ export function TemplateRaw({ onSelectKind, setValue }: TemplateRawProps) {
                                     }}
                                     onHit={onSelectKind}
                                     parent="grid"
-                                    setValue={setValue}
                                 />
                             </div>
                         );
