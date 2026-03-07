@@ -101,11 +101,62 @@ GalleryBlockItem = Annotated[
 ]
 
 
+class ImageAppearance(BaseModel):
+    scale: float = 1.0
+    offsetX: float = 0
+    offsetY: float = 0
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CaptionStyle(BaseModel):
+    font: str = "Inter"
+    size: int = 16
+    color: str = "#1e1e1c"
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class SlotCaptionAppearance(BaseModel):
+    visible: bool = False
+    posX: float = 50
+    posY: float = 90
+    style: CaptionStyle = Field(default_factory=CaptionStyle)
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class SlotAppearance(BaseModel):
+    image: ImageAppearance = Field(default_factory=ImageAppearance)
+    frameOffsetY: float = 0
+    caption: Optional[SlotCaptionAppearance] = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class BlockCaptionAppearance(BaseModel):
+    position: Literal["above", "below"] = "below"
+    style: CaptionStyle = Field(default_factory=CaptionStyle)
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class BlockAppearance(BaseModel):
+    columnRatios: List[float]
+    verticalAlign: Literal["top", "center", "bottom"] = "center"
+    gap: float = 6
+    slots: Dict[ItemPosition, SlotAppearance] = Field(default_factory=dict)
+    blockCaption: Optional[BlockCaptionAppearance] = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class GalleryBlock(BlockBase):
     blockKind: Literal["gallery"] = "gallery"
 
     layout: GalleryLayout
     items: List[GalleryBlockItem]  # TS allows empty list -> no validator
+    appearance: Optional[BlockAppearance] = None
 
     model_config = ConfigDict(extra="forbid")
 
