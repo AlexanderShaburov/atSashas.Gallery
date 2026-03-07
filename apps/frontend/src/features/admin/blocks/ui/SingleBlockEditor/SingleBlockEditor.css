@@ -52,15 +52,6 @@
     opacity: 0.65;
 }
 
-.blk--editor .blk-field--slot-caption {
-    margin-top: 8px;
-    font-size: 0.9rem;
-}
-
-.blk--editor .blk-field--block-caption {
-    margin-top: 10px;
-}
-
 .blk--editor .blk-field--tags {
     margin-top: 10px;
     font-size: 0.85rem;

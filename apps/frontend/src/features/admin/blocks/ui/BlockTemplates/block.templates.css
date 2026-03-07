@@ -4,53 +4,6 @@
     border-radius: 0.5rem;
     background: color-mix(in srgb, var(--card-bg) 85%, var(--accent) 15%);
 }
-.blk-gallery.blk-tpl .blk-gallery__caption {
-    text-align: center;
-    min-height: 1em;
-}
-.blk-gallery.blk-tpl .blk-gallery__caption:empty::before {
-    content: 'Gallery block';
-    opacity: 0.7;
-}
-
-/* 
-   =========================
-   Template gallery block
-   ========================= 
-*/
-
-.blk-gallery.blk-tpl .blk-gallery__slot {
-    border-radius: 0.5rem;
-    border: 1px dashed var(--border);
-    background: color-mix(in srgb, var(--tile-title) 80%, var(--card-bg) 20%);
-
-    min-height: 0px; /* still keeps template readable */
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 0.7rem;
-    color: var(--muted);
-}
-
-.blk-gallery .blk-gallery__slot-empty {
-    background: color-mix(in srgb, var(--accent) 35%, var(--card-bg) 65%);
-    border: 1px dashed color-mix(in srgb, var(--accent) 65%, var(--border) 35%);
-}
-
-/* Template bottom main caption */
-.blk-gallery.blk-tpl .blk-gallery__caption {
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: var(--text);
-    text-align: center;
-
-    min-height: 1.4em;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 /* Every tile in the grid - 4:3 "screen" */
 .block-editor .grid-collection > .blk-tpl {
     aspect-ratio: 4 / 3;
