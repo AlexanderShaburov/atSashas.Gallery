@@ -14,7 +14,7 @@ import Lightbox from '@/shared/ui/lightbox/Lightbox';
 import { QuickView } from '@/shared/ui/QuickView';
 import { useEffect, useState } from 'react';
 
-import { blockGridStyle, slotImageStyle, slotWrapperStyle } from './applyAppearanceStyles';
+import { blockGridStyle, slotImageStyle, slotWrapperStyle } from '@/shared/lib/appearance/applyAppearanceStyles';
 import { GallerySlotEventView } from './GallerySlotEventView';
 
 function sortByLayout(items: GalleryBlockItem[], layout: GalleryLayout): GalleryBlockItem[] {

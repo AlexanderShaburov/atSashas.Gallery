@@ -4,7 +4,7 @@ import {
     blockGridStyle,
     slotImageStyle,
     slotWrapperStyle,
-} from '@/features/public/ui/Image/applyAppearanceStyles';
+} from '@/shared/lib/appearance/applyAppearanceStyles';
 import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
 import { ArtPicture } from '@/shared/ui/ArtPicture';
 import { useCallback, useRef } from 'react';

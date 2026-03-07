@@ -20,7 +20,7 @@ import {
     blockGridStyle,
     slotImageStyle,
     slotWrapperStyle,
-} from '@/features/public/ui/Image/applyAppearanceStyles';
+} from '@/shared/lib/appearance/applyAppearanceStyles';
 import { useResolveArtAdaptive } from '@/shared/ArtCatalogProvider/useResolveArtAdaptive';
 import { isArtItem, isEventItem } from '@/shared/lib/checkers/blockItemGuards';
 import { loadGoogleFont } from '@/shared/lib/fonts/loadGoogleFont';
