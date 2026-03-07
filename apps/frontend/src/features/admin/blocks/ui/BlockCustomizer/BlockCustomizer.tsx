@@ -59,7 +59,11 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
 
     return (
         <div className="bcz">
-            <div className="bcz__grid" ref={containerRef} style={gridStyle}>
+            <div
+                className={`bcz__grid bcz__grid--${block.layout}`}
+                ref={containerRef}
+                style={gridStyle}
+            >
                 {positions.map((pos) => {
                     const slotApp = appearance.slots[pos];
                     const item = block.items.find((i) => i.position === pos);
@@ -67,10 +71,6 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
 
                     return (
                         <div key={pos} className="bcz__slot" style={slotWrapperStyle(slotApp)}>
-                            <div
-                                className="bcz__frame-handle"
-                                onPointerDown={(e) => onFrameDragPointerDown(pos, e)}
-                            />
                             {art ? (
                                 <div
                                     className="bcz__slot-media"
@@ -86,6 +86,12 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
                             ) : (
                                 <div className="bcz__slot-empty">Empty</div>
                             )}
+                            <div
+                                className="bcz__frame-handle"
+                                onPointerDown={(e) => onFrameDragPointerDown(pos, e)}
+                            >
+                                <span className="bcz__frame-handle-icon">⋮⋮</span>
+                            </div>
                             {slotApp?.caption?.visible &&
                                 item?.kind === 'art' &&
                                 item.caption?.en && (

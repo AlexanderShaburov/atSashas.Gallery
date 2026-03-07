@@ -252,7 +252,16 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         commit();
         setSaving(true);
         try {
-            await updateBlock(updated);
+            if (draft.lifecycle === 'draft') {
+                const saved = await addNewBlock(updated);
+                editSessionsDataStore.clear({ kind: 'block', id: draft.id });
+                setSelectedBlockId(saved.id);
+                const key: EditorKey = { kind: 'block', id: saved.id };
+                editSessionsDataStore.saveDraft<Block>(key, saved);
+                editSessionsDataStore.commit<Block>(key);
+            } else {
+                await updateBlock(updated);
+            }
             await refreshCollection();
         } finally {
             setSaving(false);
