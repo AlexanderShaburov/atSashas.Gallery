@@ -1,0 +1,48 @@
+.bcz {
+    padding: 16px;
+}
+.bcz__grid {
+    position: relative;
+    display: grid;
+    gap: var(--gap);
+    overflow: visible;
+}
+.bcz__slot {
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+}
+.bcz__slot picture {
+    display: block;
+    width: 100%;
+}
+.bcz__slot img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+.bcz__slot-empty {
+    aspect-ratio: 4 / 3;
+    background: var(--card-bg);
+    border: 2px dashed var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+}
+
+/* ── Column dividers ── */
+.bcz__divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    transform: translateX(-50%);
+    cursor: col-resize;
+    z-index: 10;
+    background: transparent;
+}
+.bcz__divider:hover,
+.bcz__divider:active {
+    background: color-mix(in srgb, var(--accent) 30%, transparent);
+}

@@ -1,7 +1,8 @@
 //@/features/admin/blocks/BlockEditor/BlockEditor.tsx
-import type { BlockHitEvent } from '@/entities/block';
+import type { BlockHitEvent, GalleryBlock } from '@/entities/block';
 import type { BlockEditorSession } from '@/features/admin/blocks/blockEditorSession';
 import { useBlockEditorSession } from '@/features/admin/blocks/hooks/useBlocksEditor';
+import { BlockCustomizer } from '@/features/admin/blocks/ui/BlockCustomizer/BlockCustomizer';
 import { CollectionGrid } from '@/features/admin/blocks/ui/CollectionGrid/CollectionGrid';
 import { FilterControl, type BlockFilterState } from '@/features/admin/blocks/ui/FilterControl';
 import { SingleBlockEditor } from '@/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor';
@@ -121,7 +122,15 @@ export function BlockEditor() {
                     </div>
                 </div>
             );
-        case 'customize':
+        case 'customize': {
+            if (
+                !session.draft ||
+                session.draft.blockKind !== 'gallery' ||
+                !session.appearanceDraft
+            ) {
+                return null;
+            }
+            const galleryBlock = session.draft as GalleryBlock;
             return (
                 <div className="be">
                     <SingleEditorToolbar
@@ -133,13 +142,15 @@ export function BlockEditor() {
                             exit: session.exitCustomize,
                         }}
                     />
-                    <div style={{ padding: '24px' }}>
-                        <h2>Block customizer</h2>
-                        <p>Interactive customizer will be added in next tasks.</p>
-                        {/* BlockCustomizer component will be wired here in Task 7 */}
-                    </div>
+                    <h2 style={{ padding: '0 16px', margin: '8px 0' }}>Block customizer</h2>
+                    <BlockCustomizer
+                        block={galleryBlock}
+                        appearance={session.appearanceDraft}
+                        onChange={session.setAppearanceDraft}
+                    />
                 </div>
             );
+        }
         // case 'pickArt': {
         //     const artCollection = applyArtCatalogFilter(catalog.items, artFilter);
         //     console.log(`[BlockEditor]: artCollection is: `);
