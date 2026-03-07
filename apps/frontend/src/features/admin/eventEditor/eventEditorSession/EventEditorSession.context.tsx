@@ -243,12 +243,9 @@ export function EventEditorSessionProvider({ children }: { children: React.React
       clearSession();
     }
     setEditorKeyId(null);
-    if (isJourney) {
-      returnHome('events', { ok: false, reason: 'cancel' });
-      return;
-    }
-    setScreenMode('list');
-  }, [editorKey, clearSession, isJourney, returnHome]);
+    // From edit/create → go back to select (journey) or list (standalone)
+    setScreenMode(isJourney ? 'select' : 'list');
+  }, [editorKey, clearSession, isJourney]);
 
   const save = useCallback(async () => {
     try {
