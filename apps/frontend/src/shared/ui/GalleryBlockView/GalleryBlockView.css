@@ -44,6 +44,8 @@
 .block figcaption {
   color: var(--muted);
   font-size: 0.95rem;
+  grid-column: 1 / -1;
+  margin: 0;
 }
 
 /* ── empty slot ── */
@@ -168,11 +170,6 @@
   height: auto;
   align-self: stretch;
   min-height: 0;
-}
-
-.block figcaption {
-  grid-column: 1 / -1;
-  margin: 0;
 }
 
 @media (max-width: 820px) {

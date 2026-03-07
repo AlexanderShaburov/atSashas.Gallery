@@ -92,6 +92,7 @@ export function GalleryBlockView({
         <div
           key={`empty-${pos}`}
           className="block__slot block__slot--empty"
+          style={slotWrapperStyle(slotApp)}
           onClick={onSlotClick ? (e) => onSlotClick(pos, e) : undefined}
         >
           {renderEmptySlot(pos)}
@@ -118,6 +119,7 @@ export function GalleryBlockView({
         <div
           key={`missing-${pos}`}
           className="block__slot block__slot--empty"
+          style={slotWrapperStyle(slotApp)}
           onClick={onSlotClick ? (e) => onSlotClick(pos, e) : undefined}
         >
           {renderEmptySlot(pos)}
@@ -128,7 +130,7 @@ export function GalleryBlockView({
     // Build the default picture element
     const picture = (
       <ArtPicture
-        role="button"
+        role={onSlotClick ? 'button' : undefined}
         sources={art.images.preview}
         alt={art.images.alt?.en || art.title?.en || ''}
         onClick={onSlotClick ? (e) => onSlotClick(pos, e) : undefined}
