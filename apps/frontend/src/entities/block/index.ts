@@ -1,6 +1,33 @@
+export {
+    DEFAULT_CAPTION_COLOR,
+    DEFAULT_CAPTION_SIZE,
+    DEFAULT_FONT,
+    DEFAULT_GAP,
+    DEFAULT_SCALE,
+    defaultBlockAppearance,
+    defaultBlockCaptionAppearance,
+    defaultCaptionStyle,
+    defaultImageAppearance,
+    defaultSlotAppearance,
+    defaultSlotCaptionAppearance,
+    isDefaultAppearance,
+    MAX_FONT_SIZE,
+    MAX_GAP,
+    MAX_SCALE,
+    MIN_COLUMN_RATIO,
+    MIN_FONT_SIZE,
+    MIN_GAP,
+    MIN_SCALE,
+} from './appearance.defaults';
+export type {
+    BlockAppearance,
+    BlockCaptionAppearance,
+    CaptionStyle,
+    ImageAppearance,
+    SlotAppearance,
+    SlotCaptionAppearance,
+} from './appearance.types';
 export type { BlocksCollectionJSON } from './block-collection.types';
-export { Hit } from './blockHit.types';
-export type { BlockHit, BlockHitEvent } from './blockHit.types';
 export type {
     BlockEditorMode,
     BlockEditorScreenMode,
@@ -22,4 +49,6 @@ export type {
     ItemPosition,
     TextBlock,
 } from './block.types';
+export { Hit } from './blockHit.types';
+export type { BlockHit, BlockHitEvent } from './blockHit.types';
 // export { ImageBlock } from './new-block.types';

@@ -2,6 +2,8 @@
 
 import { EntityLifecycle, ISODate, Localized } from '@/entities/common';
 
+import type { BlockAppearance } from './appearance.types';
+
 //*************** Legacy ***************/
 
 /******************* End of Legacy ********************/
@@ -59,6 +61,7 @@ export interface GalleryBlock extends BlockBase {
     blockKind: 'gallery';
     layout: GalleryLayout;
     items: GalleryBlockItem[];
+    appearance?: BlockAppearance;
 }
 
 export interface GalleryArtItem {
