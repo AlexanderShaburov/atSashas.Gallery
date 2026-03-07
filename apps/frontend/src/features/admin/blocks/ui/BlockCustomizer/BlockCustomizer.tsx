@@ -10,6 +10,7 @@ import { ArtPicture } from '@/shared/ui/ArtPicture';
 import { useRef } from 'react';
 
 import { useColumnDrag } from './useColumnDrag';
+import { useSlotInteraction } from './useSlotInteraction';
 import './BlockCustomizer.css';
 
 type Props = {
@@ -27,6 +28,11 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
         columnRatios: appearance.columnRatios,
         containerRef,
         onChange: (ratios) => onChange({ ...appearance, columnRatios: ratios }),
+    });
+
+    const { onWheel, onImagePointerDown, onFrameDragPointerDown } = useSlotInteraction({
+        appearance,
+        onChange,
     });
 
     const gridStyle = blockGridStyle(appearance);
@@ -48,12 +54,26 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
                             className="bcz__slot"
                             style={slotWrapperStyle(slotApp)}
                         >
+                            <div
+                                className="bcz__frame-handle"
+                                onPointerDown={(e) =>
+                                    onFrameDragPointerDown(pos as ItemPosition, e)
+                                }
+                            />
                             {art ? (
-                                <ArtPicture
-                                    sources={art.images.preview}
-                                    alt={art.title?.en ?? ''}
-                                    imgStyle={slotImageStyle(slotApp)}
-                                />
+                                <div
+                                    className="bcz__slot-media"
+                                    onWheel={(e) => onWheel(pos as ItemPosition, e)}
+                                    onPointerDown={(e) =>
+                                        onImagePointerDown(pos as ItemPosition, e)
+                                    }
+                                >
+                                    <ArtPicture
+                                        sources={art.images.preview}
+                                        alt={art.title?.en ?? ''}
+                                        imgStyle={slotImageStyle(slotApp)}
+                                    />
+                                </div>
                             ) : (
                                 <div className="bcz__slot-empty">Empty</div>
                             )}
