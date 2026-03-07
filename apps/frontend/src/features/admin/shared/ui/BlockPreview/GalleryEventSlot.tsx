@@ -6,7 +6,6 @@ import { useEvent } from '@/shared/EventsProvider/useEvent';
 type Props = {
     item: GalleryEventItem;
     isEditor: boolean;
-    onPickEvent: () => void;
     onPickBackground: () => void;
     resolvedBgSrc?: string;
 };
@@ -14,7 +13,6 @@ type Props = {
 export function GalleryEventSlot({
     item,
     isEditor,
-    onPickEvent,
     onPickBackground,
     resolvedBgSrc,
 }: Props) {
@@ -46,15 +44,6 @@ export function GalleryEventSlot({
                 )}
                 {isEditor && (
                     <div className="blk-gallery__event-controls">
-                        <button
-                            className="blk-gallery__event-pick-btn"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onPickEvent();
-                            }}
-                        >
-                            {event ? `Event: ${event.title.en}` : 'Select Event'}
-                        </button>
                         <button
                             className="blk-gallery__event-pick-btn"
                             onClick={(e) => {

@@ -18,9 +18,8 @@ import { ArtPicture } from '@/shared/ui/ArtPicture';
 import { TEMPLATE_BLOCKS } from '@/features/admin/blocks/ui/BlockTemplates/templateTypes';
 import { GalleryEventSlot } from '@/features/admin/shared/ui/BlockPreview/GalleryEventSlot';
 import { InlineEditableText } from '@/features/admin/shared/ui/BlockPreview';
-import { SlotChoiceMenu } from '@/features/admin/shared/ui/BlockPreview/SlotChoiceMenu';
 import { useResolveArtAdaptive } from '@/shared/ArtCatalogProvider/useResolveArtAdaptive';
-import { JSX, ReactNode, useState } from 'react';
+import { JSX, ReactNode } from 'react';
 
 type Props = {
     item: GalleryBlock;
@@ -28,8 +27,6 @@ type Props = {
     parent: BlockParent; // 'grid' | 'editor'
     setValue: (next: Block) => void; // to set new value session.setValue()
     readOnly?: boolean;
-    /** Optional callback: add event placeholder at slot (from context) */
-    onAddEventPlaceholder?: (pos: ItemPosition) => void;
     /** Optional callback: update item caption at slot (from context) */
     onUpdateItemCaption?: (pos: ItemPosition, caption: string) => void;
     /** Optional callback: update block-level caption (from context) */
@@ -55,11 +52,10 @@ type CaptionRenderOptions = {
     renderWrapper?: (p: Record<string, unknown>, content: ReactNode) => JSX.Element;
 };
 
-export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onAddEventPlaceholder, onUpdateItemCaption, onUpdateBlockCaption }: Props) {
+export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onUpdateItemCaption, onUpdateBlockCaption }: Props) {
     const isEditor = parent === 'editor';
     const imgPositions = LAYOUT_SCHEME[item.layout];
     const resolveArt = useResolveArtAdaptive();
-    const [slotChoice, setSlotChoice] = useState<{ pos: ItemPosition; top: number; left: number } | null>(null);
 
     const tpl = TEMPLATE_BLOCKS.find((t) => t.kind === item.blockKind && t.layout === item.layout);
     const label = tpl?.label;
@@ -192,38 +188,7 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onAd
     };
 
     const handleEmptySlotClick = (pos: ItemPosition, e: React.MouseEvent<HTMLElement>) => {
-        if (isEditor) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            setSlotChoice({
-                pos,
-                top: rect.top + rect.height / 2,
-                left: rect.left + rect.width / 2,
-            });
-        } else {
-            onHit({ block: item, hit: Hit.galleryImage(pos), nativeEvent: e });
-        }
-    };
-
-    const handleChooseArt = (pos: ItemPosition) => {
-        setSlotChoice(null);
-        // Synthesize a hit event to trigger the art journey
-        const syntheticEvent = new MouseEvent('click') as unknown as React.MouseEvent<HTMLElement>;
-        onHit({ block: item, hit: Hit.galleryImage(pos), nativeEvent: syntheticEvent });
-    };
-
-    const handleChooseEvent = (pos: ItemPosition) => {
-        setSlotChoice(null);
-        if (onAddEventPlaceholder) {
-            onAddEventPlaceholder(pos);
-        } else {
-            // Fallback for non-editor contexts (CollectionGrid/readOnly)
-            const newEventItem: GalleryBlockItem = {
-                kind: 'eventCta',
-                eventId: '',
-                position: pos,
-            };
-            setValue({ ...item, items: [...item.items, newEventItem] });
-        }
+        onHit({ block: item, hit: Hit.galleryImage(pos), nativeEvent: e });
     };
 
     return (
@@ -266,14 +231,6 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onAd
                                               .jpeg
                                         : undefined
                                 }
-                                onPickEvent={() => {
-                                    onHit({
-                                        block: item,
-                                        hit: Hit.galleryEventPickEvent(pos),
-                                        nativeEvent:
-                                            new MouseEvent('click') as unknown as React.MouseEvent<HTMLElement>,
-                                    });
-                                }}
                                 onPickBackground={() => {
                                     onHit({
                                         block: item,
@@ -358,16 +315,6 @@ export function GalleryComponent({ item, onHit, parent, setValue, readOnly, onAd
             })}
 
             {renderBlockCaption()}
-
-            {slotChoice && (
-                <SlotChoiceMenu
-                    top={slotChoice.top}
-                    left={slotChoice.left}
-                    onChooseArt={() => handleChooseArt(slotChoice.pos)}
-                    onChooseEvent={() => handleChooseEvent(slotChoice.pos)}
-                    onClose={() => setSlotChoice(null)}
-                />
-            )}
         </figure>
     );
 }

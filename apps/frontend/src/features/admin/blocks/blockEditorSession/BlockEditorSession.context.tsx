@@ -445,7 +445,23 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         console.log(`[INIT SESSION]: return instruction recognized as blockSetEventId`);
                         const loot = ticket.loot;
                         if (!loot?.ok) {
-                            // User cancelled — just restore editor
+                            // User cancelled — remove the empty event placeholder
+                            if (block?.draft && block.draft.blockKind === 'gallery') {
+                                const { isEventItem } = await import(
+                                    '@/shared/lib/checkers/blockItemGuards'
+                                );
+                                const cleanedItems = block.draft.items.filter(
+                                    (item) => !(isEventItem(item) && !item.eventId),
+                                );
+                                const cleanDraft = { ...block.draft, items: cleanedItems };
+                                editSessionsDataStore.saveDraft(key, cleanDraft);
+                            }
+                            // Show info banner
+                            setUiError({
+                                title: 'Event insertion cancelled',
+                                message: 'The event placeholder was removed.',
+                                onConfirm: () => setUiError(undefined),
+                            });
                             setModeStack(['select', 'edit']);
                             return;
                         }
@@ -726,7 +742,7 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
             // Guard: one event per block
             const hasEvent = (draft as GalleryBlock).items.some(
-                (i) => 'kind' in i && i.kind === 'eventCta',
+                (i) => i.kind === 'eventCta',
             );
             if (hasEvent) return;
 
@@ -738,7 +754,9 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             };
             const newDraft = { ...draft, items: [...(draft as GalleryBlock).items, newEventItem] };
 
-            // 2) Save draft to external store (survives navigation)
+            // 2) Save draft to external store (survives navigation).
+            // NOTE: setDraft() is intentionally skipped — dispatch() navigates away,
+            // so React state update is unnecessary. Draft restores from store on return.
             const key: EditorKey = { kind: 'block', id: draft.id };
             editSessionsDataStore.saveDraft(key, newDraft);
 

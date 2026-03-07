@@ -51,15 +51,18 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEven
 
     const isGallery = item.blockKind === 'gallery';
     const galleryLayout = isGallery ? (item as GalleryBlock).layout : undefined;
+    const hasEvent = isGallery
+        && (item as GalleryBlock).items.some((i) => i.kind === 'eventCta');
 
     const onAddEvent = useCallback(() => {
         if (!addEventAndJourney || !galleryLayout) return;
         addEventAndJourney(EVENT_TARGET_SLOT[galleryLayout]);
     }, [addEventAndJourney, galleryLayout]);
 
+    const showAddEvent = isGallery && !hasEvent;
     const tbContent: ToolKey[] = isJourney
-        ? ['delete', ...(isGallery ? ['addEvent' as ToolKey] : []), 'tags', 'exit', 'apply', 'save']
-        : ['delete', ...(isGallery ? ['addEvent' as ToolKey] : []), 'tags', 'exit', 'save'];
+        ? ['delete', ...(showAddEvent ? ['addEvent' as ToolKey] : []), 'tags', 'exit', 'apply', 'save']
+        : ['delete', ...(showAddEvent ? ['addEvent' as ToolKey] : []), 'tags', 'exit', 'save'];
 
     switch (item.blockKind) {
         case 'gallery':
