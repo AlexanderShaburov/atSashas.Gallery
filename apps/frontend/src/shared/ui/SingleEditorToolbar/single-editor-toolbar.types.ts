@@ -2,6 +2,8 @@
 
 export type ToolKey =
     | 'add'
+    | 'addEvent'
+    | 'customize'
     | 'edit'
     | 'delete'
     | 'apply'
@@ -22,6 +24,8 @@ export type ToolbarCtx = {
 
     // Toolbar action handlers:
     onAdd?: () => void;
+    onAddEvent?: () => void;
+    onCustomize?: () => void;
     onEdit?: () => void;
     onDelete?: () => void;
     onApply?: () => void;

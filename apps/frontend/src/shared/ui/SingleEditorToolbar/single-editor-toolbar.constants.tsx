@@ -4,7 +4,9 @@ import { ReactNode } from 'react';
 import type { ToolKey, ToolbarCtx } from './single-editor-toolbar.types';
 import {
     AddBlockButton,
+    AddEventButton,
     ApplyButton,
+    CustomizeButton,
     DeleteButton,
     EditMetadata,
     ExitButton,
@@ -27,6 +29,12 @@ type ToolRenderer = (ctx: ToolbarCtx) => ReactNode | null;
 
 export const TOOL_REGISTRY: Record<ToolKey, ToolRenderer> = {
     add: (ctx) => (ctx.onAdd ? <AddBlockButton onClick={resolveAnyClick(ctx.onAdd)} /> : null),
+
+    addEvent: (ctx) =>
+        ctx.onAddEvent ? <AddEventButton onClick={resolveAnyClick(ctx.onAddEvent)} /> : null,
+
+    customize: (ctx) =>
+        ctx.onCustomize ? <CustomizeButton onClick={resolveAnyClick(ctx.onCustomize)} /> : null,
 
     edit: (ctx) => (ctx.onEdit ? <EditMetadata onEdit={resolveAnyClick(ctx.onEdit)} /> : null),
 

@@ -34,6 +34,7 @@ type Props = {
         tags?: string[];
         onChangeTags?: (tags: string[]) => void;
         onApply: () => void;
+        onCustomize?: () => void;
     };
     addEventAndJourney?: (pos: ItemPosition) => void;
     updateItemCaption?: (pos: ItemPosition, caption: string) => void;
@@ -60,9 +61,17 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEven
     }, [addEventAndJourney, galleryLayout]);
 
     const showAddEvent = isGallery && !hasEvent;
+    const showCustomize = isGallery && !isJourney;
     const tbContent: ToolKey[] = isJourney
         ? ['delete', ...(showAddEvent ? ['addEvent' as ToolKey] : []), 'tags', 'exit', 'apply', 'save']
-        : ['delete', ...(showAddEvent ? ['addEvent' as ToolKey] : []), 'tags', 'exit', 'save'];
+        : [
+              'delete',
+              ...(showAddEvent ? ['addEvent' as ToolKey] : []),
+              ...(showCustomize ? ['customize' as ToolKey] : []),
+              'tags',
+              'exit',
+              'save',
+          ];
 
     switch (item.blockKind) {
         case 'gallery':

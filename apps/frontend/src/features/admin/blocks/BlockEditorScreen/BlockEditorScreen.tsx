@@ -6,6 +6,7 @@ import { CollectionGrid } from '@/features/admin/blocks/ui/CollectionGrid/Collec
 import { FilterControl, type BlockFilterState } from '@/features/admin/blocks/ui/FilterControl';
 import { SingleBlockEditor } from '@/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor';
 import '@/features/admin/shared/ui/BlockPreview/index';
+import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
 import '@/pages/admin/BlocksPage/BlocksPage.css';
 import { useEffect, useState } from 'react';
 
@@ -34,6 +35,7 @@ export function BlockEditor() {
         onChangeTags: session.updateTags,
         onApply: session.onApply,
         isJourney: session.isJourney,
+        onCustomize: session.enterCustomize,
     };
 
     const {
@@ -116,6 +118,25 @@ export function BlockEditor() {
                             onHit={onHit}
                             setValue={session.setDraft}
                         />
+                    </div>
+                </div>
+            );
+        case 'customize':
+            return (
+                <div className="be">
+                    <SingleEditorToolbar
+                        tools={['exit', 'save']}
+                        ctx={{
+                            canSave: true,
+                            isSaving: session.saving,
+                            save: () => void session.saveAppearance(),
+                            exit: session.exitCustomize,
+                        }}
+                    />
+                    <div style={{ padding: '24px' }}>
+                        <h2>Block customizer</h2>
+                        <p>Interactive customizer will be added in next tasks.</p>
+                        {/* BlockCustomizer component will be wired here in Task 7 */}
                     </div>
                 </div>
             );

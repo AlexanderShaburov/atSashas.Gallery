@@ -9,6 +9,20 @@ export function AddBlockButton({ onClick }: { onClick: () => void }) {
         </button>
     );
 }
+export function AddEventButton({ onClick }: { onClick: () => void }) {
+    return (
+        <button type="button" className="set-btn" onClick={onClick}>
+            Add Event
+        </button>
+    );
+}
+export function CustomizeButton({ onClick }: { onClick: () => void }) {
+    return (
+        <button type="button" className="set-btn" onClick={onClick}>
+            Customize
+        </button>
+    );
+}
 export function EditMetadata({ onEdit }: { onEdit: () => void }) {
     return (
         <button type="button" className="set-btn" onClick={onEdit}>

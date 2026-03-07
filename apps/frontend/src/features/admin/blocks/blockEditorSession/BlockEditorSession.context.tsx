@@ -2,6 +2,7 @@
 
 import type {
     Block,
+    BlockAppearance,
     BlockEditorScreenMode,
     BlockHitEvent,
     BlocksCollectionJSON,
@@ -10,6 +11,7 @@ import type {
     GalleryBlockItem,
     ItemPosition,
 } from '@/entities/block';
+import { defaultBlockAppearance } from '@/entities/block';
 import type { UiErrorState } from '@/entities/common';
 import {
     addNewBlock,
@@ -80,6 +82,8 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     );
     // Errors processing preparation, unimplemented.
     const [uiError, setUiError] = useState<UiErrorState | undefined>(undefined);
+    // Appearance customizer draft:
+    const [appearanceDraft, setAppearanceDraft] = useState<BlockAppearance | undefined>(undefined);
     //*******************************************************/
 
     // React Strict Mode protection for bootstrap
@@ -172,11 +176,40 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
     // ************** LOGICS END **************
 
+    // ************** APPEARANCE CUSTOMIZER **************
+
+    const enterCustomize = useCallback(() => {
+        if (!draft || draft.blockKind !== 'gallery') return;
+        const gallery = draft as GalleryBlock;
+        setAppearanceDraft(gallery.appearance ?? defaultBlockAppearance(gallery.layout));
+        setModeStack((s) => [...s, 'customize']);
+    }, [draft]);
+
+    const exitCustomize = useCallback(() => {
+        if (!draft || draft.blockKind !== 'gallery') {
+            setModeStack((s) => s.filter((m) => m !== 'customize'));
+            return;
+        }
+        const gallery = draft as GalleryBlock;
+        const saved = gallery.appearance ?? defaultBlockAppearance(gallery.layout);
+        const isDirtyApp = JSON.stringify(appearanceDraft) !== JSON.stringify(saved);
+        if (isDirtyApp && !confirm('Discard unsaved appearance changes?')) return;
+        setAppearanceDraft(undefined);
+        setModeStack((s) => s.filter((m) => m !== 'customize'));
+    }, [draft, appearanceDraft]);
+
+    // ************** APPEARANCE CUSTOMIZER END **************
+
     // ************** STACK CONTROL **************
 
     const onEscape = useCallback(() => {
+        const currentMode = modeStack[modeStack.length - 1];
+        if (currentMode === 'customize') {
+            exitCustomize();
+            return;
+        }
         setModeStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
-    }, []);
+    }, [modeStack, exitCustomize]);
     const currentStack: ScreenModeStack = useMemo(() => {
         return {
             screenMode: modeStack[modeStack.length - 1] ?? 'select',
@@ -215,6 +248,22 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
     // Store refreshCollection in ref for deletion hook
     refreshCallbackRef.current = async () => void (await refreshCollection());
+
+    const saveAppearance = useCallback(async () => {
+        if (!draft || !appearanceDraft || draft.blockKind !== 'gallery') return;
+        const updated = { ...draft, appearance: appearanceDraft };
+        setDraft(updated);
+        commit();
+        setSaving(true);
+        try {
+            await updateBlock(updated);
+            await refreshCollection();
+        } finally {
+            setSaving(false);
+        }
+        setAppearanceDraft(undefined);
+        setModeStack((s) => s.filter((m) => m !== 'customize'));
+    }, [draft, appearanceDraft, setDraft, commit, refreshCollection]);
 
     // Inline editable text helper:
     const isEditingTarget = useCallback(
@@ -829,6 +878,11 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             addEventAndJourney,
             updateItemCaption,
             updateBlockCaption,
+            enterCustomize,
+            exitCustomize,
+            appearanceDraft,
+            setAppearanceDraft,
+            saveAppearance,
         }),
         [
             draft,
@@ -853,6 +907,11 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             addEventAndJourney,
             updateItemCaption,
             updateBlockCaption,
+            enterCustomize,
+            exitCustomize,
+            appearanceDraft,
+            setAppearanceDraft,
+            saveAppearance,
         ],
     );
 

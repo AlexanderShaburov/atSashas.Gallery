@@ -2,6 +2,7 @@
 
 import type {
     Block,
+    BlockAppearance,
     // BlockEditorMode,
     BlockEditorScreenMode,
     BlockHitEvent,
@@ -54,6 +55,13 @@ export type BlockEditorSession = {
     saving: boolean;
     onSaveClick: () => Promise<void> | void;
     exit: () => void;
+
+    /** Appearance customizer */
+    enterCustomize: () => void;
+    exitCustomize: () => void;
+    appearanceDraft: BlockAppearance | undefined;
+    setAppearanceDraft: (app: BlockAppearance) => void;
+    saveAppearance: () => Promise<void>;
 
     /** UI helpers (optional, can extend later) */
     // UI error state:
