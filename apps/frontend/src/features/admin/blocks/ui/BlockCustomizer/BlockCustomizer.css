@@ -68,3 +68,15 @@
 .bcz__divider:active {
     background: color-mix(in srgb, var(--accent) 30%, transparent);
 }
+
+/* ── Caption overlay ── */
+.bcz__caption-overlay {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: move;
+    user-select: none;
+    pointer-events: auto;
+    white-space: nowrap;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    z-index: 5;
+}

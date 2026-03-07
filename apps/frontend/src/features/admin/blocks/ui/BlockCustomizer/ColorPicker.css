@@ -1,0 +1,34 @@
+.clrp {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.clrp__swatches {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+.clrp__swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+}
+.clrp__swatch:hover {
+    border-color: var(--accent);
+}
+.clrp__swatch--active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+}
+.clrp__free {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0;
+    cursor: pointer;
+    background: none;
+}

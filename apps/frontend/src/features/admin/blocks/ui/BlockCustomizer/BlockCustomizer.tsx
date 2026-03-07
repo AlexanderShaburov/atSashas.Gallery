@@ -10,7 +10,9 @@ import { ArtPicture } from '@/shared/ui/ArtPicture';
 import { useCallback, useRef } from 'react';
 
 import './BlockCustomizer.css';
+import { CaptionControls } from './CaptionControls';
 import { ControlPanel } from './ControlPanel';
+import { useCaptionDrag } from './useCaptionDrag';
 import { useColumnDrag } from './useColumnDrag';
 import { useSlotInteraction } from './useSlotInteraction';
 
@@ -35,6 +37,8 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
         appearance,
         onChange,
     });
+
+    const { onCaptionPointerDown } = useCaptionDrag({ appearance, onChange });
 
     const handleSnapSlot = useCallback(
         (pos: ItemPosition) => {
@@ -65,17 +69,13 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
                         <div key={pos} className="bcz__slot" style={slotWrapperStyle(slotApp)}>
                             <div
                                 className="bcz__frame-handle"
-                                onPointerDown={(e) =>
-                                    onFrameDragPointerDown(pos, e)
-                                }
+                                onPointerDown={(e) => onFrameDragPointerDown(pos, e)}
                             />
                             {art ? (
                                 <div
                                     className="bcz__slot-media"
                                     onWheel={(e) => onWheel(pos, e)}
-                                    onPointerDown={(e) =>
-                                        onImagePointerDown(pos, e)
-                                    }
+                                    onPointerDown={(e) => onImagePointerDown(pos, e)}
                                 >
                                     <ArtPicture
                                         sources={art.images.preview}
@@ -86,6 +86,23 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
                             ) : (
                                 <div className="bcz__slot-empty">Empty</div>
                             )}
+                            {slotApp?.caption?.visible &&
+                                item?.kind === 'art' &&
+                                item.caption?.en && (
+                                    <span
+                                        className="bcz__caption-overlay"
+                                        style={{
+                                            left: `${slotApp.caption.posX}%`,
+                                            top: `${slotApp.caption.posY}%`,
+                                            fontFamily: `'${slotApp.caption.style.font}', serif`,
+                                            fontSize: `${slotApp.caption.style.size}px`,
+                                            color: slotApp.caption.style.color,
+                                        }}
+                                        onPointerDown={(e) => onCaptionPointerDown(pos, e)}
+                                    >
+                                        {item.caption.en}
+                                    </span>
+                                )}
                         </div>
                     );
                 })}
@@ -106,6 +123,13 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
                 layout={block.layout}
                 onChange={onChange}
                 onSnapSlot={handleSnapSlot}
+                slotPositions={positions}
+            />
+
+            <CaptionControls
+                block={block}
+                appearance={appearance}
+                onChange={onChange}
                 slotPositions={positions}
             />
         </div>
