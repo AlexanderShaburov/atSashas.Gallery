@@ -160,6 +160,16 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         pushMode({ kind: 'select' });
     }, [pushMode]);
 
+    // ---------- EXIT ---------
+    const exit = useCallback(() => {
+        if (isSaving) return;
+        if (isDirty && !confirm('Discard unsaved stream changes?')) return;
+        if (isJourney) {
+            returnHome('stream', { ok: false, reason: 'cancel' });
+        }
+        resetSelectSession();
+    }, [isSaving, isDirty, isJourney, returnHome, resetSelectSession]);
+
     const renewStreamsIndex = useCallback(async () => {
         try {
             console.log(`[renewStreamsIndex]: Called`);
@@ -1037,6 +1047,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             addBlock,
             pushMode,
             onEscape,
+            exit,
             currentStack,
             selectStream,
             createNewStream,
@@ -1066,6 +1077,7 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             addBlock,
             pushMode,
             onEscape,
+            exit,
             currentStack,
             selectStream,
             createNewStream,

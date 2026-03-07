@@ -24,6 +24,7 @@ export type StreamEditorSession = {
     addBlock: (pos: number) => void;
     pushMode: (n: StreamScreenMode) => void;
     onEscape: () => void;
+    exit: () => void;
     currentStack: StreamScreenModeStack;
     selectStream: (id: string) => void;
     createNewStream: () => void;
