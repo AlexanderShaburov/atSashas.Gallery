@@ -1,5 +1,5 @@
-import type { BlockAppearance, GalleryLayout, ItemPosition } from '@/entities/block';
-import { defaultBlockAppearance, MAX_GAP, MIN_GAP } from '@/entities/block';
+import type { AspectRatioPreset, BlockAppearance, GalleryLayout, ItemPosition } from '@/entities/block';
+import { ASPECT_RATIO_PRESETS, defaultBlockAppearance, MAX_GAP, MIN_GAP } from '@/entities/block';
 
 import './ControlPanel.css';
 
@@ -22,12 +22,45 @@ export function ControlPanel({ appearance, layout, onChange, onSnapSlot, slotPos
         onChange({ ...appearance, verticalAlign: align });
     };
 
+    const handleAspectRatioChange = (preset: AspectRatioPreset) => {
+        onChange({ ...appearance, aspectRatio: preset.value });
+    };
+
     const handleReset = () => {
         onChange(defaultBlockAppearance(layout));
     };
 
     return (
         <div className="cpnl">
+            {/* Aspect ratio presets */}
+            <fieldset className="cpnl__field">
+                <legend className="cpnl__label">
+                    Canvas{' '}
+                    {typeof appearance.aspectRatio === 'number'
+                        ? `${appearance.aspectRatio.toFixed(2)}`
+                        : 'auto'}
+                </legend>
+                <div className="cpnl__btn-group cpnl__btn-group--wrap">
+                    {ASPECT_RATIO_PRESETS.map((preset) => {
+                        const isActive =
+                            appearance.aspectRatio === preset.value ||
+                            (typeof appearance.aspectRatio === 'number' &&
+                                typeof preset.value === 'number' &&
+                                Math.abs(appearance.aspectRatio - preset.value) < 0.001);
+                        return (
+                            <button
+                                key={preset.label}
+                                type="button"
+                                className={`cpnl__btn ${isActive ? 'cpnl__btn--active' : ''}`}
+                                onClick={() => handleAspectRatioChange(preset)}
+                            >
+                                {preset.label}
+                            </button>
+                        );
+                    })}
+                </div>
+            </fieldset>
+
             {/* Gap slider */}
             <label className="cpnl__field">
                 <span className="cpnl__label">Gap: {appearance.gap}px</span>

@@ -64,3 +64,6 @@
     color: var(--text);
     cursor: pointer;
 }
+.cpnl__btn-group--wrap {
+    flex-wrap: wrap;
+}
