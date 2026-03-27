@@ -46,8 +46,17 @@ export const ASPECT_RATIO_PRESETS: AspectRatioPreset[] = [
     { label: 'Auto', value: 'auto' },
 ];
 
+/** Format aspect ratio for display. Returns preset label (e.g. "16:9") or computed string (e.g. "1.73:1"). */
+export function formatAspectRatio(ratio: number | 'auto'): string {
+    if (ratio === 'auto') return 'Auto';
+    const match = ASPECT_RATIO_PRESETS.find(
+        (p) => typeof p.value === 'number' && Math.abs(p.value - ratio) < 0.001,
+    );
+    return match?.label ?? `${ratio.toFixed(2)}:1`;
+}
+
 /** Snap a free-form ratio to the nearest preset if within threshold. */
-export function snapAspectRatio(ratio: number): number | 'auto' {
+export function snapAspectRatio(ratio: number): number {
     for (const preset of ASPECT_RATIO_PRESETS) {
         if (preset.value === 'auto') continue;
         const diff = Math.abs(ratio - preset.value) / preset.value;

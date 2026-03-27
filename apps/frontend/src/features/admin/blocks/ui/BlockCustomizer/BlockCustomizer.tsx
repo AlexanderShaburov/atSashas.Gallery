@@ -1,5 +1,5 @@
 import type { BlockAppearance, GalleryBlock, ItemPosition } from '@/entities/block';
-import { ASPECT_RATIO_PRESETS, defaultImageAppearance, LAYOUT_SCHEME } from '@/entities/block';
+import { defaultImageAppearance, formatAspectRatio, LAYOUT_SCHEME } from '@/entities/block';
 import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
 import { GalleryBlockView } from '@/shared/ui/GalleryBlockView';
 import { useCallback, useRef } from 'react';
@@ -121,15 +121,7 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
 
                 {/* Ratio label */}
                 <div className="bcz__ratio-label">
-                    {typeof appearance.aspectRatio === 'number'
-                        ? (() => {
-                              const r = appearance.aspectRatio;
-                              const match = ASPECT_RATIO_PRESETS.find(
-                                  (p) => typeof p.value === 'number' && Math.abs(p.value - r) < 0.001,
-                              );
-                              return match?.label ?? `${r.toFixed(2)}:1`;
-                          })()
-                        : 'Auto'}
+                    {formatAspectRatio(appearance.aspectRatio)}
                 </div>
             </GalleryBlockView>
 

@@ -142,6 +142,7 @@ class BlockCaptionAppearance(BaseModel):
 
 
 class BlockAppearance(BaseModel):
+    aspectRatio: Union[float, Literal["auto"]] = 4/3
     columnRatios: List[float]
     verticalAlign: Literal["top", "center", "bottom"] = "center"
     gap: float = 6

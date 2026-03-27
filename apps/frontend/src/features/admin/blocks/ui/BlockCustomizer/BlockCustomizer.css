@@ -74,7 +74,7 @@
     right: 0;
     width: 24px;
     height: 24px;
-    cursor: nesw-resize;
+    cursor: ns-resize;
     z-index: 15;
 }
 .bcz__corner-handle::after {

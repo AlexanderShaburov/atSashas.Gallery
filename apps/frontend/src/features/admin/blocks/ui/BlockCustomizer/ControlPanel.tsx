@@ -1,5 +1,5 @@
 import type { AspectRatioPreset, BlockAppearance, GalleryLayout, ItemPosition } from '@/entities/block';
-import { ASPECT_RATIO_PRESETS, defaultBlockAppearance, MAX_GAP, MIN_GAP } from '@/entities/block';
+import { ASPECT_RATIO_PRESETS, defaultBlockAppearance, formatAspectRatio, MAX_GAP, MIN_GAP } from '@/entities/block';
 
 import './ControlPanel.css';
 
@@ -34,12 +34,7 @@ export function ControlPanel({ appearance, layout, onChange, onSnapSlot, slotPos
         <div className="cpnl">
             {/* Aspect ratio presets */}
             <fieldset className="cpnl__field">
-                <legend className="cpnl__label">
-                    Canvas{' '}
-                    {typeof appearance.aspectRatio === 'number'
-                        ? `${appearance.aspectRatio.toFixed(2)}`
-                        : 'auto'}
-                </legend>
+                <legend className="cpnl__label">Canvas {formatAspectRatio(appearance.aspectRatio)}</legend>
                 <div className="cpnl__btn-group cpnl__btn-group--wrap">
                     {ASPECT_RATIO_PRESETS.map((preset) => {
                         const isActive =

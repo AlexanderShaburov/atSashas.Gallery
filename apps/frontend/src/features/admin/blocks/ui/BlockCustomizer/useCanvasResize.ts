@@ -12,6 +12,8 @@ export function useCanvasResize({ appearance, containerRef, onChange }: UseCanva
     const dragging = useRef(false);
     const latestRatio = useRef(appearance.aspectRatio);
     latestRatio.current = appearance.aspectRatio;
+    const latestAppearance = useRef(appearance);
+    latestAppearance.current = appearance;
 
     const onCornerPointerDown = useCallback(
         (e: React.PointerEvent) => {
@@ -24,17 +26,21 @@ export function useCanvasResize({ appearance, containerRef, onChange }: UseCanva
             if (!container) return;
 
             const rect = container.getBoundingClientRect();
-            const containerWidth = rect.width;
+            const style = getComputedStyle(container);
+            const padTop = parseFloat(style.paddingTop);
+            const padLeft = parseFloat(style.paddingLeft);
+            const padRight = parseFloat(style.paddingRight);
+            const containerWidth = rect.width - padLeft - padRight;
 
             const onMove = (me: PointerEvent) => {
                 if (!dragging.current) return;
                 // Height = distance from top of container to pointer Y
-                const pointerY = me.clientY - rect.top;
+                const pointerY = me.clientY - rect.top - padTop;
                 const height = Math.max(50, pointerY);
                 const rawRatio = containerWidth / height;
                 const clampedRatio = Math.min(MAX_ASPECT_RATIO, Math.max(MIN_ASPECT_RATIO, rawRatio));
                 latestRatio.current = clampedRatio;
-                onChange({ ...appearance, aspectRatio: clampedRatio });
+                onChange({ ...latestAppearance.current, aspectRatio: clampedRatio });
             };
 
             const onUp = () => {
@@ -42,7 +48,7 @@ export function useCanvasResize({ appearance, containerRef, onChange }: UseCanva
                 // Snap to nearest preset on release
                 const current = latestRatio.current;
                 if (typeof current === 'number') {
-                    onChange({ ...appearance, aspectRatio: snapAspectRatio(current) });
+                    onChange({ ...latestAppearance.current, aspectRatio: snapAspectRatio(current) });
                 }
                 window.removeEventListener('pointermove', onMove);
                 window.removeEventListener('pointerup', onUp);
@@ -51,7 +57,7 @@ export function useCanvasResize({ appearance, containerRef, onChange }: UseCanva
             window.addEventListener('pointermove', onMove);
             window.addEventListener('pointerup', onUp);
         },
-        [appearance, containerRef, onChange],
+        [containerRef, onChange],
     );
 
     return { onCornerPointerDown };

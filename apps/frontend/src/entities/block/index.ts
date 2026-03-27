@@ -13,6 +13,7 @@ export {
     defaultImageAppearance,
     defaultSlotAppearance,
     defaultSlotCaptionAppearance,
+    formatAspectRatio,
     isDefaultAppearance,
     MAX_ASPECT_RATIO,
     MAX_FONT_SIZE,
