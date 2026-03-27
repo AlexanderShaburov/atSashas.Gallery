@@ -1,6 +1,11 @@
 .bcz {
     padding: 16px;
 }
+.bcz--resizing .block {
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+    outline: 2px dashed var(--accent);
+    outline-offset: -2px;
+}
 
 /* ── Frame handle (vertical drag) ── */
 .bcz__frame-handle {

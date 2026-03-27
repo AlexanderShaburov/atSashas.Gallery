@@ -39,7 +39,7 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
 
     const { onCaptionPointerDown } = useCaptionDrag({ appearance, onChange });
 
-    const { onCornerPointerDown } = useCanvasResize({
+    const { onCornerPointerDown, resizing } = useCanvasResize({
         appearance,
         containerRef,
         onChange,
@@ -63,7 +63,7 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
     const resolveArt = (artId: string) => catalog.items[artId];
 
     return (
-        <div className="bcz" ref={containerRef}>
+        <div className={`bcz ${resizing ? 'bcz--resizing' : ''}`} ref={containerRef}>
             <GalleryBlockView
                 block={blockWithAppearance}
                 resolveArt={resolveArt}

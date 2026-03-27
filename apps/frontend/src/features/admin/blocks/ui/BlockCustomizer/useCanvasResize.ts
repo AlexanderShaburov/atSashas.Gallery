@@ -1,6 +1,6 @@
 import type { BlockAppearance } from '@/entities/block';
 import { MAX_ASPECT_RATIO, MIN_ASPECT_RATIO, snapAspectRatio } from '@/entities/block';
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 type UseCanvasResizeProps = {
     appearance: BlockAppearance;
@@ -10,6 +10,7 @@ type UseCanvasResizeProps = {
 
 export function useCanvasResize({ appearance, containerRef, onChange }: UseCanvasResizeProps) {
     const dragging = useRef(false);
+    const [resizing, setResizing] = useState(false);
     const latestRatio = useRef(appearance.aspectRatio);
     latestRatio.current = appearance.aspectRatio;
     const latestAppearance = useRef(appearance);
@@ -21,6 +22,7 @@ export function useCanvasResize({ appearance, containerRef, onChange }: UseCanva
             e.stopPropagation();
             (e.target as HTMLElement).setPointerCapture(e.pointerId);
             dragging.current = true;
+            setResizing(true);
 
             const container = containerRef.current;
             if (!container) return;
@@ -46,6 +48,7 @@ export function useCanvasResize({ appearance, containerRef, onChange }: UseCanva
 
             const onUp = () => {
                 dragging.current = false;
+                setResizing(false);
                 // Snap to nearest preset on release
                 const current = latestRatio.current;
                 if (typeof current === 'number') {
@@ -61,5 +64,5 @@ export function useCanvasResize({ appearance, containerRef, onChange }: UseCanva
         [containerRef, onChange],
     );
 
-    return { onCornerPointerDown };
+    return { onCornerPointerDown, resizing };
 }
