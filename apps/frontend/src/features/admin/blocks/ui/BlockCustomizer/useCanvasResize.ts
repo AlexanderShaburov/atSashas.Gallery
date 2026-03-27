@@ -33,7 +33,10 @@ export function useCanvasResize({ appearance, containerRef, onChange }: UseCanva
             const padRight = parseFloat(style.paddingRight);
             const containerWidth = rect.width - padLeft - padRight;
             const startY = e.clientY;
-            const startHeight = rect.height;
+            const currentRatio = typeof latestRatio.current === 'number'
+                ? latestRatio.current
+                : containerWidth / rect.height;
+            const startHeight = containerWidth / currentRatio;
 
             const onMove = (me: PointerEvent) => {
                 if (!dragging.current) return;
