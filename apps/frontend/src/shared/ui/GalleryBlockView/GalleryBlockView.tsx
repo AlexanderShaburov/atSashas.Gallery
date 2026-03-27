@@ -156,7 +156,7 @@ export function GalleryBlockView({
       ) : null;
 
     return (
-      <div key={art.id} className="block__slot" style={slotWrapperStyle(slotApp)}>
+      <div key={`${art.id}-${pos}`} className="block__slot" style={slotWrapperStyle(slotApp)}>
         {renderArtContent ? renderArtContent(art, pos, picture) : picture}
         {slotCaption}
       </div>

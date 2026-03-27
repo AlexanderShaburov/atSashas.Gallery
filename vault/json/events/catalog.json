@@ -1,0 +1,159 @@
+{
+  "version": 11,
+  "updatedAt": "2026-03-23T04:53:57.323933+00:00",
+  "events": {
+    "event-20260214-cx1vra": {
+      "id": "event-20260214-cx1vra",
+      "slug": "master-class",
+      "title": {
+        "en": "master class",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "description": {
+        "en": "blah-blah-blah",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "dateTime": "2026-02-19T09:00",
+      "durationMinutes": 150,
+      "location": "Via Laura Mantegazza 1 00152 Rome Italy",
+      "mapUrl": "https://maps.app.goo.gl/fHH88hAbpGSb2iAr7",
+      "price": {
+        "amount": 25.0,
+        "currency": "EUR"
+      },
+      "status": "scheduled",
+      "streamSlug": null,
+      "enrollments": {}
+    },
+    "event-20260214-3p50kr": {
+      "id": "event-20260214-3p50kr",
+      "slug": "watercolor-workshop",
+      "title": {
+        "en": "WATERCOLOR WORKSHOP",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "description": {
+        "en": "All materials are included. No previous experience required. Come and explore watercolor by painting fresh flowers.",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "dateTime": "2026-02-17T10:30",
+      "durationMinutes": null,
+      "location": " Trastevere, POGGI ArtStore",
+      "mapUrl": "https://maps.app.goo.gl/924fuwxztFDcLae68",
+      "price": {
+        "amount": 27.0,
+        "currency": "EUR"
+      },
+      "status": "scheduled",
+      "streamSlug": null,
+      "enrollments": {
+        "enroll-20260214-8kvkwc": {
+          "id": "enroll-20260214-8kvkwc",
+          "fullName": "Alexander Shaburov",
+          "email": "shaburov@mac.com",
+          "createdAt": "2026-02-14T16:06:56.406487+00:00",
+          "paymentStatus": "pending",
+          "stripeSessionId": null
+        },
+        "enroll-20260214-c4k9bi": {
+          "id": "enroll-20260214-c4k9bi",
+          "fullName": "Alexander Shaburov",
+          "email": "shaburov@mac.com",
+          "createdAt": "2026-02-14T19:26:16.370290+00:00",
+          "paymentStatus": "pending",
+          "stripeSessionId": null
+        }
+      }
+    },
+    "event-20260304-wa5mrb": {
+      "id": "event-20260304-wa5mrb",
+      "slug": "great-pijame-party",
+      "title": {
+        "en": "Great PIJAME_PARTY",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "description": {
+        "en": "SEX/DRUGS/ROCK'N'ROLL",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "dateTime": "2026-03-12T10:00",
+      "durationMinutes": null,
+      "location": "Tel Hai 7 App 5 4926618 Petah Tikva Israel",
+      "mapUrl": "https://maps.app.goo.gl/DeQRR5fUHSjpoECj6",
+      "price": {
+        "amount": 1.0,
+        "currency": "ILS"
+      },
+      "status": "scheduled",
+      "streamSlug": null,
+      "enrollments": {}
+    },
+    "event-20260307-yao9xe": {
+      "id": "event-20260307-yao9xe",
+      "slug": "test-event",
+      "title": {
+        "en": "test event",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "description": {
+        "en": "It's going to be fan",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "dateTime": "",
+      "durationMinutes": null,
+      "location": "somewhere in the Galaxy",
+      "mapUrl": null,
+      "price": {
+        "amount": 1000000.0,
+        "currency": "EUR"
+      },
+      "status": "draft",
+      "streamSlug": null,
+      "enrollments": {}
+    },
+    "event-20260323-04op17": {
+      "id": "event-20260323-04op17",
+      "slug": "new-test-event",
+      "title": {
+        "en": "New Test Event",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "description": null,
+      "dateTime": "",
+      "durationMinutes": null,
+      "location": "",
+      "mapUrl": null,
+      "price": null,
+      "status": "draft",
+      "streamSlug": null,
+      "enrollments": {}
+    }
+  }
+}

@@ -31,7 +31,7 @@ import {
     useReturnHome,
 } from '@/features/admin/shared/transporter/transporter';
 import { deepEqual } from '@/shared/lib/checkers/checkers';
-import { EditorKey, JourneyHome, SerializableBlockHitEvent } from '@/shared/nav';
+import { EditorKey, JourneyHome, SerializableBlockHitEvent, journeySessionStore } from '@/shared/nav';
 import {
     blocksCollectionStore,
     catalogStore,
@@ -366,6 +366,12 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             } else {
                 // RETURN: Returning from child editor (Catalog) with loot
                 console.log(`[INIT SESSION]: RETURN ticket found (has loot)`);
+                // Defensive: ensure journey session is cleared after arrival processed the return.
+                // arrival('block') should have already cleared it, but guard against edge cases.
+                if (journeySessionStore.hasActiveSession()) {
+                    console.warn(`[INIT SESSION]: Journey session still active after arrival — clearing`);
+                    journeySessionStore.clear();
+                }
                 // 0) Resolve bootstrap dataset (draft+snapshot) saved by the outbound editor
                 const tempId = ticket.returnTo.objectId;
                 console.log(`[INIT SESSION]: target object detected as ${tempId}`);

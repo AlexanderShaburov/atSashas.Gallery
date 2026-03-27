@@ -1,0 +1,23 @@
+{
+  "_comment": "User authentication data. Use scripts/hash_password.py to generate password hashes.",
+  "_instructions": [
+    "1. cd apps/admin-backend",
+    "2. poetry install (to install passlib dependency)",
+    "3. python scripts/hash_password.py YOUR_PASSWORD",
+    "4. Copy the generated hash to hashed_password field below"
+  ],
+  "users": [
+    {
+      "username": "sasha",
+      "hashed_password": "$2b$12$2T/SFJ1tyz8D5CRx2raQ8OLvbLlEk3YUVFi15DFsUtwrszQzO7J..",
+      "full_name": "Main Admin",
+      "is_active": true
+    },
+    {
+      "username": "papa",
+      "hashed_password": "$2b$12$uDmvIgbqLs5ubLHpXyl5/e4NlC62DS.L/eM3Kw30vYDNbN/fuxB4.",
+      "full_name": "Im daddy",
+      "is_active": true
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "kind": "streamRef",
+      "streamSlug": "stream-20260304-nt30w2",
+      "size": "M",
+      "thumbOverrideUrl": null
+    },
+    {
+      "kind": "streamRef",
+      "streamSlug": "stream-20260306-3resqy",
+      "size": "M",
+      "thumbOverrideUrl": null
+    }
+  ],
+  "version": 39,
+  "createdAt": "2026-02-13T12:35:00.000000+00:00",
+  "updatedAt": "2026-03-06T12:00:03.340580+00:00"
+}
