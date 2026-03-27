@@ -5,6 +5,7 @@ import { createGalleryTemplateBlock } from '@/features/admin/blocks/ui/BlockTemp
 import { TemplateRaw } from '@/features/admin/blocks/ui/BlockTemplates/TemplateBlockCard';
 
 import { BlockRenderer } from '@/features/admin/shared/ui/BlockPreview/BlockRenderer';
+import { BlockThumbnail } from '@/shared/ui/BlockThumbnail';
 import { todayISO } from '@/shared/lib/dateAndLabels/today';
 import { Frame } from '@/shared/ui/Frame';
 import type { ThreeDotAction, ThreeDotCommand, ThreeDotOwner } from '@/shared/ui/ThreeDotMenu/threeDot.types';
@@ -98,15 +99,35 @@ export function CollectionGrid({ collection, onHit, setValue, onDeleteBlock, onD
             {safeCollection.order.map((item) => {
                 const b = safeCollection.blocks[item];
                 if (!b) return null;
+
+                const handleCardClick = (e: React.MouseEvent) => {
+                    onHit({
+                        block: b,
+                        hit: Hit.galleryImage('Center'),
+                        nativeEvent: e as React.MouseEvent<HTMLElement>,
+                    });
+                };
+
                 return (
-                    <Frame key={b.id} mode="card" aspectRatio="4/3" className="grid-collection__card">
-                        <BlockRenderer
-                            key={b.id}
-                            block={b}
-                            onHit={onHit}
-                            parent="grid"
-                            setValue={setValue}
-                        />
+                    <Frame
+                        key={b.id}
+                        mode="card"
+                        aspectRatio="4/3"
+                        className="grid-collection__card"
+                        onClick={handleCardClick}
+                    >
+                        {b.blockKind === 'gallery' ? (
+                            <BlockThumbnail block={b} />
+                        ) : (
+                            <BlockRenderer
+                                key={b.id}
+                                block={b}
+                                onHit={onHit}
+                                parent="grid"
+                                setValue={setValue}
+                                readOnly
+                            />
+                        )}
                         <button
                             className="grid-collection__dots"
                             onClick={(e) => {

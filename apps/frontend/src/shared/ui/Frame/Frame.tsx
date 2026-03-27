@@ -10,14 +10,15 @@ type Props = {
     aspectRatio?: string;
     className?: string;
     children: ReactNode;
+    onClick?: (e: React.MouseEvent) => void;
 };
 
-export function Frame({ mode, aspectRatio, className, children }: Props) {
+export function Frame({ mode, aspectRatio, className, children, onClick }: Props) {
     const style: CSSProperties | undefined = aspectRatio ? { aspectRatio } : undefined;
     const cls = ['frame', `frame--${mode}`, className].filter(Boolean).join(' ');
 
     return (
-        <div className={cls} style={style}>
+        <div className={cls} style={style} onClick={onClick}>
             {children}
         </div>
     );

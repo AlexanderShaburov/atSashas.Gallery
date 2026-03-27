@@ -26,6 +26,7 @@
 
 .grid-collection__card {
     position: relative;
+    cursor: pointer;
 }
 
 .grid-collection__dots {
