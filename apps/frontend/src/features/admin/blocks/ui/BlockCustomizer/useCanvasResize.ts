@@ -27,16 +27,17 @@ export function useCanvasResize({ appearance, containerRef, onChange }: UseCanva
 
             const rect = container.getBoundingClientRect();
             const style = getComputedStyle(container);
-            const padTop = parseFloat(style.paddingTop);
             const padLeft = parseFloat(style.paddingLeft);
             const padRight = parseFloat(style.paddingRight);
             const containerWidth = rect.width - padLeft - padRight;
+            const startY = e.clientY;
+            const startHeight = rect.height;
 
             const onMove = (me: PointerEvent) => {
                 if (!dragging.current) return;
-                // Height = distance from top of container to pointer Y
-                const pointerY = me.clientY - rect.top - padTop;
-                const height = Math.max(50, pointerY);
+                // Drag down = taller (lower ratio), drag up = shorter (higher ratio)
+                const deltaY = me.clientY - startY;
+                const height = Math.max(50, startHeight + deltaY);
                 const rawRatio = containerWidth / height;
                 const clampedRatio = Math.min(MAX_ASPECT_RATIO, Math.max(MIN_ASPECT_RATIO, rawRatio));
                 latestRatio.current = clampedRatio;
