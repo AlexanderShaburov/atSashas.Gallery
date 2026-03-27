@@ -72,24 +72,24 @@
     z-index: 5;
 }
 
-/* ── Canvas resize handle (top-right corner) ── */
+/* ── Canvas resize handle (bottom-right corner) ── */
 .bcz__corner-handle {
     position: absolute;
-    top: 0;
+    bottom: 0;
     right: 0;
     width: 24px;
     height: 24px;
-    cursor: ns-resize;
+    cursor: nwse-resize;
     z-index: 15;
 }
 .bcz__corner-handle::after {
     content: '';
     position: absolute;
-    top: 4px;
+    bottom: 4px;
     right: 4px;
     width: 14px;
     height: 14px;
-    border-top: 3px solid var(--accent);
+    border-bottom: 3px solid var(--accent);
     border-right: 3px solid var(--accent);
     opacity: 0.7;
     transition: opacity 0.15s;
