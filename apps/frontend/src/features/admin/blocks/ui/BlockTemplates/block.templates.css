@@ -32,6 +32,7 @@
    stretch to fill their grid cells in template tiles */
 .blk-tpl .block {
     align-items: stretch !important;
+    gap: 3px !important;
 }
 .blk-tpl .block > * {
     align-self: stretch !important;
