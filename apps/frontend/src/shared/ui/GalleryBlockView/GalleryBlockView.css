@@ -210,8 +210,10 @@
     min-height: 200px;
   }
 
-  /* On mobile, ignore custom column ratios */
+  /* On mobile, ignore custom column ratios and canvas aspect ratio */
   .block.block--custom {
     grid-template-columns: 1fr !important;
+    aspect-ratio: unset !important;
+    overflow: visible !important;
   }
 }

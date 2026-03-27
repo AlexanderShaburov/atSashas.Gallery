@@ -5,6 +5,7 @@ import type { CSSProperties } from 'react';
 export function blockGridStyle(appearance: BlockAppearance | undefined): CSSProperties | undefined {
     if (!appearance) return undefined;
     const cols = appearance.columnRatios.map((r) => `${r}fr`).join(' ');
+    const ratio = appearance.aspectRatio;
     return {
         gridTemplateColumns: cols,
         gap: `${appearance.gap}px`,
@@ -14,6 +15,8 @@ export function blockGridStyle(appearance: BlockAppearance | undefined): CSSProp
                 : appearance.verticalAlign === 'bottom'
                   ? 'end'
                   : 'start',
+        aspectRatio: ratio === 'auto' ? undefined : `${ratio}`,
+        overflow: ratio === 'auto' ? undefined : 'hidden',
     };
 }
 
