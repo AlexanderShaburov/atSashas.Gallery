@@ -1,5 +1,5 @@
 import type { BlockAppearance, GalleryBlock, ItemPosition } from '@/entities/block';
-import { defaultImageAppearance, LAYOUT_SCHEME } from '@/entities/block';
+import { ASPECT_RATIO_PRESETS, defaultImageAppearance, LAYOUT_SCHEME } from '@/entities/block';
 import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
 import { GalleryBlockView } from '@/shared/ui/GalleryBlockView';
 import { useCallback, useRef } from 'react';
@@ -7,6 +7,7 @@ import { useCallback, useRef } from 'react';
 import './BlockCustomizer.css';
 import { CaptionControls } from './CaptionControls';
 import { ControlPanel } from './ControlPanel';
+import { useCanvasResize } from './useCanvasResize';
 import { useCaptionDrag } from './useCaptionDrag';
 import { useColumnDrag } from './useColumnDrag';
 import { useSlotInteraction } from './useSlotInteraction';
@@ -37,6 +38,12 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
     });
 
     const { onCaptionPointerDown } = useCaptionDrag({ appearance, onChange });
+
+    const { onCornerPointerDown } = useCanvasResize({
+        appearance,
+        containerRef,
+        onChange,
+    });
 
     const handleSnapSlot = useCallback(
         (pos: ItemPosition) => {
@@ -105,6 +112,25 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
                         onPointerDown={(e) => onDividerPointerDown(i, e)}
                     />
                 ))}
+
+                {/* Corner drag handle for canvas resize (top-right) */}
+                <div
+                    className="bcz__corner-handle"
+                    onPointerDown={onCornerPointerDown}
+                />
+
+                {/* Ratio label */}
+                <div className="bcz__ratio-label">
+                    {typeof appearance.aspectRatio === 'number'
+                        ? (() => {
+                              const r = appearance.aspectRatio;
+                              const match = ASPECT_RATIO_PRESETS.find(
+                                  (p) => typeof p.value === 'number' && Math.abs(p.value - r) < 0.001,
+                              );
+                              return match?.label ?? `${r.toFixed(2)}:1`;
+                          })()
+                        : 'Auto'}
+                </div>
             </GalleryBlockView>
 
             <ControlPanel

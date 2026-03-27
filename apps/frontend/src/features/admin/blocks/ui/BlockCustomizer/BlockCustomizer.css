@@ -66,3 +66,48 @@
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     z-index: 5;
 }
+
+/* ── Canvas resize handle (top-right corner) ── */
+.bcz__corner-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    cursor: nesw-resize;
+    z-index: 15;
+}
+.bcz__corner-handle::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    border-top: 3px solid var(--accent);
+    border-right: 3px solid var(--accent);
+    opacity: 0.7;
+    transition: opacity 0.15s;
+}
+.bcz__corner-handle:hover::after {
+    opacity: 1;
+}
+.bcz__corner-handle:active {
+    cursor: grabbing;
+}
+
+/* ── Ratio label (bottom center of block) ── */
+.bcz__ratio-label {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    color: var(--accent);
+    font-size: 11px;
+    font-family: monospace;
+    padding: 2px 10px;
+    border-radius: 10px;
+    pointer-events: none;
+    z-index: 15;
+}
