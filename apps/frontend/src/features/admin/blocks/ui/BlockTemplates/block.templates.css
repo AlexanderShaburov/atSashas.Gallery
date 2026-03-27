@@ -14,11 +14,27 @@
     overflow: hidden;
 }
 
-/* All content stretch to all container aria  */
+/* All content stretch to fill container */
 .grid-collection > .blk-tpl > * {
     flex: 1 1 auto;
     width: 100%;
     height: 100%;
+}
+
+/* ── Gallery template slot layout fixes ── */
+
+/* Empty slots must stretch to fill grid cells, not maintain 4:3 */
+.blk-tpl .block__slot--empty {
+    aspect-ratio: unset;
+}
+
+/* Multi-row layouts need explicit row distribution */
+.blk-tpl .block.pairVertical {
+    grid-template-rows: 1fr 1fr;
+}
+.blk-tpl .block.triptychLeft,
+.blk-tpl .block.triptychRight {
+    grid-template-rows: 1fr 1fr;
 }
 .blk-tpl .blk-text__body {
     background: color-mix(in srgb, var(--accent) 35%, var(--card-bg) 65%);
