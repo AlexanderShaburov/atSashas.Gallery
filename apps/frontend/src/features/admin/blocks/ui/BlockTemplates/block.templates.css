@@ -28,6 +28,15 @@
     aspect-ratio: unset;
 }
 
+/* Override layout-specific align-items (start/center/end) so slots
+   stretch to fill their grid cells in template tiles */
+.blk-tpl .block {
+    align-items: stretch !important;
+}
+.blk-tpl .block > * {
+    align-self: stretch !important;
+}
+
 /* Multi-row layouts need explicit row distribution */
 .blk-tpl .block.pairVertical {
     grid-template-rows: 1fr 1fr;
