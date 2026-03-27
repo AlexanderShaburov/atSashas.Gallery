@@ -1,0 +1,1 @@
+export { BlockThumbnail } from './BlockThumbnail';
