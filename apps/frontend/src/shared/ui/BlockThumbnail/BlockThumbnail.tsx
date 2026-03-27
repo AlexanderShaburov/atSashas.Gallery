@@ -41,7 +41,7 @@ export function BlockThumbnail({ block }: Props) {
                         transform: `scale(${scale}) translate(-50%, -50%)`,
                     }}
                 >
-                    <GalleryBlockView block={block} resolveArt={resolveArt} />
+                    <GalleryBlockView block={block} resolveArt={resolveArt} className="block--thumb" />
                 </div>
             )}
         </div>
