@@ -26,6 +26,36 @@ export const MIN_FONT_SIZE = 10;
 export const MAX_FONT_SIZE = 48;
 export const MIN_COLUMN_RATIO = 0.125;
 
+export const DEFAULT_ASPECT_RATIO: number = 4 / 3;
+export const MIN_ASPECT_RATIO = 4 / 5;    // 0.8, portrait
+export const MAX_ASPECT_RATIO = 21 / 9;   // 2.333, ultra-wide
+export const ASPECT_RATIO_SNAP_THRESHOLD = 0.05; // 5%
+
+export type AspectRatioPreset = {
+    label: string;
+    value: number | 'auto';
+};
+
+export const ASPECT_RATIO_PRESETS: AspectRatioPreset[] = [
+    { label: '21:9', value: 21 / 9 },
+    { label: '16:9', value: 16 / 9 },
+    { label: '3:2', value: 3 / 2 },
+    { label: '4:3', value: 4 / 3 },
+    { label: '1:1', value: 1 },
+    { label: '4:5', value: 4 / 5 },
+    { label: 'Auto', value: 'auto' },
+];
+
+/** Snap a free-form ratio to the nearest preset if within threshold. */
+export function snapAspectRatio(ratio: number): number | 'auto' {
+    for (const preset of ASPECT_RATIO_PRESETS) {
+        if (preset.value === 'auto') continue;
+        const diff = Math.abs(ratio - preset.value) / preset.value;
+        if (diff <= ASPECT_RATIO_SNAP_THRESHOLD) return preset.value;
+    }
+    return ratio;
+}
+
 // ── Column count per layout ─────────────────────────────────────
 
 const LAYOUT_COLUMNS: Record<GalleryLayout, number> = {
@@ -71,6 +101,7 @@ export function defaultBlockAppearance(layout: GalleryLayout): BlockAppearance {
     }
 
     return {
+        aspectRatio: DEFAULT_ASPECT_RATIO,
         columnRatios,
         verticalAlign: 'center',
         gap: DEFAULT_GAP,
@@ -86,6 +117,7 @@ export function isDefaultAppearance(
 ): boolean {
     if (!app) return true;
     const def = defaultBlockAppearance(layout);
+    if (app.aspectRatio !== def.aspectRatio) return false;
     if (app.verticalAlign !== def.verticalAlign) return false;
     if (app.gap !== def.gap) return false;
     if (app.blockCaption !== def.blockCaption) return false;

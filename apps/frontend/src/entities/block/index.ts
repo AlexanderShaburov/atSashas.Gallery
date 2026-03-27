@@ -1,4 +1,7 @@
 export {
+    ASPECT_RATIO_PRESETS,
+    ASPECT_RATIO_SNAP_THRESHOLD,
+    DEFAULT_ASPECT_RATIO,
     DEFAULT_CAPTION_COLOR,
     DEFAULT_CAPTION_SIZE,
     DEFAULT_FONT,
@@ -11,14 +14,18 @@ export {
     defaultSlotAppearance,
     defaultSlotCaptionAppearance,
     isDefaultAppearance,
+    MAX_ASPECT_RATIO,
     MAX_FONT_SIZE,
     MAX_GAP,
     MAX_SCALE,
+    MIN_ASPECT_RATIO,
     MIN_COLUMN_RATIO,
     MIN_FONT_SIZE,
     MIN_GAP,
     MIN_SCALE,
+    snapAspectRatio,
 } from './appearance.defaults';
+export type { AspectRatioPreset } from './appearance.defaults';
 export type {
     BlockAppearance,
     BlockCaptionAppearance,

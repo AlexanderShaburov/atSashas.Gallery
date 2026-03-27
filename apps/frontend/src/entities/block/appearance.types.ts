@@ -31,6 +31,7 @@ export type BlockCaptionAppearance = {
 };
 
 export type BlockAppearance = {
+    aspectRatio: number | 'auto'; // width/height ratio, default 4/3
     columnRatios: number[]; // sum to 1.0
     verticalAlign: 'top' | 'center' | 'bottom';
     gap: number; // -50 to +50 px
