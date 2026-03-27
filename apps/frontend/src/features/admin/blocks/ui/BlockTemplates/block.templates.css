@@ -46,6 +46,46 @@
 .blk-tpl .block.triptychRight {
     grid-template-rows: 1fr 1fr;
 }
+/* ── Restore desktop layout for templates on mobile ── */
+@media (max-width: 820px) {
+    .blk-tpl .block.pairHorizontal {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    .blk-tpl .block.triptychHorizontal {
+        grid-template-columns: 1fr 1fr 1fr !important;
+    }
+    .blk-tpl .block.triptychLeft {
+        grid-template-columns: 1fr 2fr !important;
+    }
+    .blk-tpl .block.triptychRight {
+        grid-template-columns: 2fr 1fr !important;
+    }
+    .blk-tpl .block.triptychLeft > :nth-child(1) {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+    }
+    .blk-tpl .block.triptychLeft > :nth-child(2) {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+    }
+    .blk-tpl .block.triptychLeft > :nth-child(3) {
+        grid-column: 2 !important;
+        grid-row: 1 / span 2 !important;
+    }
+    .blk-tpl .block.triptychRight > :nth-child(1) {
+        grid-column: 1 !important;
+        grid-row: 1 / span 2 !important;
+    }
+    .blk-tpl .block.triptychRight > :nth-child(2) {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+    }
+    .blk-tpl .block.triptychRight > :nth-child(3) {
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+    }
+}
+
 .blk-tpl .blk-text__body {
     background: color-mix(in srgb, var(--accent) 35%, var(--card-bg) 65%);
     border-radius: 0.5rem;
