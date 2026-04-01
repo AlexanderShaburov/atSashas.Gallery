@@ -5,6 +5,7 @@ import PublicLayout from '@/app/layouts/PublicLayout';
 import { RequireAuth } from '@/app/guards/RequireAuth';
 import { BlockEditorSessionProvider } from '@/features/admin/blocks/blockEditorSession/BlockEditorSession.context';
 import { EventEditorSessionProvider } from '@/features/admin/eventEditor/eventEditorSession/EventEditorSession.context';
+import { TextVisualEditorSessionProvider } from '@/features/admin/textVisualEditor/textVisualEditorSession/TextVisualEditorSession.context';
 import { CatalogEditorSessionProvider } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
 import { EditorWorkspaceProvider } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { StreamEditorSessionProvider } from '@/features/admin/streams/streamEditorSession/StreamEditorSession.context';
@@ -23,6 +24,7 @@ const CatalogEditorPage = lazy(() => import('@/pages/admin/catalogEditorPage/Cat
 const BlocksPage = lazy(() => import('@/pages/admin/BlocksPage/BlocksPage'));
 const StreamsPage = lazy(() => import('@/pages/admin/StreamPage/StreamsPage'));
 const EventsPage = lazy(() => import('@/pages/admin/EventsPage'));
+const TextVisualsPage = lazy(() => import('@/pages/admin/TextVisualsPage'));
 const PublicStreamPage = lazy(() => import('@/pages/admin/PublicStreamPage'));
 const EnrollmentSuccessPage = lazy(() => import('@/pages/public/EnrollmentSuccessPage'));
 const EnrollmentCancelPage = lazy(() => import('@/pages/public/EnrollmentCancelPage'));
@@ -130,6 +132,14 @@ export const router = createBrowserRouter([
                     <EventEditorSessionProvider>
                         <EventsPage />
                     </EventEditorSessionProvider>
+                ),
+            },
+            {
+                path: 'text-visuals',
+                element: (
+                    <TextVisualEditorSessionProvider>
+                        <TextVisualsPage />
+                    </TextVisualEditorSessionProvider>
                 ),
             },
             {

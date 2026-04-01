@@ -1,0 +1,230 @@
+/* features/admin/textVisualEditor/ui/TextVisualEditor.css */
+
+.tve {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 2rem;
+  gap: 2rem;
+  overflow-y: auto;
+}
+
+.tve__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tve__title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.tve__actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.tve__btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tve__btn--primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.tve__btn--primary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.tve__btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tve__btn--secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.tve__btn--secondary:hover {
+  background: #d1d5db;
+}
+
+.tve__btn--danger {
+  background: #ef4444;
+  color: white;
+}
+
+.tve__btn--danger:hover {
+  background: #dc2626;
+}
+
+/* List view */
+
+.tve__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.tve__card {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  transition: box-shadow 0.2s;
+}
+
+.tve__card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tve__card-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.tve__card-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-align: center;
+  word-break: break-word;
+  overflow: hidden;
+}
+
+.tve__card-id {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 0.625rem;
+  font-family: monospace;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tve__empty {
+  color: #9ca3af;
+  text-align: center;
+  padding: 4rem;
+  font-style: italic;
+}
+
+.tve__loading {
+  padding: 4rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* Form */
+
+.tve__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 640px;
+}
+
+.tve__section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+  color: #374151;
+}
+
+.tve__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.tve__field label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.tve__field input,
+.tve__field textarea,
+.tve__field select {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.tve__field input:focus,
+.tve__field textarea:focus,
+.tve__field select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.tve__field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.tve__row {
+  display: flex;
+  gap: 1rem;
+}
+
+.tve__row .tve__field {
+  flex: 1;
+}
+
+.tve__radio-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.tve__radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 400;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.tve__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #374151;
+  cursor: pointer;
+}
+
+.tve__toolbar {
+  display: flex;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
