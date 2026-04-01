@@ -1,9 +1,17 @@
 //src/features/admin/blocks/ui/BlockEditorShell/templateTypes.ts
-import type { CtaBlock, EventCtaBlock, GalleryBlock, GalleryLayout, TextBlock } from '@/entities/block';
+import type {
+    ComposableBlock,
+    CtaBlock,
+    EventCtaBlock,
+    GalleryBlock,
+    GalleryLayout,
+    TextBlock,
+} from '@/entities/block';
 import { todayISO } from '@/shared/lib/dateAndLabels/today';
 
 type TemplateBlock =
     | { kind: 'gallery'; layout: GalleryLayout; label: string }
+    | { kind: 'composable'; layout: GalleryLayout; label: string }
     | { kind: 'text'; label: string }
     | { kind: 'cta'; label: string }
     | { kind: 'eventCta'; label: string };
@@ -25,6 +33,11 @@ export const TEMPLATE_BLOCKS: TemplateBlock[] = [
 
     // --- Event CTA block ---
     { kind: 'eventCta', label: 'Event CTA' },
+
+    // --- Composable block (mixed content) ---
+    { kind: 'composable', layout: 'single', label: 'Composable (Single)' },
+    { kind: 'composable', layout: 'pairHorizontal', label: 'Composable (Pair)' },
+    { kind: 'composable', layout: 'triptychHorizontal', label: 'Composable (Triptych)' },
 ];
 export function createGalleryTemplateBlock(layout: GalleryLayout): GalleryBlock {
     return {
@@ -72,5 +85,17 @@ export function createEventCtaTemplateBlock(): EventCtaBlock {
         dateCreated: todayISO(),
         eventId: '',
         buttonLabel: { en: 'Sign up' },
+    };
+}
+
+export function createComposableTemplateBlock(layout: GalleryLayout): ComposableBlock {
+    return {
+        id: `__template-composable-${layout}`,
+        blockKind: 'composable',
+        lifecycle: 'template',
+        layout: layout,
+        slots: [],
+        dateCreated: todayISO(),
+        tags: [],
     };
 }

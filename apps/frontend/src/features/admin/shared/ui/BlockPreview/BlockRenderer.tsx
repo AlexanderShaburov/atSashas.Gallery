@@ -2,6 +2,7 @@
 
 import { type Block, type BlockHitEvent, type BlockParent } from '@/entities/block';
 import { resolveSetter } from '@/shared/lib/resolvers/resolvers';
+import { ComposableBlockComponent } from './ComposableBlockComponent';
 import { CtaBlockComponent } from './CtaBlockComponent';
 import { EventCtaBlockComponent } from './EventCtaBlockComponent';
 import { GalleryComponent } from './GalleryComponent';
@@ -59,6 +60,15 @@ export function BlockRenderer({ block, onHit, parent, setValue, readOnly }: Bloc
                     parent={parent}
                     setValue={resolveSetter(setValue)}
                     readOnly={readOnly}
+                />
+            );
+        case 'composable':
+            return (
+                <ComposableBlockComponent
+                    key={block.id}
+                    item={block}
+                    onHit={onHit}
+                    parent={parent}
                 />
             );
         default:

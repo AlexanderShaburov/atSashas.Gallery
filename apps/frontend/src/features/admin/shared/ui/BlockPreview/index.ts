@@ -1,5 +1,6 @@
 export type { BlockComponentMap } from './BlockComponentMap';
 export { BlockRenderer } from './BlockRenderer';
+export { ComposableBlockComponent } from './ComposableBlockComponent';
 export { CtaBlockComponent } from './CtaBlockComponent';
 export { EventCtaBlockComponent } from './EventCtaBlockComponent';
 export { GalleryComponent } from './GalleryComponent';

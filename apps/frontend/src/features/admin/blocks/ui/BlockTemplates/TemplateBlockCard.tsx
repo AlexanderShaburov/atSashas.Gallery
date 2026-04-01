@@ -1,5 +1,6 @@
 import { type Block, type BlockHitEvent } from '@/entities/block';
 import {
+    ComposableBlockComponent,
     CtaBlockComponent,
     EventCtaBlockComponent,
     GalleryComponent,
@@ -8,6 +9,7 @@ import {
 import './block.templates.css';
 import {
     TEMPLATE_BLOCKS,
+    createComposableTemplateBlock,
     createCtaTemplateBlock,
     createEventCtaTemplateBlock,
     createGalleryTemplateBlock,
@@ -69,6 +71,22 @@ export function TemplateRaw({ onSelectKind, setValue }: TemplateRawProps) {
                                     onHit={onSelectKind}
                                     parent="grid"
                                     setValue={setValue}
+                                />
+                            </div>
+                        );
+                    case 'composable':
+                        return (
+                            <div
+                                key={`${tpl.kind}-${tpl.layout}-${index}`}
+                                className="blk-tpl"
+                            >
+                                <ComposableBlockComponent
+                                    item={{
+                                        ...createComposableTemplateBlock(tpl.layout),
+                                        isTemplate: true,
+                                    }}
+                                    onHit={onSelectKind}
+                                    parent="grid"
                                 />
                             </div>
                         );
