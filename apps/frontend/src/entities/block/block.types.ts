@@ -1,6 +1,7 @@
 // src/entities/block/block.types.ts
 
 import { EntityLifecycle, ISODate, Localized } from '@/entities/common';
+import type { Renderable } from '@/entities/renderable';
 
 import type { BlockAppearance } from './appearance.types';
 
@@ -12,7 +13,7 @@ export type BlockEditorMode = 'create' | 'edit';
 export const CTA_TYPES = ['stream', 'external', 'event'];
 export type CtaTypes = (typeof CTA_TYPES)[number];
 
-export const BLOCK_KINDS = ['gallery', 'text', 'cta', 'eventCta'] as const;
+export const BLOCK_KINDS = ['gallery', 'text', 'cta', 'eventCta', 'composable'] as const;
 export type BlockKind = (typeof BLOCK_KINDS)[number];
 
 export type ItemPosition =
@@ -119,4 +120,17 @@ export interface EventCtaBlock extends BlockBase {
     buttonLabel?: Localized;
 }
 
-export type Block = GalleryBlock | TextBlock | CtaBlock | EventCtaBlock;
+export interface BlockSlot {
+    position: ItemPosition;
+    content: Renderable;
+    caption?: Localized;
+}
+
+export interface ComposableBlock extends BlockBase {
+    blockKind: 'composable';
+    layout: GalleryLayout;
+    slots: BlockSlot[];
+    appearance?: BlockAppearance;
+}
+
+export type Block = GalleryBlock | TextBlock | CtaBlock | EventCtaBlock | ComposableBlock;

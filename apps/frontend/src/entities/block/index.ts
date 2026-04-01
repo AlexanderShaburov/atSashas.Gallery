@@ -46,6 +46,8 @@ export { BLOCK_KINDS, CTA_TYPES, GALLERY_LAYOUTS, LAYOUT_SCHEME } from './block.
 export type {
     Block,
     BlockKind,
+    BlockSlot,
+    ComposableBlock,
     CtaBlock,
     CtaTarget,
     EventCtaBlock,
@@ -57,6 +59,7 @@ export type {
     ItemPosition,
     TextBlock,
 } from './block.types';
+export { normalizeToComposable } from './normalizeBlock';
 export { Hit } from './blockHit.types';
 export type { BlockHit, BlockHitEvent } from './blockHit.types';
 // export { ImageBlock } from './new-block.types';

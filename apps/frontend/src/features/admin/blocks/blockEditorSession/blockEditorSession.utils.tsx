@@ -114,6 +114,19 @@ export function normalizeBlock(block: Block): Block {
                 eventId: block.eventId,
                 buttonLabel: block.buttonLabel ?? { en: 'Sign up' },
             };
+
+        case 'composable':
+            return {
+                id: block.id,
+                blockKind: 'composable',
+                lifecycle,
+                tags: block.tags ?? [],
+                dateCreated: block.dateCreated,
+                caption: block.caption ?? { en: '' },
+                layout: block.layout,
+                slots: block.slots,
+                appearance: block.appearance,
+            };
     }
 }
 
