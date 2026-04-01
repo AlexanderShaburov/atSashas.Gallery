@@ -1,10 +1,13 @@
 // src/features/public/ui/GalleryStream/GalleryStream.tsx
 
+import { useEffect, useState } from 'react';
+
 import type { Block } from '@/entities/block';
 import type { StreamData } from '@/entities/stream';
+import { loadMediaItemsOnce } from '@/features/public/api/mediaItemsModule';
 import { getBlockCollection, getPublicBlocks } from '@/features/public/api/publicBlocksApi';
+import { loadTextVisualsOnce } from '@/features/public/api/textVisualsModule';
 import GalleryBlock from '@/features/public/ui/GalleryBlock/GalleryBlock';
-import { useEffect, useState } from 'react';
 
 type GalleryStreamProps = {
     stream: StreamData;
@@ -17,13 +20,19 @@ export function GalleryStream({ stream, mode = 'public' }: GalleryStreamProps) {
     useEffect(() => {
         (async () => {
             try {
+                const [blocksResult] = await Promise.all([
+                    mode === 'preview'
+                        ? getBlockCollection()
+                        : getPublicBlocks(stream.streamId),
+                    loadTextVisualsOnce(),
+                    loadMediaItemsOnce(),
+                ]);
                 if (mode === 'preview') {
-                    const collection = await getBlockCollection();
+                    const collection = blocksResult as Awaited<ReturnType<typeof getBlockCollection>>;
                     if (!collection) throw new Error('Collection download failed.');
                     setCollection(collection.blocks);
                 } else {
-                    const blocks = await getPublicBlocks(stream.streamId);
-                    setCollection(blocks);
+                    setCollection(blocksResult as Record<string, Block>);
                 }
             } catch (err) {
                 console.error('[GalleryStream] Failed to load blocks:', err);
