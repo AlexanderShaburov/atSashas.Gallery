@@ -1,0 +1,31 @@
+.cta-renderable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  height: 100%;
+}
+
+.cta-renderable__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.cta-renderable__body {
+  margin: 0;
+  opacity: 0.8;
+}
+
+.cta-renderable__button {
+  padding: 10px 24px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 1rem;
+  cursor: pointer;
+  color: inherit;
+}
