@@ -1,0 +1,580 @@
+/* EventPageEditor.css — Phase 2: section-based layout */
+
+.epe__loading,
+.epe__empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* Header */
+.epe__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  gap: 1rem;
+}
+
+.epe__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.epe__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Buttons */
+.epe__btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-family: inherit;
+  min-height: 36px;
+}
+
+.epe__btn--primary {
+  background: var(--accent);
+  color: var(--on-accent, #fff);
+  border-color: var(--accent);
+}
+
+.epe__btn--primary:hover { background: var(--accent-hover); }
+.epe__btn--primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.epe__btn--danger {
+  background: transparent;
+  color: #c53030;
+  border-color: #c53030;
+}
+.epe__btn--danger:hover { background: #fff5f5; }
+.epe__btn--danger:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.epe__btn--secondary {
+  background: transparent;
+  color: var(--text);
+}
+
+.epe__btn--secondary:hover { background: rgba(0, 0, 0, 0.04); }
+
+.epe__btn--reset {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.epe__btn--reset:hover { color: #c53030; }
+
+/* Badges */
+.epe__badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--border);
+  color: var(--text);
+}
+
+.epe__badge--workshop { background: #dbeafe; color: #1e40af; }
+.epe__badge--pleinAir { background: #d1fae5; color: #065f46; }
+.epe__badge--exhibition { background: #fce7f3; color: #9d174d; }
+.epe__badge--minimal { background: #f3f4f6; color: #374151; }
+.epe__badge--draft { background: #fef3c7; color: #92400e; }
+.epe__badge--scheduled { background: #d1fae5; color: #065f46; }
+.epe__badge--closed { background: #f3f4f6; color: #6b7280; }
+
+/* Select grid */
+.epe__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.epe__card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.epe__card:hover { border-color: var(--accent); }
+
+.epe__card-hero {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--bg, #f0eeeb);
+}
+
+.epe__card-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.epe__card-body {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.epe__card-badges {
+  display: flex;
+  gap: 0.4rem;
+}
+
+/* Cards without hero image get padding on top */
+.epe__card:not(.epe__card--has-hero) .epe__card-body {
+  padding-top: 1rem;
+}
+
+.epe__card-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* Preset picker */
+.epe__preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.epe__preset-card {
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.epe__preset-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.epe__preset-tagline {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ── Toolbar ── */
+.epe__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.epe__toolbar-title {
+  font-weight: 600;
+  font-size: 1rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.epe__toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.epe__dirty-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex-shrink: 0;
+}
+
+/* ── Edit body: sidebar + panel ── */
+.epe__edit-body {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 0;
+  margin-top: 1rem;
+  min-height: 400px;
+}
+
+/* ── Sidebar ── */
+.epe__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-right: 1px solid var(--border);
+  padding-right: 1rem;
+}
+
+.epe__sidebar-tab {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.epe__sidebar-tab:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.epe__sidebar-tab--active {
+  background: var(--accent);
+  color: var(--on-accent, #fff);
+}
+
+.epe__sidebar-tab--active:hover {
+  background: var(--accent-hover);
+}
+
+/* ── Panel ── */
+.epe__panel {
+  padding-left: 1.5rem;
+  max-width: 640px;
+}
+
+/* ── Section titles ── */
+.epe__section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.epe__subsection-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 1.5rem 0 0.5rem;
+}
+
+.epe__subsection-title:first-child {
+  margin-top: 0;
+}
+
+/* ── Fields ── */
+.epe__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.epe__field--readonly {
+  cursor: default;
+}
+
+.epe__label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.epe__field input,
+.epe__field textarea,
+.epe__localized-input input,
+.epe__localized-input textarea {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: var(--card-bg);
+  color: var(--text);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.epe__field input:focus,
+.epe__field textarea:focus,
+.epe__localized-input input:focus,
+.epe__localized-input textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.epe__field textarea,
+.epe__localized-input textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.epe__field-hint {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.epe__field-hint--block {
+  margin: 0 0 0.75rem;
+  font-style: normal;
+}
+
+.epe__readonly-value {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.epe__readonly-value--mono {
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.epe__money-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.epe__money-input input {
+  flex: 1;
+}
+
+.epe__currency {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* ── Override input ── */
+.epe__override-input {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.epe__override-input input {
+  flex: 1;
+}
+
+.epe__input--default {
+  font-style: italic;
+  color: var(--muted);
+}
+
+.epe__default-indicator {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* ── Placeholder for deferred sections ── */
+.epe__placeholder-note {
+  color: var(--muted);
+  font-style: italic;
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+}
+
+.epe__placeholder-list {
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding-left: 1.25rem;
+}
+
+/* ── Media picker fields ── */
+
+.epe__media-preview {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.epe__media-thumb {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.epe__media-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.epe__media-id {
+  font-size: 0.8rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.epe__media-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ── Media list (image arrays) ── */
+
+.epe__media-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.epe__media-list-item {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.epe__media-list-item .epe__media-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+}
+
+.epe__media-list-item .epe__btn--reset {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-size: 0.7rem;
+  line-height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+}
+
+/* ── Featured works list ── */
+
+.epe__works-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.epe__work-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px;
+  border: 1px solid var(--border, #dcdad6);
+  border-radius: 8px;
+}
+
+.epe__work-image {
+  flex-shrink: 0;
+}
+
+.epe__work-image .epe__media-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+}
+
+.epe__work-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.epe__work-input {
+  padding: 4px 8px;
+  border: 1px solid var(--border, #dcdad6);
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+/* ── Preview ── */
+.epe__preview-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--card-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.epe__preview-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.epe__preview-frame {
+  min-height: 400px;
+}
+
+/* ── Responsive: sidebar → horizontal tabs ── */
+@media (max-width: 819px) {
+  .epe__edit-body {
+    grid-template-columns: 1fr;
+  }
+
+  .epe__sidebar {
+    flex-direction: row;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding-right: 0;
+    padding-bottom: 0.5rem;
+    overflow-x: auto;
+    gap: 4px;
+  }
+
+  .epe__sidebar-tab {
+    white-space: nowrap;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .epe__panel {
+    padding-left: 0;
+    padding-top: 1rem;
+  }
+}

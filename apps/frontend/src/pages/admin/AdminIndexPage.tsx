@@ -34,6 +34,18 @@ const tiles: Tile[] = [
         description: 'Compose a stream from saved blocks.',
     },
     {
+        to: '/admin/event-pages',
+        title: 'Events',
+        emoji: '📅',
+        description: 'Create and manage event pages for workshops, exhibitions, and more.',
+    },
+    {
+        to: '/admin/media',
+        title: 'Media',
+        emoji: '🖼️',
+        description: 'Manage reusable media assets.',
+    },
+    {
         to: '/admin/public-stream',
         title: 'Public Stream',
         emoji: '🌐',

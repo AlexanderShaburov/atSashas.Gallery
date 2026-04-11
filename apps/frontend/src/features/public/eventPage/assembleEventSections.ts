@@ -1,0 +1,141 @@
+// features/public/eventPage/assembleEventSections.ts
+// Core assembly logic: determines which sections render for a given event.
+// Pure function — no React, no DOM, no side effects.
+
+import type { EventRenderContext } from '@/entities/event/eventRenderContext';
+import type { ResolvedEventPageData } from '@/entities/event/eventPage.types';
+
+import {
+  PRESET_SECTION_MAP,
+  QUICK_FACTS_SOURCES,
+  SECTION_CONTRACTS,
+} from './contracts';
+import type { PresetSectionSlot, SectionKind } from './contracts';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type RenderMode = 'production' | 'development' | 'editorPreview';
+
+export interface AssemblyOptions {
+  mode?: RenderMode;
+}
+
+export type SectionStatus =
+  | 'rendered'
+  | 'skipped-optional'
+  | 'skipped-error'
+  | 'error-placeholder'
+  | 'editor-placeholder';
+
+export interface SectionOutput {
+  kind: SectionKind;
+  status: SectionStatus;
+  importance: 'required' | 'strong' | 'optional';
+}
+
+// ---------------------------------------------------------------------------
+// Field presence check
+// ---------------------------------------------------------------------------
+
+function hasField(event: Record<string, unknown>, field: string): boolean {
+  const value = event[field];
+  if (value === undefined || value === null) return false;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'object') return Object.keys(value as object).length > 0;
+  if (typeof value === 'string') return value.length > 0;
+  return true;
+}
+
+function getSourceFields(
+  slot: PresetSectionSlot,
+  preset: string,
+): string[] {
+  // QuickFacts: use preset-specific source fields
+  if (slot.section === 'quickFacts') {
+    if (preset === 'workshop' || preset === 'pleinAir') {
+      return QUICK_FACTS_SOURCES[preset];
+    }
+    return [];
+  }
+
+  // Source field override (e.g. Minimal description → extendedDescription)
+  if (slot.sourceFieldOverride) {
+    return [slot.sourceFieldOverride];
+  }
+
+  return SECTION_CONTRACTS[slot.section].sourceFields;
+}
+
+// ---------------------------------------------------------------------------
+// Assembly
+// ---------------------------------------------------------------------------
+
+export function assembleEventSections(
+  event: ResolvedEventPageData,
+  _context: EventRenderContext,
+  options?: AssemblyOptions,
+): SectionOutput[] {
+  const mode = options?.mode ?? 'production';
+  const sections = PRESET_SECTION_MAP[event.preset];
+  if (!sections) return [];
+
+  const eventRecord = event as unknown as Record<string, unknown>;
+  const results: SectionOutput[] = [];
+
+  for (const slot of sections) {
+    const sourceFields = getSourceFields(slot, event.preset);
+    const allPresent = sourceFields.every((f) => hasField(eventRecord, f));
+    const anyPresent = sourceFields.some((f) => hasField(eventRecord, f));
+
+    if (allPresent) {
+      results.push({ kind: slot.section, status: 'rendered', importance: slot.importance });
+      continue;
+    }
+
+    // Data is partially or fully missing.
+    if (slot.importance === 'required') {
+      // In editorPreview: render with partial data so the author sees live feedback.
+      // Section components handle empty/undefined fields gracefully.
+      if (mode === 'editorPreview') {
+        results.push({
+          kind: slot.section,
+          status: anyPresent ? 'rendered' : 'editor-placeholder',
+          importance: slot.importance,
+        });
+        continue;
+      }
+
+      const missing = sourceFields.filter((f) => !hasField(eventRecord, f));
+      console.error(
+        `[EventPage] Section "${slot.section}" missing required fields: ${missing.join(', ')} (event ${event.id})`,
+      );
+
+      if (mode === 'development') {
+        results.push({
+          kind: slot.section,
+          status: 'error-placeholder',
+          importance: slot.importance,
+        });
+      }
+      // production: skip silently (error already logged)
+      continue;
+    }
+
+    // strong or optional: skip entirely
+    results.push({ kind: slot.section, status: 'skipped-optional', importance: slot.importance });
+  }
+
+  return results;
+}
+
+/** Returns only the sections that should be rendered (excludes skipped). */
+export function getRenderedSections(outputs: SectionOutput[]): SectionOutput[] {
+  return outputs.filter(
+    (s) =>
+      s.status === 'rendered' ||
+      s.status === 'error-placeholder' ||
+      s.status === 'editor-placeholder',
+  );
+}

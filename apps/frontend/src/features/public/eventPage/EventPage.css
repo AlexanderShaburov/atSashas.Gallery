@@ -1,0 +1,864 @@
+/* ==========================================================================
+   EventPage.css — Stage 5C layout and visual integration
+
+   Layout categories:
+     full-bleed  — edge-to-edge (heroes, sticky CTA)
+     wide        — media-optimized width (galleries, featured works)
+     content     — standard reading width (quick facts, visit CTA, hero card)
+     narrow      — tight reading column (description, host note, bridge)
+     compact     — centered CTA block (enrollment CTA)
+
+   Spacing tokens:
+     --ep-section-gap    — default vertical gap between sections
+     --ep-section-gap-sm — reduced gap for dense transitions
+     --ep-section-gap-lg — expanded gap before/after major breaks
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   0. Page-level tokens
+   -------------------------------------------------------------------------- */
+
+.ep-page {
+  --ep-content-max: 720px;
+  --ep-narrow-max: 600px;
+  --ep-wide-max: 960px;
+  --ep-compact-max: 540px;
+  --ep-page-gutter: clamp(20px, 5vw, 48px);
+
+  --ep-section-gap: clamp(48px, 8vw, 80px);
+  --ep-section-gap-sm: clamp(24px, 4vw, 40px);
+  --ep-section-gap-lg: clamp(64px, 10vw, 112px);
+
+  --ep-heading-font: 'Cormorant Garamond', 'Georgia', serif;
+  --ep-body-font: 'Inter', system-ui, sans-serif;
+  --ep-text-color: var(--text, #1e1e1c);
+  --ep-muted-color: var(--muted, #555);
+  --ep-bg: var(--bg, #f8f7f5);
+  --ep-card-bg: var(--card-bg, #fff);
+  --ep-accent: var(--accent, #3a5f8a);
+  --ep-accent-hover: var(--accent-hover, #2f4f6d);
+  --ep-border: var(--border, #dcdad6);
+
+  font-family: var(--ep-body-font);
+  color: var(--ep-text-color);
+  background: var(--ep-bg);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   1. Layout category widths
+   -------------------------------------------------------------------------- */
+
+.ep-page__section {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ep-layout--full-bleed {
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.ep-layout--wide {
+  max-width: var(--ep-wide-max);
+  padding-left: var(--ep-page-gutter);
+  padding-right: var(--ep-page-gutter);
+}
+
+.ep-layout--content {
+  max-width: var(--ep-content-max);
+  padding-left: var(--ep-page-gutter);
+  padding-right: var(--ep-page-gutter);
+}
+
+.ep-layout--narrow {
+  max-width: var(--ep-narrow-max);
+  padding-left: var(--ep-page-gutter);
+  padding-right: var(--ep-page-gutter);
+}
+
+.ep-layout--compact {
+  max-width: var(--ep-compact-max);
+  padding-left: var(--ep-page-gutter);
+  padding-right: var(--ep-page-gutter);
+}
+
+/* --------------------------------------------------------------------------
+   2. Vertical rhythm — section spacing
+   -------------------------------------------------------------------------- */
+
+/* Default gap between all sections */
+.ep-page__section + .ep-page__section {
+  margin-top: var(--ep-section-gap);
+}
+
+/* Reduced gap: hero → next section (hero provides its own bottom space) */
+.ep-page__section[data-section-kind="heroStandard"] + .ep-page__section,
+.ep-page__section[data-section-kind="heroCinematic"] + .ep-page__section,
+.ep-page__section[data-section-kind="heroEditorial"] + .ep-page__section,
+.ep-page__section[data-section-kind="heroCard"] + .ep-page__section {
+  margin-top: var(--ep-section-gap-sm);
+}
+
+/* Reduced gap: bridge is a tight connector */
+.ep-page__section[data-section-kind="bridge"] + .ep-page__section,
+.ep-page__section + .ep-page__section[data-section-kind="bridge"] {
+  margin-top: var(--ep-section-gap-sm);
+}
+
+/* Expanded gap before CTA block — visual pause before conversion */
+.ep-page__section + .ep-page__section[data-section-kind="ctaBlock"],
+.ep-page__section + .ep-page__section[data-section-kind="visitCta"] {
+  margin-top: var(--ep-section-gap-lg);
+}
+
+/* No top margin on first section */
+.ep-page__section:first-child {
+  margin-top: 0;
+}
+
+/* Bottom padding on page for sticky CTA clearance */
+.ep-page:has(.ep-page__sticky) {
+  padding-bottom: 80px;
+}
+
+/* --------------------------------------------------------------------------
+   3. Hero sections
+   -------------------------------------------------------------------------- */
+
+/* Shared hero structure */
+.ep-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---- Standard hero (Workshop) ---- */
+.ep-hero--standard {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.ep-hero--standard .ep-hero__image {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.ep-hero--standard .ep-hero__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ep-hero--standard .ep-hero__content {
+  padding: clamp(24px, 5vw, 48px) var(--ep-page-gutter);
+  text-align: center;
+}
+
+.ep-hero__title {
+  font-family: var(--ep-heading-font);
+  font-size: clamp(1.75rem, 5vw, 3rem);
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0 0 0.4em;
+  letter-spacing: -0.01em;
+}
+
+.ep-hero__subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--ep-muted-color);
+  margin: 0 0 1em;
+  line-height: 1.5;
+}
+
+.ep-hero__eyebrow {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ep-accent);
+  margin-bottom: 0.75em;
+}
+
+.ep-hero__meta {
+  display: flex;
+  gap: 1.5em;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: var(--ep-muted-color);
+}
+
+.ep-hero__date,
+.ep-hero__price {
+  white-space: nowrap;
+}
+
+/* ---- Cinematic hero (Plein Air) ---- */
+.ep-hero--cinematic {
+  min-height: clamp(400px, 60vh, 700px);
+  display: flex;
+  align-items: flex-end;
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+}
+
+.ep-hero--cinematic::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.3) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.ep-hero--cinematic .ep-hero__content {
+  position: relative;
+  z-index: 1;
+  padding: clamp(32px, 6vw, 64px) var(--ep-page-gutter);
+  max-width: var(--ep-content-max);
+}
+
+.ep-hero--cinematic .ep-hero__title {
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.ep-hero--cinematic .ep-hero__subtitle {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ep-hero--cinematic .ep-hero__eyebrow {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ---- Editorial hero (Exhibition) ---- */
+.ep-hero--editorial {
+  min-height: clamp(360px, 55vh, 600px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+}
+
+.ep-hero--editorial::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.ep-hero--editorial .ep-hero__content {
+  position: relative;
+  z-index: 1;
+  padding: clamp(32px, 6vw, 64px) var(--ep-page-gutter);
+  max-width: var(--ep-content-max);
+}
+
+.ep-hero--editorial .ep-hero__title {
+  color: #fff;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+}
+
+.ep-hero--editorial .ep-hero__date {
+  display: block;
+  margin-top: 0.75em;
+  font-size: clamp(0.875rem, 2vw, 1.1rem);
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.04em;
+}
+
+.ep-hero--editorial .ep-hero__eyebrow {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ---- Card hero (Minimal) ---- */
+.ep-hero--card {
+  background: var(--ep-card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+}
+
+.ep-hero--card .ep-hero__image {
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+}
+
+.ep-hero--card .ep-hero__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ep-hero--card .ep-hero__content {
+  padding: clamp(20px, 4vw, 36px);
+}
+
+.ep-hero--card .ep-hero__title {
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+}
+
+.ep-hero--card .ep-hero__description {
+  color: var(--ep-muted-color);
+  margin: 0 0 1.25em;
+  line-height: 1.6;
+}
+
+.ep-hero--card .ep-hero__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75em 1.5em;
+  margin: 0 0 1.5em;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.ep-hero--card .ep-hero__facts > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.ep-hero--card .ep-hero__facts dt {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ep-muted-color);
+  margin-bottom: 0.2em;
+}
+
+.ep-hero--card .ep-hero__facts dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   4. Bridge section
+   -------------------------------------------------------------------------- */
+
+.ep-bridge {
+  text-align: center;
+  padding: clamp(16px, 3vw, 32px) 0;
+}
+
+.ep-bridge__text {
+  font-family: var(--ep-heading-font);
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--ep-muted-color);
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   5. Quick Facts section
+   -------------------------------------------------------------------------- */
+
+.ep-quick-facts {
+  padding: clamp(20px, 4vw, 36px) 0;
+  border-top: 1px solid var(--ep-border);
+  border-bottom: 1px solid var(--ep-border);
+}
+
+.ep-quick-facts__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1em 2em;
+  margin: 0;
+  padding: 0;
+}
+
+.ep-quick-facts__item {
+  display: flex;
+  flex-direction: column;
+}
+
+.ep-quick-facts__item dt {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ep-muted-color);
+  margin-bottom: 0.3em;
+}
+
+.ep-quick-facts__item dd {
+  margin: 0;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* --------------------------------------------------------------------------
+   6. Description section
+   -------------------------------------------------------------------------- */
+
+.ep-description {
+  padding: 0;
+}
+
+.ep-description__label {
+  font-family: var(--ep-heading-font);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 600;
+  margin: 0 0 0.75em;
+  line-height: 1.3;
+}
+
+.ep-description__thesis {
+  font-size: clamp(1.05rem, 2.5vw, 1.2rem);
+  font-weight: 500;
+  line-height: 1.6;
+  margin: 0 0 1.5em;
+}
+
+.ep-description__body {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ep-text-color);
+  white-space: pre-line;
+}
+
+/* --------------------------------------------------------------------------
+   7. Host Note section
+   -------------------------------------------------------------------------- */
+
+.ep-host-note {
+  padding: clamp(24px, 4vw, 40px) 0;
+  border-left: 3px solid var(--ep-accent);
+  padding-left: clamp(16px, 3vw, 28px);
+}
+
+.ep-host-note__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ep-muted-color);
+  margin: 0 0 0.75em;
+}
+
+.ep-host-note__quote {
+  font-family: var(--ep-heading-font);
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-style: italic;
+  line-height: 1.6;
+  margin: 0 0 0.75em;
+  padding: 0;
+  quotes: none;
+}
+
+.ep-host-note__attribution {
+  display: block;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--ep-muted-color);
+}
+
+/* --------------------------------------------------------------------------
+   8. Gallery sections (experience + results)
+   -------------------------------------------------------------------------- */
+
+.ep-gallery {
+  padding: 0;
+}
+
+.ep-gallery__title {
+  font-family: var(--ep-heading-font);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 600;
+  margin: 0 0 clamp(16px, 3vw, 28px);
+  line-height: 1.3;
+  text-align: center;
+}
+
+.ep-gallery__grid {
+  display: grid;
+  gap: clamp(8px, 1.5vw, 16px);
+}
+
+/* Layout variants */
+.ep-gallery__grid[data-layout="exp-1"] { grid-template-columns: 1fr; }
+.ep-gallery__grid[data-layout="exp-2"] { grid-template-columns: 1fr 1fr; }
+.ep-gallery__grid[data-layout="exp-3"] { grid-template-columns: 1fr 1fr 1fr; }
+.ep-gallery__grid[data-layout="exp-4"] { grid-template-columns: 1fr 1fr; }
+.ep-gallery__grid[data-layout="exp-pleinair"] { grid-template-columns: 2fr 1fr; }
+.ep-gallery__grid[data-layout="res-2"] { grid-template-columns: 1fr 1fr; }
+.ep-gallery__grid[data-layout="res-3"] { grid-template-columns: 1fr 1fr 1fr; }
+.ep-gallery__grid[data-layout="default"] { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+.ep-gallery__item {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.ep-gallery__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  aspect-ratio: 4 / 3;
+}
+
+/* exp-pleinair: first image spans full height */
+.ep-gallery__grid[data-layout="exp-pleinair"] .ep-gallery__item:first-child {
+  grid-row: 1 / -1;
+}
+
+/* exp-4: 2x2 grid */
+.ep-gallery__grid[data-layout="exp-4"] .ep-gallery__item img {
+  aspect-ratio: 3 / 2;
+}
+
+/* --------------------------------------------------------------------------
+   9. Featured Works section (Exhibition)
+   -------------------------------------------------------------------------- */
+
+.ep-featured-works {
+  padding: 0;
+}
+
+.ep-featured-works__title {
+  font-family: var(--ep-heading-font);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 600;
+  margin: 0 0 clamp(16px, 3vw, 28px);
+  line-height: 1.3;
+  text-align: center;
+}
+
+.ep-featured-works__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: clamp(12px, 2vw, 24px);
+}
+
+.ep-featured-works__grid[data-layout="exhibition"] {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.ep-featured-works__item {
+  margin: 0;
+  text-align: center;
+}
+
+.ep-featured-works__item img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+  border-radius: 4px;
+}
+
+.ep-featured-works__item figcaption {
+  padding: 0.5em 0;
+  font-size: 0.85rem;
+}
+
+.ep-featured-works__work-title {
+  display: block;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.ep-featured-works__medium {
+  display: block;
+  color: var(--ep-muted-color);
+  font-size: 0.8rem;
+  margin-top: 0.15em;
+}
+
+/* --------------------------------------------------------------------------
+   10. CTA Block section (Workshop / Plein Air)
+   -------------------------------------------------------------------------- */
+
+.ep-cta {
+  text-align: center;
+  padding: clamp(32px, 5vw, 56px) 0;
+}
+
+.ep-cta__bridge {
+  font-family: var(--ep-heading-font);
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--ep-muted-color);
+  margin: 0 0 1em;
+}
+
+.ep-cta__meta {
+  font-size: 0.85rem;
+  color: var(--ep-muted-color);
+  margin: 0 0 0.75em;
+  letter-spacing: 0.02em;
+}
+
+.ep-cta__scarcity {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #c53030;
+  margin: 0 0 1em;
+}
+
+.ep-cta__button {
+  display: inline-block;
+  background: var(--ep-accent);
+  color: var(--card-bg, #fff);
+  border: none;
+  padding: 0.85em 2.5em;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 48px;
+  letter-spacing: 0.02em;
+  transition: background-color 0.2s ease;
+}
+
+.ep-cta__button:hover {
+  background: var(--ep-accent-hover);
+}
+
+.ep-cta__button--secondary {
+  background: transparent;
+  color: var(--ep-accent);
+  border: 1px solid var(--ep-border);
+  margin-left: 0.75em;
+}
+
+.ep-cta__button--secondary:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.ep-cta__cancellation {
+  font-size: 0.75rem;
+  color: var(--ep-muted-color);
+  margin: 1em 0 0;
+}
+
+/* --------------------------------------------------------------------------
+   11. Visit CTA section (Exhibition)
+   -------------------------------------------------------------------------- */
+
+.ep-visit-cta {
+  padding: clamp(24px, 4vw, 40px) 0;
+  text-align: center;
+}
+
+.ep-visit-cta__details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1em 2em;
+  margin: 0 0 1.5em;
+  padding: 0;
+  text-align: center;
+}
+
+.ep-visit-cta__details > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.ep-visit-cta__details dt {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ep-muted-color);
+  margin-bottom: 0.3em;
+}
+
+.ep-visit-cta__details dd {
+  margin: 0;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.ep-visit-cta__opening {
+  font-size: 0.85rem;
+  color: var(--ep-muted-color);
+  margin: 0 0 1.5em;
+}
+
+.ep-visit-cta .ep-cta__button {
+  margin-bottom: 0.5em;
+}
+
+/* --------------------------------------------------------------------------
+   12. Sticky CTA (Plein Air)
+   -------------------------------------------------------------------------- */
+
+.ep-page__sticky {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.ep-sticky-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  max-width: var(--ep-wide-max);
+  margin: 0 auto;
+  padding: 12px var(--ep-page-gutter);
+  background: var(--ep-card-bg);
+  border-top: 1px solid var(--ep-border);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ep-sticky-cta__info {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  min-width: 0;
+}
+
+.ep-sticky-cta__price {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.ep-sticky-cta__date {
+  color: var(--ep-muted-color);
+}
+
+.ep-sticky-cta__group {
+  color: var(--ep-muted-color);
+}
+
+.ep-sticky-cta__scarcity {
+  font-weight: 600;
+  color: #c53030;
+  font-size: 0.8rem;
+}
+
+.ep-sticky-cta .ep-cta__button {
+  flex-shrink: 0;
+  padding: 0.65em 1.5em;
+  font-size: 0.9rem;
+  min-height: 40px;
+}
+
+/* --------------------------------------------------------------------------
+   13. Responsive adjustments
+   -------------------------------------------------------------------------- */
+
+/* ---- Small screens (< 600px) ---- */
+@media (max-width: 599px) {
+  /* Galleries collapse to single column */
+  .ep-gallery__grid[data-layout="exp-2"],
+  .ep-gallery__grid[data-layout="exp-3"],
+  .ep-gallery__grid[data-layout="exp-pleinair"],
+  .ep-gallery__grid[data-layout="res-2"],
+  .ep-gallery__grid[data-layout="res-3"] {
+    grid-template-columns: 1fr;
+  }
+
+  .ep-gallery__grid[data-layout="exp-pleinair"] .ep-gallery__item:first-child {
+    grid-row: auto;
+  }
+
+  /* Featured works: 2-column on mobile */
+  .ep-featured-works__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Quick facts: stack to 2-column */
+  .ep-quick-facts__list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75em 1em;
+  }
+
+  /* Visit CTA details: 2-column stack */
+  .ep-visit-cta__details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Sticky CTA: stack vertically */
+  .ep-sticky-cta {
+    flex-direction: column;
+    text-align: center;
+    padding: 12px 16px;
+  }
+
+  .ep-sticky-cta__info {
+    justify-content: center;
+  }
+
+  .ep-sticky-cta .ep-cta__button {
+    width: 100%;
+  }
+
+  /* Hero card facts: single column */
+  .ep-hero--card .ep-hero__facts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---- Medium screens (600px–819px) ---- */
+@media (min-width: 600px) and (max-width: 819px) {
+  /* Featured works: 3-column */
+  .ep-featured-works__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ---- Large screens (820px+) ---- */
+@media (min-width: 820px) {
+  /* Standard hero: side-by-side layout */
+  .ep-hero--standard {
+    grid-template-columns: 1fr 1fr;
+    min-height: 400px;
+  }
+
+  .ep-hero--standard .ep-hero__image {
+    aspect-ratio: auto;
+  }
+
+  .ep-hero--standard .ep-hero__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+  }
+
+  .ep-hero--standard .ep-hero__meta {
+    justify-content: flex-start;
+  }
+
+  /* Tighter section gap on large screens — content is wider, needs less vertical air */
+  .ep-page {
+    --ep-section-gap: 72px;
+    --ep-section-gap-sm: 36px;
+    --ep-section-gap-lg: 96px;
+  }
+}
+
+/* ---- Extra large screens (1200px+) ---- */
+@media (min-width: 1200px) {
+  /* Cap gallery item size for very wide screens */
+  .ep-gallery__item img {
+    aspect-ratio: 3 / 2;
+  }
+}

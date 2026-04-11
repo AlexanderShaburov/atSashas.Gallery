@@ -5,6 +5,8 @@ import PublicLayout from '@/app/layouts/PublicLayout';
 import { RequireAuth } from '@/app/guards/RequireAuth';
 import { BlockEditorSessionProvider } from '@/features/admin/blocks/blockEditorSession/BlockEditorSession.context';
 import { EventEditorSessionProvider } from '@/features/admin/eventEditor/eventEditorSession/EventEditorSession.context';
+import { EventPageEditorSessionProvider } from '@/features/admin/eventPageEditor/session/EventPageEditorSession.context';
+import { MediaEditorSessionProvider } from '@/features/admin/mediaEditor/mediaEditorSession/MediaEditorSession.context';
 import { TextVisualEditorSessionProvider } from '@/features/admin/textVisualEditor/textVisualEditorSession/TextVisualEditorSession.context';
 import { CatalogEditorSessionProvider } from '@/features/admin/catalogEditor/catalogEditorSession/CatalogEditorSession.context';
 import { EditorWorkspaceProvider } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
@@ -24,8 +26,12 @@ const CatalogEditorPage = lazy(() => import('@/pages/admin/catalogEditorPage/Cat
 const BlocksPage = lazy(() => import('@/pages/admin/BlocksPage/BlocksPage'));
 const StreamsPage = lazy(() => import('@/pages/admin/StreamPage/StreamsPage'));
 const EventsPage = lazy(() => import('@/pages/admin/EventsPage'));
+const EventPagesPage = lazy(() => import('@/pages/admin/EventPagesPage'));
+const MediaPage = lazy(() => import('@/pages/admin/MediaPage'));
 const TextVisualsPage = lazy(() => import('@/pages/admin/TextVisualsPage'));
 const PublicStreamPage = lazy(() => import('@/pages/admin/PublicStreamPage'));
+const EventPage = lazy(() => import('@/pages/public/EventPage'));
+const PublicEventsPage = lazy(() => import('@/pages/public/EventsPage'));
 const EnrollmentSuccessPage = lazy(() => import('@/pages/public/EnrollmentSuccessPage'));
 const EnrollmentCancelPage = lazy(() => import('@/pages/public/EnrollmentCancelPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
@@ -80,6 +86,8 @@ export const router = createBrowserRouter([
             { index: true, element: <HomePage /> },
             { path: 'gallery/:slug', element: <GalleryPage /> },
             { path: 'about', element: <AboutPage /> },
+            { path: 'events', element: <PublicEventsPage /> },
+            { path: 'event/:id', element: <EventPage /> },
             { path: 'enrollment/success', element: <EnrollmentSuccessPage /> },
             { path: 'enrollment/cancel', element: <EnrollmentCancelPage /> },
         ],
@@ -135,11 +143,27 @@ export const router = createBrowserRouter([
                 ),
             },
             {
+                path: 'event-pages',
+                element: (
+                    <EventPageEditorSessionProvider>
+                        <EventPagesPage />
+                    </EventPageEditorSessionProvider>
+                ),
+            },
+            {
                 path: 'text-visuals',
                 element: (
                     <TextVisualEditorSessionProvider>
                         <TextVisualsPage />
                     </TextVisualEditorSessionProvider>
+                ),
+            },
+            {
+                path: 'media',
+                element: (
+                    <MediaEditorSessionProvider>
+                        <MediaPage />
+                    </MediaEditorSessionProvider>
                 ),
             },
             {

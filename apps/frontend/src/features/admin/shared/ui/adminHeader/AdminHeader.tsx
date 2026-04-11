@@ -63,12 +63,20 @@ export function AdminHeader() {
                         Streams
                     </GuardedNavLink>
                     <GuardedNavLink
-                        to="/admin/events"
+                        to="/admin/event-pages"
                         className={({ isActive }) =>
                             'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
                         }
                     >
                         Events
+                    </GuardedNavLink>
+                    <GuardedNavLink
+                        to="/admin/media"
+                        className={({ isActive }) =>
+                            'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
+                        }
+                    >
+                        Media
                     </GuardedNavLink>
                     <GuardedNavLink
                         to="/admin/public-stream"

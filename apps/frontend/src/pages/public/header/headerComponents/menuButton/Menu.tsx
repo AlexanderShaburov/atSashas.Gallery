@@ -113,6 +113,14 @@ export default function Menu() {
                                 About
                             </Link>
 
+                            <Link
+                                className={`menu-link${isActive('/events') ? ' is-active' : ''}`}
+                                to="/events"
+                                onClick={close}
+                            >
+                                Events
+                            </Link>
+
                             {streams.map((s) => (
                                 <Link
                                     key={s.streamId}

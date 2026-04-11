@@ -158,11 +158,17 @@ export default function UploadPage() {
 
         setFiles((prev) => [...prev, ...dropped]);
     }
-    const tools: ToolKey[] = isJourney ? ['delete', 'apply'] : ['delete'];
+    const handleExit = () => {
+        if (isJourney) {
+            returnHome('hopper', { ok: false, reason: 'cancel' });
+        }
+    };
+
+    const tools: ToolKey[] = isJourney ? ['exit', 'delete', 'apply'] : ['delete'];
     const ctx: ToolbarCtx = {
         canSave: true,
         isSaving: false,
-        exit: () => {},
+        exit: handleExit,
         onDelete: handleDelete,
         onApply: handleApply,
     };

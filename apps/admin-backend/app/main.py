@@ -11,6 +11,7 @@ from app.routers.block import blocks, public_blocks
 from app.routers.streams import streams
 from app.routers.enrollments import enrollments
 from app.routers.events import events
+from app.routers.event_pages import event_pages
 from app.routers.public_stream import public_stream
 from app.routers.home_doc import home_doc
 from app.routers.text_visuals import text_visuals
@@ -88,3 +89,5 @@ app.include_router(text_visuals.public_router)  # Public text visuals endpoint
 app.include_router(text_visuals.admin_router)  # Admin text visuals endpoints
 app.include_router(media_items.public_router)  # Public media items endpoint
 app.include_router(media_items.admin_router)  # Admin media items endpoints
+app.include_router(event_pages.public_router)  # Public event pages endpoint
+app.include_router(event_pages.admin_router)  # Admin event pages endpoints

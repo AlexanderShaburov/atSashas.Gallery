@@ -18,8 +18,10 @@ const ROUTS: Record<EditorKind, string> = {
     catalog: '/admin/catalog',
     hopper: '/admin/hopper',
     events: '/admin/events',
+    eventPages: '/admin/event-pages',
     home: '/admin/public-stream',
     textVisuals: '/admin/text-visuals',
+    mediaItems: '/admin/media',
 };
 
 function currentLeg(ticket: JourneyTicket): ToAddress | ReturnAddress {

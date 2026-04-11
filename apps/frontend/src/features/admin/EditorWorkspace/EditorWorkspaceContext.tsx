@@ -8,6 +8,7 @@
 
 import { refreshBlocksCollection } from '@/features/admin/blocks/api/blocksApi';
 import { refreshCatalog } from '@/features/admin/catalogEditor/api';
+import { refreshMediaItems } from '@/features/admin/mediaEditor/api/mediaItemsAdminApi';
 import { refreshStreamsIndex } from '@/features/admin/streams/api/streamsApi';
 
 import { type ReactNode, useEffect } from 'react';
@@ -25,7 +26,7 @@ export function AdminDataPreloader({ children }: Props) {
         let cancelled = false;
 
         const load = async () => {
-            await Promise.all([refreshCatalog(), refreshBlocksCollection(), refreshStreamsIndex()]);
+            await Promise.all([refreshCatalog(), refreshBlocksCollection(), refreshStreamsIndex(), refreshMediaItems()]);
             if (cancelled) return;
             console.log('[AdminDataPreloader]: All domain stores populated');
         };

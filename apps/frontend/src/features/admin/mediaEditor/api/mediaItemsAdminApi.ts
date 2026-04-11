@@ -1,4 +1,4 @@
-// features/admin/mediaItemEditor/api/mediaItemsAdminApi.ts
+// features/admin/mediaEditor/api/mediaItemsAdminApi.ts
 
 import type { MediaItemCatalog, MediaItemData } from '@/entities/mediaItem';
 import { mediaItemsStore } from '@/shared/state/domain';
