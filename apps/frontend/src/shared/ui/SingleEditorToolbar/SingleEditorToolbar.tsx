@@ -6,9 +6,9 @@ import { TOOL_REGISTRY } from './single-editor-toolbar.constants';
 import { ToolbarCtx, ToolKey } from './single-editor-toolbar.types';
 
 const TOOL_GROUPS: { left: ToolKey[]; center: ToolKey[]; right: ToolKey[] } = {
-    left: ['delete', 'add', 'addEvent', 'customize', 'edit'],
+    left: ['delete', 'add', 'customize', 'edit'],
     center: ['tags'],
-    right: ['publish', 'unpublish', 'save', 'apply', 'exit'],
+    right: ['save', 'apply', 'exit'],
 };
 
 type SingleEditorToolbarProps = {

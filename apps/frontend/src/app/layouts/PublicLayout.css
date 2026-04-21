@@ -1,5 +1,5 @@
 .main-layout {
-  padding-top: var(--header-h);
+  padding-top: calc(var(--header-h) + 24px);
   padding-inline: var(--gutter);
   max-width: calc(var(--page-max) + 2 * var(--gutter));
   margin-inline: auto;

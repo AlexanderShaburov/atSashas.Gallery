@@ -46,8 +46,8 @@ export const streamsApi = {
     checkDependencies: (streamId: string) =>
         http<{
             streamId: string;
-            isPublished: boolean;
-            dependencies: { publicStream: boolean };
+            isOnHomepage: boolean;
+            dependencies: { homepage: boolean };
         }>(`/admin/streams/${encodeURIComponent(streamId)}/dependencies`),
 
     remove: (streamId: string, hard = false) => {

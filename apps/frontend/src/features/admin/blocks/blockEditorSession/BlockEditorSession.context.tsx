@@ -82,6 +82,9 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     const [appearanceDraft, setAppearanceDraft] = useState<BlockAppearance | undefined>(undefined);
     //*******************************************************/
 
+    // Guard against duplicate child journey dispatches (e.g., double-click on art slot)
+    const dispatchPendingRef = useRef(false);
+
     // React Strict Mode protection for bootstrap
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const bootstrapRef = useRef<{ processed: boolean; ticket: any }>({
@@ -366,12 +369,8 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             } else {
                 // RETURN: Returning from child editor (Catalog) with loot
                 console.log(`[INIT SESSION]: RETURN ticket found (has loot)`);
-                // Defensive: ensure journey session is cleared after arrival processed the return.
-                // arrival('block') should have already cleared it, but guard against edge cases.
-                if (journeySessionStore.hasActiveSession()) {
-                    console.warn(`[INIT SESSION]: Journey session still active after arrival — clearing`);
-                    journeySessionStore.clear();
-                }
+                // Note: arrival('block') pops the completed child leg (Block → Catalog).
+                // Parent legs (Stream → Block) remain active — do NOT clear the session here.
                 // 0) Resolve bootstrap dataset (draft+snapshot) saved by the outbound editor
                 const tempId = ticket.returnTo.objectId;
                 console.log(`[INIT SESSION]: target object detected as ${tempId}`);
@@ -674,17 +673,16 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
 
     const finalizeAfterSave = useCallback(
         (savedId: string) => {
-            console.log(`[finalizeAfterSave]: called`);
-            // If in a journey, return home with the saved block ID
-            if (isJourney) {
-                console.log(
-                    `[finalizeAfterSave]: in journey, returning home with blockId: ${savedId}`,
-                );
+            const inJourney =
+                journeySessionStore.hasActiveSession() &&
+                journeySessionStore.isEditorInJourney('block');
+            if (inJourney) {
                 returnHome('block', { ok: true, id: savedId });
+                return;
             }
             resetSession();
         },
-        [isJourney, returnHome, resetSession],
+        [returnHome, resetSession],
     );
     // *********** TOOLBAR HANDLERS ***********
 
@@ -692,11 +690,14 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     // apply button handler
     const onApply = useCallback(() => {
         void (async () => {
-            if (!isJourney) return;
+            const inJourney =
+                journeySessionStore.hasActiveSession() &&
+                journeySessionStore.isEditorInJourney('block');
+            if (!inJourney) return;
             const r = await save();
             if (r.ok) finalizeAfterSave(r.id);
         })();
-    }, [finalizeAfterSave, isJourney, save]);
+    }, [finalizeAfterSave, save]);
 
     // ----------- SAVE ----------
     // save button handler
@@ -712,11 +713,15 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     const exit = useCallback(() => {
         if (saving) return;
         if (isDirty && !confirm('Discard unsaved block changes?')) return;
-        if (isJourney) {
+        const inJourney =
+            journeySessionStore.hasActiveSession() &&
+            journeySessionStore.isEditorInJourney('block');
+        if (inJourney) {
             returnHome('block', { ok: false, reason: 'cancel' });
+            return;
         }
         resetSession();
-    }, [saving, isDirty, isJourney, returnHome, resetSession]);
+    }, [saving, isDirty, returnHome, resetSession]);
 
     // ----------- DELETE -----------
     // delete button handler
@@ -751,28 +756,34 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
     const handleEditHit = useCallback(
         (hit: BlockHitEvent) => {
             console.log(`[handleEditHit]: edit mode hit detected`);
-            console.dir(hit);
             if (currentStack.screenMode !== 'edit') return;
+            // Prevent duplicate dispatch (e.g., rapid double-click before navigation)
+            if (dispatchPendingRef.current) {
+                console.warn(`[handleEditHit]: dispatch already pending — ignoring`);
+                return;
+            }
             const tg = hitToTarget(hit);
             if (tg.blockKind === 'gallery' && tg.kind == 'image') {
                 const ticket = printoutTicket(hit);
                 if (!ticket) return;
 
-                // NEW: Provide home when starting journey to Catalog
                 const home: JourneyHome = {
                     editor: 'block',
                     objectId: draft?.id,
                 };
+                dispatchPendingRef.current = true;
                 dispatch(ticket, home);
             } else if (tg.blockKind === 'gallery' && tg.kind === 'eventPickEvent' && tg.slot) {
                 if (!draft?.id) return;
                 const ticket = createEventPickTicket(draft.id, tg.slot);
                 const home: JourneyHome = { editor: 'block', objectId: draft.id };
+                dispatchPendingRef.current = true;
                 dispatch(ticket, home);
             } else if (tg.blockKind === 'gallery' && tg.kind === 'eventPickBackground' && tg.slot) {
                 if (!draft?.id) return;
                 const ticket = createBackgroundPickTicket(draft.id, tg.slot);
                 const home: JourneyHome = { editor: 'block', objectId: draft.id };
+                dispatchPendingRef.current = true;
                 dispatch(ticket, home);
             } else {
                 setCurrentTarget(tg);
@@ -839,47 +850,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
         setCurrentTarget(undefined);
     }, []);
 
-    /** Add event placeholder at a gallery slot and dispatch journey to event editor */
-    const addEventAndJourney = useCallback(
-        (pos: ItemPosition) => {
-            if (!draft || draft.blockKind !== 'gallery') return;
-
-            // Guard: one event per block
-            const galleryDraft = draft as GalleryBlock;
-            const hasEvent = galleryDraft.items.some((i) => i.kind === 'eventCta');
-            if (hasEvent) return;
-
-            // 1) Create event placeholder; if an art item occupies the target slot,
-            //    convert its artId into the event's backgroundArtId and replace it.
-            const existing = galleryDraft.items.find((i) => i.position === pos);
-            const backgroundArtId =
-                existing && existing.kind === 'art' ? existing.artId : undefined;
-
-            const newEventItem: GalleryBlockItem = {
-                kind: 'eventCta',
-                eventId: '',
-                position: pos,
-                ...(backgroundArtId ? { backgroundArtId } : {}),
-            };
-
-            // Replace the existing item at this position (if any), then append the event
-            const filteredItems = galleryDraft.items.filter((i) => i.position !== pos);
-            const newDraft = { ...draft, items: [...filteredItems, newEventItem] };
-
-            // 2) Save draft to external store (survives navigation).
-            // NOTE: setDraft() is intentionally skipped — dispatch() navigates away,
-            // so React state update is unnecessary. Draft restores from store on return.
-            const key: EditorKey = { kind: 'block', id: draft.id };
-            editSessionsDataStore.saveDraft(key, newDraft);
-
-            // 3) Dispatch journey ticket to event editor
-            const ticket = createEventPickTicket(draft.id, pos);
-            const home: JourneyHome = { editor: 'block', objectId: draft.id };
-            dispatch(ticket, home);
-        },
-        [draft, dispatch],
-    );
-
     /** Update a gallery item caption at a given position */
     const updateItemCaption = useCallback(
         (pos: ItemPosition, caption: string) => {
@@ -930,7 +900,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             updateTags,
             isEditingTarget,
             onApply,
-            addEventAndJourney,
             updateItemCaption,
             updateBlockCaption,
             enterCustomize,
@@ -959,7 +928,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
             isEditingTarget,
             onApply,
             setDraft,
-            addEventAndJourney,
             updateItemCaption,
             updateBlockCaption,
             enterCustomize,

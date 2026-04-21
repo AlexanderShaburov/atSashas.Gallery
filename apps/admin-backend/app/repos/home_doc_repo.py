@@ -7,7 +7,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from app.models.home_doc import HomeDoc, HomeStreamRef
+from app.models.home_doc import HomeDoc
 from app.settings import settings
 
 
@@ -27,7 +27,6 @@ class HomeDocRepo:
     def __init__(self) -> None:
         self._root = Path(settings.storage_root) / settings.json_data.strip("/")
         self._path = self._root / "public" / "home.json"
-        self._fallback_path = self._root / "public_stream.json"
         self._lock = asyncio.Lock()
 
     def _load_unlocked(self) -> HomeDoc:
@@ -36,11 +35,9 @@ class HomeDocRepo:
                 data = json.load(f)
             return HomeDoc.model_validate(data)
 
-        # Fallback: migrate from public_stream.json
-        if self._fallback_path.exists():
-            return self._migrate_from_public_stream()
-
-        # Empty HomeDoc
+        # No home.json yet — return an empty HomeDoc. (The legacy
+        # public_stream.json migration fallback was retired with the
+        # public_stream subsystem.)
         now = _utc_now_iso()
         return HomeDoc(
             items=[],
@@ -49,27 +46,11 @@ class HomeDocRepo:
             updatedAt=now,
         )
 
-    def _migrate_from_public_stream(self) -> HomeDoc:
-        """Convert legacy PublicStreamData to HomeDoc on first read."""
-        with self._fallback_path.open("r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        stream_ids: list[str] = data.get("streamIds", [])
-        items = [
-            HomeStreamRef(kind="streamRef", streamSlug=sid)
-            for sid in stream_ids
-        ]
-
-        now = _utc_now_iso()
-        return HomeDoc(
-            items=items,
-            version=data.get("version", 1),
-            createdAt=data.get("createdAt", now),
-            updatedAt=data.get("updatedAt", now),
-        )
-
     def _save_unlocked(self, doc: HomeDoc) -> None:
-        payload = doc.model_dump(mode="json")
+        # exclude_none drops legacy nullable fields (size, thumbOverrideUrl) from the
+        # serialized output — honouring "new editor never writes size" while preserving
+        # round-trip of explicit values when present.
+        payload = doc.model_dump(mode="json", exclude_none=True)
         _atomic_write_json(self._path, payload)
 
     async def get(self) -> HomeDoc:

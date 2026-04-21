@@ -1,15 +1,27 @@
 import '@/pages/public/header/headerComponents/menuButton/Menu.css';
 import MenuIcon from '@/pages/public/header/headerComponents/menuButton/MenuIcon';
-import { usePublicStream } from '@/features/public/hooks/usePublicStream';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useHomeFeed } from '@/features/public/hooks/useHomeFeed';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 export default function Menu() {
     const [open, setOpen] = useState(false);
     const location = useLocation();
-    const { streams } = usePublicStream();
+    // Header menu follows the same source of truth as the public homepage:
+    // HomeDoc's streamRefs, in composition order. No separate publish roster.
+    const { homeDoc, streams } = useHomeFeed();
     const triggerRef = useRef<HTMLButtonElement>(null);
     const sheetRef = useRef<HTMLElement>(null);
+
+    const menuStreams = useMemo(() => {
+        if (!homeDoc) return [];
+        return homeDoc.items
+            .filter((it): it is Extract<typeof homeDoc.items[number], { kind: 'streamRef' }> =>
+                it.kind === 'streamRef',
+            )
+            .map((ref) => streams.get(ref.streamId))
+            .filter((s): s is NonNullable<typeof s> => !!s);
+    }, [homeDoc, streams]);
 
     const close = useCallback(() => {
         setOpen(false);
@@ -121,7 +133,7 @@ export default function Menu() {
                                 Events
                             </Link>
 
-                            {streams.map((s) => (
+                            {menuStreams.map((s) => (
                                 <Link
                                     key={s.streamId}
                                     className={`menu-link${isStreamActive(s.streamId) ? ' is-active' : ''}`}

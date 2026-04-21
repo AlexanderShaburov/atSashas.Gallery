@@ -4,28 +4,28 @@ import { buildMediaPickerTicket } from '../useMediaPicker';
 
 describe('buildMediaPickerTicket', () => {
   it('targets mediaItems editor in select mode', () => {
-    const ticket = buildMediaPickerTicket('events', 'evt-123');
+    const ticket = buildMediaPickerTicket('eventPages', 'evp-123');
     expect(ticket.destination).toEqual({ editor: 'mediaItems', mode: 'select' });
   });
 
   it('returns to the caller editor in edit mode with the given objectId', () => {
-    const ticket = buildMediaPickerTicket('events', 'evt-123');
-    expect(ticket.returnTo).toEqual({ editor: 'events', mode: 'edit', objectId: 'evt-123' });
+    const ticket = buildMediaPickerTicket('eventPages', 'evp-123');
+    expect(ticket.returnTo).toEqual({ editor: 'eventPages', mode: 'edit', objectId: 'evp-123' });
   });
 
   it('sets phase to outbound', () => {
-    const ticket = buildMediaPickerTicket('events', 'evt-123');
+    const ticket = buildMediaPickerTicket('eventPages', 'evp-123');
     expect(ticket.phase).toBe('outbound');
   });
 
   it('has no returnEffect (return handled by caller bootstrap)', () => {
-    const ticket = buildMediaPickerTicket('events', 'evt-123');
+    const ticket = buildMediaPickerTicket('eventPages', 'evp-123');
     expect(ticket.returnEffect).toBeUndefined();
   });
 
   it('generates unique journeyId per call', () => {
-    const a = buildMediaPickerTicket('events', 'e1');
-    const b = buildMediaPickerTicket('events', 'e1');
+    const a = buildMediaPickerTicket('eventPages', 'e1');
+    const b = buildMediaPickerTicket('eventPages', 'e1');
     expect(a.journeyId).not.toBe(b.journeyId);
   });
 

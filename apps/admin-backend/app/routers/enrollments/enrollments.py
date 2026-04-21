@@ -1,4 +1,13 @@
 # /app/routers/enrollments/enrollments.py
+#
+# Enrollments router — canonical event entity is EventPage
+# (`apps/admin-backend/app/models/event_pages.py`). See
+# `knowledge/decisions/decision--event--event-page-is-canonical-event.md`
+# and `knowledge/plans/plan--event--collapse-into-event-page.md`.
+#
+# Phase 2 preserves the public URL `/public/events/{id}/enroll` for contract
+# compatibility; the URL rename to `/public/event-pages/{id}/enroll` ships in
+# Phase 5 alongside the legacy code removal.
 
 from __future__ import annotations
 
@@ -10,8 +19,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from app.auth.dependencies import get_current_user
-from app.models.events import Enrollment, EnrollRequest, PaymentStatus
-from app.repos.event_repo import event_repo, generate_enrollment_id
+from app.models.enrollments import Enrollment, EnrollRequest, PaymentStatus
+from app.repos.event_page_repo import event_page_repo, generate_enrollment_id
 from app.services.stripe_service import create_checkout_session, verify_webhook_event
 
 logger = logging.getLogger(__name__)
@@ -39,21 +48,22 @@ class EnrollResponse(BaseModel):
     status_code=201,
 )
 async def enroll(event_id: str, body: EnrollRequest) -> EnrollResponse:
-    async with event_repo.session() as catalog:
-        event = catalog.events.get(event_id)
-        if not event:
+    """Register a visitor for an event. `event_id` is an EventPage id."""
+    async with event_page_repo.session() as catalog:
+        page = catalog.pages.get(event_id)
+        if not page:
             raise HTTPException(status_code=404, detail=f"Event not found: {event_id}")
 
-        if event.status != "scheduled":
+        if page.status != "scheduled":
             raise HTTPException(
                 status_code=400,
-                detail=f"Enrollment not open (event status: {event.status})",
+                detail=f"Enrollment not open (event status: {page.status.value})",
             )
 
         enrollment_id = generate_enrollment_id()
         now = datetime.now(timezone.utc).isoformat()
 
-        has_price = event.price is not None and event.price.amount > 0
+        has_price = page.price is not None and page.price.amount > 0
 
         enrollment = Enrollment(
             id=enrollment_id,
@@ -63,12 +73,12 @@ async def enroll(event_id: str, body: EnrollRequest) -> EnrollResponse:
             paymentStatus=PaymentStatus.pending if has_price else PaymentStatus.paid,
         )
 
-        event.enrollments[enrollment_id] = enrollment
+        page.enrollments[enrollment_id] = enrollment
         catalog.version += 1
 
     if has_price:
         try:
-            session = create_checkout_session(event, enrollment_id)
+            session = create_checkout_session(page, enrollment_id)
             return EnrollResponse(
                 enrollmentId=enrollment_id,
                 status="checkout",
@@ -101,16 +111,18 @@ async def stripe_webhook(request: Request) -> JSONResponse:
     if event.type == "checkout.session.completed":
         session_data = event.data.object
         enrollment_id = session_data.get("metadata", {}).get("enrollment_id")
+        # Metadata key remains `event_id` for Stripe-side compatibility; the
+        # value is an EventPage id post-migration.
         event_id = session_data.get("metadata", {}).get("event_id")
         stripe_session_id = session_data.get("id")
 
         if enrollment_id and event_id:
             try:
-                async with event_repo.session() as catalog:
-                    ev = catalog.events.get(event_id)
-                    if ev and enrollment_id in ev.enrollments:
-                        ev.enrollments[enrollment_id].paymentStatus = PaymentStatus.paid
-                        ev.enrollments[enrollment_id].stripeSessionId = stripe_session_id
+                async with event_page_repo.session() as catalog:
+                    page = catalog.pages.get(event_id)
+                    if page and enrollment_id in page.enrollments:
+                        page.enrollments[enrollment_id].paymentStatus = PaymentStatus.paid
+                        page.enrollments[enrollment_id].stripeSessionId = stripe_session_id
                         catalog.version += 1
                         logger.info(
                             "Enrollment %s paid for event %s",
@@ -129,7 +141,7 @@ async def stripe_webhook(request: Request) -> JSONResponse:
 
 @admin_router.get("/events/{event_id}/enrollments")
 async def list_enrollments(event_id: str) -> list[Enrollment]:
-    event = await event_repo.get_event(event_id)
-    if not event:
+    page = await event_page_repo.get_page(event_id)
+    if not page:
         raise HTTPException(status_code=404, detail=f"Event not found: {event_id}")
-    return list(event.enrollments.values())
+    return list(page.enrollments.values())

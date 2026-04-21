@@ -6,8 +6,7 @@ import { useEffect, useState } from 'react';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 /**
- * Hook to load a single stream for public gallery page
- * Uses the API endpoint for consistency with usePublicStream
+ * Hook to load a single stream for the public gallery page by slug/id.
  */
 export function useGallery(slug: string, mode: 'public' | 'preview' = 'public') {
     const [stream, setStream] = useState<StreamData | null>(null);

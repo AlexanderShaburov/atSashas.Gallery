@@ -17,9 +17,11 @@ const ROUTS: Record<EditorKind, string> = {
     block: '/admin/blocks',
     catalog: '/admin/catalog',
     hopper: '/admin/hopper',
-    events: '/admin/events',
     eventPages: '/admin/event-pages',
-    home: '/admin/public-stream',
+    // Canonical "home" editor route. Legacy /admin/public-stream redirects here
+    // (Phase 5 cutover). Source files for the legacy editor remain on disk until
+    // Phase 6 cleanup, but no nav, route, or journey targets them anymore.
+    home: '/admin/home',
     textVisuals: '/admin/text-visuals',
     mediaItems: '/admin/media',
 };

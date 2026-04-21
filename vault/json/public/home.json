@@ -2,18 +2,19 @@
   "items": [
     {
       "kind": "streamRef",
-      "streamSlug": "stream-20260304-nt30w2",
-      "size": "M",
-      "thumbOverrideUrl": null
+      "streamId": "stream-20260327-ctznm2",
+      "size": "S"
     },
     {
       "kind": "streamRef",
-      "streamSlug": "stream-20260306-3resqy",
-      "size": "M",
-      "thumbOverrideUrl": null
+      "streamId": "stream-20260418-6brw3d"
+    },
+    {
+      "kind": "eventRef",
+      "eventPageId": "event-20260421-ax8x2r"
     }
   ],
-  "version": 39,
+  "version": 78,
   "createdAt": "2026-02-13T12:35:00.000000+00:00",
-  "updatedAt": "2026-03-06T12:00:03.340580+00:00"
+  "updatedAt": "2026-04-21T16:29:02.987517+00:00"
 }

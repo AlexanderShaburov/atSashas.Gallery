@@ -24,8 +24,6 @@ export function StreamEditor() {
         isValid,
         isSaving,
         isJourney,
-        isPublished,
-        publicStream,
         save,
         onApply,
         onEscape,
@@ -36,14 +34,14 @@ export function StreamEditor() {
         updateTags,
         streamsIndex,
         selectStream,
+        selectAndReturn,
+        cancelSelect,
         createNewStream,
         threeDotHandler,
         editBlock,
         currentStack,
         commitMetaEditor,
         editMetadata,
-        publishStream,
-        unpublishStream,
     } = session;
 
     useEffect(() => {
@@ -72,13 +70,9 @@ export function StreamEditor() {
         console.log(`[StreamEditor] isValid: ${isValid} `);
         console.log(`[StreamEditor] isJourney: ${isJourney} `);
 
-        // Can only publish if stream has a thumbnail
-        const canPublish = !isPublished && !!draft.thumbnail;
-
         return {
             canSave: isDirty && !isLoading && isValid,
             isSaving,
-            isPublished,
             tags: draft.tags,
             onAdd: addBlockFromToolbar,
             onEdit: editMetadata,
@@ -87,8 +81,6 @@ export function StreamEditor() {
             save,
             exit,
             onChangeTags: updateTags,
-            onPublish: canPublish ? () => void publishStream() : undefined,
-            onUnpublish: () => void unpublishStream(),
         };
     }, [
         draft,
@@ -105,9 +97,6 @@ export function StreamEditor() {
         updateTags,
         addBlockFromToolbar,
         editMetadata,
-        isPublished,
-        publishStream,
-        unpublishStream,
     ]);
 
     const initial: StreamMetadata = {
@@ -127,21 +116,22 @@ export function StreamEditor() {
     const filtered = useMemo(() => applyStreamFilter(streamsIndex, filter), [streamsIndex, filter]);
     const handleOnClick = useCallback(
         async (id: string) => {
+            if (isJourney) {
+                selectAndReturn(id);
+                return;
+            }
             await selectStream(id);
         },
-        [selectStream],
+        [isJourney, selectAndReturn, selectStream],
     );
 
-    // Determine toolbar tools based on journey state and publish status
+    // Determine toolbar tools based on journey state.
     const toolbarTools = useMemo(() => {
         const baseTools = ['delete', 'tags', 'add', 'edit'];
-        console.log(`[StreamEditor] Computing toolbarTools. isJourney=${isJourney}, isPublished=${isPublished}`);
-
-        // Add publish/unpublish (only one will render based on isPublished)
-        const withPublish = [...baseTools, 'publish', 'unpublish'];
+        console.log(`[StreamEditor] Computing toolbarTools. isJourney=${isJourney}`);
 
         // Add exit and save
-        const withActions = [...withPublish, 'exit', 'save'];
+        const withActions = [...baseTools, 'exit', 'save'];
 
         if (isJourney) {
             // In journey: add 'apply' button
@@ -151,7 +141,7 @@ export function StreamEditor() {
         }
         console.log(`[StreamEditor] Not in journey, tools:`, withActions);
         return withActions;
-    }, [isJourney, isPublished]);
+    }, [isJourney]);
 
     // Reduce blinking:
     // if (!draft || !toolbarProps) {
@@ -172,32 +162,39 @@ export function StreamEditor() {
                 <div className="se">
                     <ScreenHeaderRow
                         left={<h1 className="se__title">Streams</h1>}
-                        right={<StreamFilterControl filter={filter} updateFilter={updateFilter} />}
+                        right={
+                            <>
+                                {isJourney && (
+                                    <button
+                                        type="button"
+                                        className="se__cancel-select"
+                                        onClick={cancelSelect}
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+                                <StreamFilterControl filter={filter} updateFilter={updateFilter} />
+                            </>
+                        }
                     />
                     <div className="se__grid">
                         <NewStreamComponent createNewStream={createNewStream} />
-                        {filtered.map((s) => {
-                            const isStreamPublished = publicStream?.streamIds.includes(s.streamId) ?? false;
-                            return (
-                                <figure
-                                    key={s.streamId}
-                                    className="se__thumbnail"
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={() => handleOnClick(s.streamId)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ')
-                                            handleOnClick(s.streamId);
-                                    }}
-                                >
-                                    {isStreamPublished && (
-                                        <span className="se__badge se__badge--public">PUBLIC</span>
-                                    )}
-                                    <img src={s.thumbnail} loading="lazy" />
-                                    <figcaption>{s.title ?? ''}</figcaption>
-                                </figure>
-                            );
-                        })}
+                        {filtered.map((s) => (
+                            <figure
+                                key={s.streamId}
+                                className="se__thumbnail"
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => handleOnClick(s.streamId)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ')
+                                        handleOnClick(s.streamId);
+                                }}
+                            >
+                                <img src={s.thumbnail} loading="lazy" />
+                                <figcaption>{s.title ?? ''}</figcaption>
+                            </figure>
+                        ))}
                     </div>
                 </div>
             );

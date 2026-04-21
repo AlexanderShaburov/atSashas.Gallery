@@ -70,7 +70,10 @@ export type ReturnCommand =
           position: ItemPosition;
       }
     | {
-          kind: 'homeInsertBlock';
+          kind: 'homeInsertStream';
+      }
+    | {
+          kind: 'homeInsertEvent';
       };
 
 // Phase of journey:

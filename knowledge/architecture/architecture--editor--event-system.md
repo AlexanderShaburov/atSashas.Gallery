@@ -2,53 +2,20 @@
 type: architecture
 scope: [editor]
 status: active
-date: 2026-04-10
+date: 2026-04-21
 source_of_truth: true
 tags: [event, editor]
 ---
 
-# Event system structure (Event + EventPage editors)
+# Event Editor structure
 
-Two parallel, independent editors sharing `EditorKind = 'events'` but managing different entity types.
+The SashaGallery admin exposes a single Event Editor (`EventPageEditor`) managing `EventPageData`. The legacy dual-editor architecture (parallel `EventEditor` for `EventData`) was retired by `decision--event--event-page-is-canonical-event.md`. This document describes the canonical editor only.
 
-## Event Editor
+## Editor
 
-Manages `EventData` — simple event records.
+Manages `EventPageData` — preset-based records (`workshop`, `pleinAir`, `exhibition`, `minimal`). Persisted at `vault/json/event_pages/catalog.json` via `/api/admin/event-pages` and served publicly from `/api/public/event-pages`.
 
-### Screen modes (simple state, no stack)
-
-```ts
-type ScreenMode = 'list' | 'edit' | 'create' | 'select';
-```
-
-### Draft model
-
-Uses a **form draft** (`EventDraft`) separate from `EventData`:
-- `eventToFormDraft(EventData) → EventDraft` (for editing)
-- `formDraftToPayload(EventDraft) → CreateEventPayload` (for API)
-
-```ts
-interface EventDraft {
-  id?: string;
-  slug: string;
-  titleEn: string;
-  description: string;
-  dateTime: string;
-  durationMinutes: string;
-  location: string;
-  mapUrl: string;
-  priceAmount: string;
-  priceCurrency: string;
-  status: EventStatus;
-  streamSlug: string;
-}
-```
-
-No dirty tracking. No outbound journeys (leaf editor).
-
-## Event Page Editor
-
-Manages `EventPageData` — preset-based page models (workshop, pleinAir, exhibition, minimal).
+Route: `/admin/event-pages`. Dashboard tile label: "Events".
 
 ### Screen modes (stack-based)
 
@@ -61,38 +28,41 @@ type ScreenMode = 'select' | 'create' | 'edit' | 'preview';
 
 Full `EventPageData` stored as-is. Field updates via `setDraftField(field: string, value: unknown)`.
 
-Dirty tracking: `isDirty = JSON.stringify(draft) !== JSON.stringify(snapshot)`
+Dirty tracking: `isDirty = JSON.stringify(draft) !== JSON.stringify(snapshot)`.
 
 ### Field visibility
 
 Per-preset visibility map (`fieldVisibility.ts`) controls form sections. 5 sections: content, logistics, cta, media, settings.
 
-## Structural differences
+### CTA behavior config
 
-| Aspect | Event Editor | Event Page Editor |
-|--------|-------------|-------------------|
-| Entity type | `EventData` (flat, ~10 fields) | `EventPageData` (union, 40+ fields) |
-| Draft model | Form reduction (`EventDraft`) | Full entity stored as-is |
-| Mode system | Simple state (no nesting) | Stack (supports edit ↔ preview) |
-| Dirty tracking | None | JSON diff |
-| Outbound journey | No (leaf editor) | Yes (media picker) |
-| Creation | Form-based | Factory-based (preset) |
+`EventPageData` carries an optional `ctaAction: CtaAction` (discriminated union: `external | register | inquiry`). Defined in `entities/event/ctaAction.ts`, resolved at read via `resolveCtaAction(page)` which infers a `register` action from the `price` field when absent. See `spec--editor--event-system-behavior.md` § "CTA action" for behavior rules.
+
+### Enrollments
+
+`EventPageData.enrollments: dict<Enrollment>` holds registration records. Enrollment submissions from the public site flow through `POST /api/public/event-pages/{id}/enroll` (renamed from the legacy `/public/events/{id}/enroll` as part of the migration cleanup).
 
 ## File structure
 
 ```
-eventEditor/
-├── eventEditorSession/EventEditorSession.context.tsx
-├── api/eventsAdminApi.ts
-└── ui/
-
 eventPageEditor/
 ├── session/EventPageEditorSession.context.tsx
 ├── api/eventPagesAdminApi.ts
 ├── ui/
+│   ├── EventPageEditor.tsx
+│   ├── CtaSection.tsx
+│   ├── SettingsSection.tsx
+│   └── ...
 └── __tests__/
 ```
 
 ## Related
 
-- [Event system behavior](../specs/spec--editor--event-system-behavior.md)
+- `spec--editor--event-system-behavior.md` — behavior and flow spec
+- `decision--event--event-page-is-canonical-event.md` — ADR retiring the legacy split
+- `invariant--architecture--single-event-entity.md` — the rule preventing re-introduction of a parallel event model
+- `plan--event--collapse-into-event-page.md` — migration execution plan
+
+## Historical note
+
+From 2026-02 through 2026-04-21 a second editor (`EventEditor`) existed at `/admin/events` managing a distinct `EventData` shape in `vault/json/events/catalog.json`. It was hidden from navigation and served no user flow. The migration plan above removes it in its Phase 5.

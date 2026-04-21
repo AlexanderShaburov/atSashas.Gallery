@@ -24,10 +24,7 @@ admin_router = APIRouter(
 
 @public_router.get("/home", response_model=HomeDoc)
 async def get_home_public() -> HomeDoc:
-    """
-    Get the HomeDoc for public rendering.
-    Falls back to public_stream.json migration if home.json doesn't exist.
-    """
+    """Get the HomeDoc for public rendering."""
     return await home_doc_repo.get()
 
 

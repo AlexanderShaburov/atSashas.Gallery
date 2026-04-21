@@ -18,7 +18,7 @@ Adding a new **domain entity** requires an explicit decision (ADR). The Constitu
 | **ArtItem** | Catalog item with metadata + media references |
 | **Block** | Universal content container (gallery/text/cta/eventCta/composable) |
 | **Stream** | Narrative composition of blocks |
-| **Event** | Offline workshop/event entity |
+| **Event** | Preset-based event record (workshop, plein-air, exhibition, minimal). In-code: `EventPageData`, stored in `event_pages/catalog.json`. Enrollments live on this record. Specialized by `invariant--architecture--single-event-entity.md`. |
 | **HomeDoc** | Site portrait composed of HomeItems (singleton) |
 
 ## Non-entities (per Constitution)

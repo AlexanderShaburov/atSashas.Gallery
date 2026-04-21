@@ -5,7 +5,6 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 
 from app.repos.collection_repo import block_collection_repo
-from app.repos.public_stream_repo import public_stream_repo
 from app.repos.stream_repo import StreamRepo
 
 public_router = APIRouter(

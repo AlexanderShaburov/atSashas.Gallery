@@ -7,8 +7,8 @@ from app.auth.dependencies import get_current_user
 from pydantic import BaseModel, Field
 
 from app.models.streams import StreamData, StreamIndexItem, StreamStatus
+from app.repos.home_doc_repo import home_doc_repo
 from app.repos.stream_repo import StreamRepo
-from app.repos.public_stream_repo import public_stream_repo
 
 # Public router (no authentication required)
 public_router = APIRouter(
@@ -31,29 +31,24 @@ repo = StreamRepo()
 @public_router.get("/published", response_model=list[StreamIndexItem])
 async def get_published_streams() -> list[StreamIndexItem]:
     """
-    Get published streams from index (public endpoint, no auth required).
-    Returns StreamIndexItem[] with thumbnails for streams in PublicStream.
+    Return streams currently featured on the public homepage, in HomeDoc order.
+    No authentication required.
+
+    After the Homepage Editor cutover, "published" is defined as "referenced by
+    a streamRef in HomeDoc" — HomeDoc is the sole homepage visibility source.
     """
     try:
-        # Get list of published stream IDs
-        public_stream = await public_stream_repo.get()
-        published_ids = set(public_stream.streamIds)
-
-        # Get streams index
-        index = await repo.list_index()
-
-        # Filter to only published streams, preserve PublicStream order
-        id_to_item = {item.streamId: item for item in index.streams}
-        published_items = [
-            id_to_item[stream_id]
-            for stream_id in public_stream.streamIds
-            if stream_id in id_to_item
+        doc = await home_doc_repo.get()
+        featured_ids = [
+            it.streamId for it in doc.items if it.kind == "streamRef"
         ]
 
-        return published_items
+        index = await repo.list_index()
+        id_to_item = {item.streamId: item for item in index.streams}
+        return [id_to_item[sid] for sid in featured_ids if sid in id_to_item]
     except Exception as e:
-        # If PublicStream or index doesn't exist, return empty list
-        print(f"Error loading published streams: {e}")
+        # If HomeDoc or index fails to load, return empty list.
+        print(f"Error loading featured streams: {e}")
         return []
 
 
@@ -63,7 +58,7 @@ async def get_streams_by_ids(
 ) -> list[StreamIndexItem]:
     """
     Return stream index items by their IDs (comma-separated).
-    Used by the Home page to resolve streamRef items without the PublicStream gate.
+    Used by the Home page to resolve streamRef items.
     No authentication required.
     """
     stream_ids = [sid.strip() for sid in ids.split(",") if sid.strip()]
@@ -176,24 +171,26 @@ async def update_stream(stream_id: str, body: StreamData) -> StreamData:
 @router.get("/{stream_id}/dependencies", response_model=dict)
 async def get_stream_dependencies(stream_id: str) -> dict:
     """
-    Check if a stream is published in PublicStream.
-    Returns dependency information to warn before deletion.
+    Check whether a stream is currently featured on the public homepage.
+    Returns dependency information so the admin UI can warn before deletion.
     """
-    is_published = False
+    is_on_homepage = False
 
     try:
-        public_stream = await public_stream_repo.get()
-        is_published = stream_id in public_stream.streamIds
+        doc = await home_doc_repo.get()
+        is_on_homepage = any(
+            it.kind == "streamRef" and it.streamId == stream_id for it in doc.items
+        )
     except Exception:
-        # If PublicStream doesn't exist or fails to load, assume not published
+        # If HomeDoc fails to load, assume not referenced.
         pass
 
     return {
         "streamId": stream_id,
-        "isPublished": is_published,
+        "isOnHomepage": is_on_homepage,
         "dependencies": {
-            "publicStream": is_published
-        }
+            "homepage": is_on_homepage,
+        },
     }
 
 

@@ -95,11 +95,16 @@ export function printoutTicket(hit: BlockHitEvent): JourneyTicket | undefined {
     }
 }
 
+// Legacy helper. No live caller in the UI — kept compilable post-EventPage
+// canonicalization so that `galleryEventPickEvent` BlockHit / BlockTarget
+// entries still typecheck until they are cleaned up in a follow-up pass.
+// Dispatches at `eventPages` now (the canonical entity); real retirement of
+// this block-level flow is tracked separately.
 export function createEventPickTicket(blockId: string, position: ItemPosition): JourneyTicket {
     return {
         journeyId: generateId('travel'),
         destination: {
-            editor: 'events',
+            editor: 'eventPages',
             mode: 'select',
         },
         returnTo: {

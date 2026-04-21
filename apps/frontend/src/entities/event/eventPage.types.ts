@@ -4,7 +4,8 @@
 
 import type { Localized, Money } from '@/entities/common';
 
-import type { Enrollment, EventStatus } from './event.types';
+import type { CtaAction } from './ctaAction';
+import type { Enrollment, EventStatus } from './enrollment.types';
 
 // ---------------------------------------------------------------------------
 // Core types
@@ -34,8 +35,13 @@ export interface WorkshopEventPage {
   preset: 'workshop';
   status: EventStatus;
   enrollments?: Record<string, Enrollment>;
-  /** ID of the associated EventData for enrollment. When absent, page.id is used. */
+  /** ID of the associated EventData for enrollment. Required for 'register' CTA. */
   eventId?: string;
+
+  /** CTA behavior config. When absent, resolveCtaAction() infers a register
+   *  action (paid vs free) from the legacy `price` field. See
+   *  `entities/event/ctaAction.ts`. */
+  ctaAction?: CtaAction;
 
   // ── Hero ──
   title: Localized;
@@ -83,8 +89,13 @@ export interface PleinAirEventPage {
   preset: 'pleinAir';
   status: EventStatus;
   enrollments?: Record<string, Enrollment>;
-  /** ID of the associated EventData for enrollment. When absent, page.id is used. */
+  /** ID of the associated EventData for enrollment. Required for 'register' CTA. */
   eventId?: string;
+
+  /** CTA behavior config. When absent, resolveCtaAction() infers a register
+   *  action (paid vs free) from the legacy `price` field. See
+   *  `entities/event/ctaAction.ts`. */
+  ctaAction?: CtaAction;
 
   // ── Hero (cinematic) ──
   title: Localized;
@@ -138,8 +149,13 @@ export interface ExhibitionEventPage {
   preset: 'exhibition';
   status: EventStatus;
   enrollments?: Record<string, Enrollment>;
-  /** ID of the associated EventData for enrollment. When absent, page.id is used. */
+  /** ID of the associated EventData for enrollment. Required for 'register' CTA. */
   eventId?: string;
+
+  /** CTA behavior config. When absent, resolveCtaAction() infers a register
+   *  action (paid vs free) from the legacy `price` field. See
+   *  `entities/event/ctaAction.ts`. */
+  ctaAction?: CtaAction;
 
   // ── Hero (editorial) ──
   title: Localized;
@@ -184,8 +200,13 @@ export interface MinimalEventPage {
   preset: 'minimal';
   status: EventStatus;
   enrollments?: Record<string, Enrollment>;
-  /** ID of the associated EventData for enrollment. When absent, page.id is used. */
+  /** ID of the associated EventData for enrollment. Required for 'register' CTA. */
   eventId?: string;
+
+  /** CTA behavior config. When absent, resolveCtaAction() infers a register
+   *  action (paid vs free) from the legacy `price` field. See
+   *  `entities/event/ctaAction.ts`. */
+  ctaAction?: CtaAction;
 
   // ── HeroCard (integrated) ──
   title: Localized;

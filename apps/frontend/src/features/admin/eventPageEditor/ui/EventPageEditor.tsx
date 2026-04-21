@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { EventPreset } from '@/entities/event';
-import { EVENT_PRESETS } from '@/entities/event';
+import { EVENT_PRESETS, resolveCtaAction } from '@/entities/event';
 import type { MediaItemData } from '@/entities/mediaItem';
 import { resolveEventDefaults } from '@/entities/event/resolveEventDefaults';
 import { buildEventRenderContext } from '@/entities/event/eventRenderContext';
@@ -92,17 +92,34 @@ function EventTile({ page, onClick }: { page: { id: string; preset: string; stat
   );
 }
 
+type StatusFilter = 'all' | 'draft' | 'scheduled';
+
 function SelectMode() {
   const { pages, isLoading, pushMode, selectEvent, isJourney, selectAndReturn, cancelSelect } =
     useEventPageEditorSession();
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
   if (isLoading) return <div className="epe__loading">Loading event pages...</div>;
+
+  const visiblePages =
+    statusFilter === 'all' ? pages : pages.filter((p) => p.status === statusFilter);
 
   return (
     <div className="epe__select">
       <div className="epe__header">
         <h1 className="epe__title">Events</h1>
         <div className="epe__actions">
+          <label className="epe__filter">
+            <span className="epe__filter-label">Status</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+            >
+              <option value="all">All</option>
+              <option value="draft">Draft</option>
+              <option value="scheduled">Scheduled</option>
+            </select>
+          </label>
           <button className="epe__btn epe__btn--primary" onClick={() => pushMode('create')}>
             New Event Page
           </button>
@@ -114,11 +131,15 @@ function SelectMode() {
         </div>
       </div>
 
-      {pages.length === 0 ? (
-        <div className="epe__empty">No event pages yet.</div>
+      {visiblePages.length === 0 ? (
+        <div className="epe__empty">
+          {pages.length === 0
+            ? 'No event pages yet.'
+            : `No ${statusFilter} event pages.`}
+        </div>
       ) : (
         <div className="epe__grid">
-          {pages.map((page) => (
+          {visiblePages.map((page) => (
             <EventTile
               key={page.id}
               page={page as { id: string; preset: string; status: string; title: { en?: string }; heroImage?: string }}
@@ -289,14 +310,35 @@ function PreviewMode() {
     [mediaCatalog, artCatalog],
   );
 
+  // Preview mirrors the public runtime's CTA dispatch so the editor sees
+  // what would happen per configured kind. Analytics is suppressed in
+  // preview mode (see shared/analytics/track.ts).
   const handlePreviewCta = useCallback(() => {
-    const status = draft?.status ?? 'draft';
-    if (status === 'scheduled') {
-      alert('CTA is active. Visitors will see the enrollment form here.');
-    } else {
-      alert(`CTA is inactive (status: ${status}). Set status to "scheduled" to enable enrollment.`);
+    if (!draft) return;
+    const action = resolveCtaAction(draft);
+    const status = draft.status ?? 'draft';
+    switch (action.kind) {
+      case 'external':
+        if (action.url) {
+          alert(`External link CTA → opens ${action.url} (blocked in preview).`);
+        } else {
+          alert('External link CTA → URL is empty. Configure it in the CTA section.');
+        }
+        return;
+      case 'register':
+        if (status !== 'scheduled') {
+          alert(
+            `Register CTA is inactive (status: ${status}). Set status to "scheduled" to enable.`,
+          );
+        } else {
+          alert('Register CTA is active. Visitors will see the enrollment form here.');
+        }
+        return;
+      case 'inquiry':
+        alert('Coming soon');
+        return;
     }
-  }, [draft?.status]);
+  }, [draft]);
 
   if (!draft) return <div className="epe__loading">No draft to preview.</div>;
 

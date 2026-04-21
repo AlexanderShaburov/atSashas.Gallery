@@ -2,7 +2,7 @@
 type: index
 scope: [system]
 status: active
-date: 2026-04-10
+date: 2026-04-18
 source_of_truth: true
 tags: []
 ---
@@ -11,11 +11,11 @@ tags: []
 
 Type-purity audited 2026-04-10. Architecture contains only structure. Behavior extracted to specs.
 
-**Priority:** invariants → architecture → specs → decisions → patterns → glossary
+**Priority:** invariants → architecture → specs → decisions → patterns → plans → glossary
 
 ---
 
-## Invariants (8)
+## Invariants (9)
 
 | Document | Rule |
 |----------|------|
@@ -24,6 +24,7 @@ Type-purity audited 2026-04-10. Architecture contains only structure. Behavior e
 | [Downward-only dependencies](../invariants/invariant--architecture--downward-only-dependencies.md) | app → pages → features → entities ← shared |
 | [No global data in React contexts](../invariants/invariant--state--no-global-data-in-react-contexts.md) | Context = control plane, Store = data plane |
 | [Entities are finite and controlled](../invariants/invariant--architecture--entities-are-finite-and-controlled.md) | 5 domain entities; new ones require ADR |
+| [Single event entity](../invariants/invariant--architecture--single-event-entity.md) | Exactly one event representation (EventPage); no parallel model |
 | [Filtering must not mutate source](../invariants/invariant--data--filtering-must-not-mutate-source.md) | Filtering is always a derived view |
 | [Bootstrap reads stores imperatively](../invariants/invariant--state--bootstrap-reads-stores-imperatively.md) | No hooks during mount/bootstrap |
 | [Standard command surfaces only](../invariants/invariant--ui--standard-command-surfaces-only.md) | SingleEditorToolbar + ThreeDotMenu |
@@ -53,18 +54,19 @@ Type-purity audited 2026-04-10. Architecture contains only structure. Behavior e
 | [State management](../architecture/architecture--state--custom-pubsub-stores.md) | Store hierarchy, APIs, React hooks |
 | [Rendering components](../architecture/architecture--renderer--component-hierarchy.md) | Component table, resolver, dispatch, appearance |
 
-## Specs (6) — behavior
+## Specs (7) — behavior
 
 | Document | Behavior |
 |----------|----------|
 | [Media editor behavior](../specs/spec--editor--media-editor-behavior.md) | Picker flow, upload-during-pick, deletion, mode transitions |
 | [Event system behavior](../specs/spec--editor--event-system-behavior.md) | Journey flows, media picker integration, factory creation |
+| [Homepage editor behavior](../specs/spec--editor--homepage-editor-behavior.md) | Singleton /admin/home, streamRef + eventRef composition, Journey add/open, orphan handling |
 | [Journey guard behavior](../specs/spec--navigation--journey-guard-behavior.md) | GuardedNavLink, useGuardedNavigate, useJourneyGuard |
 | [Hopper ingestion behavior](../specs/spec--system--hopper-ingestion-behavior.md) | Upload flow, ArtItem path, MediaItem path |
 | [Auth behavior](../specs/spec--system--authentication-behavior.md) | Login flow, session validation, RequireAuth |
 | [Rendering behavior](../specs/spec--renderer--rendering-behavior.md) | Context-aware rendering, public interaction, mobile |
 
-## Decisions (4)
+## Decisions (6)
 
 | Document | Choice |
 |----------|--------|
@@ -72,6 +74,8 @@ Type-purity audited 2026-04-10. Architecture contains only structure. Behavior e
 | [Custom pub/sub over Redux](../decisions/decision--state--custom-pubsub-over-redux.md) | Lightweight custom stores |
 | [JSON vault, no database](../decisions/decision--data--json-vault-no-database.md) | Files as source of truth |
 | [Unified rendering](../decisions/decision--renderer--unified-rendering-frame-renderable.md) | Frame + Renderable (in progress) |
+| [HomeDoc is sole homepage source](../decisions/decision--data--homedoc-is-sole-homepage-source.md) | public_stream retired; HomeDoc is the only visibility signal |
+| [EventPage is canonical event](../decisions/decision--event--event-page-is-canonical-event.md) | Legacy EventData retired; enrollments on EventPage |
 
 ## Patterns (2)
 
@@ -80,18 +84,58 @@ Type-purity audited 2026-04-10. Architecture contains only structure. Behavior e
 | [Draft/Snapshot](../patterns/pattern--state--draft-snapshot.md) | Two-copy editing with dirty detection |
 | [Context Provider Convention](../patterns/pattern--editor--context-provider-convention.md) | undefined default + throwing hook |
 
+## Plans — task intent and execution status
+
+Plans preserve intended work before or during implementation.
+They are not source-of-truth replacements for architecture, specs, or decisions.
+They exist to make active, implemented, rejected, and superseded work visible and traceable.
+
+### Plan status expectations
+
+* `proposed` — candidate work exists but has not started
+* `in_progress` — work is actively being executed
+* `implemented` — plan was completed and outcome captured
+* `rejected` — plan was explicitly declined
+* `superseded` — plan was replaced by another plan or decision path
+
+### Reading guidance for plans
+
+Read plans when the task is:
+
+* multi-step;
+* architectural;
+* a refactor;
+* a feature with alternatives;
+* connected to ongoing implementation;
+* dependent on previous intent or abandoned work.
+
+Do not treat plans as final behavioral truth.
+Use them together with specs, architecture, decisions, and sessions.
+
+### Expected location
+
+Plan documents live in:
+
+`knowledge/plans/`
+
+Recommended naming:
+
+`plan--<domain>--<topic>.md`
+
 ## Glossary (1)
 
 | Document | Coverage |
 |----------|---------|
 | [Domain terms](../glossary/glossary--system--domain-terms.md) | Entities, mechanisms, architecture, UI terms |
 
-## Open Questions (2)
+## Open Questions (4)
 
 | Document | Issue |
 |----------|-------|
 | [Inconsistent optimistic concurrency](../open-questions/open_question--data--inconsistent-optimistic-concurrency.md) | Only 3/9 repos enforce version checks |
 | [Entities layer violation](../open-questions/open_question--architecture--entities-layer-violation.md) | entities/common imports from shared/ui |
+| [EventPage tile model](../open-questions/open_question--event--event-page-tile-model.md) | EventPage needs a first-class tile representation; v1 HomeEventTile is a text-only placeholder |
+| [Shareable EventPage link](../open-questions/open_question--event--public-shareable-event-page-link.md) | EventPage needs explicit direct public link as a first-class use case |
 
 ---
 
@@ -103,7 +147,9 @@ Type-purity audited 2026-04-10. Architecture contains only structure. Behavior e
 4. **Specific editor** (architecture) → structure
 5. **Specific editor** (spec) → behavior
 6. **Journey system** → navigation structure + guard behavior
-7. **Invariants** → before any structural change
+7. **Decisions / Patterns** → preferred implementation direction
+8. **Plans** → current and historical task intent, sequencing, and status
+9. **Invariants** → before any structural change
 
 ## Source documents
 

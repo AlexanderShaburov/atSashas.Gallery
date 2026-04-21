@@ -5,7 +5,6 @@ import {
     StreamScreenModeStack,
 } from '@/entities/stream';
 import { StreamMetadata } from '@/entities/stream/streamApi.types';
-import { PublicStreamData } from '@/entities/publicStream';
 import { ThreeDotCommand } from '@/shared/ui/ThreeDotMenu/threeDot.types';
 
 export type StreamEditorSession = {
@@ -17,8 +16,6 @@ export type StreamEditorSession = {
     isValid: boolean;
     isDirty: boolean;
     isJourney: boolean;
-    isPublished: boolean;
-    publicStream: PublicStreamData | null;
     save: () => void;
     onApply: () => void;
     addBlock: (pos: number) => void;
@@ -27,6 +24,8 @@ export type StreamEditorSession = {
     exit: () => void;
     currentStack: StreamScreenModeStack;
     selectStream: (id: string) => void;
+    selectAndReturn: (id: string) => void;
+    cancelSelect: () => void;
     createNewStream: () => void;
     delStream: (id: string) => void;
     updateTags: (next: string[]) => void;
@@ -34,7 +33,5 @@ export type StreamEditorSession = {
     editBlock: (id: string) => void;
     editMetadata: () => void;
     commitMetaEditor: (req: StreamMetadata) => Promise<void>;
-    publishStream: () => Promise<void>;
-    unpublishStream: () => Promise<void>;
-    selectThumbnail: () => void;
+    selectThumbnail: (pendingFields?: StreamMetadata) => void;
 };

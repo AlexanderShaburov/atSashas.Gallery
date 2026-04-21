@@ -2,7 +2,7 @@
 type: architecture
 scope: [navigation, editor]
 status: active
-date: 2026-04-10
+date: 2026-04-17
 source_of_truth: true
 tags: [constitution, adr-001, journey]
 ---
@@ -32,7 +32,7 @@ type JumpResult =
   | { ok: false; reason?: string };
 ```
 
-## Return commands (11 variants)
+## Return commands (12 variants)
 
 Source: `shared/nav/journey.types.ts`
 
@@ -48,7 +48,10 @@ Source: `shared/nav/journey.types.ts`
 | `createArtItem` | `itemId` |
 | `dependencyResolved` | `targetId` |
 | `streamSelectThumbnail` | `streamId` |
-| `homeInsertBlock` | (none) |
+| `homeInsertStream` | (none) — loot carries `streamId` |
+| `homeInsertEvent` | (none) — loot carries `eventPageId` |
+
+Retired commands: `homeInsertBlock` (removed in Homepage Editor Phase 6 cleanup — block-level homepage composition is no longer supported).
 
 ## JourneySessionStore
 

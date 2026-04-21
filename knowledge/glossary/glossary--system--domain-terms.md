@@ -16,18 +16,18 @@ tags: [domain, terminology]
 | **ArtItem** | A single artwork in the catalog. Includes media references, metadata (title, technique, dimensions, price, availability). The atomic unit of art content. |
 | **Block** | Universal content container. Discriminated union: gallery (art layouts), text, cta, eventCta, composable. The atomic composition unit. |
 | **Stream** | Narrative composition of blocks. An ordered list of block references forming a "story" or page. |
-| **Event** | Offline workshop/event entity. Has its own lifecycle (draft → scheduled → closed) and can be embedded into blocks. |
-| **HomeDoc** | Singleton. The curated "portrait of the site" composed of HomeItems referencing streams and blocks. |
+| **Event** | Preset-based event record (workshop, plein-air, exhibition, minimal). Lifecycle: draft → scheduled → closed. Holds its own enrollments. In-code type: `EventPageData`. Authored in `/admin/event-pages`. See `invariant--architecture--single-event-entity.md`. |
+| **HomeDoc** | Singleton. The curated "portrait of the site" composed of HomeItems referencing streams and events. |
 
 ## Non-entities
 
 | Term | Definition |
 |------|-----------|
 | **Hopper** | Pipeline/staging area for media ingestion. Uploaded files land here before becoming ArtItems or MediaItems. NOT a domain entity. |
-| **HomeItem** | Data structure inside HomeDoc. References a Stream thumbnail or Block preview. NOT an independent entity. |
-| **MediaItem** | Reusable media asset (image/video) referenced by ID (MediaRef) from event pages, text visuals, and composable blocks. Utility entity. |
+| **HomeItem** | Data structure inside HomeDoc. References a Stream or an Event. NOT an independent entity. |
+| **MediaItem** | Reusable media asset (image/video) referenced by ID (MediaRef) from events, text visuals, and composable blocks. Utility entity. |
 | **TextVisual** | Composable text content unit. Utility entity. |
-| **EventPage** | Page rendering model for Events. Uses presets (workshop, pleinAir, exhibition, minimal) to define section composition. |
+| **EventPage** | Internal code name for the Event entity shape (preset-based). Post-2026-04-21 "Event" and "EventPage" refer to the same record — user-facing docs say "Event", code says `EventPageData`. |
 
 ## Mechanisms
 

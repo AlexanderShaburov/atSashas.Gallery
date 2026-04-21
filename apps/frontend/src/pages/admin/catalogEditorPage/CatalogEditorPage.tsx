@@ -22,7 +22,6 @@ export default function CatalogEditorPage() {
         toolbarModel,
         catalog,
         techniquesRange,
-        onEscape,
         editorIsReady,
         isLoading,
         screenMode,
@@ -82,15 +81,20 @@ export default function CatalogEditorPage() {
                 <div className="catalog-page">
                     {isLoading && <p>Loading...</p>}
                     {!isLoading && !isSelected && (
-                        <div /*className="grid"*/>
-                            <div className="catalog-editor__toolbar">
-                                <ArtCatalogFilterControl
-                                    items={catalog?.items}
-                                    techniquesRange={techniquesRange}
-                                    filter={artFilter}
-                                    updateFilter={updateArtFilter}
-                                    onBack={onEscape}
-                                />
+                        <div>
+                            {/* Sticky header — filter and action toolbar both above grid. */}
+                            <div className="catalog-editor__sticky-header">
+                                <div className="catalog-editor__toolbar">
+                                    <ArtCatalogFilterControl
+                                        items={catalog?.items}
+                                        techniquesRange={techniquesRange}
+                                        filter={artFilter}
+                                        updateFilter={updateArtFilter}
+                                    />
+                                </div>
+                                <div className="set__toolbar">
+                                    <SingleEditorToolbar tools={gridToolbar} ctx={tbCtx} />
+                                </div>
                             </div>
                             <div className="catalog-editor__body">
                                 <ArtItemGrid
@@ -98,9 +102,6 @@ export default function CatalogEditorPage() {
                                     selectedItemId={selectedItemId}
                                     setItemSelected={onSelectHandler}
                                 />
-                                <div className="set__toolbar">
-                                    <SingleEditorToolbar tools={gridToolbar} ctx={tbCtx} />
-                                </div>
                             </div>
                         </div>
                     )}

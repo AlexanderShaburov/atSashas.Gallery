@@ -15,9 +15,14 @@ type Props = {
     headerText?: string;
     submitText?: string;
 
-    // NEW: Thumbnail selection
+    // Thumbnail selection. The handler receives a snapshot of the current
+    // in-progress metadata so the caller can persist entered-but-unsaved
+    // fields to the draft store BEFORE dispatching the journey. Without
+    // this, title/description entered in the form are lost on remount
+    // after the catalog roundtrip (StreamMetaComponent holds them in
+    // local useState only).
     currentThumbnail?: string;
-    onSelectThumbnail?: () => void;
+    onSelectThumbnail?: (pendingFields: StreamMetadata) => void;
 };
 
 export function StreamMetaComponent(props: Props) {
@@ -120,32 +125,44 @@ export function StreamMetaComponent(props: Props) {
                             stream thumbnail
                             <span className="csc__required">* required for publishing</span>
                         </div>
-                        {props.currentThumbnail ? (
-                            <div className="csc__thumbnailPreview">
-                                <img
-                                    src={props.currentThumbnail}
-                                    alt="Stream thumbnail"
-                                    className="csc__thumbnailImg"
-                                />
+                        {(() => {
+                            const onSelectThumbnail = props.onSelectThumbnail!;
+                            const handleThumbClick = () => {
+                                onSelectThumbnail({
+                                    streamId: streamId ? streamId : generateId('stream'),
+                                    title: title.trim(),
+                                    tags,
+                                    description: description.trim() ? description.trim() : '',
+                                    thumbnail: props.currentThumbnail,
+                                });
+                            };
+                            return props.currentThumbnail ? (
+                                <div className="csc__thumbnailPreview">
+                                    <img
+                                        src={props.currentThumbnail}
+                                        alt="Stream thumbnail"
+                                        className="csc__thumbnailImg"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleThumbClick}
+                                        disabled={props.isLoading}
+                                        className="csc__thumbnailChange"
+                                    >
+                                        Change thumbnail
+                                    </button>
+                                </div>
+                            ) : (
                                 <button
                                     type="button"
-                                    onClick={props.onSelectThumbnail}
+                                    onClick={handleThumbClick}
                                     disabled={props.isLoading}
-                                    className="csc__thumbnailChange"
+                                    className="csc__thumbnailSelect"
                                 >
-                                    Change thumbnail
+                                    Select thumbnail from catalog
                                 </button>
-                            </div>
-                        ) : (
-                            <button
-                                type="button"
-                                onClick={props.onSelectThumbnail}
-                                disabled={props.isLoading}
-                                className="csc__thumbnailSelect"
-                            >
-                                Select thumbnail from catalog
-                            </button>
-                        )}
+                            );
+                        })()}
                     </label>
                 )}
 

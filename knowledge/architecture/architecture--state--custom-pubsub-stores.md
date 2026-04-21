@@ -2,7 +2,7 @@
 type: architecture
 scope: [state]
 status: active
-date: 2026-04-10
+date: 2026-04-18
 source_of_truth: true
 tags: [stores, state-management]
 ---
@@ -68,7 +68,7 @@ class EditSessionsDataStore extends BaseStore {
   get<T>(key: EditorKey | undefined): DraftSnapshot<T> | undefined;
   ensure<T>(key: EditorKey, initial: DraftSnapshot<T>): DraftSnapshot<T>;
   saveDraft<T>(key: EditorKey, draft: T): void;
-  setSnapshot<T>(key: EditorKey, snapshot: T): void;
+  setSnapshot<T>(key: EditorKey, snapshot: T): void;   // writes BOTH snapshot AND draft = snapshot
   commit<T>(key: EditorKey): void;
   clear(key: EditorKey): void;
   clearKind(kind: EditorKind): void;
@@ -76,6 +76,12 @@ class EditSessionsDataStore extends BaseStore {
 
 type DraftSnapshot<T> = { snapshot: T; draft: T; updatedAt: string };
 ```
+
+**Important:** `setSnapshot(key, data)` clobbers the existing draft as a side
+effect (it writes a fresh `DraftSnapshot<T>` with `draft: data`). Bootstraps
+that need to preserve an in-flight draft must capture it **before** calling
+`setSnapshot`. See the [Draft/snapshot pattern](../patterns/pattern--state--draft-snapshot.md)
+for the correct read-order.
 
 ## React integration
 

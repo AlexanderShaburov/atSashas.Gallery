@@ -1,12 +1,10 @@
 // src/features/admin/streams/streamEditorSession/StreamEditorSession.context.tsx
 
 import { MetaIntent } from '@/entities/common/lifecycle';
-import type { PublicStreamData } from '@/entities/publicStream';
 import type { StreamMetadata } from '@/entities/stream';
 import { StreamData, type StreamScreenMode } from '@/entities/stream';
 import { SaveLifecycle, StreamScreenModeStack } from '@/entities/stream/stream-editor-screen.types';
 import { getCollection } from '@/features/admin/blocks/api/blocksApi';
-import { publicStreamApi } from '@/features/admin/publicStream/api/publicStreamApi';
 import {
     useArrival,
     useDispatch,
@@ -69,8 +67,6 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
     // isLoading flag
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [pendingFocus, setPendingFocus] = useState<PendingFocus>(null);
-    // PublicStream state
-    const [publicStream, setPublicStream] = useState<PublicStreamData | null>(null);
 
     const metaIntent = useRef<MetaIntent>({ action: 'idle' });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -261,14 +257,6 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             // Renew streams list AFTER consuming the ticket
             await renewStreamsIndex();
 
-            // Load PublicStream
-            try {
-                const ps = await publicStreamApi.get();
-                setPublicStream(ps);
-            } catch (err) {
-                console.error('[STREAM BOOTSTRAP]: Failed to load PublicStream', err);
-            }
-
             // if no ticket -> it is new session from zero
             if (!arrivalTicket) {
                 console.log(`[STREAM BOOTSTRAP]: No ticket, calling resetSelectSession()`);
@@ -395,9 +383,21 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
                         console.log(`[BOOTSTRAP]: Thumbnail updated to ${v.loot.output.thumbUrl}`);
                     }
 
-                    // Return to metadata editor so user can see the updated thumbnail
-                    // Set metaIntent to 'edit' so the form knows this is an edit operation
-                    metaIntent.current = { action: 'edit' };
+                    // Return to metadata editor. Preserve the original intent
+                    // (create vs edit) by heuristic: if the stream doesn't yet
+                    // exist in the index, this is still a create flow — the
+                    // provisional draft was seeded by createNewStream. Without
+                    // this, the picker would flip a create into an orphan edit
+                    // and the stream would never be persisted to backend.
+                    {
+                        const currentStreamId = v.storeData.draft?.streamId ?? v.streamId;
+                        const existsInIndex = streamsIndexStore
+                            .getSnapshot()
+                            ?.some((s) => s.streamId === currentStreamId);
+                        metaIntent.current = existsInIndex
+                            ? { action: 'edit' }
+                            : { action: 'create' };
+                    }
                     pushMode({ kind: 'meta' });
                     break;
             }
@@ -497,25 +497,27 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
 
     const delStream = useCallback(
         async (streamId: string) => {
-            // Check if stream is published before deleting
-            let isPublished = false;
+            // Check if this stream is currently referenced on the homepage.
+            // After the Homepage Editor cutover, "is on homepage" replaces the
+            // legacy "is published" concept — there is no separate roster.
+            let isOnHomepage = false;
             try {
                 const deps = await streamsApi.checkDependencies(streamId);
-                isPublished = deps.isPublished;
+                isOnHomepage = deps.isOnHomepage;
             } catch (err) {
                 console.error('[delStream] Failed to check dependencies:', err);
                 // Continue with deletion even if check fails
             }
 
-            const warningMessage = isPublished
-                ? '⚠️ WARNING: This stream is currently PUBLISHED in the public gallery. Deleting it will remove it from the public site.'
+            const warningMessage = isOnHomepage
+                ? '⚠️ WARNING: This stream is featured on the Homepage. Deleting it will leave an orphan tile that must be removed via the Homepage Editor.'
                 : 'This will permanently delete the stream. This cannot be undone.';
 
-            const steps = isPublished
+            const steps = isOnHomepage
                 ? [
-                      'This stream is published and visible to the public.',
-                      'We will remove it from PublicStream.',
+                      'This stream is featured on the public homepage.',
                       'We will remove the stream JSON from storage.',
+                      'The homepage tile will become an orphan — remove it in the Homepage Editor.',
                       'We will refresh the streams list.',
                   ]
                 : [
@@ -524,33 +526,26 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
                   ];
 
             destructiveActionsStore.open({
-                title: isPublished ? '⚠️ Delete Published Stream' : 'Delete stream',
+                title: isOnHomepage ? '⚠️ Delete stream featured on Homepage' : 'Delete stream',
                 message: warningMessage,
-                dangerHint: isPublished
+                dangerHint: isOnHomepage
                     ? 'This stream is live on the public site!'
                     : 'Make sure it is not used as an event landing page.',
                 steps,
                 confirmLabel: 'Delete stream',
                 run: async () => {
-                    // If published, unpublish first
-                    if (isPublished) {
-                        try {
-                            await publicStreamApi.removeStream(streamId);
-                        } catch (err) {
-                            console.error('[delStream] Failed to unpublish:', err);
-                            // Continue with deletion anyway
-                        }
-                    }
                     await deleteStream(streamId);
                 },
-                onSuccess: () => {
+                onSuccess: async () => {
                     // Clear the store data for the deleted stream
                     const key: EditorKey = { kind: 'stream', id: streamId };
                     editSessionsDataStore.clear(key);
                     unsavedChangesStore.clear(key);
 
-                    // Refresh the streams list
-                    renewStreamsIndex();
+                    // Await the index refresh so downstream editors (HomeEditor)
+                    // see the deletion on next mount — otherwise orphan state can
+                    // race the navigation.
+                    await renewStreamsIndex();
 
                     // Reset to select mode
                     resetSelectSession();
@@ -559,50 +554,6 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         },
         [renewStreamsIndex, resetSelectSession],
     );
-
-    // *************** PUBLISH/UNPUBLISH STREAM ***************
-
-    // Check if current stream is published
-    const isPublished = useMemo(() => {
-        if (!selectedStreamId || !publicStream) return false;
-        return publicStream.streamIds.includes(selectedStreamId);
-    }, [selectedStreamId, publicStream]);
-
-    const publishStream = useCallback(async () => {
-        if (!selectedStreamId || !draft) return;
-
-        // Validate thumbnail exists
-        if (!draft.thumbnail) {
-            alert('Cannot publish stream without thumbnail. Please select a thumbnail first.');
-            return;
-        }
-
-        try {
-            console.log(`[publishStream]: Publishing stream ${selectedStreamId}`);
-            const updated = await publicStreamApi.addStream(selectedStreamId);
-            setPublicStream(updated);
-
-            console.log(`[publishStream]: Stream published successfully`);
-        } catch (err) {
-            console.error('[publishStream]: Failed to publish stream', err);
-            alert(`Failed to publish stream: ${err}`);
-        }
-    }, [selectedStreamId, draft]);
-
-    const unpublishStream = useCallback(async () => {
-        if (!selectedStreamId || !draft) return;
-
-        try {
-            console.log(`[unpublishStream]: Unpublishing stream ${selectedStreamId}`);
-            const updated = await publicStreamApi.removeStream(selectedStreamId);
-            setPublicStream(updated);
-
-            console.log(`[unpublishStream]: Stream unpublished successfully`);
-        } catch (err) {
-            console.error('[unpublishStream]: Failed to unpublish stream', err);
-            alert(`Failed to unpublish stream: ${err}`);
-        }
-    }, [selectedStreamId, draft]);
 
     // *************** SAVE STREAM ***************
     const popIfTopIs = useCallback((kind: StreamScreenMode['kind']) => {
@@ -626,6 +577,20 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         },
         [isJourney, returnHome],
     );
+
+    // ── Journey: select-mode return (used by Homepage Editor's Add Stream flow) ──
+    const selectAndReturn = useCallback(
+        (streamId: string) => {
+            if (!isJourney) return;
+            returnHome('stream', { ok: true, id: streamId });
+        },
+        [isJourney, returnHome],
+    );
+
+    const cancelSelect = useCallback(() => {
+        if (!isJourney) return;
+        returnHome('stream', { ok: false, reason: 'cancel' });
+    }, [isJourney, returnHome]);
 
     const save = useCallback(async () => {
         if (!draft) return;
@@ -712,8 +677,29 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         [dispatch, selectedStreamId],
     );
 
-    const jumpToCatalogForThumbnail = useCallback(() => {
+    const jumpToCatalogForThumbnail = useCallback((pendingFields?: StreamMetadata) => {
         if (!selectedStreamId) return;
+
+        // Persist any in-progress form fields to the draft before the journey
+        // dispatches. StreamMetaComponent holds title/description/tags in local
+        // React state; those are lost on unmount unless flushed here. Without
+        // this, the user's typed values disappear when they return from the
+        // catalog roundtrip.
+        if (pendingFields) {
+            const key: EditorKey = { kind: 'stream', id: selectedStreamId };
+            const current = editSessionsDataStore.get<StreamData>(key)?.draft;
+            if (current) {
+                const merged: StreamData = {
+                    ...current,
+                    title: pendingFields.title ?? current.title,
+                    tags: pendingFields.tags ?? current.tags,
+                    description: pendingFields.description ?? current.description,
+                    // thumbnail intentionally NOT overwritten here — journey
+                    // return will set it from the picker's loot.
+                };
+                editSessionsDataStore.saveDraft<StreamData>(key, merged);
+            }
+        }
 
         const returnTo: ReturnAddress = {
             editor: 'stream',
@@ -753,10 +739,30 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
         pushMode({ kind: 'meta' });
     }, [pushMode]);
 
-    // Switch UI to new Stream form:
+    // Switch UI to new Stream form. Pre-generate a provisional streamId and
+    // seed an empty draft in editSessionsDataStore so the thumbnail picker
+    // (which dispatches a journey keyed on selectedStreamId) works during
+    // create. On submit, requestNewStream POSTs with this provisional id.
     const createNewStream = useCallback(() => {
         console.log(`[StreamEditorSession]: Create new stream called`);
         resetSelectSession();
+        const provisionalId = generateId('stream');
+        const now = nowIso();
+        const emptyDraft: StreamData = {
+            streamId: provisionalId,
+            title: '',
+            status: 'draft',
+            tags: [],
+            description: '',
+            thumbnail: '',
+            version: 1,
+            createdAt: now,
+            updatedAt: now,
+            blockIds: [],
+        };
+        const key: EditorKey = { kind: 'stream', id: provisionalId };
+        editSessionsDataStore.saveDraft<StreamData>(key, emptyDraft);
+        setSelectedStreamId(provisionalId);
         metaIntent.current = { action: 'create' };
         pushMode({ kind: 'meta' });
     }, [pushMode, resetSelectSession]);
@@ -1040,8 +1046,6 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             isValid,
             isDirty,
             isJourney,
-            isPublished,
-            publicStream,
             save,
             onApply,
             addBlock,
@@ -1050,6 +1054,8 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             exit,
             currentStack,
             selectStream,
+            selectAndReturn,
+            cancelSelect,
             createNewStream,
             delStream,
             updateTags,
@@ -1057,8 +1063,6 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             editBlock,
             editMetadata,
             commitMetaEditor,
-            publishStream,
-            unpublishStream,
             selectThumbnail: jumpToCatalogForThumbnail,
         }),
         [
@@ -1070,8 +1074,6 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             isValid,
             isDirty,
             isJourney,
-            isPublished,
-            publicStream,
             save,
             onApply,
             addBlock,
@@ -1080,6 +1082,8 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             exit,
             currentStack,
             selectStream,
+            selectAndReturn,
+            cancelSelect,
             createNewStream,
             delStream,
             updateTags,
@@ -1087,8 +1091,6 @@ export function StreamEditorSessionProvider({ children }: ProviderProps) {
             editBlock,
             editMetadata,
             commitMetaEditor,
-            publishStream,
-            unpublishStream,
             jumpToCatalogForThumbnail,
         ],
     );

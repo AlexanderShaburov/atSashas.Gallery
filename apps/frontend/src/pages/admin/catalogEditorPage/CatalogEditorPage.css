@@ -7,6 +7,22 @@
     background: var(--bg);
 }
 
+/* Sticky header: filter + action toolbar both above the grid. Kept visible
+   while the grid scrolls so selection / actions stay reachable. The offset
+   `top: var(--header-h)` clears the global AdminHeader (also sticky, z-20)
+   so this header docks immediately beneath it instead of being hidden. */
+.catalog-editor__sticky-header {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+}
+
 /* ===== Header ===== */
 .catalog-page header {
     display: flex;

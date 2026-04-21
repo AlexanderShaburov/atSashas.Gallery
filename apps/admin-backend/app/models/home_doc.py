@@ -4,28 +4,33 @@ from __future__ import annotations
 
 from typing import Annotated, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 
 class HomeStreamRef(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    # extra="forbid" stays; streamSlug is accepted via validation alias, not as "extra".
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     kind: Literal["streamRef"] = "streamRef"
-    streamSlug: str = Field(min_length=1)
-    size: Literal["S", "M", "L"] = "M"
+    # Canonical: streamId. Legacy data may still key it as streamSlug; both are accepted on read.
+    streamId: str = Field(
+        min_length=1,
+        validation_alias=AliasChoices("streamId", "streamSlug"),
+    )
+    # Legacy; tolerated on read, not emitted on write when None (see repo save-path).
+    size: Optional[Literal["S", "M", "L"]] = None
     thumbOverrideUrl: Optional[str] = None
 
 
-class HomeBlockRef(BaseModel):
+class HomeEventRef(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    kind: Literal["blockRef"] = "blockRef"
-    blockId: str = Field(min_length=1)
-    size: Literal["S", "M", "L"] = "M"
+    kind: Literal["eventRef"] = "eventRef"
+    eventPageId: str = Field(min_length=1)
 
 
 HomeItem = Annotated[
-    Union[HomeStreamRef, HomeBlockRef],
+    Union[HomeStreamRef, HomeEventRef],
     Field(discriminator="kind"),
 ]
 

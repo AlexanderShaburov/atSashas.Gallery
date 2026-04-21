@@ -1,0 +1,65 @@
+{
+  "version": 3,
+  "updatedAt": "2026-04-04T08:21:10.860229+00:00",
+  "order": [
+    "tv-20260404-nnj170"
+  ],
+  "items": {
+    "tv-20260404-nnj170": {
+      "id": "tv-20260404-nnj170",
+      "lifecycle": "draft",
+      "dateCreated": "2026-04-04",
+      "title": {
+        "en": "First try",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "subtitle": {
+        "en": "I understand nothing",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "body": {
+        "en": "Draw the current architecture of the composable content system in Draw.io, covering:\n\ndomain entities and relationships,\nadmin UI flows,\nfrontend/backend data flow,\ncontent lifecycle for ArtItem, MediaItem, and TextVisual.\n\nHighlight:\n\nwhat is already implemented,\nwhat is partially implemented,\nwhat is still missing.\n\nPay special attention to slot-binding workflow and how different content types enter a ComposableBlock.",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "caption": {
+        "en": "test text",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "background": {
+        "kind": "gradient",
+        "imageUrl": null,
+        "color": null,
+        "gradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+      },
+      "typography": {
+        "fontFamily": "Inter",
+        "fontSize": 16,
+        "fontWeight": 400,
+        "textAlign": "left",
+        "lineHeight": 1.5,
+        "color": "#000000"
+      },
+      "textBox": {
+        "x": 10.0,
+        "y": 10.0,
+        "width": 80.0,
+        "height": 80.0,
+        "padding": 16.0
+      },
+      "overlay": null,
+      "tags": []
+    }
+  }
+}

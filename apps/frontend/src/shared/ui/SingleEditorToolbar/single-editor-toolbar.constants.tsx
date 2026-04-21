@@ -4,16 +4,13 @@ import { ReactNode } from 'react';
 import type { ToolKey, ToolbarCtx } from './single-editor-toolbar.types';
 import {
     AddBlockButton,
-    AddEventButton,
     ApplyButton,
     CustomizeButton,
     DeleteButton,
     EditMetadata,
     ExitButton,
-    PublishButton,
     SaveButton,
     TagsEditor,
-    UnpublishButton,
 } from './ToolbarElements';
 
 import { resolveAnyClick } from '@/shared/lib/resolvers/resolvers';
@@ -29,9 +26,6 @@ type ToolRenderer = (ctx: ToolbarCtx) => ReactNode | null;
 
 export const TOOL_REGISTRY: Record<ToolKey, ToolRenderer> = {
     add: (ctx) => (ctx.onAdd ? <AddBlockButton onClick={resolveAnyClick(ctx.onAdd)} /> : null),
-
-    addEvent: (ctx) =>
-        ctx.onAddEvent ? <AddEventButton onClick={resolveAnyClick(ctx.onAddEvent)} /> : null,
 
     customize: (ctx) =>
         ctx.onCustomize ? <CustomizeButton onClick={resolveAnyClick(ctx.onCustomize)} /> : null,
@@ -57,15 +51,5 @@ export const TOOL_REGISTRY: Record<ToolKey, ToolRenderer> = {
     tags: (ctx) =>
         ctx.onChangeTags ? (
             <TagsEditor onCommit={resolveAnyClick(ctx.onChangeTags)} tags={ctx.tags ?? []} />
-        ) : null,
-
-    publish: (ctx) =>
-        ctx.onPublish && !ctx.isPublished ? (
-            <PublishButton onPublish={resolveAnyClick(ctx.onPublish)} />
-        ) : null,
-
-    unpublish: (ctx) =>
-        ctx.onUnpublish && ctx.isPublished ? (
-            <UnpublishButton onUnpublish={resolveAnyClick(ctx.onUnpublish)} />
         ) : null,
 };

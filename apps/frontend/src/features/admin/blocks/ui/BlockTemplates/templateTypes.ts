@@ -16,6 +16,13 @@ type TemplateBlock =
     | { kind: 'cta'; label: string }
     | { kind: 'eventCta'; label: string };
 
+// Visible template catalog. Historical `text`, `cta`, and `eventCta` entries
+// were retired (no complete editor surface; homepage no longer supports
+// block-level events). Composable templates were also retired: they render
+// with an empty `slots: []` array and don't respond to selection in the grid
+// ("ghost fragments"). All underlying factory functions remain below for
+// data that already uses those kinds in streams — reachable only through
+// existing block data, not through creating new ones.
 export const TEMPLATE_BLOCKS: TemplateBlock[] = [
     // --- Gallery layouts ---
     { kind: 'gallery', layout: 'single', label: 'Single' },
@@ -24,20 +31,6 @@ export const TEMPLATE_BLOCKS: TemplateBlock[] = [
     { kind: 'gallery', layout: 'triptychLeft', label: 'Triptych (Left)' },
     { kind: 'gallery', layout: 'triptychRight', label: 'Triptych (Right)' },
     { kind: 'gallery', layout: 'triptychHorizontal', label: 'Triptych (Horizontal)' },
-
-    // --- Text block ---
-    { kind: 'text', label: 'Text' },
-
-    // --- CTA block ---
-    { kind: 'cta', label: 'CTA' },
-
-    // --- Event CTA block ---
-    { kind: 'eventCta', label: 'Event CTA' },
-
-    // --- Composable block (mixed content) ---
-    { kind: 'composable', layout: 'single', label: 'Composable (Single)' },
-    { kind: 'composable', layout: 'pairHorizontal', label: 'Composable (Pair)' },
-    { kind: 'composable', layout: 'triptychHorizontal', label: 'Composable (Triptych)' },
 ];
 export function createGalleryTemplateBlock(layout: GalleryLayout): GalleryBlock {
     return {

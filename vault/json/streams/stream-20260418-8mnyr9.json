@@ -1,0 +1,15 @@
+{
+  "streamId": "stream-20260418-8mnyr9",
+  "title": "dtrim",
+  "status": "ready",
+  "tags": [],
+  "description": "asdfga",
+  "thumbnail": "/media/arts/fullsize/art-20251226-52p602.jpeg",
+  "version": 2,
+  "createdAt": "2026-04-18T13:42:42.257696+00:00",
+  "updatedAt": "2026-04-18T13:43:02.291992+00:00",
+  "blockIds": [
+    "block-gallery-single-79773b37",
+    "block-gallery-triptychleft-0a0f02a9"
+  ]
+}

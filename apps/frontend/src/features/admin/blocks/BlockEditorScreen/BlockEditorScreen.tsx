@@ -26,6 +26,7 @@ export function BlockEditor() {
         setFilter((prev) => ({ ...prev, ...patch }));
     };
 
+
     const toolbarProps = {
         canSave: session.canSave,
         isSaving: session.saving,
@@ -100,7 +101,6 @@ export function BlockEditor() {
                             onHit={testHit}
                             setValue={session.setDraft}
                             toolbarProps={toolbarProps}
-                            addEventAndJourney={session.addEventAndJourney}
                         />
                     </div>
                 </div>

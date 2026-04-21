@@ -1,6 +1,6 @@
 {
-  "catalogVersion": 128,
-  "updatedAt": "2026-03-06T15:31:26.629987+00:00",
+  "catalogVersion": 137,
+  "updatedAt": "2026-04-11T17:36:36.161371+00:00",
   "items": {
     "art-20251118-4gpfj3": {
       "id": "art-20251118-4gpfj3",
@@ -106,7 +106,9 @@
         },
         "alt": null
       },
-      "techniques": null,
+      "techniques": [
+        "paper cut"
+      ],
       "availability": null,
       "dimensions": null,
       "alt": null,
@@ -186,7 +188,7 @@
     },
     "art-20251226-tfemnz": {
       "id": "art-20251226-tfemnz",
-      "dateCreated": "2025-12-26",
+      "dateCreated": "2025-07-16",
       "images": {
         "full": "/media/arts/fullsize/art-20251226-tfemnz.jpeg",
         "preview": {
@@ -196,10 +198,22 @@
         },
         "alt": null
       },
-      "techniques": null,
+      "techniques": [
+        "mixed media (general)"
+      ],
       "availability": null,
-      "dimensions": null,
-      "alt": null,
+      "dimensions": {
+        "width": 4.0,
+        "height": 4.0,
+        "unit": "in"
+      },
+      "alt": {
+        "en": "hey-lo ",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
       "title": {
         "en": "jey lo",
         "ru": "",
@@ -207,10 +221,16 @@
         "es": null,
         "pt": null
       },
-      "price": null,
-      "series": null,
-      "tags": null,
-      "notes": null
+      "price": {
+        "amount": 40.0,
+        "currency": "ILS"
+      },
+      "series": "girls",
+      "tags": [
+        "Jey lo",
+        "yo-ho-ho"
+      ],
+      "notes": "Looks like music albume cover."
     },
     "art-20251226-tk5nhr": {
       "id": "art-20251226-tk5nhr",
@@ -1398,38 +1418,6 @@
       "tags": [],
       "notes": null
     },
-    "art-20260301-jwprkj": {
-      "id": "art-20260301-jwprkj",
-      "dateCreated": "2026-03-01",
-      "images": {
-        "full": "/media/arts/fullsize/art-20260301-jwprkj.jpg",
-        "preview": {
-          "avif": "/media/arts/previews/art-20260301-jwprkj.avif",
-          "webp": "/media/arts/previews/art-20260301-jwprkj.webp",
-          "jpeg": "/media/arts/previews/art-20260301-jwprkj.jpeg"
-        },
-        "alt": null
-      },
-      "techniques": [],
-      "availability": "available",
-      "dimensions": {
-        "width": 0.0,
-        "height": 0.0,
-        "unit": "cm"
-      },
-      "alt": null,
-      "title": {
-        "en": "Workshop",
-        "ru": "",
-        "it": null,
-        "es": null,
-        "pt": null
-      },
-      "price": null,
-      "series": null,
-      "tags": [],
-      "notes": null
-    },
     "art-20260301-mc6jpn": {
       "id": "art-20260301-mc6jpn",
       "dateCreated": "2026-03-01",
@@ -1593,15 +1581,47 @@
         "flight"
       ],
       "notes": null
+    },
+    "art-20260411-tztz4j": {
+      "id": "art-20260411-tztz4j",
+      "dateCreated": "2026-04-11",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260411-tztz4j.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260411-tztz4j.avif",
+          "webp": "/media/arts/previews/art-20260411-tztz4j.webp",
+          "jpeg": "/media/arts/previews/art-20260411-tztz4j.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [],
+      "availability": "available",
+      "dimensions": {
+        "width": 0.0,
+        "height": 0.0,
+        "unit": "cm"
+      },
+      "alt": null,
+      "title": {
+        "en": "jPhone",
+        "ru": "",
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": null,
+      "series": null,
+      "tags": [],
+      "notes": null
     }
   },
   "order": [
+    "art-20260411-tztz4j",
     "art-20260306-wm98ms",
     "art-20260304-cx75d8",
     "art-20260301-00gt34",
     "art-20260301-3skj9q",
     "art-20260301-mc6jpn",
-    "art-20260301-jwprkj",
     "art-20260301-pr930k",
     "art-20260228-8xhfzf",
     "art-20260214-6fbtsp",

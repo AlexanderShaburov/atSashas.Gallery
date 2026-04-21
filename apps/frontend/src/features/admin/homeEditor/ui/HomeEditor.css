@@ -1,0 +1,268 @@
+.hea {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.hea__loading,
+.hea__empty {
+    padding: 2rem;
+    text-align: center;
+    color: #666;
+}
+
+.hea__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.hea__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.hea__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.hea__compose {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.hea__banner {
+    padding: 0.75rem 1rem;
+    background: #fff8e1;
+    border: 1px solid #f0d089;
+    border-radius: 0.4rem;
+    color: #6d4a00;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.hea__list-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.hea__section-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.hea__count {
+    color: #888;
+    font-weight: 400;
+    margin-left: 0.25rem;
+}
+
+.hea__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────── */
+
+.hea__btn {
+    padding: 0.4rem 0.85rem;
+    border: 1px solid #ccc;
+    border-radius: 0.3rem;
+    /* Explicit colors to survive dark-mode color-scheme inheritance — without
+       them, browser default `color: inherit` renders white-on-white when the
+       user-agent picks dark for the page. */
+    background: #fff;
+    color: #111;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.hea__btn:hover {
+    background: #f5f5f5;
+}
+
+.hea__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.hea__btn--primary {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+.hea__btn--primary:hover {
+    background: #1d4ed8;
+}
+
+.hea__btn--secondary {
+    background: #fafafa;
+}
+
+.hea__btn--add {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+}
+
+/* ── Tile ──────────────────────────────────────────────────────── */
+
+.hea-tile {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #fff;
+    color: #111;
+    border: 1px solid #e4e4e4;
+    border-radius: 0.4rem;
+}
+
+.hea-tile--orphan {
+    border-color: #e0b34f;
+    background: #fffaf0;
+}
+
+.hea-tile--legacy {
+    border-color: #c0c0c0;
+    background: #fafafa;
+}
+
+.hea-tile__drag {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: grab;
+    font-size: 1rem;
+    color: #888;
+    line-height: 1;
+}
+
+.hea-tile__drag:active {
+    cursor: grabbing;
+}
+
+.hea-tile__body {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.hea-tile__thumb {
+    width: 4rem;
+    height: 4rem;
+    object-fit: cover;
+    border-radius: 0.3rem;
+    flex-shrink: 0;
+}
+
+.hea-tile__thumb--empty {
+    background: #eee;
+}
+
+.hea-tile__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.hea-tile__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hea-tile__meta {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #777;
+}
+
+.hea-tile__badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.25rem;
+    background: #eef2f7;
+    color: #334;
+    align-self: flex-start;
+}
+
+.hea-tile__badge--event {
+    background: #efe8ff;
+    color: #4a2d8a;
+}
+
+.hea-tile__badge--legacy {
+    background: #f0e4d4;
+    color: #654d2d;
+}
+
+.hea-tile__badge--orphan {
+    background: #fbe2c2;
+    color: #7a4b0a;
+}
+
+.hea-tile__actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+.hea-tile__btn {
+    padding: 0.3rem 0.7rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    background: #fff;
+    color: #111;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.hea-tile__btn:hover {
+    background: #f5f5f5;
+}
+
+.hea-tile__btn--danger {
+    color: #b91c1c;
+    border-color: #e0b3b3;
+}
+
+.hea-tile__btn--danger:hover {
+    background: #fff1f1;
+}
+
+.hea-tile__btn--primary {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+.hea-tile__btn--primary:hover {
+    background: #1d4ed8;
+}

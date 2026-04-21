@@ -12,7 +12,6 @@ from app.routers.streams import streams
 from app.routers.enrollments import enrollments
 from app.routers.events import events
 from app.routers.event_pages import event_pages
-from app.routers.public_stream import public_stream
 from app.routers.home_doc import home_doc
 from app.routers.text_visuals import text_visuals
 from app.routers.media_items import media_items
@@ -77,8 +76,6 @@ app.include_router(blocks.router)
 app.include_router(public_blocks.public_router)  # Public blocks endpoint
 app.include_router(streams.public_router)  # Public streams endpoint
 app.include_router(streams.router)  # Admin streams endpoints
-app.include_router(public_stream.public_router)  # Public endpoint
-app.include_router(public_stream.admin_router)  # Admin endpoints
 app.include_router(events.public_router)  # Public events endpoint
 app.include_router(events.admin_router)  # Admin events endpoints
 app.include_router(enrollments.public_router)  # Public enrollment + Stripe webhook

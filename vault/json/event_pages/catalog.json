@@ -1,0 +1,153 @@
+{
+  "version": 55,
+  "updatedAt": "2026-04-21T16:53:10.993195+00:00",
+  "pages": {
+    "event-20260421-ax8x2r": {
+      "id": "event-20260421-ax8x2r",
+      "slug": "event-20260421-ax8x2r",
+      "preset": "workshop",
+      "status": "scheduled",
+      "title": {
+        "en": "New Workshop",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "description": {
+        "en": "shopshopshop shopshopshop shopshopshop shopshopshop ",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "location": {
+        "en": "Vatican City",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "ctaLabel": {
+        "en": "Reserve Your Spot",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "enrollments": {},
+      "eventId": "event-20260421-ax8x2r",
+      "ctaAction": {
+        "kind": "register",
+        "paid": true,
+        "capacity": 3
+      },
+      "subtitle": {
+        "en": "shopshopshop"
+      },
+      "ctaBridge": {
+        "en": "You'll leave with your own finished piece — and the confidence to keep painting."
+      },
+      "hostNote": {
+        "en": "shopshopshop shopshopshop shopshopshop "
+      },
+      "hostName": "shopshopshop ",
+      "dateStart": "2026-04-22",
+      "mapUrl": "https://maps.app.goo.gl/by5zrGXMr2Ftg1VS9",
+      "price": {
+        "amount": 100,
+        "currency": "EUR"
+      },
+      "capacity": 3,
+      "cancellationNote": {
+        "en": "Free cancelation up to 48 hours."
+      },
+      "heroImage": "art-20251118-4gpfj3",
+      "experienceImages": [
+        "media-20260411-qkwoc4"
+      ],
+      "resultsImages": [
+        "media-20260411-am996u",
+        "art-20260210-1ywd8q"
+      ]
+    },
+    "event-20260421-4scvhr": {
+      "id": "event-20260421-4scvhr",
+      "slug": "event-20260421-4scvhr",
+      "preset": "pleinAir",
+      "status": "scheduled",
+      "title": {
+        "en": "Плюй на эйр. ",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "description": {
+        "en": "Будем плевать на эйр и смотреть, что получится. ",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "location": {
+        "en": "Vatican City",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "ctaLabel": {
+        "en": "Join This Session",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "enrollments": {},
+      "eventId": null,
+      "ctaAction": {
+        "kind": "register",
+        "paid": true,
+        "capacity": 5
+      },
+      "subtitle": {
+        "en": "Веселая плей на эйр. "
+      },
+      "ctaBridge": {
+        "en": "Two mornings on the coast, and a sketchbook of paintings you made there."
+      },
+      "bridgeLine": {
+        "en": "Мы рады будем всем, кто может плеваться. "
+      },
+      "hostNote": {
+        "en": "Я тоже могу плеваться. "
+      },
+      "hostName": "Меня зовут Саша. ",
+      "dateStart": "2026-04-22",
+      "dateEnd": "2026-04-23",
+      "sessions": {
+        "en": "2 morning sessions"
+      },
+      "meetingPoint": {
+        "en": "Metro"
+      },
+      "mapUrl": "https://maps.app.goo.gl/by5zrGXMr2Ftg1VS9",
+      "price": {
+        "amount": 500,
+        "currency": "EUR"
+      },
+      "groupSize": 5,
+      "cancellationNote": {
+        "en": "No canceletion"
+      },
+      "heroImage": "art-20251120-jcsrbr",
+      "experienceImages": [
+        "art-20251118-4gpfj3"
+      ],
+      "resultsImages": [
+        "art-20251120-9td10a"
+      ]
+    }
+  }
+}

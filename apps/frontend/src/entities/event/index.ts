@@ -1,6 +1,16 @@
-export { EVENT_STATUSES, PAYMENT_STATUSES } from './event.types';
-export type { Enrollment, EventData, EventStatus, PaymentStatus } from './event.types';
+export { EVENT_STATUSES, PAYMENT_STATUSES } from './enrollment.types';
+export type { Enrollment, EventStatus, PaymentStatus } from './enrollment.types';
+export type { EventData } from './event.types';
 export type { EventCatalog } from './event-catalog.types';
+
+export { CTA_ACTION_KINDS, resolveCtaAction } from './ctaAction';
+export type {
+  CtaAction,
+  CtaActionExternal,
+  CtaActionInquiry,
+  CtaActionKind,
+  CtaActionRegister,
+} from './ctaAction';
 
 export { CREATION_DEFAULTS, RENDER_DEFAULTS } from './eventDefaults';
 export type { CreationDefaults, RenderDefaults } from './eventDefaults';

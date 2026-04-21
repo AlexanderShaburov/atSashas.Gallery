@@ -46,10 +46,10 @@ const tiles: Tile[] = [
         description: 'Manage reusable media assets.',
     },
     {
-        to: '/admin/public-stream',
-        title: 'Public Stream',
+        to: '/admin/home',
+        title: 'Homepage',
         emoji: '🌐',
-        description: 'Manage which streams are visible to public.',
+        description: 'Compose the public homepage: streams and events.',
     },
 ];
 

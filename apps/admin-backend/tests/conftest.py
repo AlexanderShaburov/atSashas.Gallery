@@ -118,17 +118,38 @@ SAMPLE_BLOCK_COLLECTION = {
     "order": ["block-text-abc12345"],
 }
 
-SAMPLE_PUBLIC_STREAM = {
-    "kind": "PublicStream",
-    "version": 1,
-    "streamIds": ["test-stream"],
-    "createdAt": "2025-01-01T00:00:00+00:00",
-    "updatedAt": "2025-01-01T00:00:00+00:00",
-}
-
 SAMPLE_CATALOG = {
     "items": {},
     "order": [],
+}
+
+SAMPLE_EVENT_PAGES = {
+    "version": 1,
+    "updatedAt": "2025-01-01T00:00:00+00:00",
+    "pages": {
+        "event-20260421-test01": {
+            "id": "event-20260421-test01",
+            "slug": "free-workshop",
+            "preset": "workshop",
+            "status": "scheduled",
+            "title": {"en": "Free Workshop"},
+            "description": {"en": "Test description"},
+            "location": {"en": "Studio"},
+            "ctaLabel": {"en": "Enroll"},
+            "enrollments": {},
+        },
+        "event-20260421-test02": {
+            "id": "event-20260421-test02",
+            "slug": "draft-workshop",
+            "preset": "workshop",
+            "status": "draft",
+            "title": {"en": "Draft Workshop"},
+            "description": {"en": "Test description"},
+            "location": {"en": "Studio"},
+            "ctaLabel": {"en": "Enroll"},
+            "enrollments": {},
+        },
+    },
 }
 
 
@@ -159,12 +180,12 @@ def _seed_vault() -> None:
         SAMPLE_BLOCK_COLLECTION,
     )
     _write_json(
-        os.path.join(_JSON_DIR, "public_stream.json"),
-        SAMPLE_PUBLIC_STREAM,
-    )
-    _write_json(
         os.path.join(_JSON_DIR, "art_catalog.json"),
         SAMPLE_CATALOG,
+    )
+    _write_json(
+        os.path.join(_JSON_DIR, "event_pages", "catalog.json"),
+        SAMPLE_EVENT_PAGES,
     )
 
 

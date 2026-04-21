@@ -16,6 +16,7 @@ import type { JourneyHome } from '@/shared/nav/journeySession.types';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { generateId } from '@/shared/lib/id/generateId';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { invalidateEventPagesCache } from '@/features/public/api/eventPagesModule';
 import { eventPagesAdminApi, refreshEventPages } from '../api/eventPagesAdminApi';
 
 // ---------------------------------------------------------------------------
@@ -364,6 +365,10 @@ export function EventPageEditorSessionProvider({ children }: { children: React.R
       // Sync snapshot to match draft (clears dirty)
       commit();
       await refreshEventPages();
+      // Invalidate the public-side module cache so public renderers
+      // (and any preview path that went through /public/event-pages)
+      // observe the save on next load.
+      invalidateEventPagesCache();
 
       // In journey mode, return after save
       if (isJourney) {
@@ -390,6 +395,7 @@ export function EventPageEditorSessionProvider({ children }: { children: React.R
         if (persisted) {
           await eventPagesAdminApi.remove(id);
           await refreshEventPages();
+          invalidateEventPagesCache();
         }
         // Clear local session (works for both persisted and unsaved drafts)
         if (editorKey) clearSession();

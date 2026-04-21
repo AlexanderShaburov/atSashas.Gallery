@@ -1,1 +1,1 @@
-export type { HomeBlockRef, HomeDoc, HomeItem, HomeStreamRef } from './homeDoc.types';
+export type { HomeDoc, HomeEventRef, HomeItem, HomeStreamRef } from './homeDoc.types';

@@ -9,13 +9,6 @@ export function AddBlockButton({ onClick }: { onClick: () => void }) {
         </button>
     );
 }
-export function AddEventButton({ onClick }: { onClick: () => void }) {
-    return (
-        <button type="button" className="set-btn" onClick={onClick}>
-            Add Event
-        </button>
-    );
-}
 export function CustomizeButton({ onClick }: { onClick: () => void }) {
     return (
         <button type="button" className="set-btn" onClick={onClick}>
@@ -45,21 +38,6 @@ export function DeleteButton({ onDelete }: { onDelete: () => void }) {
     );
 }
 
-export function PublishButton({ onPublish }: { onPublish: () => void }) {
-    return (
-        <button type="button" className="set-btn set-btn--success" onClick={onPublish}>
-            Publish
-        </button>
-    );
-}
-
-export function UnpublishButton({ onUnpublish }: { onUnpublish: () => void }) {
-    return (
-        <button type="button" className="set-btn set-btn--warning" onClick={onUnpublish}>
-            Unpublish
-        </button>
-    );
-}
 export function ExitButton({ onExit }: { onExit: () => void }) {
     return (
         <button type="button" className="set-btn" onClick={onExit}>

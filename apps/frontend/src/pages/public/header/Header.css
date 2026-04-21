@@ -1,10 +1,14 @@
+/* Header surface. Mirrors the footer's treatment (var(--card-bg) + 1px
+   rule) so the page reads as a framed composition: lifted top strip,
+   body in quieter --bg where art lives, lifted bottom strip. */
 .headerContainer {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  background: var(--bg);
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
   width: 100%;
   height: var(--header-h);
   display: grid;

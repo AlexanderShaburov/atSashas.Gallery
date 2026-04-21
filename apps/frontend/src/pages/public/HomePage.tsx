@@ -1,10 +1,10 @@
 import '@/pages/public/Home.css';
 import { useHomeFeed } from '@/features/public/hooks/useHomeFeed';
-import { HomeBlockTile } from '@/features/public/ui/HomeBlockTile/HomeBlockTile';
+import { HomeEventTile } from '@/features/public/ui/HomeEventTile/HomeEventTile';
 import { Link } from 'react-router-dom';
 
 export default function HomePage({ mode = 'public' }: { mode?: 'public' | 'preview' }) {
-    const { homeDoc, streams, blocks, loading, error, isPreview } = useHomeFeed(mode);
+    const { homeDoc, streams, events, loading, error, isPreview } = useHomeFeed(mode);
 
     if (loading) {
         return (
@@ -40,19 +40,18 @@ export default function HomePage({ mode = 'public' }: { mode?: 'public' | 'previ
             <div className="tiles">
                 {homeDoc.items.map((item, index) => {
                     if (item.kind === 'streamRef') {
-                        const stream = streams.get(item.streamSlug);
+                        const stream = streams.get(item.streamId);
                         if (!stream) return null;
 
                         const posx = 50 + (index % 2) * 10 - 5;
                         const posy = 50 + Math.floor(index / 2) * 5;
                         const zoom = 1.2 + (index % 3) * 0.1;
-                        const sizeClass = item.size === 'L' ? ' tile--large' : '';
 
                         return (
-                            <nav key={`stream-${item.streamSlug}`} className="home-nav">
+                            <nav key={`stream-${item.streamId}`} className="home-nav">
                                 <Link
                                     to={`${linkPrefix}/${stream.streamId}`}
-                                    className={`tile${sizeClass}`}
+                                    className="tile"
                                     aria-label={stream.title}
                                     style={
                                         {
@@ -82,18 +81,14 @@ export default function HomePage({ mode = 'public' }: { mode?: 'public' | 'previ
                         );
                     }
 
-                    if (item.kind === 'blockRef') {
-                        const block = blocks.get(item.blockId);
-                        if (!block) {
-                            console.warn('[HomePage] Block not resolved:', item.blockId);
-                            return null;
-                        }
-
+                    if (item.kind === 'eventRef') {
+                        const page = events.get(item.eventPageId);
+                        if (!page) return null;
                         return (
-                            <HomeBlockTile
-                                key={`block-${item.blockId}`}
-                                block={block}
-                                size={item.size}
+                            <HomeEventTile
+                                key={`event-${item.eventPageId}`}
+                                page={page}
+                                mode={isPreview ? 'preview' : 'public'}
                             />
                         );
                     }

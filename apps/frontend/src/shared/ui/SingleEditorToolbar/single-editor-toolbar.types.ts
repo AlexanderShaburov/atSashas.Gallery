@@ -2,29 +2,24 @@
 
 export type ToolKey =
     | 'add'
-    | 'addEvent'
     | 'customize'
     | 'edit'
     | 'delete'
     | 'apply'
     | 'save'
     | 'exit'
-    | 'tags'
-    | 'publish'
-    | 'unpublish';
+    | 'tags';
 
 export type ToolbarCtx = {
     // Derived states:
     canSave: boolean;
     isSaving: boolean;
-    isPublished?: boolean;
 
     // Toolbar data access:
     tags?: string[];
 
     // Toolbar action handlers:
     onAdd?: () => void;
-    onAddEvent?: () => void;
     onCustomize?: () => void;
     onEdit?: () => void;
     onDelete?: () => void;
@@ -32,8 +27,6 @@ export type ToolbarCtx = {
     save?: () => void;
     exit: () => void;
     onChangeTags?: (tags: string[]) => void;
-    onPublish?: () => void;
-    onUnpublish?: () => void;
 };
 export type CatalogToolbarModel = {
     // Derived:

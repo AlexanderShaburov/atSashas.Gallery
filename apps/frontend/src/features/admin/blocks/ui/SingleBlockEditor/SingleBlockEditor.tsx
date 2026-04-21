@@ -1,5 +1,5 @@
 //src/features/admin/blocks/ui/SingleBlockEditor/SingleBlockEditor.tsx
-import { type Block, type BlockHitEvent, type ComposableBlock, type CtaBlock, type EventCtaBlock, type GalleryBlock, type GalleryLayout, type ItemPosition, type TextBlock } from '@/entities/block';
+import { type Block, type BlockHitEvent, type ComposableBlock, type CtaBlock, type EventCtaBlock, type GalleryBlock, type TextBlock } from '@/entities/block';
 import {
     ComposableBlockComponent,
     CtaBlockComponent,
@@ -9,17 +9,8 @@ import {
 } from '@/features/admin/shared/ui/BlockPreview';
 import { ToolKey } from '@/shared/ui/SingleEditorToolbar/single-editor-toolbar.types';
 import { SingleEditorToolbar } from '@/shared/ui/SingleEditorToolbar/SingleEditorToolbar';
-import { JSX, useCallback } from 'react';
+import { JSX } from 'react';
 import './SingleBlockEditor.css';
-
-const EVENT_TARGET_SLOT: Record<GalleryLayout, ItemPosition> = {
-    single: 'Center',
-    pairHorizontal: 'Right',
-    pairVertical: 'Bottom',
-    triptychHorizontal: 'Center',
-    triptychLeft: 'Right',
-    triptychRight: 'Left',
-};
 
 type Props = {
     item: Block;
@@ -37,9 +28,8 @@ type Props = {
         onApply: () => void;
         onCustomize?: () => void;
     };
-    addEventAndJourney?: (pos: ItemPosition) => void;
 };
-export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEventAndJourney }: Props) {
+export function SingleBlockEditor({ item, onHit, setValue, toolbarProps }: Props) {
     let content: JSX.Element | undefined = undefined;
     const { isJourney, ...tbCtx } = toolbarProps;
 
@@ -50,22 +40,14 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEven
     }
 
     const isGallery = item.blockKind === 'gallery';
-    const galleryLayout = isGallery ? (item as GalleryBlock).layout : undefined;
-    const hasEvent = isGallery
-        && (item as GalleryBlock).items.some((i) => i.kind === 'eventCta');
-
-    const onAddEvent = useCallback(() => {
-        if (!addEventAndJourney || !galleryLayout) return;
-        addEventAndJourney(EVENT_TARGET_SLOT[galleryLayout]);
-    }, [addEventAndJourney, galleryLayout]);
-
-    const showAddEvent = isGallery && !hasEvent;
     const showCustomize = isGallery && !isJourney;
+    // Legacy "Add Event" toolbar entry has been retired. Block-level event
+    // attachment for the homepage is no longer supported; events are composed
+    // at the homepage level via Homepage Editor.
     const tbContent: ToolKey[] = isJourney
-        ? ['delete', ...(showAddEvent ? ['addEvent' as ToolKey] : []), 'tags', 'exit', 'apply', 'save']
+        ? ['delete', 'tags', 'exit', 'apply', 'save']
         : [
               'delete',
-              ...(showAddEvent ? ['addEvent' as ToolKey] : []),
               ...(showCustomize ? ['customize' as ToolKey] : []),
               'tags',
               'exit',
@@ -131,7 +113,7 @@ export function SingleBlockEditor({ item, onHit, setValue, toolbarProps, addEven
             </div>
             <SingleEditorToolbar
                 tools={tbContent}
-                ctx={{ ...tbCtx, ...(isGallery && addEventAndJourney ? { onAddEvent } : {}) }}
+                ctx={tbCtx}
             />
         </div>
     );

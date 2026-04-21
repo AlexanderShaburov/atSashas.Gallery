@@ -2,56 +2,203 @@
   border-top: 1px solid var(--border);
   background: var(--card-bg);
   color: var(--muted);
-  padding: 20px var(--gutter) 28px;
+  padding: 40px var(--gutter) 28px;
   max-width: calc(var(--page-max) + 2 * var(--gutter));
   margin-inline: auto;
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
 }
 
+/* Cap the grid's inner width so the two columns form a cohesive pair
+   centered within the footer rather than stretching to the outer gutters.
+   Right column is `auto` so it hugs its content — no trailing empty
+   strip beside the links/CTA. */
 .footer-grid {
   display: grid;
-  gap: 16px;
-  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 56px;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  max-width: 780px;
+  margin-inline: auto;
 }
 
 @media (max-width: 820px) {
-  .footer-grid { grid-template-columns: 1fr; }
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
 }
 
-.footer-col { display: grid; gap: 8px; }
-.footer-brand { color: var(--text); font-weight: 600; font-size: 1.05rem; }
-.footer-title { color: var(--text); font-weight: 600; margin-bottom: 4px; }
+.footer-col {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
 
-.footer-links { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
-.footer-links a { color: inherit; text-decoration: none; }
-.footer-links a:hover { color: var(--accent); text-decoration: underline; }
-
-.footer-note { margin: 0; }
-.footer-contact a { color: inherit; text-decoration: underline; }
-
-.footer-cta {
-  margin-top: 8px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: transparent;
+/* ── Headings ─────────────────────────────────────────────────────── */
+.footer-brand {
   color: var(--text);
-  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.05rem;
 }
-.footer-cta:hover { border-color: var(--accent); color: var(--accent); }
 
+.footer-title {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 4px;
+}
+
+/* ── Left column: legal + contact ─────────────────────────────────── */
+.footer-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.75;
+  color: color-mix(in srgb, var(--muted) 82%, transparent);
+  max-width: 40ch;
+}
+
+.footer-contact {
+  margin: 16px 0 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.footer-contact a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 25%, transparent);
+  transition: color 120ms, border-color 120ms;
+}
+
+.footer-contact a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Social links (Get in touch) ──────────────────────────────────── */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.footer-links a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  transition: color 120ms;
+}
+
+.footer-links a:hover {
+  color: var(--accent);
+}
+
+/* ── CTA ──────────────────────────────────────────────────────────── */
+.footer-cta {
+  margin-top: 20px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--card-bg);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  justify-self: start;
+  transition: background 120ms, border-color 120ms;
+}
+
+.footer-cta:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* ── Right column composition (2-column grid only) ────────────────── */
+/* Left-aligned so content reads with the same axis as the left column,
+   but packed tight: reduced grid gap, tighter list gap, smaller CTA
+   margin — the three elements read as one composed unit rather than a
+   vertical stack of floaters. The `auto` column width at the grid level
+   eliminates the trailing empty strip that would otherwise make the
+   block feel loose. */
+
+@media (min-width: 821px) {
+  .footer-col:nth-child(2) {
+    gap: 8px;
+    /* Center the right column vertically against the taller left block so
+       its top and bottom don't overshoot the legal paragraph's bounds. */
+    align-self: center;
+  }
+
+  .footer-col:nth-child(2) .footer-links {
+    gap: 6px;
+  }
+
+  /* Softer link tone — steps back from pure --text so the filled accent
+     CTA remains the strongest element. Subtle weight lift keeps readability
+     at the lower contrast. */
+  .footer-col:nth-child(2) .footer-links a {
+    color: color-mix(in srgb, var(--text) 75%, var(--muted));
+    font-weight: 500;
+  }
+
+  .footer-col:nth-child(2) .footer-links a:hover {
+    color: var(--accent);
+  }
+
+  .footer-col:nth-child(2) .footer-cta {
+    margin-top: 2px;
+  }
+}
+
+/* ── Bottom row ───────────────────────────────────────────────────── */
+/* Resolves the footer. Shares the grid's inner-width cap so the divider
+   and back-to-top anchor sit within the same composed band as the
+   columns above — no full-width rule stretching past the content. */
 .footer-bottom {
-  margin-top: 16px;
+  max-width: 780px;
+  margin: 40px auto 0;
+  padding-top: 18px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 12px;
-  border-top: 1px dashed var(--border);
-  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
-.footer-legal { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.footer-legal a { color: inherit; text-decoration: none; }
-.footer-legal a:hover { color: var(--accent); text-decoration: underline; }
 
-.back-to-top { color: inherit; text-decoration: none; }
-.back-to-top:hover { color: var(--accent); text-decoration: underline; }
+.footer-legal {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.footer-legal a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.footer-legal a:hover {
+  color: var(--accent);
+}
+
+.back-to-top {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: inherit;
+  letter-spacing: inherit;
+  transition: color 120ms;
+}
+
+.back-to-top:hover {
+  color: var(--accent);
+}

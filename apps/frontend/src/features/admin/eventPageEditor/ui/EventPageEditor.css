@@ -25,6 +25,34 @@
 .epe__actions {
   display: flex;
   gap: 0.5rem;
+  align-items: center;
+}
+
+.epe__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.epe__filter-label {
+  color: var(--muted, #6b7280);
+}
+
+.epe__filter select {
+  padding: 0.375rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: #111;
+  font-family: inherit;
+  font-size: 0.875rem;
+  min-height: 36px;
+}
+
+.epe__filter select option {
+  background: #fff;
+  color: #111;
 }
 
 /* Buttons */
@@ -396,6 +424,13 @@
   font-weight: 400;
   font-style: italic;
   color: var(--muted);
+}
+
+.epe__required {
+  font-weight: 400;
+  font-style: italic;
+  color: #c53030;
+  margin-left: 0.4rem;
 }
 
 /* ── Placeholder for deferred sections ── */

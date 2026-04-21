@@ -129,6 +129,7 @@ class JourneySessionStore {
         const topLeg = this.activeSession.legs[this.activeSession.legs.length - 1];
         if (!topLeg) return undefined;
 
+
         const expectedEditor =
             topLeg.state === 'outbound'
                 ? topLeg.ticket.destination.editor

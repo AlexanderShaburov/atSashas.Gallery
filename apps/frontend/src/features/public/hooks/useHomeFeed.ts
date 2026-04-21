@@ -1,17 +1,19 @@
 // features/public/hooks/useHomeFeed.ts
 
-import type { Block } from '@/entities/block';
+import type { EventPageData } from '@/entities/event';
 import type { HomeDoc, HomeItem } from '@/entities/homeDoc';
 import type { StreamIndexItem } from '@/entities/stream';
 import { useEffect, useState } from 'react';
-import { getPublicBlocksByIds, getPublicHomeDoc } from '../api/homeDocApi';
+import { getEventPageById, loadEventPagesOnce } from '../api/eventPagesModule';
+import { getPublicHomeDoc } from '../api/homeDocApi';
+import { loadMediaItemsOnce } from '../api/mediaItemsModule';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export type HomeFeedResult = {
     homeDoc: HomeDoc | null;
     streams: Map<string, StreamIndexItem>;
-    blocks: Map<string, Block>;
+    events: Map<string, EventPageData>;
     loading: boolean;
     error: string | null;
     isPreview: boolean;
@@ -20,15 +22,18 @@ export type HomeFeedResult = {
 /**
  * Loads HomeDoc and resolves all references:
  * - streamRef items → fetched from streams index
- * - blockRef items → fetched from blocks-by-ids endpoint
+ * - eventRef items → resolved from eventPagesModule (loadEventPagesOnce gated page-level)
  *
- * In preview mode, reads draft HomeDoc from localStorage
- * and fetches data from admin API.
+ * Page-level loading gate: `loading` stays true until streams and eventPages
+ * both resolve. HomePage short-circuits on `loading`, so event tiles never
+ * render with a missing catalog.
+ *
+ * In preview mode, reads draft HomeDoc from localStorage and fetches data from admin API.
  */
 export function useHomeFeed(mode: 'public' | 'preview' = 'public'): HomeFeedResult {
     const [homeDoc, setHomeDoc] = useState<HomeDoc | null>(null);
     const [streams, setStreams] = useState<Map<string, StreamIndexItem>>(new Map());
-    const [blocks, setBlocks] = useState<Map<string, Block>>(new Map());
+    const [events, setEvents] = useState<Map<string, EventPageData>>(new Map());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -52,64 +57,109 @@ export function useHomeFeed(mode: 'public' | 'preview' = 'public'): HomeFeedResu
             items: HomeItem[],
             isAdmin: boolean,
         ): Promise<Map<string, StreamIndexItem>> {
-            const slugs = items
+            const streamIds = items
                 .filter((it): it is Extract<HomeItem, { kind: 'streamRef' }> => it.kind === 'streamRef')
-                .map((it) => it.streamSlug);
+                .map((it) => it.streamId);
 
-            if (slugs.length === 0) return new Map();
+            if (streamIds.length === 0) return new Map();
 
             const url = isAdmin
                 ? `${API_BASE}/admin/streams`
-                : `${API_BASE}/public/streams/by-ids?ids=${encodeURIComponent(slugs.join(','))}`;
+                : `${API_BASE}/public/streams/by-ids?ids=${encodeURIComponent(streamIds.join(','))}`;
 
             const res = await fetch(url);
             if (!res.ok) throw new Error(`Failed to load streams: ${res.status}`);
+            // Defensive Content-Type check — same rationale as resolveEvents.
+            const contentType = res.headers.get('content-type') || '';
+            if (!contentType.toLowerCase().includes('application/json')) {
+                const snippet = (await res.text()).slice(0, 200);
+                console.warn(
+                    '[useHomeFeed] streams endpoint returned non-JSON:',
+                    { url, contentType, snippet },
+                );
+                return new Map();
+            }
             const allStreams: StreamIndexItem[] = await res.json();
 
             const map = new Map<string, StreamIndexItem>();
             for (const s of allStreams) {
-                if (slugs.includes(s.streamId)) {
+                if (streamIds.includes(s.streamId)) {
                     map.set(s.streamId, s);
                 }
             }
             return map;
         }
 
-        async function resolveBlocks(
+        async function resolveEvents(
             items: HomeItem[],
             isAdmin: boolean,
-        ): Promise<Map<string, Block>> {
-            const blockIds = items
-                .filter((it): it is Extract<HomeItem, { kind: 'blockRef' }> => it.kind === 'blockRef')
-                .map((it) => it.blockId);
+        ): Promise<Map<string, EventPageData>> {
+            const eventPageIds = items
+                .filter((it): it is Extract<HomeItem, { kind: 'eventRef' }> => it.kind === 'eventRef')
+                .map((it) => it.eventPageId);
 
-            if (blockIds.length === 0) return new Map();
-
-            // In preview/admin mode, fetch blocks from admin collection endpoint
-            // to ensure unpublished blocks are available
+            // Admin/preview: read the full admin catalog (drafts + scheduled).
+            // This matches what the Homepage Editor sees, so preview faithfully
+            // reflects what the author is about to publish.
             if (isAdmin) {
+                let catalog: { pages: Record<string, EventPageData> } | null = null;
                 try {
-                    const res = await fetch(`${API_BASE}/blocks/collection`);
-                    if (res.ok) {
-                        const text = await res.text();
-                        const collection = JSON.parse(text) as { blocks: Record<string, Block> };
-                        const map = new Map<string, Block>();
-                        for (const id of blockIds) {
-                            const block = collection.blocks[id];
-                            if (block) map.set(id, block);
+                    const res = await fetch(`${API_BASE}/admin/event-pages`);
+                    if (!res.ok) {
+                        console.warn(
+                            '[useHomeFeed] admin event-pages HTTP',
+                            res.status,
+                            res.statusText,
+                        );
+                    } else {
+                        // Defensive: if a misconfigured proxy returns HTML (e.g. login
+                        // page or SPA fallback), surface it as a warning instead of a
+                        // cryptic JSON parse error.
+                        const contentType = res.headers.get('content-type') || '';
+                        if (!contentType.toLowerCase().includes('application/json')) {
+                            const snippet = (await res.text()).slice(0, 200);
+                            console.warn(
+                                '[useHomeFeed] admin event-pages returned non-JSON:',
+                                { contentType, snippet },
+                            );
+                        } else {
+                            catalog = await res.json();
                         }
-                        console.log('[useHomeFeed] Resolved blocks via admin:', map.size);
-                        return map;
                     }
-                    console.warn('[useHomeFeed] Admin blocks fetch failed:', res.status);
                 } catch (e) {
-                    console.warn('[useHomeFeed] Admin blocks parse error, falling back:', e);
+                    console.warn(
+                        '[useHomeFeed] admin event-pages load failed; event tiles will be skipped:',
+                        e,
+                    );
                 }
-                // Fallback to public endpoint
+                if (!catalog || eventPageIds.length === 0) return new Map();
+                const map = new Map<string, EventPageData>();
+                for (const id of eventPageIds) {
+                    const page = catalog.pages[id];
+                    if (page) map.set(id, page);
+                }
+                return map;
             }
 
-            const dict = await getPublicBlocksByIds(blockIds);
-            return new Map(Object.entries(dict));
+            // Public: status-filtered public endpoint via shared cache.
+            try {
+                await loadEventPagesOnce();
+            } catch (e) {
+                console.warn(
+                    '[useHomeFeed] loadEventPagesOnce failed; event tiles will be skipped:',
+                    e,
+                );
+                return new Map();
+            }
+
+            if (eventPageIds.length === 0) return new Map();
+
+            const map = new Map<string, EventPageData>();
+            for (const id of eventPageIds) {
+                const page = getEventPageById(id);
+                if (page) map.set(id, page);
+            }
+            return map;
         }
 
         async function load() {
@@ -122,16 +172,24 @@ export function useHomeFeed(mode: 'public' | 'preview' = 'public'): HomeFeedResu
 
                 if (cancelled) return;
 
-                const [streamsMap, blocksMap] = await Promise.all([
+                // Prime media items cache so event tiles (and other consumers)
+                // can resolve heroImage refs synchronously via getMediaItem().
+                // Non-fatal on failure; event tiles will fall back to text-only.
+                const mediaItemsPromise = loadMediaItemsOnce().catch((e) => {
+                    console.warn('[useHomeFeed] loadMediaItemsOnce failed:', e);
+                });
+
+                const [streamsMap, eventsMap] = await Promise.all([
                     resolveStreams(doc.items, isPreview),
-                    resolveBlocks(doc.items, isPreview),
+                    resolveEvents(doc.items, isPreview),
                 ]);
+                await mediaItemsPromise;
 
                 if (cancelled) return;
 
                 setHomeDoc(doc);
                 setStreams(streamsMap);
-                setBlocks(blocksMap);
+                setEvents(eventsMap);
             } catch (e: unknown) {
                 if (!cancelled) {
                     const message =
@@ -154,5 +212,5 @@ export function useHomeFeed(mode: 'public' | 'preview' = 'public'): HomeFeedResu
         };
     }, [mode]);
 
-    return { homeDoc, streams, blocks, loading, error, isPreview: mode === 'preview' };
+    return { homeDoc, streams, events, loading, error, isPreview: mode === 'preview' };
 }

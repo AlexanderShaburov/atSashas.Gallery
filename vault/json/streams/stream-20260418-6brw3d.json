@@ -1,0 +1,17 @@
+{
+  "streamId": "stream-20260418-6brw3d",
+  "title": "Тест стрим.",
+  "status": "ready",
+  "tags": [
+    "Test"
+  ],
+  "description": "It's a simple Тест стрим.",
+  "thumbnail": "/media/arts/fullsize/art-20260212-32qq5n.jpeg",
+  "version": 2,
+  "createdAt": "2026-04-18T12:29:52.748116+00:00",
+  "updatedAt": "2026-04-18T12:30:17.014375+00:00",
+  "blockIds": [
+    "block-gallery-triptychhorizontal-4ec08a37",
+    "block-gallery-pairhorizontal-fb19f8fa"
+  ]
+}

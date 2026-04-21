@@ -4,14 +4,23 @@ from __future__ import annotations
 
 import stripe
 
-from app.models.events import EventData
+from app.models.event_pages import EventPageData
 from app.settings import settings
 
 
-def create_checkout_session(event: EventData, enrollment_id: str) -> stripe.checkout.Session:
+def create_checkout_session(event: EventPageData, enrollment_id: str) -> stripe.checkout.Session:
+    """Create a Stripe Checkout Session for a paid registration.
+
+    `event` is the canonical EventPage (see
+    `decision--event--event-page-is-canonical-event.md`). The metadata key
+    `event_id` is preserved verbatim for webhook compatibility; its value is
+    now an EventPage id.
+    """
     stripe.api_key = settings.stripe_secret_key
 
-    title_en = event.title.get("en", event.slug) if isinstance(event.title, dict) else event.slug
+    # Localized is a Pydantic BaseModel with an optional `en` field. Prefer the
+    # English title; fall back to slug when not set.
+    title_en = (event.title.en if event.title and event.title.en else event.slug)
     amount = event.price.amount if event.price else 0
     currency = (event.price.currency if event.price else "eur").lower()
 

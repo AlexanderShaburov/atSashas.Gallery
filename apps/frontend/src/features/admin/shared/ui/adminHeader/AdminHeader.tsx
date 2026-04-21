@@ -79,12 +79,12 @@ export function AdminHeader() {
                         Media
                     </GuardedNavLink>
                     <GuardedNavLink
-                        to="/admin/public-stream"
+                        to="/admin/home"
                         className={({ isActive }) =>
                             'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
                         }
                     >
-                        Public
+                        Homepage
                     </GuardedNavLink>
                 </nav>
 

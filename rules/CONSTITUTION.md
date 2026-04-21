@@ -33,7 +33,7 @@ Adding a new entity requires an explicit decision (ADR).
   - Text content (story block),
   - Optional background (ArtItem reference).
 - **Stream** — narrative composition of Blocks.
-- **Event** — offline workshop/event entity, editable via a dedicated form/editor.
+- **Event** — preset-based event record (workshop, plein-air, exhibition, minimal), authored via the Event Editor at `/admin/event-pages`. Holds its own enrollments. In-code type: `EventPageData`. Specialized by `invariant--architecture--single-event-entity.md` — exactly one representation, no parallel model. See `decision--event--event-page-is-canonical-event.md`.
 - **HomeDoc (singleton)** — site portrait composed of HomeItems.
 
 ### 3.2 Non-entities

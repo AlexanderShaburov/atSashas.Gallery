@@ -2,7 +2,7 @@
 type: architecture
 scope: [data, architecture]
 status: active
-date: 2026-04-10
+date: 2026-04-17
 source_of_truth: true
 tags: [constitution, domain-model]
 ---
@@ -16,24 +16,24 @@ tags: [constitution, domain-model]
                        │  HomeDoc     │
                        │  (singleton) │
                        └──────┬───────┘
-                              │ references (by slug/id)
+                              │ references (streamId | eventPageId)
                 ┌─────────────┴──────────────┐
                 ▼                             ▼
-         ┌────────────┐                ┌───────────┐
-         │  Stream    │                │  Block     │
-         │  (ordered  │──references───▶│  (gallery/ │
-         │   blockIds)│  (by ID)       │   text/cta)│
-         └────────────┘                └─────┬──────┘
-                                             │ references (by ID)
-                                ┌────────────┴────────────┐
-                                ▼                         ▼
-                         ┌───────────┐            ┌───────────┐
-                         │  ArtItem  │            │  Event    │
-                         │  (artwork)│            │ (workshop)│
-                         └───────────┘            └───────────┘
+         ┌────────────┐                ┌──────────────┐
+         │  Stream    │                │  Event       │
+         │  (ordered  │                │ (preset-based│
+         │   blockIds)│                │  EventPage)  │
+         └─────┬──────┘                │   holds      │
+               │ references (by ID)    │ enrollments  │
+               ▼                       └──────────────┘
+         ┌───────────┐
+         │  Block    │
+         │ (gallery/ │──references───▶ ArtItem
+         │  text/cta)│  (by ID)
+         └───────────┘
 ```
 
-All relationships are by-ID references, not containment. Stream stores `blockIds[]` (string array). Block stores `artId`, `eventId` (string fields).
+All relationships are by-ID references, not containment. Stream stores `blockIds[]` (string array). Block stores `artId` (string field) — the legacy `eventId` field on blocks remains for data compatibility but is not part of the canonical flow: homepage composition references events only via `HomeDoc.items[*].eventRef.eventPageId`. Block-level homepage composition was retired in the Homepage Editor cutover (2026-04-17); the legacy EventData entity was retired in the EventPage canonicalization (2026-04-21).
 
 ## Domain entities (per Constitution)
 
@@ -42,7 +42,7 @@ All relationships are by-ID references, not containment. Stream stores `blockIds
 | ArtItem | `art-YYYYMMDD-{base32(6)}` | template, draft, saved, published | `art_catalog.json` |
 | Block | `block-{kind}-{layout?}-{uuid8}` | template, draft, saved | `block_collection.json` |
 | Stream | `stream-YYYYMMDD-{base32(6)}` | draft, ready, archived | `streams/index.json` + individual files |
-| Event | `event-YYYYMMDD-{base32(6)}` | draft, scheduled, closed | `events/catalog.json` |
+| Event | `event-YYYYMMDD-{base32(6)}` | draft, scheduled, closed | `event_pages/catalog.json` (in-code type: `EventPageData`) |
 | HomeDoc | (singleton) | N/A | `public/home.json` |
 
 ## Block type system (discriminated union on `blockKind`)
@@ -59,7 +59,7 @@ Gallery layouts: `single`, `pairHorizontal`, `pairVertical`, `triptychLeft`, `tr
 
 ## Entity modules in code
 
-12 directories under `entities/`:
+11 directories under `entities/`:
 
 | Module | Primary exports | Notes |
 |--------|----------------|-------|
@@ -68,10 +68,9 @@ Gallery layouts: `single`, `pairHorizontal`, `pairVertical`, `triptychLeft`, `tr
 | `catalog/` | `ArtCatalog` | Wrapper around ArtItemData records |
 | `common/` | `Localized`, `Money`, `Dimensions`, `EntityLifecycle`, `ISODate` | Shared value types |
 | `event/` | `EventData`, `EventPageData`, `EventPreset` | Includes event page presets |
-| `homeDoc/` | `HomeDoc`, `HomeItem`, `HomeStreamRef`, `HomeBlockRef` | Singleton page model |
+| `homeDoc/` | `HomeDoc`, `HomeItem`, `HomeStreamRef`, `HomeEventRef` | Singleton homepage composition model — streamRef (canonical `streamId`) + eventRef (→ `EventPageData.id`) |
 | `hopper/` | `HopperItem` | Minimal, no index.ts barrel |
 | `mediaItem/` | `MediaItemData`, `MediaSources`, `MediaItemCatalog` | Utility entity |
-| `publicStream/` | `PublicStream` (class), `PublicStreamData` | Class with `fromJSON()` |
 | `renderable/` | `Renderable` (discriminated union), `RenderableResolver` | Content type system |
 | `stream/` | `StreamData`, `StreamIndexItem`, `StreamsIndex` | Pure types |
 | `textVisual/` | `TextVisualData`, `TextVisualCatalog` | Composable text content |
@@ -79,9 +78,12 @@ Gallery layouts: `single`, `pairHorizontal`, `pairVertical`, `triptychLeft`, `tr
 ## Content reference types
 
 - `artId: string` → ArtItem in catalog
-- `eventId: string` → Event entity
+- `eventPageId: string` → Event (EventPageData) — used by `HomeEventRef`. Canonical reference form post-2026-04-21.
+- `streamId: string` → Stream (used by `HomeStreamRef`; backend also tolerates legacy `streamSlug` on read)
 - `MediaRef = string` → MediaItem ID
 - `blockIds: string[]` → Block IDs in a Stream
+
+Legacy: `eventId` fields on `EventCtaBlock` and `EventPageData.eventId` are retained for data compatibility only. They do not participate in the canonical event reference flow; new consumers should use `eventPageId` exclusively.
 
 ## Related
 

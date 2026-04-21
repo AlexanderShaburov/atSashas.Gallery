@@ -1,5 +1,37 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-27T00:00:00.000000+00:00",
-  "streams": []
+  "updatedAt": "2026-04-18T13:43:02.295351+00:00",
+  "streams": [
+    {
+      "streamId": "stream-20260327-ctznm2",
+      "title": "test",
+      "thumbnail": "/media/arts/previews/art-20260306-wm98ms.jpeg",
+      "status": "ready",
+      "tags": [
+        "test"
+      ],
+      "description": "",
+      "updatedAt": "2026-04-11T17:29:16.510472+00:00"
+    },
+    {
+      "streamId": "stream-20260418-6brw3d",
+      "title": "Тест стрим.",
+      "thumbnail": "/media/arts/fullsize/art-20260212-32qq5n.jpeg",
+      "status": "ready",
+      "tags": [
+        "Test"
+      ],
+      "description": "It's a simple Тест стрим.",
+      "updatedAt": "2026-04-18T12:30:17.014375+00:00"
+    },
+    {
+      "streamId": "stream-20260418-8mnyr9",
+      "title": "dtrim",
+      "thumbnail": "/media/arts/fullsize/art-20251226-52p602.jpeg",
+      "status": "ready",
+      "tags": [],
+      "description": "asdfga",
+      "updatedAt": "2026-04-18T13:43:02.291992+00:00"
+    }
+  ]
 }

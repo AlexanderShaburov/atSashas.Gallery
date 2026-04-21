@@ -1,6 +1,6 @@
 import { JumpResult } from './journey.types';
 
-export type EditorKind = 'stream' | 'block' | 'catalog' | 'hopper' | 'events' | 'eventPages' | 'home' | 'textVisuals' | 'mediaItems';
+export type EditorKind = 'stream' | 'block' | 'catalog' | 'hopper' | 'eventPages' | 'home' | 'textVisuals' | 'mediaItems';
 
 export type EditorKey =
     | { kind: 'stream'; id: string }
@@ -8,7 +8,6 @@ export type EditorKey =
     | { kind: 'catalog'; id: string | 'main' }
     | { kind: 'hopper'; id: 'main' }
     | { kind: 'home'; id: 'home-doc' }
-    | { kind: 'events'; id: string }
     | { kind: 'eventPages'; id: string }
     | { kind: 'textVisuals'; id: string }
     | { kind: 'mediaItems'; id: string };
