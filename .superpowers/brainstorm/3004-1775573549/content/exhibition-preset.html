@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exhibition Preset — Event Page Prototype</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --color-bg: #FAFAF8;
+    --color-text: #1A1A1A;
+    --color-text-secondary: #6B6B6B;
+    --color-accent: #2C2C2C;
+    --color-accent-hover: #111;
+    --color-border: #E8E6E1;
+    --color-warm: #F5F0EB;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .preset-label {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 100;
+    background: #1A1A1A;
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 4px;
+  }
+  .preset-label span { opacity: 0.5; margin-right: 6px; }
+
+  .section-annotation {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 40px 8px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #B87333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-annotation::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 1px;
+    background: #B87333;
+  }
+  .section-annotation .tag {
+    font-size: 9px;
+    background: rgba(184,115,51,0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+
+  /* ===== HERO — EDITORIAL ===== */
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 80vh;
+    min-height: 540px;
+    max-height: 800px;
+    overflow: hidden;
+    background: #111;
+  }
+  .hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.0) 0%,
+      rgba(0,0,0,0.0) 55%,
+      rgba(0,0,0,0.6) 100%
+    );
+    pointer-events: none;
+  }
+  .hero-content {
+    position: absolute;
+    bottom: 56px;
+    left: 56px;
+    right: 56px;
+    color: #fff;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 16px;
+  }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(38px, 5.5vw, 60px);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin-bottom: 12px;
+    max-width: 650px;
+  }
+  .hero-dates {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    opacity: 0.7;
+    letter-spacing: 0.04em;
+  }
+
+  /* ===== DESCRIPTION — CURATORIAL STATEMENT ===== */
+  .description {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 72px 40px 56px;
+  }
+  .description-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 20px;
+  }
+  .description p {
+    color: var(--color-text-secondary);
+    margin-bottom: 16px;
+    font-weight: 300;
+    line-height: 1.85;
+    font-size: 15.5px;
+  }
+  .description p:last-child { margin-bottom: 0; }
+  .description p:first-of-type {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--color-text);
+    margin-bottom: 20px;
+  }
+
+  /* ===== GALLERY — FEATURED WORKS ===== */
+  .gallery-section {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 40px 16px;
+  }
+  .gallery-section h3 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 400;
+    margin-bottom: 28px;
+    letter-spacing: -0.01em;
+  }
+
+  /* Exhibition gallery: editorial grid with varied sizes */
+  .gallery-grid {
+    display: grid;
+    gap: 16px;
+  }
+  .gallery-grid.exhibition {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 380px 300px 380px;
+  }
+  .gallery-grid.exhibition .gallery-item:nth-child(1) {
+    grid-column: 1 / -1;
+  }
+  .gallery-grid.exhibition .gallery-item:nth-child(4) {
+    grid-column: 1 / -1;
+  }
+
+  .gallery-item {
+    border-radius: 4px;
+    overflow: hidden;
+    background: #E8E6E1;
+    position: relative;
+  }
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .gallery-item .artwork-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 32px 20px 14px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.5));
+    color: #fff;
+  }
+  .artwork-caption .artwork-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 400;
+    font-style: italic;
+  }
+  .artwork-caption .artwork-meta {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.7;
+    margin-top: 3px;
+  }
+
+  /* ===== HOST NOTE — CURATOR VARIANT ===== */
+  .host-note {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 40px 40px 56px;
+  }
+  .host-note-inner {
+    background: var(--color-warm);
+    border-radius: 8px;
+    padding: 32px 36px;
+    position: relative;
+  }
+  .host-note-inner::before {
+    content: '\201C';
+    font-family: var(--font-display);
+    font-size: 64px;
+    font-weight: 300;
+    color: rgba(0,0,0,0.08);
+    position: absolute;
+    top: 8px;
+    left: 20px;
+    line-height: 1;
+  }
+  .host-note-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 12px;
+  }
+  .host-note p {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.7;
+    color: var(--color-text);
+  }
+  .host-note .signature {
+    margin-top: 16px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    font-style: normal;
+    color: var(--color-text-secondary);
+  }
+
+  /* ===== VISIT DETAILS + CTA (COMBINED) ===== */
+  .visit-cta {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 40px 96px;
+  }
+  .visit-cta-inner {
+    border-top: 1px solid var(--color-border);
+    padding-top: 48px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 48px;
+    align-items: start;
+  }
+
+  .visit-details h3 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+  .visit-detail-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .visit-detail-row .detail-label {
+    flex: 0 0 100px;
+    font-weight: 500;
+    color: var(--color-text);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+  .visit-detail-row .detail-value {
+    color: var(--color-text-secondary);
+    font-weight: 300;
+  }
+
+  .visit-cta-action {
+    text-align: center;
+    padding-top: 8px;
+  }
+  .visit-cta-action .cta-button {
+    display: inline-block;
+    padding: 16px 44px;
+    background: var(--color-accent);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    text-decoration: none;
+  }
+  .visit-cta-action .cta-button:hover {
+    background: var(--color-accent-hover);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.16);
+  }
+  .visit-cta-action .cta-secondary {
+    display: block;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .hero { height: 65vh; min-height: 420px; }
+    .hero-content { bottom: 36px; left: 24px; right: 24px; }
+    .description, .host-note { padding-left: 24px; padding-right: 24px; }
+    .gallery-section { padding-left: 24px; padding-right: 24px; }
+    .gallery-grid.exhibition {
+      grid-template-columns: 1fr;
+      grid-template-rows: 300px 240px 240px 300px;
+    }
+    .gallery-grid.exhibition .gallery-item:nth-child(1),
+    .gallery-grid.exhibition .gallery-item:nth-child(4) { grid-column: auto; }
+    .visit-cta { padding-left: 24px; padding-right: 24px; }
+    .visit-cta-inner {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .visit-cta-action { text-align: left; }
+    .section-annotation { padding-left: 24px; padding-right: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="preset-label"><span>Preset 3/4</span> Exhibition</div>
+
+<!-- ===== HERO — EDITORIAL ===== -->
+<div class="section-annotation">Section 1 — Hero (editorial) <span class="tag">required</span></div>
+
+<section class="hero">
+  <img class="hero-image" src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1400&h=900&fit=crop&crop=center" alt="Abstract painting — key exhibition work">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Exhibition</div>
+    <h1 class="hero-title">Between Memory and Place</h1>
+    <p class="hero-dates">April 18 — May 12, 2026</p>
+  </div>
+</section>
+
+<!-- ===== DESCRIPTION — CURATORIAL STATEMENT ===== -->
+<div class="section-annotation">Section 2 — Description (curatorial voice) <span class="tag">required</span></div>
+
+<section class="description">
+  <div class="description-label">About the Exhibition</div>
+  <p>Twelve works exploring the line between where we've been and what we remember of it.</p>
+  <p>The paintings in this collection began as studies of real places — coastlines, markets, train stations — but over months of reworking, they moved away from representation toward something more felt than seen. What remains is colour, gesture, and the residue of attention.</p>
+  <p>The exhibition brings together work from the past two years, much of it shown for the first time.</p>
+</section>
+
+<!-- ===== GALLERY — FEATURED WORKS ===== -->
+<div class="section-annotation">Section 3 — GalleryExperience (featured works) <span class="tag">required</span></div>
+
+<section class="gallery-section">
+  <h3>Selected Works</h3>
+  <div class="gallery-grid exhibition">
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1549490349-8643362247b5?w=1100&h=600&fit=crop" alt="Large abstract painting with blue and earth tones">
+      <div class="artwork-caption">
+        <div class="artwork-title">Morning at Camogli</div>
+        <div class="artwork-meta">Watercolor on paper, 76 &times; 56 cm</div>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=600&h=500&fit=crop" alt="Abstract watercolor study">
+      <div class="artwork-caption">
+        <div class="artwork-title">Station Light, II</div>
+        <div class="artwork-meta">Mixed media on paper</div>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&h=500&fit=crop" alt="Gestural painting in warm tones">
+      <div class="artwork-caption">
+        <div class="artwork-title">What the Market Sounded Like</div>
+        <div class="artwork-meta">Gouache on canvas, 50 &times; 40 cm</div>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1482160549825-59d1b23cb208?w=1100&h=600&fit=crop" alt="Large landscape abstraction">
+      <div class="artwork-caption">
+        <div class="artwork-title">Portofino, from Above</div>
+        <div class="artwork-meta">Oil on linen, 100 &times; 70 cm</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOST NOTE — CURATOR VARIANT ===== -->
+<div class="section-annotation">Section 4 — HostNote (curator voice) <span class="tag">optional</span></div>
+
+<section class="host-note">
+  <div class="host-note-inner">
+    <div class="host-note-label">From the artist</div>
+    <p>This collection began as an experiment — can a place survive being painted from memory alone? Some of these works are the answer. Others are the question, still open.</p>
+    <p class="signature">— Sasha</p>
+  </div>
+</section>
+
+<!-- ===== VISIT DETAILS + CTA (COMBINED) ===== -->
+<div class="section-annotation">Section 5 — VisitDetails + CtaBlock (combined) <span class="tag">required</span></div>
+
+<section class="visit-cta">
+  <div class="visit-cta-inner">
+    <div class="visit-details">
+      <h3>Plan Your Visit</h3>
+      <div class="visit-detail-row">
+        <span class="detail-label">Dates</span>
+        <span class="detail-value">April 18 — May 12, 2026</span>
+      </div>
+      <div class="visit-detail-row">
+        <span class="detail-label">Opening</span>
+        <span class="detail-value">Friday, April 18, 18:00 — 21:00</span>
+      </div>
+      <div class="visit-detail-row">
+        <span class="detail-label">Hours</span>
+        <span class="detail-value">Tue — Sat, 11:00 — 18:00</span>
+      </div>
+      <div class="visit-detail-row">
+        <span class="detail-label">Location</span>
+        <span class="detail-value">Galleria Sasha, Via Roma 24, Milan</span>
+      </div>
+      <div class="visit-detail-row">
+        <span class="detail-label">Admission</span>
+        <span class="detail-value">Free</span>
+      </div>
+    </div>
+    <div class="visit-cta-action">
+      <button class="cta-button">RSVP for Opening</button>
+      <span class="cta-secondary">Add to calendar</span>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

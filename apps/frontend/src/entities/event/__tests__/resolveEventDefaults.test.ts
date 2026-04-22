@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { RENDER_DEFAULTS } from '../eventDefaults';
 import { createEventPage } from '../eventFactory';
 import { EVENT_PRESETS } from '../eventPage.types';
-import type { EventPageData, PleinAirEventPage } from '../eventPage.types';
+import type { PleinAirEventPage } from '../eventPage.types';
 import { resolveEventDefaults } from '../resolveEventDefaults';
 
 // ---------------------------------------------------------------------------

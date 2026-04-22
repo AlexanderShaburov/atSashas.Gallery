@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workshop Preset v3 — Final</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --color-bg: #FAFAF8;
+    --color-surface: #FFFFFF;
+    --color-text: #1A1A1A;
+    --color-text-secondary: #6B6B6B;
+    --color-accent: #2C2C2C;
+    --color-accent-hover: #111;
+    --color-border: #E8E6E1;
+    --color-badge-bg: rgba(255,255,255,0.92);
+    --color-warm: #F5F0EB;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .preset-label {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 100;
+    background: #1A1A1A;
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 4px;
+  }
+  .preset-label span { opacity: 0.5; margin-right: 6px; }
+
+  .section-annotation {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 40px 8px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #B87333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-annotation::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 1px;
+    background: #B87333;
+  }
+  .section-annotation .tag {
+    font-size: 9px;
+    background: rgba(184,115,51,0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+    min-height: 500px;
+    max-height: 720px;
+    overflow: hidden;
+  }
+  .hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.02) 40%, rgba(0,0,0,0.35) 100%);
+  }
+  .hero-content {
+    position: absolute;
+    bottom: 48px;
+    left: 48px;
+    right: 48px;
+    color: #fff;
+  }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .hero-subtitle {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 300;
+    opacity: 0.9;
+    letter-spacing: 0.02em;
+  }
+  .hero-badge {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    background: var(--color-badge-bg);
+    backdrop-filter: blur(12px);
+    padding: 16px 24px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  }
+  .hero-badge .price {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--color-text);
+    line-height: 1.1;
+  }
+  .hero-badge .date {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+    letter-spacing: 0.03em;
+  }
+  .hero-cta-anchor {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 32px;
+    background: rgba(255,255,255,0.95);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+  .hero-cta-anchor:hover { background: #fff; }
+
+  /* ===== QUICK FACTS ===== */
+  .quick-facts {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 40px;
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .fact { text-align: center; flex: 1; }
+  .fact-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 6px;
+  }
+  .fact-value {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--color-text);
+  }
+
+  /* ===== DESCRIPTION ===== */
+  .description {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 56px 40px;
+  }
+  .description h2 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 400;
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+  .description p {
+    color: var(--color-text-secondary);
+    margin-bottom: 16px;
+    font-weight: 300;
+    line-height: 1.8;
+  }
+  .description p:last-child { margin-bottom: 0; }
+
+  /* ===== HOST NOTE ===== */
+  .host-note {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 40px 56px;
+  }
+  .host-note-inner {
+    background: var(--color-warm);
+    border-radius: 8px;
+    padding: 32px 36px;
+    position: relative;
+  }
+  .host-note-inner::before {
+    content: '\201C';
+    font-family: var(--font-display);
+    font-size: 64px;
+    font-weight: 300;
+    color: rgba(0,0,0,0.08);
+    position: absolute;
+    top: 8px;
+    left: 20px;
+    line-height: 1;
+  }
+  .host-note-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 12px;
+  }
+  .host-note p {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.7;
+    color: var(--color-text);
+  }
+  .host-note .signature {
+    margin-top: 16px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    font-style: normal;
+    color: var(--color-text-secondary);
+  }
+
+  /* ===== GALLERIES ===== */
+  .gallery-section {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 40px 56px;
+  }
+  .gallery-section h3 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 400;
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+  .gallery-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  /* Experience: adaptive layouts by image count */
+  .gallery-grid.exp-1 {
+    grid-template-columns: 1fr;
+    grid-template-rows: 340px;
+    max-width: 680px;
+  }
+  .gallery-grid.exp-2 {
+    grid-template-columns: 1.3fr 0.7fr;
+    grid-template-rows: 320px;
+  }
+  .gallery-grid.exp-3 {
+    grid-template-columns: 1.2fr 0.8fr;
+    grid-template-rows: 200px 200px;
+  }
+  .gallery-grid.exp-3 .gallery-item:first-child {
+    grid-row: 1 / 3;
+  }
+  .gallery-grid.exp-4 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 240px 240px;
+  }
+
+  /* Results: equal columns, 2 or 3 */
+  .gallery-grid.res-2 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 260px;
+  }
+  .gallery-grid.res-3 {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 240px;
+  }
+
+  .gallery-item {
+    border-radius: 6px;
+    overflow: hidden;
+    background: #E8E6E1;
+    position: relative;
+  }
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ===== CTA BLOCK ===== */
+  .cta-block {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 56px 40px 96px;
+    text-align: center;
+  }
+  .cta-bridge {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--color-text-secondary);
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+  .cta-divider {
+    width: 48px;
+    height: 1px;
+    background: var(--color-border);
+    margin: 0 auto 36px;
+  }
+  .cta-block h2 {
+    font-family: var(--font-display);
+    font-size: 34px;
+    font-weight: 400;
+    margin-bottom: 10px;
+  }
+  .cta-meta {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+  .cta-button {
+    display: inline-block;
+    padding: 18px 60px;
+    background: var(--color-accent);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 16px rgba(0,0,0,0.15);
+  }
+  .cta-button:hover {
+    background: var(--color-accent-hover);
+    box-shadow: 0 5px 24px rgba(0,0,0,0.22);
+    transform: translateY(-1px);
+  }
+  .cta-note {
+    margin-top: 18px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .hero { height: 55vh; min-height: 380px; }
+    .hero-content { bottom: 32px; left: 24px; right: 24px; }
+    .hero-badge { top: 16px; right: 16px; padding: 12px 16px; }
+    .hero-badge .price { font-size: 22px; }
+    .quick-facts { flex-wrap: wrap; padding: 24px; gap: 16px; }
+    .fact { flex: 0 0 calc(50% - 8px); }
+    .description, .host-note, .cta-block { padding-left: 24px; padding-right: 24px; }
+    .gallery-section { padding-left: 24px; padding-right: 24px; }
+    .gallery-grid.exp-2,
+    .gallery-grid.exp-3 { grid-template-columns: 1fr; grid-template-rows: auto; }
+    .gallery-grid.exp-3 .gallery-item:first-child { grid-row: auto; }
+    .gallery-grid.exp-4 { grid-template-columns: 1fr; }
+    .gallery-grid.res-3 { grid-template-columns: 1fr 1fr; }
+    .gallery-item { min-height: 200px; }
+    .section-annotation { padding-left: 24px; padding-right: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="preset-label"><span>Preset 1/4</span> Workshop — Final</div>
+
+<!-- ===== HERO ===== -->
+<div class="section-annotation">Section 1 — Hero <span class="tag">required</span></div>
+
+<section class="hero">
+  <img class="hero-image" src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=1400&h=800&fit=crop&crop=center" alt="Artist painting in studio">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1 class="hero-title">Watercolor Foundations</h1>
+    <p class="hero-subtitle">A hands-on workshop for beginners and improvers</p>
+    <a href="#cta" class="hero-cta-anchor">Reserve Your Spot</a>
+  </div>
+  <div class="hero-badge">
+    <div class="price">&euro;45</div>
+    <div class="date">May 17, 2026</div>
+  </div>
+</section>
+
+<!-- ===== QUICK FACTS ===== -->
+<div class="section-annotation">Section 2 — QuickFacts <span class="tag">required</span></div>
+
+<div class="quick-facts">
+  <div class="fact">
+    <div class="fact-label">Date</div>
+    <div class="fact-value">May 17, 2026</div>
+  </div>
+  <div class="fact">
+    <div class="fact-label">Duration</div>
+    <div class="fact-value">3 hours</div>
+  </div>
+  <div class="fact">
+    <div class="fact-label">Location</div>
+    <div class="fact-value">Studio 12, Milan</div>
+  </div>
+  <div class="fact">
+    <div class="fact-label">Price</div>
+    <div class="fact-value">&euro;45</div>
+  </div>
+  <div class="fact">
+    <div class="fact-label">Spots</div>
+    <div class="fact-value">4 of 8 left</div>
+  </div>
+</div>
+
+<!-- ===== DESCRIPTION ===== -->
+<div class="section-annotation">Section 3 — Description <span class="tag">required</span></div>
+
+<section class="description">
+  <h2>What You'll Explore</h2>
+  <p>This workshop is built around the fundamentals that make watercolor both challenging and rewarding: wet-on-wet technique, color mixing directly on paper, and learning to work with — rather than against — the medium's unpredictability.</p>
+  <p>You'll leave with two to three finished studies, a personal color mixing chart, and the confidence to continue experimenting at home. All materials are provided, including professional-grade paints and paper.</p>
+  <p>Designed for beginners and those returning to watercolor after a break. Maximum 8 participants for individual attention.</p>
+</section>
+
+<!-- ===== HOST NOTE ===== -->
+<div class="section-annotation">Section 4 — HostNote <span class="tag">optional</span></div>
+
+<section class="host-note">
+  <div class="host-note-inner">
+    <div class="host-note-label">A note from the host</div>
+    <p>If you've never held a brush before, you're exactly who this workshop is for. I'll be right beside you the whole time. There are no mistakes in watercolor — only discoveries.</p>
+    <p class="signature">— Sasha</p>
+  </div>
+</section>
+
+<!-- ===== GALLERY: EXPERIENCE ===== -->
+<div class="section-annotation">Section 5 — GalleryExperience <span class="tag">optional</span> &middot; showing exp-3 layout</div>
+
+<section class="gallery-section">
+  <h3>The Workshop Experience</h3>
+  <div class="gallery-grid exp-3">
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=700&h=900&fit=crop" alt="Artist workspace with watercolors">
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=600&h=400&fit=crop&crop=center" alt="Painting process">
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1579762715118-a6f1d789a8ce?w=600&h=400&fit=crop" alt="Color palette mixing">
+    </div>
+  </div>
+</section>
+
+<!-- ===== GALLERY: RESULTS ===== -->
+<div class="section-annotation">Section 6 — GalleryResults <span class="tag">optional</span> &middot; showing res-3 layout</div>
+
+<section class="gallery-section">
+  <h3>Participant Results</h3>
+  <div class="gallery-grid res-3">
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1580196969807-cc6de06c05be?w=500&h=400&fit=crop" alt="Student watercolor landscape">
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?w=500&h=400&fit=crop" alt="Student watercolor flowers">
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1582201942988-13e60e4556ee?w=500&h=400&fit=crop" alt="Student watercolor abstract">
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA BLOCK ===== -->
+<div class="section-annotation">Section 7 — CtaBlock <span class="tag">required</span></div>
+
+<section class="cta-block" id="cta">
+  <p class="cta-bridge">You'll leave with your own finished piece — and the confidence to keep painting.</p>
+  <div class="cta-divider"></div>
+  <h2>Ready to Begin?</h2>
+  <p class="cta-meta">May 17, 2026 &middot; 3 hours &middot; &euro;45 per person</p>
+  <button class="cta-button">Reserve Your Spot</button>
+  <p class="cta-note">Free cancellation up to 48 hours before the event</p>
+</section>
+
+</body>
+</html>

@@ -19,56 +19,50 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Treat `_`-prefixed identifiers as intentionally unused. Matches the
+      // common convention for destructuring discards, handler args that the
+      // signature requires but the body ignores, etc.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+        },
+      ],
+    },
   },
-  // ── Homepage Editor anti-regression (plan §12) ──────────────────────────────
-  // The new Homepage Editor, HomeEventTile, and useHomeFeed must not depend on
-  // legacy event infrastructure. Canonical event = EventPageData. Any new
-  // reference to EventData, useEvent(), /api/public/events, or events/catalog.json
-  // in these files is a plan violation and must fail lint.
+  // ── Event retirement anti-regression ────────────────────────────────────────
+  // Project-wide guardrail per `invariant--architecture--single-event-entity.md`.
+  // The legacy EventData entity, its editor, its provider, its repo, and its
+  // JSON catalog were retired on 2026-04-21. The system has exactly one event
+  // entity: EventPage (EventPageData). Any import of the retired paths is a
+  // violation and must fail lint.
   {
-    files: [
-      'src/features/admin/homeEditor/**/*.{ts,tsx}',
-      'src/features/public/ui/HomeEventTile/**/*.{ts,tsx}',
-      'src/features/public/hooks/useHomeFeed.ts',
-    ],
+    files: ['src/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
           paths: [
             {
-              name: '@/shared/EventsProvider/useEvent',
-              message:
-                'Homepage must not depend on useEvent() — resolve events via EventPageData (eventPagesStore).',
-            },
-            {
-              name: '@/shared/EventsProvider',
-              importNames: ['useEvent'],
-              message:
-                'Homepage must not depend on useEvent() — resolve events via EventPageData (eventPagesStore).',
-            },
-            {
               name: '@/entities/event',
               importNames: ['EventData'],
               message:
-                'Homepage must use EventPageData only, never EventData.',
-            },
-            {
-              name: '@/features/public/api/eventPagesModule',
-              message:
-                'Homepage Editor must resolve events against the admin catalog (eventPagesStore / refreshEventPages), not the public status-filtered module.',
+                'EventData retired 2026-04-21. Use EventPageData (the canonical event entity).',
             },
           ],
           patterns: [
             {
-              group: ['**/shared/EventsProvider/useEvent*'],
+              group: [
+                '**/shared/EventsProvider/**',
+                '**/features/admin/eventEditor/**',
+                '**/features/public/api/eventsModule*',
+              ],
               message:
-                'Homepage must not depend on useEvent() — resolve events via EventPageData (eventPagesStore).',
-            },
-            {
-              group: ['**/public/api/eventPagesModule*'],
-              message:
-                'Homepage Editor must resolve events against the admin catalog (eventPagesStore / refreshEventPages), not the public status-filtered module.',
+                'Legacy event infrastructure retired 2026-04-21 — see `decision--event--event-page-is-canonical-event.md`. Use EventPageData / event_pages APIs.',
             },
           ],
         },
@@ -76,18 +70,17 @@ export default defineConfig([
       'no-restricted-syntax': [
         'error',
         {
-          // Matches /api/public/events (legacy EventData endpoint).
-          // Dots match the literal forward slashes (esquery's selector regex does
-          // not parse escaped slashes reliably). Does NOT match /api/public/event-pages
-          // because the terminal "s" in the pattern does not match "-" in the target.
-          selector: 'Literal[value=/api.public.events/]',
+          // Legacy EventData endpoint. Dots in esquery literal regex match
+          // the forward slashes; the trailing literal "s" ensures we do not
+          // also match `/api/public/event-pages` (which has `-` after `event`).
+          selector: 'Literal[value=/api.public.events[^-]/]',
           message:
-            'Homepage must not hit /api/public/events — use /api/public/event-pages (canonical).',
+            'Legacy /api/public/events endpoint retired 2026-04-21 — use /api/public/event-pages.',
         },
         {
           selector: 'Literal[value=/events.catalog.json/]',
           message:
-            'Homepage must not reference events/catalog.json (legacy EventData store).',
+            'Legacy events/catalog.json retired 2026-04-21 — use event_pages/catalog.json.',
         },
       ],
     },

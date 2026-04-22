@@ -1,10 +1,10 @@
 ---
 type: plan
 scope: [event, data, architecture]
-status: proposed
-date: 2026-04-21
+status: implemented
+date: 2026-04-22
 source_of_truth: false
-tags: [event, event-page, migration, legacy-cleanup, adr-required]
+tags: [event, event-page, migration, legacy-cleanup, adr-ratified]
 ---
 
 # Collapse Event into EventPage — architecture alignment & legacy cleanup
@@ -176,7 +176,32 @@ Only after 4.A is clean. Per `decision--event--event-page-is-canonical-event.md`
 - `grep -r "events/catalog.json"` returns only references in retired code scheduled for Phase 5 removal.
 - Reference audit artifact committed alongside the deletion.
 
-### Phase 5 — Legacy code removal
+### Phase 5 — Legacy code removal — **implemented 2026-04-21**
+
+Executed as a sequence of controlled stages against a safety commit (`edb0d37`):
+
+- **Types relocated** before deletion: `Enrollment`, `EventStatus`, `PaymentStatus` moved to `apps/admin-backend/app/models/enrollments.py` and `apps/frontend/src/entities/event/enrollment.types.ts`. Live consumers repointed; legacy files continue importing their own copies until deleted.
+- **Route + journey removed**: `/admin/events` dropped from `router.tsx`; `events: '/admin/events'` removed from transporter; `'events'` removed from `EditorKind` + `EditorKey` unions.
+- **EventEditor + EventsPage deleted**: `src/features/admin/eventEditor/` (whole tree), `src/pages/admin/EventsPage.tsx`.
+- **Admin block-preview event rendering retired**: `EventCtaBlockComponent`, `GalleryEventSlot`, `EventPicker` (tree) deleted; `BlockRenderer`, `SingleBlockEditor`, `TemplateBlockCard`, `GalleryComponent`, `BlockPreview/index.ts` updated to drop `eventCta` branches.
+- **Public event rendering retired**: `EventCtaView` (+ CSS) and `GallerySlotEventView` (+ CSS) deleted; `GalleryBlock` drops the `eventCta` branch; `ImageComponent` drops `renderEventSlot` prop + `isEventItem` usage.
+- **EventsProvider layer deleted**: `src/shared/EventsProvider/` (provider, loader, useEvent) and `src/features/public/api/eventsModule.ts` removed; `router.tsx` drops the loader wraps.
+- **Event-block plumbing retired**: `EventCtaBlock`, `GalleryEventItem` types removed from `entities/block/block.types.ts` + barrel; `eventSlot`/`eventPickEvent`/`eventPickBackground` BlockHit kinds and `EditTarget` variants removed; `normalizeEventCtaBlock` removed from `normalizeBlock.ts`; `blockSetEventId`/`blockSetEventBackground` removed from `journey.types.ts` return effect union and from `BlockReturnKind`; `createEventPickTicket`/`createBackgroundPickTicket` and their dispatchers removed from the block editor session; `createEventCtaTemplateBlock` removed from templates; `isEventItem` guard removed from `blockItemGuards.ts`; `GalleryBlockView`'s `renderEventSlot` prop removed; `validators.ts` gallery-item validation simplified to art-only.
+- **Dead helper removed**: `src/shared/lib/checkers/eventStatusHelpers.ts` deleted (guardrail caught it as the sole remaining `EventData` importer).
+- **Backend legacy retired**: `apps/admin-backend/app/routers/events/events.py`, `apps/admin-backend/app/repos/event_repo.py`, `apps/admin-backend/app/models/events.py` deleted; `main.py` no longer registers `events.public_router` / `events.admin_router`.
+- **ESLint guardrail**: project-wide `no-restricted-imports` banning `@/shared/EventsProvider/**`, `@/features/admin/eventEditor/**`, `@/features/public/api/eventsModule*`, and `EventData` from `@/entities/event`. Project-wide `no-restricted-syntax` matching literal string fragments `/api/public/events` (disambiguated from `/api/public/event-pages`) and `events/catalog.json`. Violations fail lint.
+
+Verification:
+- `npx tsc --noEmit`: 0 errors.
+- Frontend vitest: 453 passing (19 files), only pre-existing helper file `journeySession.test.ts` absent of test suites (unchanged).
+- Backend `pytest`: 17 passed, 2 skipped (pre-existing).
+- FastAPI route enumeration smoke check: no legacy `/admin/events*` or `/public/events*` (except the preserved `/public/events/{id}/enroll` enrollment alias; URL rename deferred).
+- Post-deletion `rg EventData|event_repo|/admin/events|EventsProvider|eventsModule|EventCtaBlock|GalleryEventItem|GalleryEventSlot|EventCtaView|GallerySlotEventView|EventPicker` in `apps/`: 0 matches (aside from guardrail strings in `eslint.config.js` and this plan document).
+
+Known deferrals (out of strict Phase 5 scope):
+- URL rename `/public/events/{id}/enroll` → `/public/event-pages/{id}/enroll`: deferred to a later cycle for contract stability. Tracked in this plan's "open decisions" #2.
+- Pre-existing unused-variable / explicit-any lint warnings in unrelated files: not introduced by this phase; outside scope.
+
 
 **Goal**: The EventEditor and EventData no longer exist.
 
@@ -193,7 +218,14 @@ Deliverables (in order — each a standalone commit to minimize blast radius):
 
 **Gate**: `grep -r "EventData\|event_repo\|/admin/events"` returns zero results in `apps/`. Typecheck + full test suite green. Manual QA of registration still works.
 
-### Phase 6 — Post-cleanup verification + vault sync
+### Phase 6 — Post-cleanup verification + vault sync — **implemented 2026-04-22**
+
+Shipped:
+- Manual QA pass across event editor, registration CTA, public page, draft/scheduled gating, editor preview, homepage, streams, and legacy-surface absence. Registration end-to-end structurally verified (payment path returns "Payment service unavailable" as expected in this env). No regressions in neighbouring surfaces.
+- `bug--event--id-prefix-collision-between-event-and-eventpage.md` flipped to `status: fixed` with resolution note.
+- `plan--events--cta-registration-system.md` Phase 2 unblocked against the canonical entity (Event picker re-scoped).
+- Nav index (`knowledge/index/index--system--project-navigation.md`) re-verified: decision count 6 + invariant count 9 both correct; no stale pointers.
+- One unrelated React render-cycle warning observed in `EventPageEditorSessionProvider` — not migration-caused; tracked as a separate concern (see `knowledge/open-questions/open_question--editor--eventpage-session-provider-render-warning.md`).
 
 **Goal**: Close the loop.
 

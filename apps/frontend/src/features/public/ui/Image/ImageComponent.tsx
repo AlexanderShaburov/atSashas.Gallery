@@ -1,13 +1,10 @@
 import type { ArtItemData } from '@/entities/art';
 import type { GalleryBlock, ItemPosition } from '@/entities/block';
-import { isEventItem } from '@/shared/lib/checkers/blockItemGuards';
 import { useArtCatalog } from '@/shared/ArtCatalogProvider/CatalogHook';
 import { GalleryBlockView } from '@/shared/ui/GalleryBlockView';
 import Lightbox from '@/shared/ui/lightbox/Lightbox';
 import { QuickView } from '@/shared/ui/QuickView';
 import { useState } from 'react';
-
-import { GallerySlotEventView } from './GallerySlotEventView';
 
 type ImageComponentProps = { block: GalleryBlock };
 
@@ -21,7 +18,7 @@ export default function ImageComponent({ block }: ImageComponentProps) {
 
   const handleSlotClick = (pos: ItemPosition, e: React.MouseEvent) => {
     const item = block.items.find((i) => i.position === pos);
-    if (!item || isEventItem(item)) return;
+    if (!item) return;
     const art = resolveArt(item.artId);
     if (!art) return;
     setAnchorPoint({ x: e.clientX + window.scrollX, y: e.clientY + window.scrollY });
@@ -41,7 +38,6 @@ export default function ImageComponent({ block }: ImageComponentProps) {
         block={block}
         resolveArt={resolveArt}
         onSlotClick={handleSlotClick}
-        renderEventSlot={(item) => <GallerySlotEventView item={item} />}
       />
 
       {quickViewArt && anchorPoint && (

@@ -2,7 +2,6 @@ import { type Block, type BlockHitEvent } from '@/entities/block';
 import {
     ComposableBlockComponent,
     CtaBlockComponent,
-    EventCtaBlockComponent,
     GalleryComponent,
     TextBlockComponent,
 } from '@/features/admin/shared/ui/BlockPreview';
@@ -11,7 +10,6 @@ import {
     TEMPLATE_BLOCKS,
     createComposableTemplateBlock,
     createCtaTemplateBlock,
-    createEventCtaTemplateBlock,
     createGalleryTemplateBlock,
     createTextTemplateBlock,
 } from './templateTypes';
@@ -54,20 +52,6 @@ export function TemplateRaw({ onSelectKind, setValue }: TemplateRawProps) {
                             <div key={`${tpl.kind}-${index}`} className="blk-tpl">
                                 <TextBlockComponent
                                     item={{ ...createTextTemplateBlock(), isTemplate: true }}
-                                    onHit={onSelectKind}
-                                    parent="grid"
-                                    setValue={setValue}
-                                />
-                            </div>
-                        );
-                    case 'eventCta':
-                        return (
-                            <div key={`${tpl.kind}-${index}`} className="blk-tpl">
-                                <EventCtaBlockComponent
-                                    item={{
-                                        ...createEventCtaTemplateBlock(),
-                                        isTemplate: true,
-                                    }}
                                     onHit={onSelectKind}
                                     parent="grid"
                                     setValue={setValue}

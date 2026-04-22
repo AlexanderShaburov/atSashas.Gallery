@@ -6,15 +6,23 @@
       "size": "S"
     },
     {
+      "kind": "eventRef",
+      "eventPageId": "event-20260422-y9b4he"
+    },
+    {
       "kind": "streamRef",
       "streamId": "stream-20260418-6brw3d"
     },
     {
       "kind": "eventRef",
       "eventPageId": "event-20260421-ax8x2r"
+    },
+    {
+      "kind": "eventRef",
+      "eventPageId": "event-20260421-4scvhr"
     }
   ],
-  "version": 78,
+  "version": 83,
   "createdAt": "2026-02-13T12:35:00.000000+00:00",
-  "updatedAt": "2026-04-21T16:29:02.987517+00:00"
+  "updatedAt": "2026-04-22T04:46:26.599106+00:00"
 }

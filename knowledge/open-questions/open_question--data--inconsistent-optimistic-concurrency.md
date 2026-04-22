@@ -11,18 +11,18 @@ tags: [backend, concurrency]
 
 ## Observation
 
-Only 3 of 9 backend repos enforce optimistic concurrency (version check + HTTP 409 rejection):
+Only 2 of 7 surviving backend repos enforce optimistic concurrency (version check + HTTP 409 rejection):
 - StreamRepo
-- PublicStreamRepo
 - HomeDocRepo
 
-The remaining 6 repos have `version` fields in their Pydantic models but do NOT validate the incoming version before saving:
-- EventRepo
+The remaining 5 repos have `version` fields in their Pydantic models but do NOT validate the incoming version before saving:
 - EventPageRepo
 - TextVisualRepo
 - MediaItemRepo
 - CatalogRepo (has `catalogVersion`)
 - BlockCollectionRepo (has `version`)
+
+Historical: `PublicStreamRepo` and `EventRepo` previously appeared in these lists; both retired in 2026-04 cutovers (`decision--data--homedoc-is-sole-homepage-source.md`, `decision--event--event-page-is-canonical-event.md`).
 
 ## Risk
 
@@ -34,7 +34,6 @@ Should all repos enforce optimistic concurrency, or is the current inconsistency
 
 ## Evidence
 
-- StreamRepo version check: `stream_repo.py` lines 224-251
-- PublicStreamRepo version check: `public_stream_repo.py` lines 55-78
-- HomeDocRepo version check: `home_doc_repo.py` lines 79-95
-- EventRepo _save() with NO version check: `event_repo.py` lines 46-53
+- StreamRepo version check: `stream_repo.py` (version-check block)
+- HomeDocRepo version check: `home_doc_repo.py` (version-check block)
+- EventPageRepo `_save()` with NO version check: `event_page_repo.py`

@@ -72,15 +72,7 @@ export interface GalleryArtItem {
     caption?: Localized;
 }
 
-export interface GalleryEventItem {
-    kind: 'eventCta';
-    eventId: string;
-    position: ItemPosition;
-    buttonLabel?: Localized;
-    backgroundArtId?: string;
-}
-
-export type GalleryBlockItem = GalleryArtItem | GalleryEventItem;
+export type GalleryBlockItem = GalleryArtItem;
 
 export interface TextBlock extends BlockBase {
     blockKind: 'text';
@@ -114,12 +106,6 @@ export interface CtaBlock extends BlockBase {
     target: CtaTarget | undefined;
 }
 
-export interface EventCtaBlock extends BlockBase {
-    blockKind: 'eventCta';
-    eventId: string;
-    buttonLabel?: Localized;
-}
-
 export interface BlockSlot {
     position: ItemPosition;
     content: Renderable;
@@ -133,4 +119,4 @@ export interface ComposableBlock extends BlockBase {
     appearance?: BlockAppearance;
 }
 
-export type Block = GalleryBlock | TextBlock | CtaBlock | EventCtaBlock | ComposableBlock;
+export type Block = GalleryBlock | TextBlock | CtaBlock | ComposableBlock;

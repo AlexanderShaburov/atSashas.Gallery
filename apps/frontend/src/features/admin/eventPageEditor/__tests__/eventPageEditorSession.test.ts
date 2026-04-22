@@ -9,7 +9,6 @@ import { mapEventToRenderModel } from '@/features/public/eventPage/mapEventToRen
 import { EventPageView } from '@/features/public/eventPage/EventPageView';
 import type {
   EventPageData,
-  EventPreset,
   WorkshopEventPage,
   PleinAirEventPage,
   ExhibitionEventPage,

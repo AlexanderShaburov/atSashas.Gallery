@@ -1,13 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { createEventPage } from '@/entities/event/eventFactory';
 import { resolveEventDefaults } from '@/entities/event/resolveEventDefaults';
-import { buildEventRenderContext } from '@/entities/event/eventRenderContext';
 import type { ResolvedEventPageData } from '@/entities/event/eventPage.types';
 import type { EventRenderContext } from '@/entities/event/eventRenderContext';
 import type {
   WorkshopEventPage,
-  PleinAirEventPage,
   ExhibitionEventPage,
   MinimalEventPage,
 } from '@/entities/event/eventPage.types';

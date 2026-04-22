@@ -237,13 +237,24 @@ Deliverables (shipped):
 
 Test outcome: 368 existing tests pass + 6 new unit tests on `resolveCtaAction` cover explicit-value, legacy-free-inference, legacy-paid-inference, and no-capacity-backfill cases.
 
-### Phase 2 — Free registration end-to-end — **blocked 2026-04-21, migration-in-progress**
+### Phase 2 — Free registration end-to-end — **unblocked 2026-04-22**
 
-**Blocker**: manual QA surfaced that the admin UI has migrated to `EventPageEditor` as the only user-visible event editor, but the enrollment endpoint still reads from `events/catalog.json` (legacy EventData repo). See `knowledge/bugs/bug--event--id-prefix-collision-between-event-and-eventpage.md`.
+**Status**: the architectural blocker that paused this phase is resolved. `decision--event--event-page-is-canonical-event.md` is ratified and `plan--event--collapse-into-event-page.md` is `implemented` — EventPage is the single canonical event entity. Enrollment is already wired end-to-end against `event_pages/catalog.json`: `POST /public/events/{event_page_id}/enroll` resolves via `event_page_repo`, writes to `EventPageData.enrollments`, and returns `201`. Free path verified by `apps/admin-backend/tests/test_enrollments_api.py`; manual QA verified the UI path on 2026-04-22.
 
-**Ratified resolution**: `knowledge/decisions/decision--event--event-page-is-canonical-event.md` (EventPage is canonical; legacy retired).
+**What is already shipped (unified by the migration, not this plan)**:
+- Backend enrollment endpoint against the canonical entity (migration Phase 2).
+- Frontend public page dispatches register CTA with status-only gate; `EnrollmentForm` submits against `page.id` (migration Phase 3).
+- `EventPageData.enrollments` persistence + admin-side read via `GET /admin/events/{id}/enrollments`.
 
-**Unblock conditions**: Phase 3 (Frontend reconciliation) of `knowledge/plans/plan--event--collapse-into-event-page.md` completes. At that point the enrollment pipeline targets the canonical entity and this phase can resume. The Event picker design within this phase should be reviewed at that time — likely unnecessary once EventPage is the only event concept.
+**Re-scoped Phase 2 deliverables** (what this plan still has to add):
+- Admin "Registrations" UI tab inside `EventPageEditor` (list view, filters, aggregate counts). The backend already serves the data — the tab needs to be built.
+- Owner email on `registration.created` (mailer choice still open; see §Open decisions).
+- Optional: rename of Registration record fields to the plan's intended shape (§2.2) if we want to keep the spec's naming (`registrations` instead of `enrollments`). Currently the field is named `enrollments` on both entity and endpoint for historical reasons; renaming is a separate cosmetic pass.
+
+**Previously scoped and now redundant**:
+- **Event picker via Journey** — retired from Phase 2 scope. The picker existed to reconcile the EventPage↔EventData split; with the entities collapsed, the Event Page *is* the event and no cross-reference picker is needed. Any registration CTA configured on an EventPage targets that EventPage directly.
+
+**Gate**: admin Registrations tab lists entries in real time against a live test registration; owner email fires for the same submission.
 
 
 Goal: a user can register for a free event and the owner sees the registration.

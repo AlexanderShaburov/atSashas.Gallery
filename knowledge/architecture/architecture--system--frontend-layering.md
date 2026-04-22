@@ -33,12 +33,12 @@ tags: [fsd, frontend]
 ├──────────────────────────────────────────────────┤
 │  entities/  Pure domain models (no UI/effects)    │
 │    art/, block/, catalog/, common/, event/,       │
-│    homeDoc/, hopper/, mediaItem/, publicStream/,  │
+│    homeDoc/, hopper/, mediaItem/,                 │
 │    renderable/, stream/, textVisual/              │
 ├──────────────────────────────────────────────────┤
 │  shared/    Stores, nav, lib, ui primitives       │
-│    state/, nav/, lib/, ui/, galleryLayouts/,      │
-│    ArtCatalogProvider/, EventsProvider/           │
+│    state/, nav/, lib/, ui/, galleryLayouts/,     │
+│    analytics/, ArtCatalogProvider/                │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -49,6 +49,8 @@ tags: [fsd, frontend]
 /                        → HomePage
 /gallery/:slug           → GalleryPage
 /about                   → AboutPage
+/events                  → PublicEventsPage
+/event/:id               → EventPage
 /enrollment/success      → EnrollmentSuccessPage
 /enrollment/cancel       → EnrollmentCancelPage
 ```
@@ -56,6 +58,7 @@ tags: [fsd, frontend]
 ### Preview routes (auth required)
 ```
 /preview/                → HomePage (mode="preview")
+/preview/event/:id       → EventPage (mode="preview")
 /preview/:slug           → GalleryPage (mode="preview")
 ```
 
@@ -67,11 +70,10 @@ tags: [fsd, frontend]
 /admin/catalog           → CatalogEditorPage       ← CatalogEditorSessionProvider
 /admin/blocks            → BlocksPage              ← BlockEditorSessionProvider
 /admin/streams           → StreamsPage             ← StreamEditorSessionProvider
-/admin/events            → EventsPage              ← EventEditorSessionProvider
 /admin/event-pages       → EventPagesPage          ← EventPageEditorSessionProvider
+/admin/home              → HomeEditorPage          ← HomeEditorSessionProvider
 /admin/text-visuals      → TextVisualsPage         ← TextVisualEditorSessionProvider
 /admin/media             → MediaPage               ← MediaEditorSessionProvider
-/admin/public-stream     → PublicStreamPage         (no session provider)
 /admin/hopper            → UploadPage
 ```
 
@@ -81,8 +83,7 @@ tags: [fsd, frontend]
 ```
 AppProviders (ThemeProvider → AuthProvider)
   → ArtCatalogLoader (mode="public")
-    → EventsLoader
-      → PublicLayout (Header + CatalogProvider + Outlet + Footer)
+    → PublicLayout (Header + Outlet + Footer)
 ```
 
 **Admin routes:**
@@ -90,10 +91,9 @@ AppProviders (ThemeProvider → AuthProvider)
 AppProviders (ThemeProvider → AuthProvider)
   → RequireAuth
     → ArtCatalogLoader (mode="admin")
-      → EventsLoader
-        → EditorWorkspaceProvider (= AdminDataPreloader, preloads 4 stores)
-          → AdminLayout (AdminHeader + DestructiveOverlay + Outlet)
-            → [per-route SessionProvider wraps page component]
+      → EditorWorkspaceProvider (= AdminDataPreloader, preloads 4 stores)
+        → AdminLayout (AdminHeader + DestructiveOverlay + Outlet)
+          → [per-route SessionProvider wraps page component]
 ```
 
 **EditorWorkspaceProvider** is a side-effect wrapper (NOT a context). It preloads:

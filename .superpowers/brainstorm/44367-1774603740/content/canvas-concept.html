@@ -1,0 +1,108 @@
+<h2>Canvas Size: How It Works</h2>
+<p class="subtitle">The block becomes a fixed-ratio frame. Drag the corner to set the aspect ratio, then customize content inside.</p>
+
+<div class="split" style="gap: 2rem; margin-bottom: 2rem;">
+
+  <!-- BEFORE -->
+  <div class="mockup">
+    <div class="mockup-header">Current: Implicit Height</div>
+    <div class="mockup-body" style="padding: 1.5rem;">
+      <div style="background: #1a1a1a; border-radius: 8px; overflow: hidden;">
+        <!-- Block with no explicit ratio -->
+        <div style="display: flex; gap: 6px; padding: 6px;">
+          <div style="flex: 1; background: #2a2a2a; aspect-ratio: 3/4; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+            <span style="color: #666; font-size: 0.75rem;">Image A<br><span style="color:#555; font-size:0.65rem">natural height</span></span>
+          </div>
+          <div style="flex: 1; background: #2a2a2a; aspect-ratio: 4/5; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+            <span style="color: #666; font-size: 0.75rem;">Image B<br><span style="color:#555; font-size:0.65rem">natural height</span></span>
+          </div>
+        </div>
+      </div>
+      <p style="color: #888; font-size: 0.75rem; margin-top: 0.75rem; text-align: center;">Height determined by image aspect ratios — inconsistent across blocks</p>
+    </div>
+  </div>
+
+  <!-- AFTER -->
+  <div class="mockup">
+    <div class="mockup-header">New: Explicit Aspect Ratio</div>
+    <div class="mockup-body" style="padding: 1.5rem;">
+      <div style="background: #1a1a1a; border-radius: 8px; overflow: hidden; position: relative;">
+        <!-- Block with explicit 16:9 ratio -->
+        <div style="aspect-ratio: 16/9; display: flex; gap: 6px; padding: 6px; overflow: hidden;">
+          <div style="flex: 1; background: #2a2a2a; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            <span style="color: #666; font-size: 0.75rem;">Image A<br><span style="color:#555; font-size:0.65rem">cropped to fit</span></span>
+          </div>
+          <div style="flex: 1; background: #2a2a2a; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            <span style="color: #666; font-size: 0.75rem;">Image B<br><span style="color:#555; font-size:0.65rem">cropped to fit</span></span>
+          </div>
+        </div>
+        <!-- Corner drag handle -->
+        <div style="position: absolute; bottom: 4px; right: 4px; width: 16px; height: 16px; border-right: 3px solid #f59e0b; border-bottom: 3px solid #f59e0b; cursor: nwse-resize; opacity: 0.9;"></div>
+      </div>
+      <p style="color: #888; font-size: 0.75rem; margin-top: 0.75rem; text-align: center;">16:9 canvas — consistent shape, images crop within frame</p>
+    </div>
+  </div>
+</div>
+
+<!-- Interaction diagram -->
+<h3>Customizer Interaction</h3>
+<p class="subtitle">Step 1: Set frame shape. Step 2: Adjust content inside.</p>
+
+<div class="mockup" style="max-width: 700px; margin: 0 auto;">
+  <div class="mockup-header">Block Customizer — Canvas Resize</div>
+  <div class="mockup-body" style="padding: 2rem;">
+    <div style="position: relative; background: #111; border: 2px dashed #f59e0b44; border-radius: 8px; aspect-ratio: 16/9; max-width: 100%; display: flex; gap: 6px; padding: 8px; overflow: hidden;">
+
+      <!-- Slot 1 -->
+      <div style="flex: 1; background: linear-gradient(135deg, #2d1b4e, #1b3a4e); border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;">
+        <div style="color: #8b7ab8; font-size: 0.8rem; text-align: center;">
+          Art Image<br>
+          <span style="font-size: 0.65rem; color: #665f80;">zoom &amp; pan inside</span>
+        </div>
+      </div>
+
+      <!-- Slot 2 -->
+      <div style="flex: 1; background: linear-gradient(135deg, #1b3a4e, #1b4e3a); border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;">
+        <div style="color: #7ab8a8; font-size: 0.8rem; text-align: center;">
+          Art Image<br>
+          <span style="font-size: 0.65rem; color: #5f8076;">zoom &amp; pan inside</span>
+        </div>
+      </div>
+
+      <!-- Corner drag handle -->
+      <div style="position: absolute; bottom: 6px; right: 6px; width: 20px; height: 20px; border-right: 3px solid #f59e0b; border-bottom: 3px solid #f59e0b; cursor: nwse-resize;"></div>
+
+      <!-- Ratio label -->
+      <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: #f59e0b22; color: #f59e0b; font-size: 0.7rem; padding: 2px 10px; border-radius: 10px; font-family: monospace;">
+        16 : 9
+      </div>
+
+      <!-- Top-right info -->
+      <div style="position: absolute; top: 8px; right: 8px; background: #f59e0b22; color: #f59e0b; font-size: 0.6rem; padding: 2px 8px; border-radius: 10px;">
+        drag corner to resize
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 1rem; margin-top: 1rem; justify-content: center; flex-wrap: wrap;">
+      <div style="background: #1e1e1e; padding: 6px 14px; border-radius: 6px; font-size: 0.75rem; color: #aaa; border: 1px solid #333;">Gap: 6px</div>
+      <div style="background: #1e1e1e; padding: 6px 14px; border-radius: 6px; font-size: 0.75rem; color: #aaa; border: 1px solid #333;">Align: center</div>
+      <div style="background: #1e1e1e; padding: 6px 14px; border-radius: 6px; font-size: 0.75rem; color: #f59e0b; border: 1px solid #f59e0b44;">Ratio: 16:9</div>
+      <div style="background: #1e1e1e; padding: 6px 14px; border-radius: 6px; font-size: 0.75rem; color: #aaa; border: 1px solid #333;">Columns: 50/50</div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile behavior -->
+<div style="margin-top: 2rem;">
+  <h3>Mobile Behavior</h3>
+  <p class="subtitle">On mobile (&le;820px): aspect ratio ignored, images stack naturally as single-column stream</p>
+  <div style="display: flex; gap: 2rem; justify-content: center; align-items: flex-start; margin-top: 1rem;">
+    <div style="width: 180px;">
+      <div style="background: #1a1a1a; border-radius: 8px; padding: 4px; text-align: center;">
+        <div style="background: #2a2a2a; aspect-ratio: 3/4; border-radius: 4px; margin-bottom: 4px; display:flex; align-items:center; justify-content:center;"><span style="color:#666; font-size:0.65rem;">Image A</span></div>
+        <div style="background: #2a2a2a; aspect-ratio: 4/5; border-radius: 4px; display:flex; align-items:center; justify-content:center;"><span style="color:#666; font-size:0.65rem;">Image B</span></div>
+      </div>
+      <p style="color: #888; font-size: 0.65rem; text-align: center; margin-top: 0.5rem;">Mobile: natural heights, stacked</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,705 @@
+/* Admin Enrollments detail view (Phase 4). Visual tone matches the
+   Phase 3 list screen. */
+
+.admin-enroll-detail {
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 1.25rem 1.25rem 3rem;
+}
+
+.admin-enroll-detail__back {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+}
+
+.admin-enroll-detail__back a {
+    color: #6b7280;
+    text-decoration: none;
+}
+
+.admin-enroll-detail__back a:hover {
+    color: #1f2937;
+    text-decoration: underline;
+}
+
+/* ── Header ── */
+
+.admin-enroll-detail__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.admin-enroll-detail__heading h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.2;
+}
+
+.admin-enroll-detail__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: #6b7280;
+    font-size: 0.9375rem;
+}
+
+.admin-enroll-detail__date {
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-enroll-detail__editor-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #e5e0db;
+    color: #1f2937;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+}
+
+.admin-enroll-detail__editor-link:hover {
+    background: #faf7f5;
+    border-color: #d8d0c8;
+}
+
+/* ── Summary strip ── */
+
+.admin-enroll-detail__summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.admin-enroll-detail__summary-item {
+    padding: 0.85rem 1rem;
+    border: 1px solid #e5e0db;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.admin-enroll-detail__summary-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6b7280;
+}
+
+.admin-enroll-detail__summary-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── States ── */
+
+.admin-enroll-detail__state {
+    padding: 2rem 1rem;
+    border-radius: 0.625rem;
+    text-align: center;
+    font-size: 0.9375rem;
+}
+
+.admin-enroll-detail__state h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+}
+
+.admin-enroll-detail__state--loading {
+    color: #6b7280;
+    background: #faf7f5;
+}
+
+.admin-enroll-detail__state--empty {
+    color: #6b7280;
+    background: #faf7f5;
+}
+
+.admin-enroll-detail__state--error {
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+}
+
+/* ── Roster table ── */
+
+.admin-enroll-detail__table-wrap {
+    overflow-x: auto;
+    border: 1px solid #e5e0db;
+    border-radius: 0.75rem;
+    background: #ffffff;
+}
+
+.admin-enroll-detail__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+}
+
+.admin-enroll-detail__table thead th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    background: #faf7f5;
+    border-bottom: 1px solid #e5e0db;
+}
+
+.admin-enroll-detail__actions-head {
+    width: 3rem;
+}
+
+.admin-enroll-detail__table tbody td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid #f1ede8;
+    color: #1f2937;
+    vertical-align: top;
+}
+
+.admin-enroll-detail__table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-enroll-detail__contact {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.admin-enroll-detail__contact li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+}
+
+.admin-enroll-detail__contact-label {
+    color: #9ca3af;
+    font-size: 0.8125rem;
+}
+
+.admin-enroll-detail__contact-value {
+    color: #1f2937;
+}
+
+.admin-enroll-detail__created {
+    color: #6b7280;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.admin-enroll-detail__muted {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.admin-enroll-detail__row-actions {
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: #6b7280;
+    font-size: 1.1rem;
+    font-family: inherit;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.admin-enroll-detail__row-actions:hover,
+.admin-enroll-detail__row-actions[aria-expanded='true'] {
+    background: #faf7f5;
+    border-color: #e5e0db;
+    color: #1f2937;
+}
+
+.admin-enroll-detail__row-actions:disabled {
+    color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+/* ── Row menu popover ── */
+
+.admin-enroll-detail__menu {
+    position: relative;
+    display: inline-block;
+}
+
+.admin-enroll-detail__menu-panel {
+    width: 14rem;
+    background: #ffffff;
+    border: 1px solid #e5e0db;
+    border-radius: 0.625rem;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    padding: 0.35rem 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Portal variant — rendered into document.body at a fixed viewport
+   position computed from the trigger's bounding rect. Fixed positioning
+   means the menu never inherits the roster table's `overflow-x: auto`
+   clipping. */
+.admin-enroll-detail__menu-panel--portal {
+    position: fixed;
+    z-index: 3500;
+}
+
+.admin-enroll-detail__menu-group {
+    padding: 0.25rem 0;
+    border-top: 1px solid #f1ede8;
+}
+
+.admin-enroll-detail__menu-group:first-child {
+    border-top: none;
+}
+
+.admin-enroll-detail__menu-heading {
+    padding: 0.25rem 0.85rem 0.1rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.admin-enroll-detail__menu-hint {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8125rem;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.admin-enroll-detail__menu-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.85rem;
+    border: none;
+    background: none;
+    text-align: left;
+    color: #1f2937;
+    font-size: 0.875rem;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.admin-enroll-detail__menu-item:hover:not(:disabled) {
+    background: #faf7f5;
+}
+
+.admin-enroll-detail__menu-item:disabled {
+    color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+/* ── Header actions ── */
+
+.admin-enroll-detail__header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.admin-enroll-detail__primary-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.55rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: #e07a5f;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.admin-enroll-detail__primary-action:hover {
+    background: #c96a52;
+}
+
+/* ── In-flight row ── */
+
+.admin-enroll-detail__row--busy {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* ── Inline dismiss on the action-error banner ── */
+
+.admin-enroll-detail__dismiss {
+    float: right;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 0.25rem;
+    font-family: inherit;
+}
+
+/* ---------------------------------------------------------------------------
+   Action modals (feature-local; backdrop + card pattern)
+   --------------------------------------------------------------------------- */
+
+.admin-enroll-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(3px);
+}
+
+.admin-enroll-modal__card {
+    width: min(92vw, 480px);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #fffcf9;
+    border-radius: 1rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-enroll-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.25rem 0.5rem;
+    border-bottom: 1px solid #f1ede8;
+}
+
+.admin-enroll-modal__title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.admin-enroll-modal__close {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0.25rem 0.4rem;
+    border-radius: 0.25rem;
+}
+
+.admin-enroll-modal__close:hover:not(:disabled) {
+    background: #faf7f5;
+    color: #1f2937;
+}
+
+.admin-enroll-modal__body {
+    padding: 1rem 1.25rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.admin-enroll-modal__subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.admin-enroll-modal__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.admin-enroll-modal__field label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.admin-enroll-modal__field input,
+.admin-enroll-modal__field select,
+.admin-enroll-modal__field textarea {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid #e5e0db;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    font-size: 0.9375rem;
+    font-family: inherit;
+    color: #1f2937;
+    box-sizing: border-box;
+}
+
+.admin-enroll-modal__field textarea {
+    resize: vertical;
+    min-height: 2.5rem;
+    line-height: 1.4;
+}
+
+.admin-enroll-modal__field input:focus,
+.admin-enroll-modal__field select:focus,
+.admin-enroll-modal__field textarea:focus {
+    outline: none;
+    border-color: #e07a5f;
+    box-shadow: 0 0 0 3px rgba(224, 122, 95, 0.15);
+}
+
+.admin-enroll-modal__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+}
+
+.admin-enroll-modal__hint {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.admin-enroll-modal__hint--error {
+    color: #b45309;
+}
+
+.admin-enroll-modal__state {
+    padding: 1rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+    text-align: center;
+    background: #faf7f5;
+    border-radius: 0.5rem;
+}
+
+.admin-enroll-modal__error {
+    margin-top: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
+.admin-enroll-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.admin-enroll-modal__cancel {
+    padding: 0.5rem 0.9rem;
+    border: none;
+    background: none;
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 0.375rem;
+}
+
+.admin-enroll-modal__cancel:hover:not(:disabled) {
+    color: #1f2937;
+    background: #faf7f5;
+}
+
+.admin-enroll-modal__primary {
+    padding: 0.55rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: #e07a5f;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.admin-enroll-modal__primary:hover:not(:disabled) {
+    background: #c96a52;
+}
+
+.admin-enroll-modal__primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Transfer picker ── */
+
+.admin-enroll-modal__picker {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 18rem;
+    overflow-y: auto;
+    border: 1px solid #e5e0db;
+    border-radius: 0.5rem;
+    background: #ffffff;
+}
+
+.admin-enroll-modal__picker li + li {
+    border-top: 1px solid #f1ede8;
+}
+
+.admin-enroll-modal__picker-row {
+    display: grid;
+    grid-template-columns: 6rem 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: none;
+    background: transparent;
+    font-size: 0.875rem;
+    font-family: inherit;
+    text-align: left;
+    color: #1f2937;
+    cursor: pointer;
+}
+
+.admin-enroll-modal__picker-row:hover:not(:disabled) {
+    background: #faf7f5;
+}
+
+.admin-enroll-modal__picker-row--selected {
+    background: #fef3c7;
+}
+
+.admin-enroll-modal__picker-row--selected:hover {
+    background: #fef0b3 !important;
+}
+
+.admin-enroll-modal__picker-row--disabled {
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.admin-enroll-modal__picker-date {
+    font-variant-numeric: tabular-nums;
+    color: #6b7280;
+}
+
+.admin-enroll-modal__picker-title {
+    font-weight: 500;
+}
+
+.admin-enroll-modal__picker-capacity {
+    font-variant-numeric: tabular-nums;
+    color: #6b7280;
+    font-size: 0.8125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.admin-enroll-modal__picker-full {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 0.05rem 0.35rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* ── Status + payment pills (reuse the list tones) ── */
+
+.admin-enroll-detail__status {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.admin-enroll-detail__status--scheduled {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.admin-enroll-detail__status--draft {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.admin-enroll-detail__status--closed {
+    background: #e5e7eb;
+    color: #4b5563;
+}
+
+.admin-enroll-detail__status--pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.admin-enroll-detail__status--confirmed {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.admin-enroll-detail__status--cancelled-by-user,
+.admin-enroll-detail__status--cancelled-by-admin {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.admin-enroll-detail__status--no-show {
+    background: #e5e7eb;
+    color: #4b5563;
+}
+
+.admin-enroll-detail__status--attended {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.admin-enroll-detail__pay {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.admin-enroll-detail__pay--paid {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.admin-enroll-detail__pay--unpaid {
+    background: #fef3c7;
+    color: #92400e;
+}

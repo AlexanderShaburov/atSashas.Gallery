@@ -15,9 +15,6 @@ export const hitToTarget = (e: BlockHitEvent): EditTarget => {
             switch (e.hit.kind) {
                 case 'image':
                 case 'imageCaption':
-                case 'eventSlot':
-                case 'eventPickEvent':
-                case 'eventPickBackground':
                     return {
                         blockKind: 'gallery',
                         kind: e.hit.kind,
@@ -54,10 +51,6 @@ export const hitToTarget = (e: BlockHitEvent): EditTarget => {
                     return { blockKind: 'cta', kind: 'label' };
             }
             break;
-        }
-
-        case 'eventCta': {
-            return { blockKind: 'eventCta', kind: 'eventId' };
         }
     }
 };
@@ -102,17 +95,6 @@ export function normalizeBlock(block: Block): Block {
                 body: block.body ?? { en: '' },
                 buttonLabel: block.buttonLabel ?? { en: '' },
                 target: block.target ?? { type: 'stream', slug: '' },
-            };
-
-        case 'eventCta':
-            return {
-                id: block.id,
-                blockKind: 'eventCta',
-                lifecycle,
-                tags: block.tags ?? [],
-                dateCreated: block.dateCreated,
-                eventId: block.eventId,
-                buttonLabel: block.buttonLabel ?? { en: 'Sign up' },
             };
 
         case 'composable':

@@ -1,12 +1,13 @@
 // features/admin/eventPageEditor/ui/ContentSection.tsx
 
+import type { AllFieldKeys } from './fieldVisibility';
 import { isFieldVisible } from './fieldVisibility';
 import { LocalizedInput } from './LocalizedInput';
 import type { SectionProps } from './sectionProps';
 import { getLoc, getStr } from './sectionProps';
 
 export function ContentSection({ preset, record, set }: SectionProps) {
-  const vis = (f: string) => isFieldVisible(preset, f as any);
+  const vis = (f: string) => isFieldVisible(preset, f as AllFieldKeys);
 
   return (
     <div className="epe__section-body">

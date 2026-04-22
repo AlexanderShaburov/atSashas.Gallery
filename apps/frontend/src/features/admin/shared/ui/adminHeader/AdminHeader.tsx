@@ -71,6 +71,14 @@ export function AdminHeader() {
                         Events
                     </GuardedNavLink>
                     <GuardedNavLink
+                        to="/admin/enrollments"
+                        className={({ isActive }) =>
+                            'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')
+                        }
+                    >
+                        Enrollments
+                    </GuardedNavLink>
+                    <GuardedNavLink
                         to="/admin/media"
                         className={({ isActive }) =>
                             'admin-nav__link' + (isActive ? ' admin-nav__link--active' : '')

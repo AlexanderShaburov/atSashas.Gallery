@@ -1,8 +1,8 @@
 ---
 type: bug
 scope: [event, data, architecture]
-status: open
-date: 2026-04-21
+status: fixed
+date: 2026-04-22
 source_of_truth: true
 tags: [id, event, event-page, ux, architecture, half-migration]
 ---
@@ -48,13 +48,18 @@ The earlier framing of this bug as "ID prefix collision + missing editor validat
 
 `architecture--data--domain-model.md` assigns the `event-` prefix only to the **Event** entity. Event Pages are not listed as a Constitution-level domain entity — yet `createEventPage` adopted the same ID format. This diverges from the domain-model contract.
 
-## Resolution direction (ADR ratified 2026-04-21)
+## Resolution
 
-Ratified in `decision--event--event-page-is-canonical-event.md`: EventPage is the canonical entity; legacy EventData is retired. The collision class dissolves once the legacy is physically removed.
+Ratified in `decision--event--event-page-is-canonical-event.md` on 2026-04-21: EventPage is the canonical entity; legacy `EventData` retired. Execution completed through `plan--event--collapse-into-event-page.md` Phases 0–5 (2026-04-21) and manual-QA verified end-to-end on 2026-04-22.
 
-Execution plan: `plan--event--collapse-into-event-page.md` (proposed). Bug status remains `open` until migration Phase 5 (legacy code removal) completes, then flips to `resolved`.
+- Phase 2 repointed enrollment to `event_page_repo`; automated test `tests/test_enrollments_api.py` proves the canonical lookup.
+- Phase 3 dropped the `eventId` gate from the register CTA and switched `EnrollmentForm` to `page.id`.
+- Phase 4 deleted `vault/json/events/catalog.json` with a clean reference audit.
+- Phase 5 retired all legacy code (router, repo, model, provider, block-preview event renderers, block-level event plumbing) and added ESLint guardrails against reintroduction (`invariant--architecture--single-event-entity.md`).
 
-Further CTA & Registration work (`plan--events--cta-registration-system.md` Phase 2+) remains blocked until the migration's Phase 3 (frontend reconciliation) lands, at which point the Event picker design should be revisited as likely unnecessary.
+Symptom path confirmed gone: a newly authored Event Page is addressed by `page.id`, enrollment submits to `POST /api/public/events/{page.id}/enroll`, backend resolves against `event_pages/catalog.json`, and the registration persists on `EventPageData.enrollments`. The "Event not found" 404 reported in the original symptom is structurally impossible now.
+
+ID prefix `event-YYYYMMDD-…` remains, but is uncontested: there is no second entity sharing the shape.
 
 ## Related
 

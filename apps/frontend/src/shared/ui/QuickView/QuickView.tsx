@@ -83,15 +83,13 @@ export function QuickView({ art, anchorPoint, onClose, onViewFull }: Props) {
 
     // anchorPoint is page-relative (clientX/Y + scroll at click time)
     const viewportW = window.innerWidth;
-    const viewportH = window.innerHeight;
     const scrollX = window.scrollX;
-    const scrollY = window.scrollY;
     const cardW = Math.min(320, viewportW - 32);
     const margin = 16;
 
     // Initial position: centered on click X, below click Y
     let left = anchorPoint.x - cardW / 2;
-    let top = anchorPoint.y + 12;
+    const top = anchorPoint.y + 12;
 
     // Horizontal clamping
     if (left < scrollX + margin) left = scrollX + margin;

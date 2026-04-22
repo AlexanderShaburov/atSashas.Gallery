@@ -2,7 +2,6 @@
 
 import type { BlockHitEvent, BlockParent, GalleryBlock, ItemPosition } from '@/entities/block';
 import { Hit } from '@/entities/block';
-import { GalleryEventSlot } from '@/features/admin/shared/ui/BlockPreview/GalleryEventSlot';
 import { useResolveArtAdaptive } from '@/shared/ArtCatalogProvider/useResolveArtAdaptive';
 import { GalleryBlockView } from '@/shared/ui/GalleryBlockView';
 
@@ -13,9 +12,8 @@ type Props = {
     readOnly?: boolean;
 };
 
-export function GalleryComponent({ item, onHit, parent, readOnly }: Props) {
+export function GalleryComponent({ item, onHit, readOnly }: Props) {
     const resolveArt = useResolveArtAdaptive();
-    const isEditor = parent === 'editor';
 
     const handleSlotClick = (pos: ItemPosition, e: React.MouseEvent) => {
         if (readOnly) return;
@@ -42,27 +40,6 @@ export function GalleryComponent({ item, onHit, parent, readOnly }: Props) {
                           />
                       )
             }
-            renderEventSlot={(eventItem, pos) => (
-                <GalleryEventSlot
-                    item={eventItem}
-                    isEditor={isEditor}
-                    resolvedBgSrc={
-                        eventItem.backgroundArtId
-                            ? resolveArt(eventItem.backgroundArtId)?.images.preview.jpeg
-                            : undefined
-                    }
-                    onPickBackground={() => {
-                        onHit({
-                            block: item,
-                            hit: Hit.galleryEventPickBackground(pos),
-                            nativeEvent:
-                                new MouseEvent(
-                                    'click',
-                                ) as unknown as React.MouseEvent<HTMLElement>,
-                        });
-                    }}
-                />
-            )}
         />
     );
 }

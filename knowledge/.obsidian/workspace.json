@@ -182,7 +182,15 @@
   },
   "active": "dca0f50e20e249c7",
   "lastOpenFiles": [
+    "bugs/bug--deployment--clean-vault-boot-blocked.md",
+    "plans/plan--admin--event-enrollments-post-mvp-followups.md",
+    "open-questions/open_question--architecture--user-contact-catalog.md",
+    "plans/plan--admin--event-enrollments-management.md",
+    "plans/plan--admin--event-registration-management.md",
+    "Untitled 1.md",
+    "decisions/adr--system--rename-soki-to-nexus.md",
     "sessions/session--event--phase-4a-reference-audit.md",
+    "open-questions/open_question--editor--eventpage-session-provider-render-warning.md",
     "invariants/invariant--architecture--single-event-entity.md",
     "decisions/decision--event--event-page-is-canonical-event.md",
     "plans/plan--event--collapse-into-event-page.md",
@@ -203,15 +211,7 @@
     "specs/spec--system--knowledge-driven-task-orchestration copy.md",
     "specs/spec--devops--knowledge-sync-classification-ver-1-1.md",
     "specs/spec--devops--knowledge-sync-classification copy.md",
-    "index/index--system--project-navigation copy.md",
-    "specs/spec--system--knowledge-driven-task-orchestration_FIXED.md",
     "specs/spec--devops--knowledge-sync-classification.md.bak",
-    "specs/spec--system--knowledge-driven-task-orchestration.md.bak",
-    "sessions/session--editor--event-home-integration-bridge.md",
-    "sessions/session--2026-04-17--event-home-integration-bridge.md",
-    "bugs/bug--navigation--duplicate-dispatch-in-block-editor.md",
-    "specs/spec--system--knowledge-driven-task-orchestration.md",
-    "spec--system--knowledge-driven-task-orchestration.md",
-    "specs/spec--devops--knowledge-sync-classification.md"
+    "specs/spec--system--knowledge-driven-task-orchestration.md.bak"
   ]
 }

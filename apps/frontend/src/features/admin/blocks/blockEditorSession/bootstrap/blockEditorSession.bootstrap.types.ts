@@ -1,6 +1,6 @@
 import type { JumpResult } from '@/shared/nav/journey.types';
 
-export type BlockReturnKind = 'blockInsertArt' | 'blockUpdateArt' | 'blockSetEventId' | 'blockSetEventBackground';
+export type BlockReturnKind = 'blockInsertArt' | 'blockUpdateArt';
 
 export type OkJumpResult = Extract<JumpResult, { ok: true }>;
 

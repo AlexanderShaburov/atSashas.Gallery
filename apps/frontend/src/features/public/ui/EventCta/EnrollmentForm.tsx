@@ -1,7 +1,8 @@
 // features/public/ui/EventCta/EnrollmentForm.tsx
 
-import { enrollPublic } from '@/features/public/api/enrollmentApi';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { EnrollError, enrollPublic } from '@/features/public/api/enrollmentApi';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { evaluateEnrollmentFormInput } from './enrollmentFormValidation';
 import './EnrollmentForm.css';
 
 type Props = {
@@ -13,16 +14,24 @@ type Props = {
 export function EnrollmentForm({ eventId, isFree, onCancel }: Props) {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [note, setNote] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [emailTouched, setEmailTouched] = useState(false);
+    const [contactTouched, setContactTouched] = useState(false);
     const nameRef = useRef<HTMLInputElement>(null);
     const cardRef = useRef<HTMLDivElement>(null);
 
-    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    const canSubmit =
-        fullName.trim().length > 0 && emailValid && !isSubmitting;
+    const validity = useMemo(
+        () => evaluateEnrollmentFormInput({ fullName, email, phone }),
+        [fullName, email, phone],
+    );
+    const { hasEmail, hasPhone, emailMalformed, contactMissing } = validity;
+    const trimmedEmail = email.trim();
+    const trimmedPhone = phone.trim();
+    const canSubmit = validity.canSubmit && !isSubmitting;
 
     // Focus first input on mount
     useEffect(() => {
@@ -50,12 +59,15 @@ export function EnrollmentForm({ eventId, isFree, onCancel }: Props) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setContactTouched(true);
 
         try {
             setIsSubmitting(true);
             const result = await enrollPublic(eventId, {
                 fullName: fullName.trim(),
-                email: email.trim(),
+                email: hasEmail ? trimmedEmail : undefined,
+                phone: hasPhone ? trimmedPhone : undefined,
+                note: note.trim() ? note.trim() : undefined,
             });
 
             if (result.checkoutUrl) {
@@ -64,20 +76,29 @@ export function EnrollmentForm({ eventId, isFree, onCancel }: Props) {
                 setSuccess(true);
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Something went wrong');
+            if (err instanceof EnrollError) {
+                if (err.code === 'capacity') {
+                    setError('This event is full.');
+                } else {
+                    setError(err.message);
+                }
+            } else {
+                setError(err instanceof Error ? err.message : 'Something went wrong');
+            }
         } finally {
             setIsSubmitting(false);
         }
     };
 
     if (success) {
+        const confirmationTarget = hasEmail ? trimmedEmail : trimmedPhone;
         return (
             <div className="enroll-backdrop" onClick={onCancel}>
                 <div className="enroll-card enroll-card--success" ref={cardRef}>
                     <div className="enroll-success-icon">&#10003;</div>
                     <h3 className="enroll-card__title">You're in!</h3>
                     <p className="enroll-card__subtitle">
-                        We'll send a confirmation to <strong>{email}</strong>.
+                        We'll be in touch at <strong>{confirmationTarget}</strong>.
                     </p>
                     <button className="enroll-btn enroll-btn--primary" onClick={onCancel}>
                         Done
@@ -87,13 +108,15 @@ export function EnrollmentForm({ eventId, isFree, onCancel }: Props) {
         );
     }
 
+    const showContactError = contactTouched && contactMissing;
+
     return (
         <div className="enroll-backdrop" onClick={handleBackdropClick}>
             <div className="enroll-card" ref={cardRef} onClick={(e) => e.stopPropagation()}>
                 <form onSubmit={(e) => void handleSubmit(e)} noValidate>
                     <h3 className="enroll-card__title">Join the workshop</h3>
                     <p className="enroll-card__subtitle">
-                        We'll email your confirmation and receipt.
+                        Share your name and how we can reach you — email or phone.
                     </p>
 
                     <div className="enroll-field">
@@ -115,24 +138,64 @@ export function EnrollmentForm({ eventId, isFree, onCancel }: Props) {
 
                     <div className="enroll-field">
                         <label htmlFor="enroll-email" className="enroll-field__label">
-                            Email for confirmation
+                            Email
                         </label>
                         <input
                             id="enroll-email"
                             type="email"
-                            className={`enroll-field__input${emailTouched && email && !emailValid ? ' enroll-field__input--invalid' : ''}`}
+                            className={`enroll-field__input${emailTouched && emailMalformed ? ' enroll-field__input--invalid' : ''}`}
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                setContactTouched(true);
+                            }}
                             onBlur={() => setEmailTouched(true)}
                             placeholder="e.g. alex@email.com"
                             autoComplete="email"
-                            required
                         />
-                        {emailTouched && email && !emailValid && (
+                        {emailTouched && emailMalformed && (
                             <span className="enroll-field__hint">
                                 Please enter a valid email
                             </span>
                         )}
+                    </div>
+
+                    <div className="enroll-field">
+                        <label htmlFor="enroll-phone" className="enroll-field__label">
+                            Phone
+                        </label>
+                        <input
+                            id="enroll-phone"
+                            type="tel"
+                            className="enroll-field__input"
+                            value={phone}
+                            onChange={(e) => {
+                                setPhone(e.target.value);
+                                setContactTouched(true);
+                            }}
+                            placeholder="e.g. +1 555 0100"
+                            autoComplete="tel"
+                        />
+                    </div>
+
+                    {showContactError && (
+                        <div className="enroll-field__hint enroll-field__hint--error">
+                            Provide either an email or a phone number so we can confirm.
+                        </div>
+                    )}
+
+                    <div className="enroll-field">
+                        <label htmlFor="enroll-note" className="enroll-field__label">
+                            Anything we should know? <span className="enroll-field__label-hint">(optional)</span>
+                        </label>
+                        <textarea
+                            id="enroll-note"
+                            className="enroll-field__input enroll-field__input--textarea"
+                            value={note}
+                            onChange={(e) => setNote(e.target.value)}
+                            rows={2}
+                            placeholder="e.g. dietary needs, questions..."
+                        />
                     </div>
 
                     {error && <div className="enroll-error">{error}</div>}

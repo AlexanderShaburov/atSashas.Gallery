@@ -9,7 +9,6 @@ import type {
   WorkshopEventPage,
 } from '@/entities/event/eventPage.types';
 import type { EventRenderContext } from '@/entities/event/eventRenderContext';
-import { buildEventRenderContext } from '@/entities/event/eventRenderContext';
 
 import {
   assembleEventSections,

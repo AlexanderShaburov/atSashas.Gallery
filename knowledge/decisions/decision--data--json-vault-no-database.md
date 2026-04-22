@@ -38,9 +38,10 @@ vault/
 │   ├── users.json
 │   ├── block_collection/block_collection.json
 │   ├── streams/index.json + {stream_id}.json
-│   ├── events/catalog.json
-│   ├── public/home.json
-│   └── public_stream.json
+│   ├── event_pages/catalog.json
+│   ├── media_items/catalog.json
+│   ├── text_visuals/catalog.json
+│   └── public/home.json
 └── streams/                # Stream-level media assets
 ```
 
@@ -50,8 +51,8 @@ All repos use `asyncio.Lock` (in-process only).
 
 | Mechanism | Repos that implement it |
 |-----------|------------------------|
-| Optimistic concurrency (version + 409) | StreamRepo, PublicStreamRepo, HomeDocRepo |
-| Version field exists but NOT enforced | EventRepo, EventPageRepo, TextVisualRepo, MediaItemRepo, CatalogRepo, BlockCollectionRepo |
+| Optimistic concurrency (version + 409) | StreamRepo, HomeDocRepo |
+| Version field exists but NOT enforced | EventPageRepo, TextVisualRepo, MediaItemRepo, CatalogRepo, BlockCollectionRepo |
 | Atomic writes (tmp+rename) | All repos EXCEPT CatalogRepo and BlockCollectionRepo |
 
 ## Git policy

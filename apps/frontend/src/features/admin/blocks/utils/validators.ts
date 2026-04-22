@@ -10,17 +10,12 @@ export function validateBlockForm(form: Block): boolean {
             return (
                 Array.isArray(form.items) &&
                 form.items.length > 0 &&
-                form.items.every((item) => {
-                    if ('eventId' in item) return hasFilledString(item.eventId);
-                    return hasFilledString(item.artId);
-                })
+                form.items.every((item) => hasFilledString(item.artId))
             );
         case 'text':
             return hasLocalizedContent(form.body);
         case 'cta':
             return hasLocalizedContent(form.buttonLabel) && validateCtaTarget(form.target);
-        case 'eventCta':
-            return hasFilledString(form.eventId);
         default:
             return false;
     }

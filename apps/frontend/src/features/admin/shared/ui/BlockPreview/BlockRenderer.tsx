@@ -4,7 +4,6 @@ import { type Block, type BlockHitEvent, type BlockParent } from '@/entities/blo
 import { resolveSetter } from '@/shared/lib/resolvers/resolvers';
 import { ComposableBlockComponent } from './ComposableBlockComponent';
 import { CtaBlockComponent } from './CtaBlockComponent';
-import { EventCtaBlockComponent } from './EventCtaBlockComponent';
 import { GalleryComponent } from './GalleryComponent';
 import { TextBlockComponent } from './TextBlockComponent';
 
@@ -43,17 +42,6 @@ export function BlockRenderer({ block, onHit, parent, setValue, readOnly }: Bloc
         case 'cta':
             return (
                 <CtaBlockComponent
-                    key={block.id}
-                    item={block}
-                    onHit={onHit}
-                    parent={parent}
-                    setValue={resolveSetter(setValue)}
-                    readOnly={readOnly}
-                />
-            );
-        case 'eventCta':
-            return (
-                <EventCtaBlockComponent
                     key={block.id}
                     item={block}
                     onHit={onHit}

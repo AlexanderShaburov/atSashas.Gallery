@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import type { Enrollment } from '../event.types';
+import type { Enrollment } from '../enrollment.types';
 import {
   getExhibitionLayout,
   getExperienceLayout,
@@ -14,7 +14,7 @@ import {
   splitExhibitionDescription,
 } from '../eventDerived';
 import { createEventPage } from '../eventFactory';
-import type { CaptionedWork, EventPageData } from '../eventPage.types';
+import type { CaptionedWork } from '../eventPage.types';
 import { buildEventRenderContext } from '../eventRenderContext';
 
 // ---------------------------------------------------------------------------
@@ -25,9 +25,9 @@ describe('1. buildEventRenderContext', () => {
   it('mixed statuses → paidEnrollmentCount = 2', () => {
     const event = createEventPage('workshop');
     (event as unknown as Record<string, unknown>).enrollments = {
-      a: { id: 'a', fullName: '', email: '', createdAt: '', paymentStatus: 'paid' } satisfies Enrollment,
-      b: { id: 'b', fullName: '', email: '', createdAt: '', paymentStatus: 'pending' } satisfies Enrollment,
-      c: { id: 'c', fullName: '', email: '', createdAt: '', paymentStatus: 'paid' } satisfies Enrollment,
+      a: { id: 'a', fullName: '', email: '', createdAt: '', updatedAt: '', status: 'pending', createdBy: 'public', paymentStatus: 'paid' } satisfies Enrollment,
+      b: { id: 'b', fullName: '', email: '', createdAt: '', updatedAt: '', status: 'pending', createdBy: 'public', paymentStatus: 'unpaid' } satisfies Enrollment,
+      c: { id: 'c', fullName: '', email: '', createdAt: '', updatedAt: '', status: 'pending', createdBy: 'public', paymentStatus: 'paid' } satisfies Enrollment,
     };
     const result = buildEventRenderContext(event);
     expect(result).toEqual({ paidEnrollmentCount: 2 });

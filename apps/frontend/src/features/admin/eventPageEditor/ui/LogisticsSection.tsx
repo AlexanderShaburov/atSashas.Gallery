@@ -1,12 +1,13 @@
 // features/admin/eventPageEditor/ui/LogisticsSection.tsx
 
+import type { AllFieldKeys } from './fieldVisibility';
 import { isFieldVisible } from './fieldVisibility';
 import { LocalizedInput } from './LocalizedInput';
 import type { SectionProps } from './sectionProps';
 import { getLoc, getStr, getNum } from './sectionProps';
 
 export function LogisticsSection({ preset, record, set }: SectionProps) {
-  const vis = (f: string) => isFieldVisible(preset, f as any);
+  const vis = (f: string) => isFieldVisible(preset, f as AllFieldKeys);
 
   const price = record['price'] as { amount: number; currency: string } | undefined;
 

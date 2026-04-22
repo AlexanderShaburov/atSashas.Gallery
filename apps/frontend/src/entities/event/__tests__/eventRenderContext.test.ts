@@ -10,12 +10,16 @@ import { buildEventRenderContext } from '../eventRenderContext';
 // ---------------------------------------------------------------------------
 
 function makeEnrollment(status: Enrollment['paymentStatus'], id?: string): Enrollment {
+  const now = new Date().toISOString();
   return {
     id: id ?? `enr-${Math.random().toString(36).slice(2, 8)}`,
     fullName: 'Test User',
     email: 'test@test.com',
-    createdAt: new Date().toISOString(),
+    createdAt: now,
+    updatedAt: now,
+    status: 'pending',
     paymentStatus: status,
+    createdBy: 'public',
   };
 }
 
@@ -41,9 +45,9 @@ describe('buildEventRenderContext', () => {
     const event = createEventPage('workshop') as EventPageData;
     (event as unknown as Record<string, unknown>).enrollments = {
       a: makeEnrollment('paid', 'a'),
-      b: makeEnrollment('pending', 'b'),
+      b: makeEnrollment('unpaid', 'b'),
       c: makeEnrollment('paid', 'c'),
-      d: makeEnrollment('failed', 'd'),
+      d: makeEnrollment('unpaid', 'd'),
     };
     const ctx = buildEventRenderContext(event);
     expect(ctx.paidEnrollmentCount).toBe(2);
@@ -60,11 +64,11 @@ describe('buildEventRenderContext', () => {
     expect(ctx.paidEnrollmentCount).toBe(3);
   });
 
-  it('all pending → paidEnrollmentCount = 0', () => {
+  it('all unpaid → paidEnrollmentCount = 0', () => {
     const event = createEventPage('workshop') as EventPageData;
     (event as unknown as Record<string, unknown>).enrollments = {
-      a: makeEnrollment('pending', 'a'),
-      b: makeEnrollment('pending', 'b'),
+      a: makeEnrollment('unpaid', 'a'),
+      b: makeEnrollment('unpaid', 'b'),
     };
     const ctx = buildEventRenderContext(event);
     expect(ctx.paidEnrollmentCount).toBe(0);

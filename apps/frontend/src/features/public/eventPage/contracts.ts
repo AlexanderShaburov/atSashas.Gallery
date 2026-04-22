@@ -2,8 +2,6 @@
 // Section contracts, preset section arrays, and QuickFacts field mappings.
 // Source of truth: Docs/EVENT_PAGE_FINALIZATION.md §1
 
-import type { Localized } from '@/entities/common';
-
 // ---------------------------------------------------------------------------
 // Section kinds
 // ---------------------------------------------------------------------------

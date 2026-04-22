@@ -2,7 +2,6 @@
 import type {
     ComposableBlock,
     CtaBlock,
-    EventCtaBlock,
     GalleryBlock,
     GalleryLayout,
     TextBlock,
@@ -13,8 +12,7 @@ type TemplateBlock =
     | { kind: 'gallery'; layout: GalleryLayout; label: string }
     | { kind: 'composable'; layout: GalleryLayout; label: string }
     | { kind: 'text'; label: string }
-    | { kind: 'cta'; label: string }
-    | { kind: 'eventCta'; label: string };
+    | { kind: 'cta'; label: string };
 
 // Visible template catalog. Historical `text`, `cta`, and `eventCta` entries
 // were retired (no complete editor surface; homepage no longer supports
@@ -67,17 +65,6 @@ export function createCtaTemplateBlock(): CtaBlock {
         body: { en: 'Description here' },
         buttonLabel: { en: 'Button label' },
         target: { type: 'event', eventId: '' },
-    };
-}
-
-export function createEventCtaTemplateBlock(): EventCtaBlock {
-    return {
-        id: '__template-eventCta',
-        blockKind: 'eventCta',
-        lifecycle: 'template',
-        dateCreated: todayISO(),
-        eventId: '',
-        buttonLabel: { en: 'Sign up' },
     };
 }
 

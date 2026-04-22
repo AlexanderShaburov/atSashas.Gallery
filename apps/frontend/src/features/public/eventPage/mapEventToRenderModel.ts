@@ -307,7 +307,6 @@ function mapCtaBlock(
   context: EventRenderContext,
 ): CtaBlockData {
   const record = event as unknown as Record<string, unknown>;
-  const price = record['price'] as Money | undefined;
   const capacity = record['capacity'] as number | undefined;
 
   let metaLine: string;

@@ -40,6 +40,12 @@ const tiles: Tile[] = [
         description: 'Create and manage event pages for workshops, exhibitions, and more.',
     },
     {
+        to: '/admin/enrollments',
+        title: 'Enrollments',
+        emoji: '📝',
+        description: 'Review enrollments per event occurrence, upcoming or past.',
+    },
+    {
         to: '/admin/media',
         title: 'Media',
         emoji: '🖼️',

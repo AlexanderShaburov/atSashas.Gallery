@@ -11,7 +11,6 @@ import { EventPageView } from '@/features/public/eventPage/EventPageView';
 import { EVENT_PRESETS } from '@/entities/event/eventPage.types';
 import type {
   EventPageData,
-  EventPreset,
   WorkshopEventPage,
   PleinAirEventPage,
   ExhibitionEventPage,

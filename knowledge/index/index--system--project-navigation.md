@@ -128,7 +128,7 @@ Recommended naming:
 |----------|---------|
 | [Domain terms](../glossary/glossary--system--domain-terms.md) | Entities, mechanisms, architecture, UI terms |
 
-## Open Questions (4)
+## Open Questions (5)
 
 | Document | Issue |
 |----------|-------|
@@ -136,6 +136,13 @@ Recommended naming:
 | [Entities layer violation](../open-questions/open_question--architecture--entities-layer-violation.md) | entities/common imports from shared/ui |
 | [EventPage tile model](../open-questions/open_question--event--event-page-tile-model.md) | EventPage needs a first-class tile representation; v1 HomeEventTile is a text-only placeholder |
 | [Shareable EventPage link](../open-questions/open_question--event--public-shareable-event-page-link.md) | EventPage needs explicit direct public link as a first-class use case |
+| [User / contact catalog](../open-questions/open_question--architecture--user-contact-catalog.md) | Enrollments carry no cross-event identity; future contact entity + storage substrate decision deferred |
+
+### Resolved
+
+| Document | Resolution |
+|----------|-----------|
+| [EventPageEditorSessionProvider render warning](../open-questions/open_question--editor--eventpage-session-provider-render-warning.md) | Fixed 2026-04-22: impure `setModeStack` updater in `back()` — sibling setter + external-store emit inside the updater |
 
 ---
 

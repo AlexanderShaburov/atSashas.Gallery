@@ -12,7 +12,6 @@ import { CatalogEditorSessionProvider } from '@/features/admin/catalogEditor/cat
 import { EditorWorkspaceProvider } from '@/features/admin/EditorWorkspace/EditorWorkspaceContext';
 import { StreamEditorSessionProvider } from '@/features/admin/streams/streamEditorSession/StreamEditorSession.context';
 import { ArtCatalogLoader } from '@/shared/ArtCatalogProvider/ArtCatalogLoader';
-import { EventsLoader } from '@/shared/EventsProvider/EventsLoader';
 import { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
@@ -29,6 +28,8 @@ const EventPagesPage = lazy(() => import('@/pages/admin/EventPagesPage'));
 const MediaPage = lazy(() => import('@/pages/admin/MediaPage'));
 const TextVisualsPage = lazy(() => import('@/pages/admin/TextVisualsPage'));
 const HomeEditorPage = lazy(() => import('@/pages/admin/homeEditorPage/HomeEditorPage'));
+const AdminEnrollmentsPage = lazy(() => import('@/pages/admin/AdminEnrollmentsPage'));
+const AdminEnrollmentDetailPage = lazy(() => import('@/pages/admin/AdminEnrollmentDetailPage'));
 const EventPage = lazy(() => import('@/pages/public/EventPage'));
 const PublicEventsPage = lazy(() => import('@/pages/public/EventsPage'));
 const EnrollmentSuccessPage = lazy(() => import('@/pages/public/EnrollmentSuccessPage'));
@@ -40,9 +41,7 @@ const NotFound = lazy(() => import('@/pages/NotFound'));
 function PublicRoot() {
     return (
         <ArtCatalogLoader mode="public">
-            <EventsLoader>
-                <PublicLayout />
-            </EventsLoader>
+            <PublicLayout />
         </ArtCatalogLoader>
     );
 }
@@ -50,11 +49,6 @@ function PublicRoot() {
 // Preview root wrap (auth required, public layout):
 // eslint-disable-next-line react-refresh/only-export-components
 function PreviewRoot() {
-    // Preview renders the homepage against a draft HomeDoc. It resolves
-    // event references through the admin event-pages catalog (see
-    // useHomeFeed's isAdmin branch) and must not depend on legacy
-    // EventData — so EventsLoader is deliberately omitted here to avoid
-    // any call to /api/public/events during preview.
     return (
         <RequireAuth>
             <ArtCatalogLoader mode="admin">
@@ -70,11 +64,9 @@ function AdminRoot() {
     return (
         <RequireAuth>
             <ArtCatalogLoader mode="admin">
-                <EventsLoader>
-                    <EditorWorkspaceProvider>
-                        <AdminLayout />
-                    </EditorWorkspaceProvider>
-                </EventsLoader>
+                <EditorWorkspaceProvider>
+                    <AdminLayout />
+                </EditorWorkspaceProvider>
             </ArtCatalogLoader>
         </RequireAuth>
     );
@@ -176,6 +168,16 @@ export const router = createBrowserRouter([
                 // Phase 5 cutover: legacy Public Stream URL redirects to Homepage Editor.
                 path: 'public-stream',
                 element: <Navigate to="/admin/home" replace />,
+            },
+            {
+                path: 'enrollments',
+                element: <AdminEnrollmentsPage />,
+            },
+            {
+                // Phase 3: route stub for the per-event roster. The real
+                // detail view is built in Phase 4.
+                path: 'enrollments/:eventPageId',
+                element: <AdminEnrollmentDetailPage />,
             },
             {
                 path: 'hopper',

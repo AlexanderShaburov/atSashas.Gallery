@@ -10,9 +10,6 @@ export type BlockHit =
     // Gallery block
     | { blockKind: 'gallery'; kind: 'image'; slot: ItemPosition }
     | { blockKind: 'gallery'; kind: 'imageCaption'; slot: ItemPosition }
-    | { blockKind: 'gallery'; kind: 'eventSlot'; slot: ItemPosition }
-    | { blockKind: 'gallery'; kind: 'eventPickEvent'; slot: ItemPosition }
-    | { blockKind: 'gallery'; kind: 'eventPickBackground'; slot: ItemPosition }
     | { blockKind: 'gallery'; kind: 'blockCaption' }
 
     // Text block
@@ -22,10 +19,7 @@ export type BlockHit =
     // CTA block
     | { blockKind: 'cta'; kind: 'ctaTitle' }
     | { blockKind: 'cta'; kind: 'ctaBody' }
-    | { blockKind: 'cta'; kind: 'ctaButton' }
-
-    // EventCta block
-    | { blockKind: 'eventCta'; kind: 'eventCtaButton' };
+    | { blockKind: 'cta'; kind: 'ctaButton' };
 
 export const Hit = {
     galleryImage: (slot: ItemPosition): BlockHit => ({
@@ -61,24 +55,5 @@ export const Hit = {
     ctaButton: (): BlockHit => ({
         blockKind: 'cta',
         kind: 'ctaButton',
-    }),
-    galleryEventSlot: (slot: ItemPosition): BlockHit => ({
-        blockKind: 'gallery',
-        kind: 'eventSlot',
-        slot,
-    }),
-    galleryEventPickEvent: (slot: ItemPosition): BlockHit => ({
-        blockKind: 'gallery',
-        kind: 'eventPickEvent',
-        slot,
-    }),
-    galleryEventPickBackground: (slot: ItemPosition): BlockHit => ({
-        blockKind: 'gallery',
-        kind: 'eventPickBackground',
-        slot,
-    }),
-    eventCtaButton: (): BlockHit => ({
-        blockKind: 'eventCta',
-        kind: 'eventCtaButton',
     }),
 };

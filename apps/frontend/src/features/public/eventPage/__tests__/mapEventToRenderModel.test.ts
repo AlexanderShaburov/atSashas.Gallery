@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { createEventPage } from '@/entities/event/eventFactory';
 import { resolveEventDefaults } from '@/entities/event/resolveEventDefaults';
-import { buildEventRenderContext } from '@/entities/event/eventRenderContext';
 import type { EventRenderContext } from '@/entities/event/eventRenderContext';
 import type {
   ExhibitionEventPage,

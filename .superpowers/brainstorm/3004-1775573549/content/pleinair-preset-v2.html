@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plein Air Preset v2 — Event Page Prototype</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --color-bg: #FAFAF8;
+    --color-text: #1A1A1A;
+    --color-text-secondary: #6B6B6B;
+    --color-accent: #2C2C2C;
+    --color-accent-hover: #111;
+    --color-border: #E8E6E1;
+    --color-warm: #F5F0EB;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .preset-label {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 100;
+    background: #1A1A1A;
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 4px;
+  }
+  .preset-label span { opacity: 0.5; margin-right: 6px; }
+
+  .section-annotation {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 40px 8px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #B87333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-annotation::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 1px;
+    background: #B87333;
+  }
+  .section-annotation .tag {
+    font-size: 9px;
+    background: rgba(184,115,51,0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+
+  /* ===== HERO — CINEMATIC ===== */
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 85vh;
+    min-height: 560px;
+    max-height: 840px;
+    overflow: hidden;
+  }
+  .hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.05) 0%,
+      rgba(0,0,0,0.0) 30%,
+      rgba(0,0,0,0.45) 100%
+    );
+  }
+  .hero-content {
+    position: absolute;
+    bottom: 56px;
+    left: 56px;
+    right: 56px;
+    color: #fff;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 16px;
+  }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 6vw, 64px);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin-bottom: 16px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    max-width: 700px;
+  }
+  .hero-subtitle {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 300;
+    font-style: italic;
+    opacity: 0.85;
+    line-height: 1.5;
+    max-width: 500px;
+  }
+
+  /* ===== HERO → DESCRIPTION BRIDGE ===== */
+  .hero-bridge {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 64px 40px 0;
+    text-align: center;
+  }
+  .hero-bridge-line {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
+  .hero-bridge-divider {
+    width: 40px;
+    height: 1px;
+    background: var(--color-border);
+    margin: 32px auto 0;
+  }
+
+  /* ===== STICKY CTA ===== */
+  .sticky-cta {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--color-border);
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    box-shadow: 0 -2px 20px rgba(0,0,0,0.06);
+  }
+  .sticky-cta-info {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    font-weight: 300;
+  }
+  .sticky-cta-info strong {
+    color: var(--color-text);
+    font-weight: 600;
+    font-size: 16px;
+  }
+  .sticky-cta-button {
+    padding: 12px 36px;
+    background: var(--color-accent);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    text-decoration: none;
+  }
+  .sticky-cta-button:hover {
+    background: var(--color-accent-hover);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+  }
+
+  /* ===== DESCRIPTION — INVITATION TONE ===== */
+  .description {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 48px 40px 56px;
+  }
+  .description p {
+    color: var(--color-text-secondary);
+    margin-bottom: 20px;
+    font-weight: 300;
+    line-height: 1.9;
+    font-size: 15.5px;
+  }
+  .description p:last-child { margin-bottom: 0; }
+  .description p em {
+    font-style: italic;
+    color: var(--color-text);
+  }
+
+  /* ===== GALLERY ===== */
+  .gallery-section {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 40px 56px;
+  }
+  .gallery-section h3 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 400;
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+  .gallery-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .gallery-grid.exp-pleinair {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 320px 220px;
+  }
+  .gallery-grid.exp-pleinair .gallery-item:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .gallery-grid.res-2 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 280px;
+  }
+
+  .gallery-item {
+    border-radius: 6px;
+    overflow: hidden;
+    background: #E8E6E1;
+    position: relative;
+  }
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ===== HOST NOTE ===== */
+  .host-note {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 40px 56px;
+  }
+  .host-note-inner {
+    background: var(--color-warm);
+    border-radius: 8px;
+    padding: 32px 36px;
+    position: relative;
+  }
+  .host-note-inner::before {
+    content: '\201C';
+    font-family: var(--font-display);
+    font-size: 64px;
+    font-weight: 300;
+    color: rgba(0,0,0,0.08);
+    position: absolute;
+    top: 8px;
+    left: 20px;
+    line-height: 1;
+  }
+  .host-note-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 12px;
+  }
+  .host-note p {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.7;
+    color: var(--color-text);
+  }
+  .host-note .signature {
+    margin-top: 16px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    font-style: normal;
+    color: var(--color-text-secondary);
+  }
+
+  /* ===== QUICK FACTS ===== */
+  .quick-facts {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 40px;
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .fact { text-align: center; flex: 1; }
+  .fact-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 6px;
+  }
+  .fact-value {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--color-text);
+  }
+  .fact-value.highlight {
+    font-weight: 500;
+  }
+
+  /* ===== CTA BLOCK ===== */
+  .cta-block {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 56px 40px;
+    padding-bottom: 120px;
+    text-align: center;
+  }
+  .cta-bridge {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--color-text-secondary);
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+  .cta-divider {
+    width: 48px;
+    height: 1px;
+    background: var(--color-border);
+    margin: 0 auto 36px;
+  }
+  .cta-block h2 {
+    font-family: var(--font-display);
+    font-size: 34px;
+    font-weight: 400;
+    margin-bottom: 10px;
+  }
+  .cta-meta {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+  .cta-button {
+    display: inline-block;
+    padding: 18px 60px;
+    background: var(--color-accent);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 16px rgba(0,0,0,0.15);
+  }
+  .cta-button:hover {
+    background: var(--color-accent-hover);
+    box-shadow: 0 5px 24px rgba(0,0,0,0.22);
+    transform: translateY(-1px);
+  }
+  .cta-note {
+    margin-top: 18px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+  .cta-scarcity {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 6px 16px;
+    background: rgba(184,115,51,0.08);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #8B6914;
+    letter-spacing: 0.02em;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .hero { height: 70vh; min-height: 440px; }
+    .hero-content { bottom: 36px; left: 24px; right: 24px; }
+    .hero-bridge { padding: 48px 24px 0; }
+    .description, .host-note, .cta-block { padding-left: 24px; padding-right: 24px; }
+    .gallery-section { padding-left: 24px; padding-right: 24px; }
+    .gallery-grid.exp-pleinair {
+      grid-template-columns: 1fr;
+      grid-template-rows: 260px 200px 200px 200px;
+    }
+    .gallery-grid.exp-pleinair .gallery-item:first-child { grid-column: auto; }
+    .gallery-grid.res-2 { grid-template-columns: 1fr; grid-template-rows: 240px 240px; }
+    .quick-facts { flex-wrap: wrap; padding: 24px; gap: 16px; }
+    .fact { flex: 0 0 calc(50% - 8px); }
+    .sticky-cta { padding: 12px 20px; gap: 16px; }
+    .sticky-cta-info { font-size: 13px; }
+    .section-annotation { padding-left: 24px; padding-right: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="preset-label"><span>Preset 2/4</span> Plein Air v2</div>
+
+<!-- ===== HERO — CINEMATIC ===== -->
+<div class="section-annotation">Section 1 — Hero (cinematic) <span class="tag">required</span></div>
+
+<section class="hero">
+  <img class="hero-image" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1600&h=1000&fit=crop&crop=center" alt="Coastal landscape at golden hour">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Plein Air Session</div>
+    <h1 class="hero-title">Painting the Ligurian Coast</h1>
+    <p class="hero-subtitle">Two days of open-air watercolor on the Italian Riviera</p>
+  </div>
+</section>
+
+<!-- ===== HERO → DESCRIPTION BRIDGE ===== -->
+<div class="hero-bridge">
+  <p class="hero-bridge-line">The fishing villages between Camogli and Portofino offer something rare — light that changes every ten minutes.</p>
+  <div class="hero-bridge-divider"></div>
+</div>
+
+<!-- ===== DESCRIPTION — INVITATION ===== -->
+<div class="section-annotation">Section 2 — Description (invitation tone) <span class="tag">required</span></div>
+
+<section class="description">
+  <p>Over two mornings, we'll set up along the harbour and coastal path, working in watercolor and gouache. Afternoons are free — to review the work, explore, or simply sit and sketch.</p>
+  <p>This is not a course with assignments. It's a shared experience of painting in a place that rewards attention. All levels welcome.</p>
+</section>
+
+<!-- ===== GALLERY EXPERIENCE — LOCATION & ATMOSPHERE ===== -->
+<div class="section-annotation">Section 3 — GalleryExperience <span class="tag">required</span> &middot; location, atmosphere &amp; human presence</div>
+
+<section class="gallery-section">
+  <h3>The Setting</h3>
+  <div class="gallery-grid exp-pleinair">
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=1200&h=500&fit=crop&crop=bottom" alt="Italian Riviera coastal village panorama">
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1534445867742-43195f401b6c?w=500&h=400&fit=crop" alt="Harbour with colourful boats">
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1473186505569-9c61870c11f9?w=500&h=400&fit=crop" alt="Artist painting outdoors by the coast">
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=500&h=400&fit=crop" alt="Coastal path with sea view">
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOST NOTE ===== -->
+<div class="section-annotation">Section 4 — HostNote <span class="tag">optional</span></div>
+
+<section class="host-note">
+  <div class="host-note-inner">
+    <div class="host-note-label">A note from the host</div>
+    <p>You don't need outdoor painting experience — just curiosity and a willingness to get a little paint on your hands. The coastline is generous with beginners. I'll help you find your angle and your rhythm.</p>
+    <p class="signature">— Sasha</p>
+  </div>
+</section>
+
+<!-- ===== GALLERY RESULTS ===== -->
+<div class="section-annotation">Section 5 — GalleryResults <span class="tag">optional</span> &middot; participant work</div>
+
+<section class="gallery-section">
+  <h3>From Past Sessions</h3>
+  <div class="gallery-grid res-2">
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&h=450&fit=crop" alt="Plein air watercolor of coastal scene">
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=600&h=450&fit=crop" alt="Plein air watercolor of harbour">
+    </div>
+  </div>
+</section>
+
+<!-- ===== QUICK FACTS ===== -->
+<div class="section-annotation">Section 6 — QuickFacts <span class="tag">required</span> &middot; logistics positioned low</div>
+
+<div class="quick-facts">
+  <div class="fact">
+    <div class="fact-label">Dates</div>
+    <div class="fact-value">Jun 14–15, 2026</div>
+  </div>
+  <div class="fact">
+    <div class="fact-label">Sessions</div>
+    <div class="fact-value">2 mornings</div>
+  </div>
+  <div class="fact">
+    <div class="fact-label">Meeting Point</div>
+    <div class="fact-value">Camogli harbour</div>
+  </div>
+  <div class="fact">
+    <div class="fact-label">Group Size</div>
+    <div class="fact-value">Max 6</div>
+  </div>
+  <div class="fact">
+    <div class="fact-label">Price</div>
+    <div class="fact-value highlight">&euro;120</div>
+  </div>
+</div>
+
+<!-- ===== CTA BLOCK ===== -->
+<div class="section-annotation">Section 7 — CtaBlock <span class="tag">required</span></div>
+
+<section class="cta-block" id="cta">
+  <p class="cta-bridge">Two mornings, one coastline, and a sketchbook full of light you painted yourself.</p>
+  <div class="cta-divider"></div>
+  <h2>Secure Your Place</h2>
+  <p class="cta-meta">June 14–15, 2026 &middot; Camogli, Liguria &middot; &euro;120 per person</p>
+  <button class="cta-button">Join This Session</button>
+  <p class="cta-note">Free cancellation up to 7 days before the event</p>
+  <div class="cta-scarcity">3 of 6 spots remaining</div>
+</section>
+
+<!-- ===== STICKY CTA BAR ===== -->
+<div class="sticky-cta">
+  <span class="sticky-cta-info"><strong>&euro;120</strong> &middot; Jun 14–15 &middot; 3 spots left</span>
+  <a href="#cta" class="sticky-cta-button">Join This Session</a>
+</div>
+
+</body>
+</html>

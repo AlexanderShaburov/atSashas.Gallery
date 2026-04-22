@@ -1,4 +1,4 @@
-import type { BlockHitEvent, GalleryArtItem, ItemPosition } from '@/entities/block';
+import type { BlockHitEvent, GalleryArtItem } from '@/entities/block';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { generateId } from '@/shared/lib/id/generateId';
 import { JourneyTicket } from '@/shared/nav';
@@ -95,53 +95,3 @@ export function printoutTicket(hit: BlockHitEvent): JourneyTicket | undefined {
     }
 }
 
-// Legacy helper. No live caller in the UI — kept compilable post-EventPage
-// canonicalization so that `galleryEventPickEvent` BlockHit / BlockTarget
-// entries still typecheck until they are cleaned up in a follow-up pass.
-// Dispatches at `eventPages` now (the canonical entity); real retirement of
-// this block-level flow is tracked separately.
-export function createEventPickTicket(blockId: string, position: ItemPosition): JourneyTicket {
-    return {
-        journeyId: generateId('travel'),
-        destination: {
-            editor: 'eventPages',
-            mode: 'select',
-        },
-        returnTo: {
-            editor: 'block',
-            mode: 'edit',
-            objectId: blockId,
-        },
-        phase: 'outbound',
-        nonce: createNonce(),
-        createdAt: nowIso(),
-        returnEffect: {
-            kind: 'blockSetEventId',
-            blockId,
-            position,
-        },
-    };
-}
-
-export function createBackgroundPickTicket(blockId: string, position: ItemPosition): JourneyTicket {
-    return {
-        journeyId: generateId('travel'),
-        destination: {
-            editor: 'catalog',
-            mode: 'select',
-        },
-        returnTo: {
-            editor: 'block',
-            mode: 'edit',
-            objectId: blockId,
-        },
-        phase: 'outbound',
-        nonce: createNonce(),
-        createdAt: nowIso(),
-        returnEffect: {
-            kind: 'blockSetEventBackground',
-            blockId,
-            position,
-        },
-    };
-}

@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { CREATION_DEFAULTS } from '../eventDefaults';
 import { createEventPage } from '../eventFactory';
 import { EVENT_PRESETS } from '../eventPage.types';
-import type { EventPageData, EventPreset } from '../eventPage.types';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -20,10 +19,6 @@ const DERIVED_FIELD_NAMES = [
   'thesisLine',
   'bodyParagraphs',
 ];
-
-function keys(obj: Record<string, unknown>): string[] {
-  return Object.keys(obj);
-}
 
 // ---------------------------------------------------------------------------
 // A. Preset creation

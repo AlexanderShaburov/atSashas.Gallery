@@ -2,14 +2,13 @@ import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 
 import type { ArtItemData } from '@/entities/art';
-import type { GalleryBlock, GalleryEventItem, ItemPosition } from '@/entities/block';
+import type { GalleryBlock, ItemPosition } from '@/entities/block';
 import { LAYOUT_SCHEME } from '@/entities/block';
 import {
   blockGridStyle,
   slotImageStyle,
   slotWrapperStyle,
 } from '@/shared/lib/appearance/applyAppearanceStyles';
-import { isEventItem } from '@/shared/lib/checkers/blockItemGuards';
 import { loadGoogleFont } from '@/shared/lib/fonts/loadGoogleFont';
 import { ArtPicture } from '@/shared/ui/ArtPicture';
 
@@ -19,7 +18,6 @@ export type GalleryBlockViewProps = {
   block: GalleryBlock;
   resolveArt: (artId: string) => ArtItemData | undefined;
   onSlotClick?: (pos: ItemPosition, e: React.MouseEvent) => void;
-  renderEventSlot?: (item: GalleryEventItem, pos: ItemPosition) => ReactNode;
   renderEmptySlot?: (pos: ItemPosition) => ReactNode;
   renderArtContent?: (art: ArtItemData, pos: ItemPosition, picture: ReactNode) => ReactNode;
   children?: ReactNode;
@@ -30,7 +28,6 @@ export function GalleryBlockView({
   block,
   resolveArt,
   onSlotClick,
-  renderEventSlot,
   renderEmptySlot,
   renderArtContent,
   children,
@@ -96,16 +93,6 @@ export function GalleryBlockView({
           onClick={onSlotClick ? (e) => onSlotClick(pos, e) : undefined}
         >
           {renderEmptySlot(pos)}
-        </div>
-      );
-    }
-
-    // Event item
-    if (isEventItem(item)) {
-      if (!renderEventSlot) return null;
-      return (
-        <div key={`event-${pos}`} className="block__slot" style={slotWrapperStyle(slotApp)}>
-          {renderEventSlot(item, pos)}
         </div>
       );
     }

@@ -16,6 +16,7 @@ import type { JourneyHome } from '@/shared/nav/journeySession.types';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { generateId } from '@/shared/lib/id/generateId';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { invalidateEventPagesCache } from '@/features/public/api/eventPagesModule';
 import { eventPagesAdminApi, refreshEventPages } from '../api/eventPagesAdminApi';
 
@@ -102,7 +103,7 @@ export function EventPageEditorSessionProvider({ children }: { children: React.R
   // ── External store: editor draft ──
   const [editorKeyId, setEditorKeyId] = useState<string | null>(null);
   const editorKey = useMemo(() => makeEditorKey(editorKeyId), [editorKeyId]);
-  const { storeData, setDraft: setStoreDraft, setSnapshot, clear: clearSession, commit } =
+  const { storeData, setDraft: setStoreDraft, clear: clearSession, commit } =
     useSessionDataStore<EventPageData>(editorKey);
   const draft = storeData?.draft ?? null;
   const isDirty = storeData
@@ -123,52 +124,115 @@ export function EventPageEditorSessionProvider({ children }: { children: React.R
   const returnHome = useReturnHome();
   const isJourney = useJourneyStatus('eventPages');
 
-  // ── Strict Mode protection ──
-  const bootstrapRef = useRef<{ processed: boolean }>({ processed: false });
   const editorKeyRef = useRef(editorKey);
   editorKeyRef.current = editorKey;
 
-  // ── Load pages ──
-  const loadPages = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      await refreshEventPages();
-    } catch (err) {
-      console.error('[EventPageEditor] Failed to load pages', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const modeStackRef = useRef(modeStack);
+  modeStackRef.current = modeStack;
 
-  // ── Bootstrap ──
+  // Deep-link return path. Populated by the bootstrap effect when the
+  // editor was reached via `/admin/event-pages?edit=<id>&returnTo=<path>`
+  // (e.g. from the admin enrollments detail page). Consumed by `back()`
+  // when the user exits edit mode — we navigate to the return path
+  // instead of dropping to the generic select state. Cleared on consumption
+  // so a subsequent unrelated back() inside the editor doesn't loop.
+  const returnOnExitRef = useRef<string | null>(null);
+  const navigate = useNavigate();
+
+  // ── Bootstrap (StrictMode-safe: cancelled flag + single effect) ──
+  //
+  // Previous version used a module-level ref as a "run once" guard and a
+  // separate cleanup effect that cleared the session on unmount. Under
+  // React 18 StrictMode the guard kept the second mount from re-seeding
+  // state while the cleanup effect still wiped the session on the fake
+  // unmount — producing empty state and emitting store notifications
+  // mid-cycle that surfaced as a "setState while rendering" warning.
+  //
+  // Here we use the idiomatic cancellation pattern: both mounts run the
+  // effect, but in-flight state writes from the cancelled run are no-ops
+  // after the cleanup flag flips. On real unmount (no pending picker
+  // journey), we still clear the session; on the strict-mode fake
+  // unmount the cleanup still runs, but because the second mount rewinds
+  // through the same logic, the state ends up consistent either way.
   useEffect(() => {
-    if (bootstrapRef.current.processed) return;
-    bootstrapRef.current = { processed: true };
+    let cancelled = false;
+
+    const setModeStackIfActive = (next: ScreenMode[]) => {
+      if (!cancelled) setModeStack(next);
+    };
+    const setEditorKeyIdIfActive = (next: string | null) => {
+      if (!cancelled) setEditorKeyId(next);
+    };
 
     void (async () => {
-      await loadPages();
+      try {
+        setIsLoading(true);
+        await refreshEventPages();
+      } catch (err) {
+        console.error('[EventPageEditor] Failed to load pages', err);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+
+      if (cancelled) return;
 
       const ticket = arrival('eventPages');
       if (!ticket) {
-        setModeStack(['select']);
+        // Deep-link entry: /admin/event-pages?edit=<id>[&returnTo=<path>]
+        // opens that event in edit mode directly. Used by the admin
+        // Enrollments detail view. The params are consumed once and
+        // stripped from the URL so back/forward navigation does not
+        // re-trigger them. `returnTo` is stored for `back()` to consume
+        // when the user exits edit mode, landing them back at the caller
+        // surface instead of the editor's select state.
+        const params = new URLSearchParams(window.location.search);
+        const deepLinkId = params.get('edit');
+        const rawReturnTo = params.get('returnTo');
+        // Guard against open-redirect — only accept in-app admin paths.
+        const safeReturnTo =
+          rawReturnTo && rawReturnTo.startsWith('/admin/') ? rawReturnTo : null;
+
+        if (deepLinkId) {
+          const currentCatalog = eventPagesStore.getSnapshot();
+          const found = currentCatalog?.pages[deepLinkId];
+          if (found && !cancelled) {
+            const key: EditorKey = { kind: 'eventPages', id: deepLinkId };
+            editSessionsDataStore.setSnapshot(key, found);
+            setEditorKeyIdIfActive(deepLinkId);
+            setModeStackIfActive(['select', 'edit']);
+            if (safeReturnTo) returnOnExitRef.current = safeReturnTo;
+          } else {
+            setModeStackIfActive(['select']);
+          }
+          params.delete('edit');
+          params.delete('returnTo');
+          const newSearch = params.toString();
+          const newUrl =
+            window.location.pathname +
+            (newSearch ? `?${newSearch}` : '') +
+            window.location.hash;
+          window.history.replaceState(window.history.state, '', newUrl);
+          return;
+        }
+        setModeStackIfActive(['select']);
         return;
       }
 
       if (!ticket.loot) {
         switch (ticket.destination.mode) {
           case 'select':
-            setModeStack(['select']);
+            setModeStackIfActive(['select']);
             return;
           case 'edit': {
             const id = ticket.destination.objectId;
             if (!id) throw new Error('[EventPageEditor BOOTSTRAP]: outbound edit missing objectId');
             const currentCatalog = eventPagesStore.getSnapshot();
             const found = currentCatalog?.pages[id];
-            if (found) {
+            if (found && !cancelled) {
               const key: EditorKey = { kind: 'eventPages', id };
               editSessionsDataStore.setSnapshot(key, found);
-              setEditorKeyId(id);
-              setModeStack(['select', 'edit']);
+              setEditorKeyIdIfActive(id);
+              setModeStackIfActive(['select', 'edit']);
             }
             return;
           }
@@ -183,7 +247,7 @@ export function EventPageEditorSessionProvider({ children }: { children: React.R
           const key: EditorKey = { kind: 'eventPages', id: eventId };
           const savedSession = editSessionsDataStore.get<EventPageData>(key);
           const baseDraft = savedSession?.draft;
-          if (baseDraft) {
+          if (baseDraft && !cancelled) {
             const rec = baseDraft as unknown as Record<string, unknown>;
             let updated: EventPageData;
             if (action.mode === 'set') {
@@ -192,7 +256,6 @@ export function EventPageEditorSessionProvider({ children }: { children: React.R
               const existing = (rec[action.field] as string[] | undefined) ?? [];
               updated = { ...baseDraft, [action.field]: [...existing, ticket.loot.id] } as EventPageData;
             } else {
-              // appendWork — add CaptionedWork with just the image, user fills title/medium later
               const existing = (rec[action.field] as { image: string; title: Record<string, string> }[] | undefined) ?? [];
               const newWork = { image: ticket.loot.id, title: {} };
               updated = { ...baseDraft, [action.field]: [...existing, newWork] } as EventPageData;
@@ -201,8 +264,8 @@ export function EventPageEditorSessionProvider({ children }: { children: React.R
             const snapshot = currentCatalog?.pages[eventId] ?? baseDraft;
             editSessionsDataStore.setSnapshot(key, snapshot);
             editSessionsDataStore.saveDraft(key, updated);
-            setEditorKeyId(eventId);
-            setModeStack(['select', 'edit']);
+            setEditorKeyIdIfActive(eventId);
+            setModeStackIfActive(['select', 'edit']);
             _pendingMediaAction = null;
             return;
           }
@@ -216,28 +279,29 @@ export function EventPageEditorSessionProvider({ children }: { children: React.R
         if (_pendingMediaAction && eventId) {
           const key: EditorKey = { kind: 'eventPages', id: eventId };
           const savedSession = editSessionsDataStore.get<EventPageData>(key);
-          if (savedSession?.draft) {
-            setEditorKeyId(eventId);
-            setModeStack(['select', 'edit']);
+          if (savedSession?.draft && !cancelled) {
+            setEditorKeyIdIfActive(eventId);
+            setModeStackIfActive(['select', 'edit']);
           }
         }
         _pendingMediaAction = null;
         return;
       }
 
-      setModeStack(['select']);
+      setModeStackIfActive(['select']);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  // ── Cleanup on unmount ──
-  useEffect(() => {
     return () => {
-      // Skip cleanup during media picker round-trip — draft must survive remount
+      cancelled = true;
+      // Real unmount cleanup. Skip during a pending picker journey — the
+      // draft must survive remount. StrictMode's fake unmount also runs
+      // this but the cancelled flag above neutralizes any in-flight state
+      // writes, and the remount re-runs the bootstrap clean.
       if (_pendingMediaAction) return;
       const key = editorKeyRef.current;
       if (key) editSessionsDataStore.clear(key);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Mode transitions ──
@@ -245,20 +309,37 @@ export function EventPageEditorSessionProvider({ children }: { children: React.R
     setModeStack((s) => [...s, mode]);
   }, []);
 
+  // `back()` must keep the setState updater pure: no sibling setters, no
+  // external-store emits inside it. Doing so produced a "Cannot update a
+  // component while rendering a different component" warning during the
+  // Edit → Select transition because emit() fired listeners and a second
+  // setter was queued while the updater was executing in the render phase.
+  //
+  // When the editor was opened via `?edit=<id>&returnTo=<path>` (deep link
+  // from the admin Enrollments detail view), `back()` navigates to the
+  // stored return path instead of popping into select mode. This preserves
+  // the caller's context instead of leaving the admin in a generic editor
+  // state.
   const back = useCallback(() => {
-    setModeStack((s) => {
-      if (s.length <= 1) return s;
-      const next = s.slice(0, -1);
-      // If leaving edit mode, clear session
-      if (s[s.length - 1] === 'edit') {
-        if (editorKeyRef.current) {
-          editSessionsDataStore.clear(editorKeyRef.current);
-        }
-        setEditorKeyId(null);
+    const current = modeStackRef.current;
+    if (current.length <= 1) return;
+    const leavingEdit = current[current.length - 1] === 'edit';
+
+    if (leavingEdit) {
+      if (editorKeyRef.current) {
+        editSessionsDataStore.clear(editorKeyRef.current);
       }
-      return next;
-    });
-  }, []);
+      setEditorKeyId(null);
+
+      const returnTo = returnOnExitRef.current;
+      if (returnTo) {
+        returnOnExitRef.current = null;
+        navigate(returnTo);
+        return;
+      }
+    }
+    setModeStack((s) => (s.length <= 1 ? s : s.slice(0, -1)));
+  }, [navigate]);
 
   // ── Create ──
   const createNew = useCallback(

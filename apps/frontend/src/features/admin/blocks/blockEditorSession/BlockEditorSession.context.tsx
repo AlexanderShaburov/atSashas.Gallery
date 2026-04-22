@@ -42,11 +42,7 @@ import {
     useUnsavedChanges,
 } from '@/shared/state';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import {
-    printoutTicket,
-    createEventPickTicket,
-    createBackgroundPickTicket,
-} from './BlockEditorSession.travel';
+import { printoutTicket } from './BlockEditorSession.travel';
 import { hitToTarget, instantiateFromTemplate } from './blockEditorSession.utils';
 import { resolveBlockBootstrapData } from './bootstrap';
 import {
@@ -533,80 +529,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                         return;
                     }
 
-                    case 'blockSetEventId': {
-                        console.log(
-                            `[INIT SESSION]: return instruction recognized as blockSetEventId`,
-                        );
-                        const loot = ticket.loot;
-                        if (!loot?.ok) {
-                            // User cancelled — remove the empty event placeholder
-                            if (block?.draft && block.draft.blockKind === 'gallery') {
-                                const { isEventItem } = await import(
-                                    '@/shared/lib/checkers/blockItemGuards'
-                                );
-                                const cleanedItems = block.draft.items.filter(
-                                    (item) => !(isEventItem(item) && !item.eventId),
-                                );
-                                const cleanDraft = { ...block.draft, items: cleanedItems };
-                                editSessionsDataStore.saveDraft(key, cleanDraft);
-                            }
-                            // Show info banner
-                            setUiError({
-                                title: 'Event insertion cancelled',
-                                message: 'The event placeholder was removed.',
-                                onConfirm: () => setUiError(undefined),
-                            });
-                            setModeStack(['select', 'edit']);
-                            return;
-                        }
-                        // Find event item at position and set eventId
-                        const pos = (effect as { position: string }).position;
-                        if (block?.draft && block.draft.blockKind === 'gallery') {
-                            const { isEventItem } = await import(
-                                '@/shared/lib/checkers/blockItemGuards'
-                            );
-                            const updatedItems = block.draft.items.map((item) =>
-                                item.position === pos && isEventItem(item)
-                                    ? { ...item, eventId: loot.id }
-                                    : item,
-                            );
-                            const newDraft = { ...block.draft, items: updatedItems };
-                            editSessionsDataStore.saveDraft(key, newDraft);
-                        }
-                        setModeStack(['select', 'edit']);
-                        return;
-                    }
-
-                    case 'blockSetEventBackground': {
-                        console.log(
-                            `[INIT SESSION]: return instruction recognized as blockSetEventBackground`,
-                        );
-                        const loot = ticket.loot;
-                        if (!loot?.ok) {
-                            setModeStack(['select', 'edit']);
-                            return;
-                        }
-                        const pos = (effect as { position: string }).position;
-                        if (block?.draft && block.draft.blockKind === 'gallery') {
-                            const { isEventItem } = await import(
-                                '@/shared/lib/checkers/blockItemGuards'
-                            );
-                            const updatedItems = block.draft.items.map((item) =>
-                                item.position === pos && isEventItem(item)
-                                    ? { ...item, backgroundArtId: loot.id }
-                                    : item,
-                            );
-                            const newDraft = { ...block.draft, items: updatedItems };
-                            editSessionsDataStore.saveDraft(key, newDraft);
-
-                            // Refresh catalog to resolve the new background art image
-                            const freshCatalog = await getCatalog();
-                            catalogStore.set(freshCatalog);
-                        }
-                        setModeStack(['select', 'edit']);
-                        return;
-                    }
-
                     default: {
                         // Should be unreachable due to isBlockReturnCommand, but keep as safety net
                         throw new Error(`[Bootstrap]: Unsupported returnEffect kind`);
@@ -771,18 +693,6 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                     editor: 'block',
                     objectId: draft?.id,
                 };
-                dispatchPendingRef.current = true;
-                dispatch(ticket, home);
-            } else if (tg.blockKind === 'gallery' && tg.kind === 'eventPickEvent' && tg.slot) {
-                if (!draft?.id) return;
-                const ticket = createEventPickTicket(draft.id, tg.slot);
-                const home: JourneyHome = { editor: 'block', objectId: draft.id };
-                dispatchPendingRef.current = true;
-                dispatch(ticket, home);
-            } else if (tg.blockKind === 'gallery' && tg.kind === 'eventPickBackground' && tg.slot) {
-                if (!draft?.id) return;
-                const ticket = createBackgroundPickTicket(draft.id, tg.slot);
-                const home: JourneyHome = { editor: 'block', objectId: draft.id };
                 dispatchPendingRef.current = true;
                 dispatch(ticket, home);
             } else {

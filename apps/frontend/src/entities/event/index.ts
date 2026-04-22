@@ -1,5 +1,16 @@
-export { EVENT_STATUSES, PAYMENT_STATUSES } from './enrollment.types';
-export type { Enrollment, EventStatus, PaymentStatus } from './enrollment.types';
+export {
+  ENROLLMENT_CREATED_BY,
+  ENROLLMENT_STATUSES,
+  EVENT_STATUSES,
+  PAYMENT_STATUSES,
+} from './enrollment.types';
+export type {
+  Enrollment,
+  EnrollmentCreatedBy,
+  EnrollmentStatus,
+  EventStatus,
+  PaymentStatus,
+} from './enrollment.types';
 export type { EventData } from './event.types';
 export type { EventCatalog } from './event-catalog.types';
 
