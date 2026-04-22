@@ -89,6 +89,33 @@ With `vault/` absent and no seed data, the system should boot and:
 - Manual browser verification against a clean deployment remains for
   the admin-side review.
 
+## Follow-up — same class on the upload page (2026-04-22)
+
+Manual QA of image upload on the server surfaced the same "The string
+did not match the expected pattern" signature plus `404 (Not Found)`
+on `/upload`. Two more modules had the same missing-`|| '/api'`
+fragility and were patched the same way:
+
+- `apps/frontend/src/features/admin/catalogEditor/api/index.ts` —
+  `VAULT_BASE`, `API_BASE`, and `STREAMS_URL` now fall back to
+  `/media`, `/api`, and `/media/streams` respectively, matching
+  `apps/frontend/.env`. `UPLOAD_URL`, `HOPPER_LIST_URL`, `HOPPER_DEL`,
+  `UPDATE_ART_CATALOG`, and `JSON_VAULT` are all derived from
+  `API_BASE`, so the full upload / hopper / delete / dependents /
+  techniques surface is fixed in a single place.
+- `apps/frontend/src/features/admin/streams/api/streamsApi.ts` —
+  `API_BASE` fallback added.
+- `apps/frontend/src/pages/admin/UploadPage.tsx` — bootstrap effect
+  and `handleUpload` wrapped in try/catch with a dismissible
+  `upload-error` banner. Per-file try/catch in the upload loop keeps
+  partial failures from aborting the rest; failed filenames stay in
+  the file list so the admin can retry without re-picking. No more
+  unhandled promise rejections escape to the console.
+
+After this sweep a grep for `VITE_API_BASE_URL` across the frontend
+returns zero production hits without the `|| '/api'` fallback. The
+pattern is now consistent across every API module.
+
 ## Related
 
 - `decision--data--json-vault-no-database.md` — the JSON vault decision

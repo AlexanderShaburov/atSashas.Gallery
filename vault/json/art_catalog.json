@@ -1,6 +1,6 @@
 {
-  "catalogVersion": 137,
-  "updatedAt": "2026-04-11T17:36:36.161371+00:00",
+  "catalogVersion": 138,
+  "updatedAt": "2026-04-22T16:06:59.680268+00:00",
   "items": {
     "art-20251118-4gpfj3": {
       "id": "art-20251118-4gpfj3",
@@ -1613,9 +1613,52 @@
       "series": null,
       "tags": [],
       "notes": null
+    },
+    "art-20260422-qp3c14": {
+      "id": "art-20260422-qp3c14",
+      "dateCreated": "2026-04-22",
+      "images": {
+        "full": "/media/arts/fullsize/art-20260422-qp3c14.jpg",
+        "preview": {
+          "avif": "/media/arts/previews/art-20260422-qp3c14.avif",
+          "webp": "/media/arts/previews/art-20260422-qp3c14.webp",
+          "jpeg": "/media/arts/previews/art-20260422-qp3c14.jpeg"
+        },
+        "alt": null
+      },
+      "techniques": [
+        "generative art"
+      ],
+      "availability": "notForSale",
+      "dimensions": {
+        "width": 50.0,
+        "height": 20.0,
+        "unit": "cm"
+      },
+      "alt": {
+        "en": "btc graph",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "title": {
+        "en": "Grpaphs",
+        "ru": "Графики",
+        "it": null,
+        "es": "Graphos",
+        "pt": null
+      },
+      "price": null,
+      "series": "Friends",
+      "tags": [
+        "polymarket"
+      ],
+      "notes": "This is screensot of arbitrage bot"
     }
   },
   "order": [
+    "art-20260422-qp3c14",
     "art-20260411-tztz4j",
     "art-20260306-wm98ms",
     "art-20260304-cx75d8",

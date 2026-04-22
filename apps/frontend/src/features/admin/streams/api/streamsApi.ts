@@ -3,7 +3,11 @@ import type { StreamData, StreamIndexItem } from '@/entities/stream/';
 import { StreamMetadata } from '@/entities/stream/streamApi.types';
 import { streamsIndexStore } from '@/shared/state/domain';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+// Fallback matches `apps/frontend/.env` so a server build that does not
+// substitute VITE_API_BASE_URL produces `/api/...` (relative) rather than
+// `undefined/...` (which WebKit/Safari rejects as "The string did not
+// match the expected pattern"). Same pattern every other API module uses.
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 async function http<T>(url: string, init?: RequestInit): Promise<T> {
     const res = await fetch(`${API_BASE}${url}`, {

@@ -1,6 +1,6 @@
 {
-  "version": 75,
-  "updatedAt": "2026-04-22T13:47:35.071184+00:00",
+  "version": 78,
+  "updatedAt": "2026-04-22T16:16:03.417198+00:00",
   "pages": {
     "event-20260421-ax8x2r": {
       "id": "event-20260421-ax8x2r",
@@ -161,6 +161,19 @@
           "createdAt": "2026-04-22T13:40:03.909226+00:00",
           "updatedAt": "2026-04-22T13:40:03.909226+00:00",
           "stripeSessionId": null
+        },
+        "enroll-20260422-i8hrdu": {
+          "id": "enroll-20260422-i8hrdu",
+          "fullName": "Alexander Shaburov",
+          "email": "shaburov@mac.com",
+          "phone": "0533682268",
+          "note": "laskjfas;lfhjas;fgh",
+          "status": "pending",
+          "paymentStatus": "unpaid",
+          "createdBy": "public",
+          "createdAt": "2026-04-22T16:16:03.416874+00:00",
+          "updatedAt": "2026-04-22T16:16:03.416874+00:00",
+          "stripeSessionId": null
         }
       },
       "eventId": null,
@@ -253,6 +266,54 @@
       "time": "10:00",
       "mapUrl": "https://maps.app.goo.gl/by5zrGXMr2Ftg1VS9",
       "heroImage": "media-20260411-9m9110"
+    },
+    "event-20260422-wwrj3n": {
+      "id": "event-20260422-wwrj3n",
+      "slug": "event-20260422-wwrj3n",
+      "preset": "minimal",
+      "status": "draft",
+      "title": {
+        "en": "Бла-бла-бла. ",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "description": {
+        "en": "Бла-бла-бла. Бла-бла-бла. Бла-бла-бла. Бла-бла-бла. Бла-бла-бла. ",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "location": {
+        "en": "Vatican City",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "ctaLabel": {
+        "en": "RSVP",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "price": {
+        "amount": 1000.0,
+        "currency": "EUR"
+      },
+      "enrollments": {},
+      "eventId": null,
+      "ctaAction": null,
+      "extendedDescription": {
+        "en": "Бла-бла-бла. Бла-бла-бла. Бла-бла-бла. Бла-бла-бла. Бла-бла-бла. Бла-бла-бла. Бла-бла-бла. Бла-бла-бла. Бла-бла-бла. Бла-бла-бла. "
+      },
+      "dateStart": "2026-04-23",
+      "dateEnd": "2026-04-23",
+      "time": "20:00",
+      "heroImage": "art-20251118-4gpfj3"
     }
   }
 }

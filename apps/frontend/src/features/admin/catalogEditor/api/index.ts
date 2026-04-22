@@ -5,9 +5,16 @@ import type { ApiResponse } from '@/entities/common';
 import type { GridItem } from '@/shared/ui/grid';
 import type { StreamData } from '@/entities/stream';
 import { catalogStore } from '@/shared/state/domain';
-export const VAULT_BASE = import.meta.env.VITE_VAULT_BASE_URL;
-export const API_BASE = import.meta.env.VITE_API_BASE_URL;
-export const STREAMS_URL = import.meta.env.VITE_STREAMS_BASE_URL;
+// Fallbacks match `apps/frontend/.env` so server builds that fail to
+// substitute the Vite env variables do not produce "undefined/..." URLs
+// (which WebKit/Safari rejects as "The string did not match the expected
+// pattern"). Every other API module in this codebase uses the same
+// pattern — see `features/public/api/*.ts`,
+// `features/admin/blocks/api/blocksApi.ts`, and the fix previously
+// applied to `shared/ArtCatalogProvider/ArtCatalogLoader.tsx`.
+export const VAULT_BASE = import.meta.env.VITE_VAULT_BASE_URL || '/media';
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+export const STREAMS_URL = import.meta.env.VITE_STREAMS_BASE_URL || '/media/streams';
 export const UPDATE_ART_CATALOG = `${API_BASE}/art/catalog/update`;
 export const HOPPER_LIST_URL = `${API_BASE}/hopper/content`;
 export const HOPPER_DEL = `${API_BASE}/hopper`;

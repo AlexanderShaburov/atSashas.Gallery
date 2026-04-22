@@ -1,6 +1,6 @@
 {
-  "version": 15,
-  "updatedAt": "2026-04-11T17:37:17.046268+00:00",
+  "version": 16,
+  "updatedAt": "2026-04-22T16:13:41.123036+00:00",
   "order": [
     "media-20260410-36p6dm",
     "media-20260410-6zchxn",
@@ -14,7 +14,8 @@
     "media-20260411-9m9110",
     "media-20260411-q0qefu",
     "media-20260411-iae2k0",
-    "media-20260411-2il58y"
+    "media-20260411-2il58y",
+    "media-20260422-kr31qh"
   ],
   "items": {
     "media-20260410-36p6dm": {
@@ -320,6 +321,33 @@
         "videoSources": null
       },
       "title": null,
+      "alt": null,
+      "dimensions": null,
+      "tags": []
+    },
+    "media-20260422-kr31qh": {
+      "id": "media-20260422-kr31qh",
+      "lifecycle": "draft",
+      "dateCreated": "2026-04-22",
+      "media": {
+        "kind": "image",
+        "sources": {
+          "preview": {
+            "avif": null,
+            "webp": null,
+            "jpeg": null
+          },
+          "full": "/media/hopper/c4a2f51c308c3934c779d78dc060cda8272f17a34d0df3d7dd6180e282cf8d72.jpeg"
+        },
+        "videoSources": null
+      },
+      "title": {
+        "en": "Choco",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
       "alt": null,
       "dimensions": null,
       "tags": []

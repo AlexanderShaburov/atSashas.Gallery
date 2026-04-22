@@ -1,8 +1,8 @@
 {
   "kind": "BlockCollection",
-  "version": 364,
+  "version": 367,
   "generatedAt": "2026-03-27",
-  "updatedAt": "2026-04-18",
+  "updatedAt": "2026-04-22",
   "blocks": {
     "block-gallery-single-33e84e99": {
       "id": "block-gallery-single-33e84e99",
@@ -772,9 +772,117 @@
         }
       ],
       "appearance": null
+    },
+    "block-gallery-pairhorizontal-308092d7": {
+      "id": "block-gallery-pairhorizontal-308092d7",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-04-22",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "pairHorizontal",
+      "items": [
+        {
+          "kind": "art",
+          "artId": "art-20260422-qp3c14",
+          "position": "Left",
+          "caption": null
+        },
+        {
+          "kind": "art",
+          "artId": "art-20260210-kfb5q7",
+          "position": "Right",
+          "caption": null
+        }
+      ],
+      "appearance": null
+    },
+    "block-gallery-triptychright-6118847f": {
+      "id": "block-gallery-triptychright-6118847f",
+      "blockKind": "gallery",
+      "lifecycle": "saved",
+      "isTemplate": null,
+      "tags": [],
+      "dateCreated": "2026-04-22",
+      "caption": {
+        "en": "",
+        "ru": null,
+        "it": null,
+        "es": null,
+        "pt": null
+      },
+      "layout": "triptychRight",
+      "items": [
+        {
+          "kind": "art",
+          "artId": "art-20260210-kfb5q7",
+          "position": "Left",
+          "caption": null
+        },
+        {
+          "kind": "art",
+          "artId": "art-20260210-1ywd8q",
+          "position": "RUC",
+          "caption": null
+        },
+        {
+          "kind": "art",
+          "artId": "art-20260213-49a65n",
+          "position": "RBC",
+          "caption": null
+        }
+      ],
+      "appearance": {
+        "aspectRatio": 1.0,
+        "columnRatios": [
+          0.6015424164524421,
+          0.3984575835475579
+        ],
+        "verticalAlign": "center",
+        "gap": 6.0,
+        "slots": {
+          "Left": {
+            "image": {
+              "scale": 1.0,
+              "offsetX": 0.0,
+              "offsetY": 0.0
+            },
+            "frameOffsetY": 85.0,
+            "caption": null
+          },
+          "RUC": {
+            "image": {
+              "scale": 1.0,
+              "offsetX": 0.0,
+              "offsetY": 0.0
+            },
+            "frameOffsetY": -12.0,
+            "caption": null
+          },
+          "RBC": {
+            "image": {
+              "scale": 1.0,
+              "offsetX": 0.0,
+              "offsetY": 0.0
+            },
+            "frameOffsetY": -27.0,
+            "caption": null
+          }
+        },
+        "blockCaption": null
+      }
     }
   },
   "order": [
+    "block-gallery-triptychright-6118847f",
+    "block-gallery-pairhorizontal-308092d7",
     "block-gallery-single-79773b37",
     "block-gallery-single-7384f674",
     "block-gallery-single-fbf03adb",

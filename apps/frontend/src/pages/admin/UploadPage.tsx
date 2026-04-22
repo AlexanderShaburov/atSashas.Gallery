@@ -25,6 +25,10 @@ export default function UploadPage() {
     const [uploaded, setUploaded] = useState<GridItem[]>([]);
     const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
     const [isDragging, setIsDragging] = useState(false);
+    // Surface upload + hopper-load errors in the UI instead of letting
+    // them escape as unhandled promise rejections (which is what the
+    // console logs on the server showed).
+    const [errorMessage, setErrorMessage] = useState<string>('');
 
     const arrival = useArrival();
     const returnHome = useReturnHome();
@@ -75,13 +79,24 @@ export default function UploadPage() {
             }
         }
 
-        // Now perform async operations
-        (async () => {
-            // Download hopper content once at page load
-            const artItemGrid = await getHopperContent();
-            console.log(`[UploadPage]: artItemGrid (Hopper) is: `);
-            console.dir(artItemGrid);
-            setUploaded(artItemGrid);
+        // Now perform async operations. Errors are caught and surfaced
+        // to the UI — previously they bubbled as unhandled promise
+        // rejections ("The string did not match the expected pattern"
+        // on server builds where VITE_API_BASE_URL was not substituted).
+        void (async () => {
+            try {
+                const artItemGrid = await getHopperContent();
+                console.log(`[UploadPage]: artItemGrid (Hopper) is: `);
+                console.dir(artItemGrid);
+                setUploaded(artItemGrid);
+            } catch (err) {
+                console.error('[UploadPage] Failed to load hopper content:', err);
+                setErrorMessage(
+                    err instanceof Error
+                        ? `Could not load uploaded files: ${err.message}`
+                        : 'Could not load uploaded files.',
+                );
+            }
         })();
     }, [arrival]);
 
@@ -90,18 +105,47 @@ export default function UploadPage() {
     async function handleUpload() {
         if (!files.length) return;
         setUploading(true);
+        setErrorMessage('');
         try {
             const newGrid: GridItem[] = [];
+            const failed: string[] = [];
 
             for (const file of files) {
-                const { url, ok } = await uploadImage(file, 'hopper');
-                if (ok && url) {
-                    newGrid.push({ id: generateId('art'), thumbUrl: url });
+                try {
+                    const result = await uploadImage(file, 'hopper');
+                    const { url, ok } = result ?? {};
+                    if (ok && url) {
+                        newGrid.push({ id: generateId('art'), thumbUrl: url });
+                    } else {
+                        failed.push(file.name);
+                    }
+                } catch (err) {
+                    console.error('[UploadPage] Upload failed for', file.name, err);
+                    failed.push(file.name);
                 }
             }
 
             setUploaded((prev) => [...prev, ...newGrid]);
-            setFiles([]);
+            // Only clear the file list for successful items so the admin
+            // can retry failures without re-selecting every file.
+            const failedSet = new Set(failed);
+            setFiles((prev) => prev.filter((f) => failedSet.has(f.name)));
+
+            if (failed.length > 0) {
+                setErrorMessage(
+                    `Upload failed for ${failed.length} file${failed.length === 1 ? '' : 's'}: ${failed.join(', ')}`,
+                );
+            }
+        } catch (err) {
+            // Defensive catch — the inner loop already handles per-file
+            // failures, but any unexpected throw (URL construction, etc.)
+            // must not escape as an unhandled promise rejection.
+            console.error('[UploadPage] Unexpected upload failure:', err);
+            setErrorMessage(
+                err instanceof Error
+                    ? `Upload failed: ${err.message}`
+                    : 'Upload failed with an unexpected error.',
+            );
         } finally {
             setUploading(false);
         }
@@ -212,6 +256,20 @@ export default function UploadPage() {
                     </div>
                 )}
             </section>
+
+            {errorMessage && (
+                <div className="upload-error" role="alert">
+                    <span>{errorMessage}</span>
+                    <button
+                        type="button"
+                        className="upload-error__dismiss"
+                        onClick={() => setErrorMessage('')}
+                        aria-label="Dismiss error"
+                    >
+                        ✕
+                    </button>
+                </div>
+            )}
 
             {files.length > 0 && (
                 <div className="upload-actions">

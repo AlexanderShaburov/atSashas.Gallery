@@ -1,6 +1,10 @@
 {
   "items": [
     {
+      "kind": "eventRef",
+      "eventPageId": "event-20260422-wwrj3n"
+    },
+    {
       "kind": "streamRef",
       "streamId": "stream-20260327-ctznm2",
       "size": "S"
@@ -22,7 +26,7 @@
       "eventPageId": "event-20260421-4scvhr"
     }
   ],
-  "version": 83,
+  "version": 84,
   "createdAt": "2026-02-13T12:35:00.000000+00:00",
-  "updatedAt": "2026-04-22T04:46:26.599106+00:00"
+  "updatedAt": "2026-04-22T16:14:06.883878+00:00"
 }
