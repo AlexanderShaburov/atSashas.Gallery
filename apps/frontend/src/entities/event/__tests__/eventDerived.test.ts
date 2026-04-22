@@ -38,6 +38,13 @@ describe('getPriceDisplay', () => {
     expect(getPriceDisplay(undefined)).toBe('Free');
   });
 
+  it('null → "Free" (backend Pydantic Optional[Money] serializes as null)', () => {
+    // Regression guard for the server-deploy crash:
+    //   `TypeError: null is not an object (evaluating 'price.amount')`
+    // The old `price === undefined` check let a null value fall through.
+    expect(getPriceDisplay(null)).toBe('Free');
+  });
+
   it('amount 0 → "Free"', () => {
     expect(getPriceDisplay({ amount: 0, currency: 'EUR' })).toBe('Free');
   });

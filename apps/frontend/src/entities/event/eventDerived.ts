@@ -36,8 +36,13 @@ const CURRENCY_SYMBOLS: Record<CurrencyName, string> = {
  * - `undefined` or zero amount → `"Free"`
  * - Otherwise → symbol + amount, e.g. `"€45"`, `"$120"`
  */
-export function getPriceDisplay(price: Money | undefined): string {
-  if (price === undefined || price.amount === 0) return 'Free';
+export function getPriceDisplay(price: Money | undefined | null): string {
+  // Backend Pydantic `Optional[Money] = None` serializes as JSON `null`,
+  // not `undefined`. The old `price === undefined` check silently passed
+  // a null value through to `price.amount` and crashed `<PreviewMode>`
+  // with "null is not an object (evaluating 'price.amount')" — the exact
+  // error reported in server-deploy QA.
+  if (!price || price.amount === 0) return 'Free';
   const symbol = CURRENCY_SYMBOLS[price.currency] ?? price.currency;
   return `${symbol}${price.amount}`;
 }
