@@ -1,5 +1,9 @@
 export const createNonce = (): string => {
-    return crypto.randomUUID();
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}-${Math.random().toString(16).slice(2)}`;
 };
 
 export const nowIso = (): string => {
