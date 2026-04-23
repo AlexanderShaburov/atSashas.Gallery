@@ -34,7 +34,15 @@ export function printoutTicket(hit: BlockHitEvent): JourneyTicket | undefined {
             }
             case 'draft': {
                 const idx = findArtItemByPos(hit, hit.hit.slot);
-                if (!idx) return;
+                // `findArtItemByPos` returns:
+                //   undefined → wrong block kind (we bail)
+                //   -1        → slot is empty (dispatch select journey below)
+                //   0, 1, 2…  → slot has an art item at that index (edit path)
+                //
+                // The previous `if (!idx) return;` silently dropped the
+                // idx === 0 case, so clicking the first occupied slot of
+                // a gallery block did nothing.
+                if (idx === undefined) return;
                 if (idx === -1) {
                     // draft has no image selected for slot with pos:
                     const ticket: JourneyTicket = {
