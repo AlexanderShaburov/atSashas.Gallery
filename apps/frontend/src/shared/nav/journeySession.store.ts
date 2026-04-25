@@ -122,6 +122,15 @@ class JourneySessionStore {
     /**
      * Process arrival at an editor.
      * Consumes the leg: outbound → returning, or returning → completed (pop).
+     *
+     * Stale-leg recovery: if the arriving editor doesn't match the top
+     * leg's expected editor (e.g. user back-button'd out of a partially
+     * rendered child editor), do NOT throw. A throw here bubbles into
+     * the editor's bootstrap as an unhandled promise rejection, blanks
+     * the screen, and leaves the journey session permanently stuck —
+     * the user can't navigate anywhere without "Journey is currently
+     * active" warnings. Instead: log, clear the session, return
+     * undefined so the editor mounts fresh as if no journey existed.
      */
     arrival(editor: EditorKind): JourneyTicket | undefined {
         if (!this.activeSession) return undefined;
@@ -138,14 +147,17 @@ class JourneySessionStore {
         if (expectedEditor !== editor) {
             this.logDiagnostic({
                 kind: 'unexpected-editor',
-                message: `Arrival at ${editor} but expected ${expectedEditor}`,
+                message: `Arrival at ${editor} but expected ${expectedEditor} — clearing stale session`,
                 sessionId: this.activeSession.sessionId,
                 expectedEditor,
                 actualEditor: editor,
             });
-            throw new Error(
-                `${LOG_PREFIX} Arrival on unexpected editor ${editor} instead of ${expectedEditor}`,
+            console.error(
+                `${LOG_PREFIX} Arrival on unexpected editor ${editor} instead of ${expectedEditor} — clearing stale session so the user can recover`,
             );
+            this.activeSession = undefined;
+            this.emit();
+            return undefined;
         }
 
         console.log(`${LOG_PREFIX} Arrival at ${editor}, leg state: ${topLeg.state}`);

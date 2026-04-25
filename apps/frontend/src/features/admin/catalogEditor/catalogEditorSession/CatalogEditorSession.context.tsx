@@ -306,6 +306,27 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                             return;
                         }
 
+                        // Populate the session draft store BEFORE flipping
+                        // screenMode. SingleArtItemEditor reads draft via
+                        // useSessionDataStore({ kind: 'catalog', id }); without
+                        // saveDraft+commit, draft stays undefined,
+                        // editorIsReady is false, and the page renders an
+                        // empty div under screenMode === 'edit' — i.e. a
+                        // blank screen with no exit affordance.
+                        //
+                        // This mirrors editById() (the click-driven entry
+                        // path). The two entry paths must populate the same
+                        // stores; otherwise the journey-driven entry leaves
+                        // the editor in a degraded state the user can't
+                        // recover from without a hard reload.
+                        const editorKey: EditorKey = { kind: 'catalog', id };
+                        editSessionsDataStore.saveDraft<ArtItemData>(editorKey, item);
+                        editSessionsDataStore.commit<ArtItemData>(editorKey);
+                        setThumb({
+                            id: item.id,
+                            thumbUrl: item.images.full,
+                            title: item.title?.en ?? '',
+                        });
                         setSelectedItemId(id);
                         setScreenMode('edit');
                         return;
