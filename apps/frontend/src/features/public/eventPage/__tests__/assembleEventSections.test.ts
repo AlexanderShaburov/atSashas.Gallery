@@ -395,3 +395,53 @@ describe('Debug output snapshots', () => {
     expect(skipped).toHaveLength(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Regression: Pydantic-serialized null Localized must not count as present.
+//
+// Backend `Localized` defaults to {en:null, ru:null, it:null, es:null, pt:null}
+// when the field is unset. The previous `hasField` implementation counted
+// Object.keys length and treated this as populated, so sections rendered
+// with empty text content while the production / public renderer dropped
+// them based on its own (also-buggy) logic. See
+// `bug--render--event-page-section-loss-on-deploy.md`.
+// ---------------------------------------------------------------------------
+
+describe('Regression — null-Localized is treated as missing', () => {
+  function pydanticNullLocalized() {
+    return { en: null, ru: null, it: null, es: null, pt: null };
+  }
+
+  it('all-null Localized title → heroStandard skipped in production', () => {
+    const event = fullWorkshop();
+    (event as unknown as Record<string, unknown>).title = pydanticNullLocalized();
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const outputs = assembleEventSections(event, emptyCtx, { mode: 'production' });
+    spy.mockRestore();
+    // heroStandard is required; production drops it when a required field
+    // is missing. The bug had it incorrectly rendered (with empty text).
+    expect(getRenderedSections(outputs).map((o) => o.kind)).not.toContain('heroStandard');
+  });
+
+  it('partially populated Localized counts as present', () => {
+    const event = fullWorkshop();
+    (event as unknown as Record<string, unknown>).title = {
+      en: 'Watercolor Foundations',
+      ru: null,
+      it: null,
+      es: null,
+      pt: null,
+    };
+    const outputs = assembleEventSections(event, emptyCtx, { mode: 'production' });
+    expect(getRenderedSections(outputs).map((o) => o.kind)).toContain('heroStandard');
+  });
+
+  it('empty string Localized counts as missing', () => {
+    const event = fullWorkshop();
+    (event as unknown as Record<string, unknown>).title = { en: '', ru: null };
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const outputs = assembleEventSections(event, emptyCtx, { mode: 'production' });
+    spy.mockRestore();
+    expect(getRenderedSections(outputs).map((o) => o.kind)).not.toContain('heroStandard');
+  });
+});

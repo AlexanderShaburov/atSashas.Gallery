@@ -717,16 +717,19 @@ describe('R. Edge cases', () => {
     expect(hero.data.priceDisplay).toBe('Free');
   });
 
-  it('no dateStart → dateDisplay is empty string', () => {
+  it('no dateStart → heroStandard renders with empty dateDisplay (dev mode placeholder)', () => {
     const event = fullWorkshop();
     (event as unknown as Record<string, unknown>).dateStart = undefined;
-    // heroStandard requires dateStart — it will be skipped in production.
-    // But we can still test via development mode where it shows a placeholder.
+    // heroStandard requires dateStart — in production the section is skipped
+    // entirely; in development the assembler emits an `error-placeholder`
+    // and the mapper renders it with empty fields so the section structure
+    // is visible to the developer.
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { sections } = mapEventToRenderModel(event, emptyCtx, { mode: 'development' });
     spy.mockRestore();
-    // heroStandard won't have data (error-placeholder), so it won't be in sections
-    expect(sectionKinds(sections)).not.toContain('heroStandard');
+    const hero = findSection(sections, 'heroStandard');
+    expect(hero).toBeDefined();
+    expect(hero!.data.dateDisplay).toBe('');
   });
 
   it('CaptionedWork without medium → medium is empty string', () => {

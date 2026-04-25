@@ -399,9 +399,15 @@ export function mapEventToRenderModel(
 
   const sections: RenderEventSection[] = [];
 
+  // `getRenderedSections` deliberately keeps `editor-placeholder` and
+  // `error-placeholder` outputs alongside `rendered` ones, so the editor
+  // preview and dev mode see section structure even with partial data.
+  // The previous `if (status !== 'rendered') continue` here silently
+  // dropped both placeholder kinds, defeating that intent and producing
+  // the post-deploy "Preview is missing most sections" symptom.
+  // `mapSection` reads each field defensively, so passing partial data
+  // through it is safe.
   for (const output of rendered) {
-    if (output.status !== 'rendered') continue;
-
     const section = mapSection(output.kind, event, context, resolver);
     if (section) {
       sections.push(section);

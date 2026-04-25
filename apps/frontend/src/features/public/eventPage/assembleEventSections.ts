@@ -39,12 +39,37 @@ export interface SectionOutput {
 // Field presence check
 // ---------------------------------------------------------------------------
 
+/**
+ * "Has content" check used to decide whether a section's source field
+ * counts as populated.
+ *
+ * Critical detail: backend Pydantic `Localized` always serializes its
+ * five locale fields and defaults unset ones to `null`. The wire shape
+ * for an empty title is `{en:null, ru:null, it:null, es:null, pt:null}`
+ * — five keys, no content. The previous implementation checked
+ * `Object.keys(value).length > 0`, which reported these as present and
+ * let downstream rendering produce empty-text sections.
+ *
+ * `hasField` now reports `true` only if some leaf is genuinely
+ * content-bearing (non-empty string, non-null primitive, non-empty
+ * array). Empty objects, all-null Localized objects, and empty strings
+ * are all treated as missing.
+ */
 function hasField(event: Record<string, unknown>, field: string): boolean {
-  const value = event[field];
+  return hasContent(event[field]);
+}
+
+function hasContent(value: unknown): boolean {
   if (value === undefined || value === null) return false;
   if (Array.isArray(value)) return value.length > 0;
-  if (typeof value === 'object') return Object.keys(value as object).length > 0;
+  if (typeof value === 'object') {
+    const values = Object.values(value as Record<string, unknown>);
+    if (values.length === 0) return false;
+    return values.some((v) => hasContent(v));
+  }
   if (typeof value === 'string') return value.length > 0;
+  // Numbers / booleans are content-bearing (e.g. price.amount === 0,
+  // capacity === 0 are still meaningful values).
   return true;
 }
 

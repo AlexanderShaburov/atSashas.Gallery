@@ -182,6 +182,9 @@
   },
   "active": "dca0f50e20e249c7",
   "lastOpenFiles": [
+    "bugs/bug--render--event-page-section-loss-on-deploy.md",
+    "bugs/bug--navigation--media-editor-journey-dead-end.md",
+    "bugs/bug--deployment--crypto-randomuuid-insecure-context.md",
     "bugs/bug--deployment--clean-vault-boot-blocked.md",
     "plans/plan--admin--event-enrollments-post-mvp-followups.md",
     "open-questions/open_question--architecture--user-contact-catalog.md",
@@ -208,9 +211,6 @@
     "plans",
     "sessions/session--editor--homepage-editor-alignment.md",
     "specs/spec--system--knowledge-driven-task-orchestration-ver-1-1.md",
-    "specs/spec--system--knowledge-driven-task-orchestration copy.md",
-    "specs/spec--devops--knowledge-sync-classification-ver-1-1.md",
-    "specs/spec--devops--knowledge-sync-classification copy.md",
     "specs/spec--devops--knowledge-sync-classification.md.bak",
     "specs/spec--system--knowledge-driven-task-orchestration.md.bak"
   ]
