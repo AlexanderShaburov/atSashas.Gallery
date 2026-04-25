@@ -1,4 +1,5 @@
 // src/shared/api/streamsApi.ts
+import { apiFetch } from "@/features/auth/apiFetch";
 import type { StreamData, StreamIndexItem } from '@/entities/stream/';
 import { StreamMetadata } from '@/entities/stream/streamApi.types';
 import { streamsIndexStore } from '@/shared/state/domain';
@@ -10,7 +11,7 @@ import { streamsIndexStore } from '@/shared/state/domain';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 async function http<T>(url: string, init?: RequestInit): Promise<T> {
-    const res = await fetch(`${API_BASE}${url}`, {
+    const res = await apiFetch(`${API_BASE}${url}`, {
         ...init,
         headers: {
             'Content-Type': 'application/json',

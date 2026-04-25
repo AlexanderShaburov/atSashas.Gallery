@@ -1,5 +1,6 @@
 // features/admin/textVisualEditor/api/textVisualsAdminApi.ts
 
+import { apiFetch } from "@/features/auth/apiFetch";
 import type { TextVisualCatalog, TextVisualData } from '@/entities/textVisual';
 import { textVisualsStore } from '@/shared/state/domain';
 
@@ -10,13 +11,13 @@ export type CreateTextVisualPayload = Omit<TextVisualData, 'id'>;
 
 export const textVisualsAdminApi = {
   async getAll(): Promise<TextVisualCatalog> {
-    const res = await fetch(TEXT_VISUALS_URL);
+    const res = await apiFetch(TEXT_VISUALS_URL);
     if (!res.ok) throw new Error(`Failed to load text visuals: ${res.statusText}`);
     return res.json();
   },
 
   async create(payload: CreateTextVisualPayload): Promise<TextVisualData> {
-    const res = await fetch(TEXT_VISUALS_URL, {
+    const res = await apiFetch(TEXT_VISUALS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -29,7 +30,7 @@ export const textVisualsAdminApi = {
   },
 
   async update(id: string, item: TextVisualData): Promise<TextVisualData> {
-    const res = await fetch(`${TEXT_VISUALS_URL}/${id}`, {
+    const res = await apiFetch(`${TEXT_VISUALS_URL}/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(item),
@@ -42,7 +43,7 @@ export const textVisualsAdminApi = {
   },
 
   async remove(id: string): Promise<void> {
-    const res = await fetch(`${TEXT_VISUALS_URL}/${id}`, { method: 'DELETE' });
+    const res = await apiFetch(`${TEXT_VISUALS_URL}/${id}`, { method: 'DELETE' });
     if (!res.ok) {
       const text = await res.text();
       throw new Error(`Failed to delete text visual: ${text}`);

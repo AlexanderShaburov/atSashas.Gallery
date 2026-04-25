@@ -6,7 +6,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import './LoginPage.css';
 
 export default function LoginPage() {
-    const { isAuthenticated, isLoading, login } = useAuth();
+    const { isAuthenticated, isLoading, login, sessionExpired } = useAuth();
     const location = useLocation();
 
     const [username, setUsername] = useState('');
@@ -50,6 +50,12 @@ export default function LoginPage() {
             <div className="login-card">
                 <h1 className="login-title">Admin Login</h1>
                 <p className="login-subtitle">atSashas.Gallery</p>
+
+                {sessionExpired && !error && (
+                    <div className="login-notice" role="alert">
+                        Your session expired. Please log in again to continue.
+                    </div>
+                )}
 
                 <form className="login-form" onSubmit={handleSubmit}>
                     <div className="login-field">

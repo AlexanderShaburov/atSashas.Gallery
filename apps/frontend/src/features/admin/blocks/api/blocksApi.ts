@@ -1,5 +1,6 @@
 //src/features/admin/blocks/api/blocksApi.ts:
 
+import { apiFetch } from "@/features/auth/apiFetch";
 import type { Block, BlocksCollectionJSON } from '@/entities/block';
 import { generateId } from '@/shared/lib/id/generateId';
 import { blocksCollectionStore } from '@/shared/state/domain';
@@ -11,7 +12,7 @@ export const BLOCK_COLLECTION = `${BLOCK_VAULT}/collection`;
 const BLOCK_NEW_COLLECTION = `${BLOCK_VAULT}/new_collection`;
 
 export async function getCollection(): Promise<BlocksCollectionJSON> {
-    const resp = await fetch(BLOCK_COLLECTION);
+    const resp = await apiFetch(BLOCK_COLLECTION);
     if (!resp.ok) throw new Error(`Failed to read collection: ${resp.status}`);
     return await resp.json();
 }
@@ -25,7 +26,7 @@ export async function createCollection(name: string) {
         id: collectionId,
     };
     console.dir('CreateCollection:', data);
-    const resp = await fetch(BLOCK_NEW_COLLECTION, {
+    const resp = await apiFetch(BLOCK_NEW_COLLECTION, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -37,7 +38,7 @@ export async function createCollection(name: string) {
 export async function deleteCollection(collection: BlocksCollectionJSON) {
     try {
         const url = BLOCK_COLLECTION + `/${collection.collectionId}`;
-        const response = await fetch(url, {
+        const response = await apiFetch(url, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json',
@@ -56,7 +57,7 @@ export async function deleteCollection(collection: BlocksCollectionJSON) {
 
 export async function addNewBlock(block: Block): Promise<Block> {
     console.log(`[addNewBlock]: Called`);
-    const res = await fetch(BLOCK_VAULT, {
+    const res = await apiFetch(BLOCK_VAULT, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -70,7 +71,7 @@ export async function addNewBlock(block: Block): Promise<Block> {
 export async function updateBlock(block: Block): Promise<Block> {
     console.log('[updateBlock]: Called');
     const URL = `${BLOCK_VAULT}/${block.id}`;
-    const res = await fetch(URL, {
+    const res = await apiFetch(URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(block),
@@ -92,7 +93,7 @@ export async function refreshBlocksCollection(): Promise<void> {
 export async function deleteBlock(id: string) {
     console.log(`[API][deleteBlock] block with id ${id} be deleted immediately`);
     const URL = `${BLOCK_VAULT}/${id}`;
-    const res = await fetch(URL, {
+    const res = await apiFetch(URL, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
     });

@@ -1,3 +1,4 @@
+import { apiFetch } from "@/features/auth/apiFetch";
 import type { EventPageData } from '@/entities/event';
 import { eventPagesStore } from '@/shared/state';
 import type { EventPageCatalog } from '@/shared/state';
@@ -7,13 +8,13 @@ const URL = `${API_BASE}/admin/event-pages`;
 
 export const eventPagesAdminApi = {
   async getAll(): Promise<EventPageCatalog> {
-    const res = await fetch(URL);
+    const res = await apiFetch(URL);
     if (!res.ok) throw new Error(`Failed to load event pages: ${res.statusText}`);
     return res.json();
   },
 
   async create(page: EventPageData): Promise<EventPageData> {
-    const res = await fetch(URL, {
+    const res = await apiFetch(URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(page),
@@ -26,7 +27,7 @@ export const eventPagesAdminApi = {
   },
 
   async update(id: string, page: EventPageData): Promise<EventPageData> {
-    const res = await fetch(`${URL}/${id}`, {
+    const res = await apiFetch(`${URL}/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(page),
@@ -39,7 +40,7 @@ export const eventPagesAdminApi = {
   },
 
   async remove(id: string): Promise<void> {
-    const res = await fetch(`${URL}/${id}`, { method: 'DELETE' });
+    const res = await apiFetch(`${URL}/${id}`, { method: 'DELETE' });
     if (!res.ok) {
       const text = await res.text();
       throw new Error(`Failed to delete event page: ${text}`);

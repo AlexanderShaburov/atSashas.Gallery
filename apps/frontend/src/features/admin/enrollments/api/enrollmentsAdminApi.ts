@@ -6,6 +6,7 @@
 //   Phase 5A: action endpoints (status / payment / contact / create /
 //             transfer) — wired here for Phase 5B UI consumption.
 
+import { apiFetch } from "@/features/auth/apiFetch";
 import type { Enrollment, EnrollmentStatus, PaymentStatus } from '@/entities/event';
 
 import type {
@@ -90,7 +91,7 @@ async function adminJsonRequest<T>(
 ): Promise<T> {
     let res: Response;
     try {
-        res = await fetch(url, init);
+        res = await apiFetch(url, init);
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Network error';
         throw new AdminActionError(0, 'network', message);
@@ -105,7 +106,7 @@ async function adminJsonRequest<T>(
 export async function fetchEnrollmentsOverview(
     signal?: AbortSignal,
 ): Promise<EnrollmentOverviewRow[]> {
-    const res = await fetch(OVERVIEW_URL, { signal });
+    const res = await apiFetch(OVERVIEW_URL, { signal });
     if (!res.ok) {
         const text = await res.text();
         throw new Error(text || `Failed to load enrollments overview: ${res.statusText}`);
@@ -117,7 +118,7 @@ export async function fetchEnrollmentsDetail(
     eventPageId: string,
     signal?: AbortSignal,
 ): Promise<EnrollmentsDetailResponse> {
-    const res = await fetch(DETAIL_URL(eventPageId), { signal });
+    const res = await apiFetch(DETAIL_URL(eventPageId), { signal });
     if (res.status === 404) {
         throw new DetailNotFoundError(`Event not found: ${eventPageId}`);
     }

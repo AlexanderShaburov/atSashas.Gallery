@@ -1,3 +1,4 @@
+import { apiFetch } from "@/features/auth/apiFetch";
 import type { ArtItemDependents, TechniquesJson } from '@/entities/art';
 import { ArtShipment } from '@/entities/art/shipment';
 import type { ArtCatalog } from '@/entities/catalog';
@@ -34,7 +35,7 @@ export async function refreshCatalog(): Promise<void> {
 // Load current catalog version:
 export async function getCatalog(): Promise<ArtCatalog> {
     const request = `${JSON_VAULT}/art_catalog`;
-    const res = await fetch(request);
+    const res = await apiFetch(request);
     if (!res.ok) throw new Error(`Catalog ${res.status}`);
     const raw = (await res.json()) as ApiResponse<ArtCatalog>;
     return raw.data;
@@ -42,7 +43,7 @@ export async function getCatalog(): Promise<ArtCatalog> {
 
 export async function updateCatalog(shipment: ArtShipment): Promise<number> {
     console.log(`Shipment is sending to backend with type: ${shipment.images.kind}`);
-    const res = await fetch(UPDATE_ART_CATALOG, {
+    const res = await apiFetch(UPDATE_ART_CATALOG, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -54,11 +55,11 @@ export async function updateCatalog(shipment: ArtShipment): Promise<number> {
 }
 
 export async function getStreams() {
-    return (await fetch(STREAMS_URL)).json();
+    return (await apiFetch(STREAMS_URL)).json();
 }
 
 export async function saveStreams(data: StreamData) {
-    await fetch(STREAMS_URL, {
+    await apiFetch(STREAMS_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -71,7 +72,7 @@ export async function uploadImage(file: File, category: string, filename?: strin
     fd.append('category', category);
     if (filename) fd.append('filename', filename);
     return (
-        await fetch(UPLOAD_URL, {
+        await apiFetch(UPLOAD_URL, {
             method: 'POST',
             headers: {
                 Authorization: 'change-me',
@@ -82,14 +83,14 @@ export async function uploadImage(file: File, category: string, filename?: strin
 }
 
 export async function getHopperContent(): Promise<GridItem[]> {
-    const resp = await fetch(HOPPER_LIST_URL);
+    const resp = await apiFetch(HOPPER_LIST_URL);
     if (!resp.ok) throw new Error(`Hopper list request failed with error ${resp.status}`);
     return await resp.json();
 }
 
 export async function getTechniques(): Promise<TechniquesJson> {
     const request = `${JSON_VAULT}/techniques`;
-    const res = await fetch(request);
+    const res = await apiFetch(request);
     if (!res.ok) throw new Error(`Techniques ${res.status}`);
     const raw = (await res.json()) as ApiResponse<TechniquesJson>;
     return raw.data;
@@ -116,7 +117,7 @@ export async function deleteFromHopper(fileId: string): Promise<boolean> {
     try {
         const url = `${HOPPER_DEL}/${encodeURIComponent(fileId)}`;
         console.log(`Endpoint for delete hopper file url ${url}`);
-        const response = await fetch(url, {
+        const response = await apiFetch(url, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json',
@@ -139,7 +140,7 @@ export async function getDependents(id: string) {
     if (!id) return { response: 'failed', reason: 'no id' };
     const request = `${API_BASE}/art/dependencies/${id}`;
 
-    const response = await fetch(request);
+    const response = await apiFetch(request);
     if (!response.ok) {
         console.error(`Failed to collect dependents while deleting art item: ${id}`);
         return { response: 'failed', reason: String(response) };
@@ -156,7 +157,7 @@ export async function getDependents(id: string) {
  */
 export async function deleteArtItem(artId: string): Promise<void> {
     const url = `${API_BASE}/art/catalog/${encodeURIComponent(artId)}`;
-    const response = await fetch(url, {
+    const response = await apiFetch(url, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',

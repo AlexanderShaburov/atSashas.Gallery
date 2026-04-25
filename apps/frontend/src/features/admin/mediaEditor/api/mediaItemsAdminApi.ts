@@ -1,5 +1,6 @@
 // features/admin/mediaEditor/api/mediaItemsAdminApi.ts
 
+import { apiFetch } from "@/features/auth/apiFetch";
 import type { MediaItemCatalog, MediaItemData } from '@/entities/mediaItem';
 import { mediaItemsStore } from '@/shared/state/domain';
 
@@ -10,13 +11,13 @@ export type CreateMediaItemPayload = Omit<MediaItemData, 'id'>;
 
 export const mediaItemsAdminApi = {
   async getAll(): Promise<MediaItemCatalog> {
-    const res = await fetch(MEDIA_ITEMS_URL);
+    const res = await apiFetch(MEDIA_ITEMS_URL);
     if (!res.ok) throw new Error(`Failed to load media items: ${res.statusText}`);
     return res.json();
   },
 
   async create(payload: CreateMediaItemPayload): Promise<MediaItemData> {
-    const res = await fetch(MEDIA_ITEMS_URL, {
+    const res = await apiFetch(MEDIA_ITEMS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -29,7 +30,7 @@ export const mediaItemsAdminApi = {
   },
 
   async update(id: string, item: MediaItemData): Promise<MediaItemData> {
-    const res = await fetch(`${MEDIA_ITEMS_URL}/${id}`, {
+    const res = await apiFetch(`${MEDIA_ITEMS_URL}/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(item),
@@ -42,7 +43,7 @@ export const mediaItemsAdminApi = {
   },
 
   async remove(id: string): Promise<void> {
-    const res = await fetch(`${MEDIA_ITEMS_URL}/${id}`, { method: 'DELETE' });
+    const res = await apiFetch(`${MEDIA_ITEMS_URL}/${id}`, { method: 'DELETE' });
     if (!res.ok) {
       const text = await res.text();
       throw new Error(`Failed to delete media item: ${text}`);
