@@ -1,105 +1,149 @@
-import type { BlockHitEvent, GalleryArtItem } from '@/entities/block';
+import type { BlockHit, BlockHitEvent, GalleryArtItem, GalleryBlock } from '@/entities/block';
 import { createNonce, nowIso } from '@/shared/lib/dateAndLabels/nonceAndNow';
 import { generateId } from '@/shared/lib/id/generateId';
 import { JourneyTicket } from '@/shared/nav';
-import { findArtItemByPos } from './blockEditorSession.utils';
+
+// Journey routing for a slot-image click on a gallery block.
+//
+// Behavior by lifecycle:
+//   template → invalid; templates exist as catalogue stamps and can't be
+//              the source of a journey. Log and return undefined; the
+//              caller will treat that as "no nav".
+//   draft / saved → identical:
+//      slot has art at that position → open catalog in EDIT mode on that
+//                                      art item (returnEffect: blockUpdateArt)
+//      slot is empty                 → open catalog in SELECT mode so the
+//                                      author can pick or create an art
+//                                      item (returnEffect: blockInsertArt)
+//
+// Why draft and saved share the same routing:
+//   - Saved blocks were previously unhandled (switch had no `case 'saved':`),
+//     so clicking an assigned slot on an existing block did nothing — see
+//     bug--journey--reclick-assigned-slot-no-action.md.
+//   - The draft and saved cases differ only in *where* the block is
+//     persisted (in-memory draft vs. saved record); the click semantics
+//     are the same.
+//
+// Diagnostics: every decision point logs a structured line so a deployed
+// repro of "click did nothing" or "wrong mode" leaves a complete trace.
+// The journey-bootstrap-throw bug taught us that silent failures here
+// cascade into compound damage; explicit logs make those failures
+// debuggable rather than mysterious.
 
 export function printoutTicket(hit: BlockHitEvent): JourneyTicket | undefined {
-    // Validate context:
-    // screenMode - edit
-    // blockKind - gallery
-    // target kind - image !!!!
+    if (hit.block.blockKind !== 'gallery' || hit.hit.blockKind !== 'gallery') {
+        console.warn('[printoutTicket]: non-gallery hit ignored', {
+            blockKind: hit.block.blockKind,
+            hitKind: hit.hit.blockKind,
+        });
+        return;
+    }
+    if (hit.hit.kind !== 'image') {
+        // Other hit kinds (caption, blockCaption) are handled elsewhere
+        // (inline-edit, block-caption editor). Not a journey case.
+        return;
+    }
 
-    // What stage of lifecycle block goes:
-    // if template -> error;
-    // if draft -> check:
-    //      if image for position is already selected:
-    //          - catalog should be opened in edit mode and artItem with
-    //            selected id under edit;
-    //      if no:
-    //          - catalog should be opened id select screen mode;
-    // if saved -> catalog should be opened in edit mode and artItem with
-    //            selected id under edit
-    if (hit.block.blockKind !== 'gallery' || hit.hit.blockKind !== 'gallery') return;
-    if (
-        hit &&
-        hit.hit.blockKind === 'gallery' &&
-        hit.hit.kind === 'image' &&
-        hit.block.blockKind === 'gallery'
-    ) {
-        switch (hit.block.lifecycle) {
-            case 'template': {
-                throw new Error(`Journey can't be started from template`);
-                break;
-            }
-            case 'draft': {
-                const idx = findArtItemByPos(hit, hit.hit.slot);
-                // `findArtItemByPos` returns:
-                //   undefined → wrong block kind (we bail)
-                //   -1        → slot is empty (dispatch select journey below)
-                //   0, 1, 2…  → slot has an art item at that index (edit path)
-                //
-                // The previous `if (!idx) return;` silently dropped the
-                // idx === 0 case, so clicking the first occupied slot of
-                // a gallery block did nothing.
-                if (idx === undefined) return;
-                if (idx === -1) {
-                    // draft has no image selected for slot with pos:
-                    const ticket: JourneyTicket = {
-                        journeyId: generateId('travel'),
-                        destination: {
-                            editor: 'catalog',
-                            mode: 'select',
-                        },
-                        returnTo: {
-                            editor: 'block',
-                            mode: 'edit',
-                            objectId: hit.block.id,
-                        },
-                        phase: 'outbound',
-                        nonce: createNonce(),
-                        createdAt: nowIso(),
-                        returnEffect: {
-                            kind: 'blockInsertArt',
-                            blockId: hit.block.id,
-                            // Store only serializable data, not the nativeEvent
-                            pendingSelection: {
-                                block: hit.block,
-                                hit: hit.hit,
-                            },
-                        },
-                    };
-                    return ticket;
-                } else {
-                    const ticket: JourneyTicket = {
-                        journeyId: generateId('travel'),
-                        destination: {
-                            editor: 'catalog',
-                            mode: 'edit',
-                            objectId: (hit.block.items[idx] as GalleryArtItem | undefined)?.artId ?? '__none__',
-                        },
-                        returnTo: {
-                            editor: 'block',
-                            mode: 'edit',
-                            objectId: hit.block.id,
-                        },
-                        phase: 'outbound',
-                        nonce: createNonce(),
-                        createdAt: nowIso(),
-                        returnEffect: {
-                            kind: 'blockUpdateArt',
-                            blockId: hit.block.id,
-                            // Store only serializable data, not the nativeEvent
-                            pendingSelection: {
-                                block: hit.block,
-                                hit: hit.hit,
-                            },
-                        },
-                    };
-                    return ticket;
-                }
-            }
+    const block = hit.block as GalleryBlock;
+
+    switch (block.lifecycle) {
+        case 'template': {
+            console.error(
+                "[printoutTicket]: refused — can't start a journey from a template block",
+                { blockId: block.id },
+            );
+            return;
+        }
+        case 'draft':
+        case 'saved': {
+            return buildSlotJourneyTicket(block, hit.hit);
+        }
+        default: {
+            console.error('[printoutTicket]: unsupported lifecycle — no journey dispatched', {
+                lifecycle: (block as GalleryBlock).lifecycle,
+                blockId: block.id,
+            });
+            return;
         }
     }
 }
 
+function buildSlotJourneyTicket(
+    block: GalleryBlock,
+    hit: Extract<BlockHit, { blockKind: 'gallery'; kind: 'image' }>,
+): JourneyTicket | undefined {
+    // Inline the items lookup so the routing decision is local and the
+    // diagnostic log shows exactly what was checked. -1 means empty slot,
+    // 0+ means an art item lives at that position.
+    const idx = block.items.findIndex((it) => it.position === hit.slot);
+
+    if (idx === -1) {
+        console.log('[printoutTicket]: empty slot → SELECT journey to catalog', {
+            lifecycle: block.lifecycle,
+            blockId: block.id,
+            slot: hit.slot,
+        });
+        return makeTicket(block, hit, {
+            destinationMode: 'select',
+            returnEffectKind: 'blockInsertArt',
+        });
+    }
+
+    const item = block.items[idx] as GalleryArtItem | undefined;
+    if (!item || item.kind !== 'art' || !item.artId) {
+        console.error(
+            "[printoutTicket]: slot occupied but artId missing — can't open catalog edit",
+            { lifecycle: block.lifecycle, blockId: block.id, slot: hit.slot, item },
+        );
+        return;
+    }
+
+    console.log('[printoutTicket]: occupied slot → EDIT journey to catalog', {
+        lifecycle: block.lifecycle,
+        blockId: block.id,
+        slot: hit.slot,
+        artId: item.artId,
+    });
+    return makeTicket(block, hit, {
+        destinationMode: 'edit',
+        objectId: item.artId,
+        returnEffectKind: 'blockUpdateArt',
+    });
+}
+
+type MakeTicketOpts =
+    | { destinationMode: 'select'; returnEffectKind: 'blockInsertArt' }
+    | { destinationMode: 'edit'; objectId: string; returnEffectKind: 'blockUpdateArt' };
+
+function makeTicket(
+    block: GalleryBlock,
+    hit: Extract<BlockHit, { blockKind: 'gallery'; kind: 'image' }>,
+    opts: MakeTicketOpts,
+): JourneyTicket {
+    const destination =
+        opts.destinationMode === 'edit'
+            ? { editor: 'catalog' as const, mode: 'edit' as const, objectId: opts.objectId }
+            : { editor: 'catalog' as const, mode: 'select' as const };
+
+    return {
+        journeyId: generateId('travel'),
+        destination,
+        returnTo: {
+            editor: 'block',
+            mode: 'edit',
+            objectId: block.id,
+        },
+        phase: 'outbound',
+        nonce: createNonce(),
+        createdAt: nowIso(),
+        returnEffect: {
+            kind: opts.returnEffectKind,
+            blockId: block.id,
+            // Store only serializable data, not the nativeEvent
+            pendingSelection: {
+                block,
+                hit,
+            },
+        },
+    };
+}
