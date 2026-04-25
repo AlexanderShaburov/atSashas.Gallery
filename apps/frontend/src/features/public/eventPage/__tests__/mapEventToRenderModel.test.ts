@@ -260,13 +260,17 @@ describe('C. HeroStandard payload', () => {
     expect(hero.data.dateDisplay).toBe('May 17, 2026');
   });
 
-  it('heroImage is a required sourceField — section skipped when absent', () => {
+  it('heroImage missing → heroStandard still renders with heroImage=null (parity)', () => {
+    // After the parity fix, a required section renders when ANY source
+    // field has content. heroImage being absent leaves the section
+    // visible with heroImage=null; the public layout matches what the
+    // editor preview shows.
     const event = fullWorkshop();
     (event as unknown as Record<string, unknown>).heroImage = undefined;
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { sections } = mapEventToRenderModel(event, emptyCtx);
-    spy.mockRestore();
-    expect(sectionKinds(sections)).not.toContain('heroStandard');
+    const hero = findSection(sections, 'heroStandard');
+    expect(hero).toBeDefined();
+    expect(hero!.data.heroImage).toBeNull();
   });
 
   it('free price shows "Free"', () => {
@@ -699,16 +703,18 @@ describe('R. Edge cases', () => {
     expect(fw.data.layout).toBeNull();
   });
 
-  it('price is a required sourceField — section skipped when absent', () => {
+  it('price missing → heroStandard / quickFacts / ctaBlock still render (priceDisplay="Free")', () => {
+    // After the parity fix, a missing required field no longer drops
+    // the section. The mapper produces priceDisplay="Free" so the
+    // public layout matches the editor preview the author saw.
     const event = fullWorkshop();
     (event as unknown as Record<string, unknown>).price = undefined;
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { sections } = mapEventToRenderModel(event, emptyCtx);
-    spy.mockRestore();
-    // heroStandard, quickFacts, ctaBlock all require price
-    expect(sectionKinds(sections)).not.toContain('heroStandard');
-    expect(sectionKinds(sections)).not.toContain('quickFacts');
-    expect(sectionKinds(sections)).not.toContain('ctaBlock');
+    expect(sectionKinds(sections)).toContain('heroStandard');
+    expect(sectionKinds(sections)).toContain('quickFacts');
+    expect(sectionKinds(sections)).toContain('ctaBlock');
+    const hero = findSection(sections, 'heroStandard')!;
+    expect(hero.data.priceDisplay).toBe('Free');
   });
 
   it('zero price → priceDisplay is "Free"', () => {

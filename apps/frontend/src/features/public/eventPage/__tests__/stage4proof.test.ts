@@ -106,20 +106,38 @@ describe('2. Minimal sourceFieldOverride', () => {
 // 3. Broken workshop — development mode
 // ---------------------------------------------------------------------------
 
-describe('3. Development mode — missing required title', () => {
-  it('returns error-placeholder for heroStandard', () => {
+describe('3. Development mode — missing required title (other fields present)', () => {
+  // Author-preview parity: production / development / editorPreview all
+  // render a required section as long as ANY of its source fields has
+  // content. Empty title → mapper produces empty string; section
+  // structure stays visible to match the editor preview.
+  it('renders heroStandard with partial data when other required fields are populated', () => {
     const event = fullWorkshop();
     (event as unknown as Record<string, unknown>).title = {};
+
+    const outputs = assembleEventSections(event, emptyCtx, { mode: 'development' });
+    const hero = outputs.find((o) => o.kind === 'heroStandard');
+
+    expect(hero).toBeDefined();
+    expect(hero!.status).toBe('rendered');
+    expect(hero!.importance).toBe('required');
+  });
+
+  it('emits error-placeholder when EVERY required source field is empty', () => {
+    const event = fullWorkshop();
+    const r = event as unknown as Record<string, unknown>;
+    r.title = {};
+    r.subtitle = {};
+    r.heroImage = undefined;
+    r.price = undefined;
+    r.dateStart = undefined;
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const outputs = assembleEventSections(event, emptyCtx, { mode: 'development' });
     const hero = outputs.find((o) => o.kind === 'heroStandard');
 
-    console.log('dev mode heroStandard output:', JSON.stringify(hero));
-
     expect(hero).toBeDefined();
     expect(hero!.status).toBe('error-placeholder');
-    expect(hero!.importance).toBe('required');
     expect(spy).toHaveBeenCalled();
 
     spy.mockRestore();
@@ -130,10 +148,32 @@ describe('3. Development mode — missing required title', () => {
 // 4. Broken workshop — production mode
 // ---------------------------------------------------------------------------
 
-describe('4. Production mode — missing required title', () => {
-  it('heroStandard is skipped, console.error called, no exception', () => {
+describe('4. Production mode — missing required title (other fields present)', () => {
+  // Previously the strict allPresent rule dropped heroStandard whenever
+  // ANY required field was empty, so the public page diverged from
+  // editor preview (workshop showed bare title + galleries while preview
+  // showed a full hero). After the parity fix, production renders the
+  // section when at least one required field has content; the mapper
+  // produces empty strings for missing ones so the layout matches.
+  it('renders heroStandard so the public page matches editor preview', () => {
     const event = fullWorkshop();
     (event as unknown as Record<string, unknown>).title = {};
+
+    const outputs = assembleEventSections(event, emptyCtx, { mode: 'production' });
+    const rendered = getRenderedSections(outputs);
+    const kinds = rendered.map((o) => o.kind);
+
+    expect(kinds).toContain('heroStandard');
+  });
+
+  it('drops heroStandard silently when EVERY required source field is empty', () => {
+    const event = fullWorkshop();
+    const r = event as unknown as Record<string, unknown>;
+    r.title = {};
+    r.subtitle = {};
+    r.heroImage = undefined;
+    r.price = undefined;
+    r.dateStart = undefined;
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     let outputs: ReturnType<typeof assembleEventSections> | undefined;
@@ -143,8 +183,6 @@ describe('4. Production mode — missing required title', () => {
 
     const rendered = getRenderedSections(outputs!);
     const kinds = rendered.map((o) => o.kind);
-
-    console.log('production mode rendered (missing title):', JSON.stringify(kinds));
 
     expect(kinds).not.toContain('heroStandard');
     expect(spy).toHaveBeenCalled();

@@ -196,10 +196,29 @@ describe('B. Optional sections skipped', () => {
 // ---------------------------------------------------------------------------
 
 describe('C. Required sections — development mode', () => {
-  it('workshop missing title → error-placeholder for heroStandard', () => {
+  it('workshop missing one required field → renders heroStandard with partial data (parity)', () => {
+    // After the author-preview parity fix, a required section renders as
+    // long as at least one of its source fields is populated. The mapper
+    // produces empty strings for missing fields so the layout matches
+    // editor preview.
     const event = fullWorkshop();
-    // Clear title to simulate missing required data
     (event as unknown as Record<string, unknown>).title = {};
+
+    const outputs = assembleEventSections(event, emptyCtx, { mode: 'development' });
+    const hero = outputs.find((o) => o.kind === 'heroStandard');
+
+    expect(hero).toBeDefined();
+    expect(hero!.status).toBe('rendered');
+  });
+
+  it('workshop with EVERY required field empty → error-placeholder + console.error', () => {
+    const event = fullWorkshop();
+    const r = event as unknown as Record<string, unknown>;
+    r.title = {};
+    r.subtitle = {};
+    r.heroImage = undefined;
+    r.price = undefined;
+    r.dateStart = undefined;
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const outputs = assembleEventSections(event, emptyCtx, { mode: 'development' });
@@ -218,9 +237,27 @@ describe('C. Required sections — development mode', () => {
 // ---------------------------------------------------------------------------
 
 describe('D. Required sections — production mode', () => {
-  it('workshop missing title → heroStandard skipped (not in rendered output)', () => {
+  it('workshop missing one required field → renders heroStandard (parity with editor preview)', () => {
+    // Old behavior dropped the section entirely, leaving the public
+    // page bare. The parity fix renders the section when ANY required
+    // field has content.
     const event = fullWorkshop();
     (event as unknown as Record<string, unknown>).title = {};
+
+    const outputs = assembleEventSections(event, emptyCtx, { mode: 'production' });
+    const rendered = getRenderedSections(outputs);
+
+    expect(rendered.find((o) => o.kind === 'heroStandard')).toBeDefined();
+  });
+
+  it('workshop with EVERY required field empty → heroStandard is silently dropped', () => {
+    const event = fullWorkshop();
+    const r = event as unknown as Record<string, unknown>;
+    r.title = {};
+    r.subtitle = {};
+    r.heroImage = undefined;
+    r.price = undefined;
+    r.dateStart = undefined;
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const outputs = assembleEventSections(event, emptyCtx, { mode: 'production' });
@@ -341,14 +378,17 @@ describe('H. QuickFacts preset mapping', () => {
     expect(qf!.status).toBe('rendered');
   });
 
-  it('workshop missing duration → quickFacts has missing required field', () => {
+  it('workshop missing duration → quickFacts still renders with partial data (parity)', () => {
+    // After the parity fix, a required section renders when ANY of its
+    // source fields has content. quickFacts (workshop) requires
+    // [dateStart, duration, location, price]; with duration empty but
+    // others populated, the section is rendered and the missing item
+    // is simply omitted from the rendered list.
     const event = fullWorkshop();
     (event as unknown as Record<string, unknown>).duration = undefined;
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const outputs = assembleEventSections(event, emptyCtx, { mode: 'development' });
     const qf = outputs.find((o) => o.kind === 'quickFacts');
-    expect(qf!.status).toBe('error-placeholder');
-    spy.mockRestore();
+    expect(qf!.status).toBe('rendered');
   });
 
   it('exhibition does not render quickFacts', () => {
@@ -408,18 +448,32 @@ describe('Debug output snapshots', () => {
 // ---------------------------------------------------------------------------
 
 describe('Regression — null-Localized is treated as missing', () => {
+  // The fix here is that hasField recurses into the value: a Pydantic
+  // round-trip Localized of {en:null, ru:null, …} is "missing" rather
+  // than "present-with-five-keys". Combined with the parity fix
+  // (production renders required sections when ANY source field is
+  // populated), this surfaces as: that single field reads as empty in
+  // the mapped output, while the section still renders if other fields
+  // have content. Only when EVERY required field is empty is the
+  // section dropped.
   function pydanticNullLocalized() {
     return { en: null, ru: null, it: null, es: null, pt: null };
   }
 
-  it('all-null Localized title → heroStandard skipped in production', () => {
+  it('all-null Localized title is treated as empty by hasField', () => {
     const event = fullWorkshop();
-    (event as unknown as Record<string, unknown>).title = pydanticNullLocalized();
+    const r = event as unknown as Record<string, unknown>;
+    r.title = pydanticNullLocalized();
+    // Other source fields are also empty, so heroStandard should be
+    // dropped in production — proving null-Localized doesn't satisfy
+    // hasField.
+    r.subtitle = pydanticNullLocalized();
+    r.heroImage = undefined;
+    r.price = undefined;
+    r.dateStart = undefined;
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const outputs = assembleEventSections(event, emptyCtx, { mode: 'production' });
     spy.mockRestore();
-    // heroStandard is required; production drops it when a required field
-    // is missing. The bug had it incorrectly rendered (with empty text).
     expect(getRenderedSections(outputs).map((o) => o.kind)).not.toContain('heroStandard');
   });
 
@@ -437,8 +491,16 @@ describe('Regression — null-Localized is treated as missing', () => {
   });
 
   it('empty string Localized counts as missing', () => {
+    // With every required field empty, including title's {en:''}, the
+    // section drops in production — confirming the empty-string leaf
+    // is treated as no content.
     const event = fullWorkshop();
-    (event as unknown as Record<string, unknown>).title = { en: '', ru: null };
+    const r = event as unknown as Record<string, unknown>;
+    r.title = { en: '', ru: null };
+    r.subtitle = pydanticNullLocalized();
+    r.heroImage = undefined;
+    r.price = undefined;
+    r.dateStart = undefined;
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const outputs = assembleEventSections(event, emptyCtx, { mode: 'production' });
     spy.mockRestore();

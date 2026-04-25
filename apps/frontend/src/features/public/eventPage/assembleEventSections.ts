@@ -121,12 +121,37 @@ export function assembleEventSections(
 
     // Data is partially or fully missing.
     if (slot.importance === 'required') {
-      // In editorPreview: render with partial data so the author sees live feedback.
-      // Section components handle empty/undefined fields gracefully.
+      // Author-preview parity: production, editorPreview, and development
+      // all render a required section with whatever data IS present, so
+      // the public page matches what the author saw in editor preview.
+      // Section components read each field defensively (empty strings,
+      // null images) and lay out the structure cleanly.
+      //
+      // The only divergence between modes is what happens when every
+      // source field is empty:
+      //   editorPreview → editor-placeholder (visible to author)
+      //   development   → error-placeholder  (visible to dev, plus log)
+      //   production    → skip silently      (don't ship empty sections)
+      //
+      // Rationale: the previous strict allPresent rule for production
+      // left workshops with one missing field (e.g. duration, or a
+      // null-Localized title from a Pydantic round-trip) rendering as
+      // bare title + galleries on the public page while the editor
+      // preview showed a complete hero / quickFacts / cta layout.
+      if (anyPresent) {
+        results.push({
+          kind: slot.section,
+          status: 'rendered',
+          importance: slot.importance,
+        });
+        continue;
+      }
+
+      // Every source field is empty.
       if (mode === 'editorPreview') {
         results.push({
           kind: slot.section,
-          status: anyPresent ? 'rendered' : 'editor-placeholder',
+          status: 'editor-placeholder',
           importance: slot.importance,
         });
         continue;
