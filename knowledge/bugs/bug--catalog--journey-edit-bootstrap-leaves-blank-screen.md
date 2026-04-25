@@ -141,7 +141,13 @@ with `throw`.
 
 - `tsc --noEmit` clean.
 - `vitest run` — 554 / 554 tests pass.
-- Manual deployed-build verification pending.
+- Manual deployed-build verification (commit `04bda59`) — PASS.
+  - Case A: existing saved block, click selected image → catalog opens
+    in edit mode, no blank.
+  - Case B: stream editor → add block → pick image → return → click
+    same assigned image → catalog opens correctly, no blank.
+  - Browser back from catalog no longer surfaces "Unexpected
+    Application Error: Arrival on unexpected editor".
 
 ## Related
 

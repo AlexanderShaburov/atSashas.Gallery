@@ -85,7 +85,11 @@ Refactored `printoutTicket` to:
 
 - `tsc --noEmit` clean.
 - `vitest run` — 554 / 554 tests pass.
-- Manual deployed-build verification pending.
+- Manual deployed-build verification (commits `ff1f7fa` + `04bda59`)
+  — PASS. The saved-lifecycle case now dispatches the journey, and
+  the follow-up catalog-blank fix lets it actually land in edit mode.
+  The two fixes formed a Step 1 / Step 2 pair: this one made the
+  click do *something*; the catalog fix made that something useful.
 
 ## Related issue still under investigation — Case B (newly-created block)
 
