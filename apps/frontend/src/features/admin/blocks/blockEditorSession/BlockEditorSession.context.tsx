@@ -412,10 +412,21 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 }
 
                 // 2) Handle returnEffect kinds separately (insert vs update)
+                //
+                // The bootstrap MUST NOT throw out of the async IIFE.
+                // A thrown rejection here leaves the journey leg
+                // unconsumed, produces a blank-screen cascade, and
+                // turns the next nav into "JourneySession: Arrival on
+                // unexpected editor". On any unexpected condition we
+                // log it, drop into select mode, and let the user
+                // recover. The journey leg is already on its return
+                // phase at this point so the ticket completes naturally.
                 if (!isBlockReturnCommand(effect)) {
-                    throw new Error(
-                        `[Bootstrap]: Unexpected returnEffect for BlockEditor: ${effect ? effect.kind : 'undefined'}`,
+                    console.error(
+                        `[Block BOOTSTRAP]: Unexpected returnEffect: ${effect ? effect.kind : 'undefined'} — falling back to select`,
                     );
+                    setModeStack(['select']);
+                    return;
                 }
                 console.log(`[INIT SESSION]: Return effect detected as:`);
                 console.dir(effect);
@@ -423,7 +434,13 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 // 2) Restore selectedBlockId first (required to bind external store scope)
                 //    NOTE: blockId always comes from the return effect (both insert/update share blockId)
                 const blockId = effect.blockId;
-                if (!blockId) throw new Error('[Bootstrap]: returnEffect missing blockId');
+                if (!blockId) {
+                    console.error(
+                        '[Block BOOTSTRAP]: returnEffect missing blockId — falling back to select',
+                    );
+                    setModeStack(['select']);
+                    return;
+                }
                 setSelectedBlockId(blockId);
 
                 // ❗️ New approach: just created block hasn't get into collection yet!
@@ -433,10 +450,18 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                 console.dir(key);
 
                 const block = editSessionsDataStore.get<Block>(key);
-                if (!block)
-                    throw new Error(
-                        `[Bootstrap]: Journey ticket block doesn't stored in SessionsDataStore`,
+                if (!block) {
+                    // Most likely cause: the editSessionsDataStore was
+                    // cleared between dispatch and return (e.g., long
+                    // upload chain that crossed a session reset). Fall
+                    // back to select; the user keeps any other in-flight
+                    // work and can re-pick the slot if they want.
+                    console.error(
+                        `[Block BOOTSTRAP]: Journey ticket block ${blockId} not in SessionsDataStore — falling back to select`,
                     );
+                    setModeStack(['select']);
+                    return;
+                }
                 console.log(`[INIT SESSION]: saved block read as:`);
                 console.dir(block.draft);
 
@@ -530,8 +555,15 @@ export function BlockEditorSessionProvider({ children }: ProviderProps) {
                     }
 
                     default: {
-                        // Should be unreachable due to isBlockReturnCommand, but keep as safety net
-                        throw new Error(`[Bootstrap]: Unsupported returnEffect kind`);
+                        // Defensive: should be unreachable due to
+                        // isBlockReturnCommand. If we somehow get here, do
+                        // not throw — fall back to select so the user
+                        // doesn't get a blank screen.
+                        console.error(
+                            '[Block BOOTSTRAP]: Unsupported returnEffect kind — falling back to select',
+                        );
+                        setModeStack(['select']);
+                        return;
                     }
                 }
             }

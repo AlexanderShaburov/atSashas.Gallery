@@ -256,6 +256,16 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
 
             // Check if this is a return (has loot) or outbound (no loot)
             // Note: tickets always have phase='outbound', the leg state determines if it's returning
+            //
+            // Bootstrap MUST NOT throw out of the async IIFE: a thrown
+            // rejection here leaves the journey leg in `outbound` state,
+            // produces a blank-screen cascade for the user, and turns
+            // any subsequent navigation into "JourneySession: Arrival
+            // on unexpected editor" (the next editor mounts and tries
+            // to consume a leg that isn't theirs). On any unexpected
+            // condition we now log the error, gracefully complete the
+            // leg via returnHome with ok:false, and fall through to
+            // select mode so the catalog renders something.
             if (!ticket.loot) {
                 // OUTBOUND: Someone navigated TO catalog editor
                 // isJourney now derived from useJourneyStatus() - no manual setting needed
@@ -266,27 +276,48 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                     }
                     case 'edit': {
                         const id = ticket.destination.objectId;
-                        if (!id)
-                            throw new Error('[Catalog BOOTSTRAP]: outbound edit missing objectId');
+                        if (!id) {
+                            console.error(
+                                '[Catalog BOOTSTRAP]: outbound edit missing objectId — aborting leg',
+                            );
+                            returnHome('catalog', { ok: false, reason: 'error' });
+                            setScreenMode('select');
+                            return;
+                        }
 
                         // We need catalog to resolve item
                         const cat = (await getCatalog()) as ArtCatalog;
                         catalogStore.set(cat);
 
                         const item = cat.items?.[id];
-                        if (!item)
-                            throw new Error(
-                                `[Catalog BOOTSTRAP]: ArtItem not found in catalog: ${id}`,
+                        if (!item) {
+                            // The slot's stored artId points at an art item the
+                            // catalog doesn't (yet) have. Most common cause: a
+                            // stale id left on the slot after a previous
+                            // upload-create flow didn't fully reconcile, or a
+                            // catalog-side delete that the block hasn't been
+                            // refreshed against. Don't throw — return cleanly
+                            // so the user can keep working.
+                            console.error(
+                                `[Catalog BOOTSTRAP]: ArtItem not found in catalog: ${id} — aborting leg`,
                             );
+                            returnHome('catalog', { ok: false, reason: 'error' });
+                            setScreenMode('select');
+                            return;
+                        }
 
                         setSelectedItemId(id);
                         setScreenMode('edit');
                         return;
                     }
-                    default:
-                        throw new Error(
-                            '[Catalog BOOTSTRAP]: Unsupported outbound destination.mode',
+                    default: {
+                        console.error(
+                            '[Catalog BOOTSTRAP]: Unsupported outbound destination.mode — aborting leg',
                         );
+                        returnHome('catalog', { ok: false, reason: 'error' });
+                        setScreenMode('select');
+                        return;
+                    }
                 }
             } else {
                 // RETURN: Returning from child editor with loot
@@ -327,11 +358,23 @@ export function CatalogEditorSessionProvider({ children }: ProviderProps) {
                 }
 
                 console.log(`[Catalog BOOTSTRAP]: RETURN ticket presented.`);
-                if (ticket.returnTo.mode !== 'edit')
-                    throw new Error(`Impossible return to catalog  editor`);
-                if (!ticket.loot) throw new Error(`Impossible return to catalog not having loot`);
-                if (!ticket.loot.ok)
-                    throw new Error(`Impossible return to catalog not having loot`);
+                if (ticket.returnTo.mode !== 'edit') {
+                    console.error(
+                        `[Catalog BOOTSTRAP]: return ticket not addressed to edit mode — falling back to select`,
+                    );
+                    setScreenMode('select');
+                    return;
+                }
+                // Hopper journey was cancelled or errored. Drop into select
+                // mode rather than throwing — the user is back in catalog
+                // intentionally; nothing was created.
+                if (!ticket.loot || !ticket.loot.ok) {
+                    console.log(
+                        `[Catalog BOOTSTRAP]: return without ok loot (cancel/error); landing in select`,
+                    );
+                    setScreenMode('select');
+                    return;
+                }
 
                 // Fetch catalog directly to avoid stale state from refreshBase()
                 const cat = (await getCatalog()) as ArtCatalog;

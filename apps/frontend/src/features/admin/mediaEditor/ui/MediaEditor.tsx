@@ -26,30 +26,32 @@ function MediaSelectMode() {
 
   return (
     <>
-      <div className="media-editor__header">
-        <h1 className="media-editor__title">
-          {isJourney ? 'Pick a media item' : 'Media Library'}
-        </h1>
-        <div className="media-editor__pick-actions">
-          <button type="button" className="media-editor__add-btn" onClick={onAdd}>
-            Upload New
-          </button>
-          {/* Defensive Cancel path: the journey may be active even when the
-              bootstrap landed in 'select' (e.g., direct nav during an open
-              journey). Without this the user is dead-ended with no explicit
-              way back to the caller. */}
-          {isJourney && (
-            <button
-              type="button"
-              className="media-edit-form__back"
-              onClick={cancelPick}
-            >
-              Cancel
+      <div className="media-editor__sticky-header">
+        <div className="media-editor__header">
+          <h1 className="media-editor__title">
+            {isJourney ? 'Pick a media item' : 'Media Library'}
+          </h1>
+          <div className="media-editor__pick-actions">
+            <button type="button" className="media-editor__add-btn" onClick={onAdd}>
+              Upload New
             </button>
-          )}
+            {/* Defensive Cancel path: the journey may be active even when the
+                bootstrap landed in 'select' (e.g., direct nav during an open
+                journey). Without this the user is dead-ended with no explicit
+                way back to the caller. */}
+            {isJourney && (
+              <button
+                type="button"
+                className="media-edit-form__back"
+                onClick={cancelPick}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
+        <MediaFilterBar filter={filter} allTags={allTags} updateFilter={updateFilter} />
       </div>
-      <MediaFilterBar filter={filter} allTags={allTags} updateFilter={updateFilter} />
       <MediaSelectGrid items={filteredItems} onSelect={selectItem} />
     </>
   );
@@ -65,18 +67,20 @@ function MediaPickMode() {
 
   return (
     <>
-      <div className="media-editor__header">
-        <h1 className="media-editor__title">Pick a media item</h1>
-        <div className="media-editor__pick-actions">
-          <button type="button" className="media-editor__add-btn" onClick={onAdd}>
-            Upload New
-          </button>
-          <button type="button" className="media-edit-form__back" onClick={cancelPick}>
-            Cancel
-          </button>
+      <div className="media-editor__sticky-header">
+        <div className="media-editor__header">
+          <h1 className="media-editor__title">Pick a media item</h1>
+          <div className="media-editor__pick-actions">
+            <button type="button" className="media-editor__add-btn" onClick={onAdd}>
+              Upload New
+            </button>
+            <button type="button" className="media-edit-form__back" onClick={cancelPick}>
+              Cancel
+            </button>
+          </div>
         </div>
+        <MediaFilterBar filter={filter} allTags={allTags} updateFilter={updateFilter} />
       </div>
-      <MediaFilterBar filter={filter} allTags={allTags} updateFilter={updateFilter} />
       <MediaSelectGrid items={filteredItems} onSelect={selectItem} />
     </>
   );

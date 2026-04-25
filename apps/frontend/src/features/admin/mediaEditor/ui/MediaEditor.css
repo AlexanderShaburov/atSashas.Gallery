@@ -10,6 +10,22 @@
   color: var(--text);
 }
 
+/* Sticky header: keeps the title + Upload-New + Cancel + filter bar
+   visible while the grid scrolls, mirroring the catalog editor's
+   `.catalog-editor__sticky-header`. The `top: var(--header-h)` offset
+   docks below the global AdminHeader (also sticky). */
+.media-editor__sticky-header {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
 .media-editor__header {
   display: flex;
   align-items: center;
