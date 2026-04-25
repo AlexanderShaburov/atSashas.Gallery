@@ -114,3 +114,28 @@
     color: var(--text);
     outline: none;
 }
+
+/* Slot caption authoring (Block Editor only — restored after the
+   editor migrations disconnected the inline caption surface). The
+   customizer continues to control caption presentation. */
+.blk-slot-caption {
+    display: block;
+    margin-top: 0.35rem;
+    padding: 0.2rem 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: var(--text);
+    cursor: text;
+    border-radius: 0.35rem;
+    transition: background 0.12s;
+}
+.blk-slot-caption:hover {
+    background: color-mix(in srgb, var(--accent) 6%, transparent 94%);
+}
+.blk-slot-caption__placeholder {
+    color: var(--muted);
+    font-style: italic;
+}
+.blk-slot-caption--editor input.blk-inline-input {
+    margin-top: 0.35rem;
+}

@@ -5,6 +5,8 @@ import { Hit } from '@/entities/block';
 import { useResolveArtAdaptive } from '@/shared/ArtCatalogProvider/useResolveArtAdaptive';
 import { GalleryBlockView } from '@/shared/ui/GalleryBlockView';
 
+import { SlotCaptionEditor } from './SlotCaptionEditor';
+
 type Props = {
     item: GalleryBlock;
     onHit: (hit: BlockHitEvent) => void;
@@ -12,8 +14,9 @@ type Props = {
     readOnly?: boolean;
 };
 
-export function GalleryComponent({ item, onHit, readOnly }: Props) {
+export function GalleryComponent({ item, onHit, parent, readOnly }: Props) {
     const resolveArt = useResolveArtAdaptive();
+    const inEditor = !readOnly && parent === 'editor';
 
     const handleSlotClick = (pos: ItemPosition, e: React.MouseEvent) => {
         if (readOnly) return;
@@ -29,6 +32,20 @@ export function GalleryComponent({ item, onHit, readOnly }: Props) {
             block={item}
             resolveArt={resolveArt}
             onSlotClick={handleSlotClick}
+            renderArtContent={
+                // In editor mode, render the slot's caption editor below the
+                // picture so the author can write or edit the caption text
+                // inline. In other parents (homepage preview, public block
+                // view) we keep the default picture-only rendering.
+                inEditor
+                    ? (_art, pos, picture) => (
+                          <>
+                              {picture}
+                              <SlotCaptionEditor block={item} position={pos} />
+                          </>
+                      )
+                    : undefined
+            }
             renderEmptySlot={
                 readOnly
                     ? undefined
