@@ -101,11 +101,52 @@ and waiting for a consumer.
   gallery slots that have `kind === 'art'` items; empty slots keep
   their existing pick-image affordance unchanged).
 
+## Follow-up — caption renderers were reading the wrong field (2026-04-25)
+
+Manual QA after the authoring restoration showed the Customizer
+displaying the **art item's title** under each slot rather than the
+authored slot caption.
+
+The bug was in the renderer side, separate from the authoring layer:
+
+- `shared/ui/GalleryBlockView/GalleryBlockView.tsx:130, 141` — the
+  slot-caption span rendered `art.title.en` instead of the gallery
+  item's `caption.en`. Affected every consumer of `GalleryBlockView`
+  (admin Block Editor view, BlockCustomizer view, public block view,
+  homepage preview).
+- `features/admin/blocks/ui/BlockCustomizer/BlockCustomizer.tsx:87,
+  99` — the customizer overlays its own draggable caption span
+  (`bcz__caption-overlay`) on top of the GalleryBlockView, and this
+  span read `art.title.en` for the same reason.
+
+Sibling renderer
+`shared/ui/ComposableBlockView/ComposableBlockView.tsx:97, 108` had
+always read `slot.caption?.en` correctly. The Customizer's
+`CaptionControls` panel was already gating its appearance UI on
+`item.caption?.en`. Only the two display sites above were
+mis-reading.
+
+Fix: both display sites now read the slot's caption from the gallery
+item (`item.kind === 'art' ? item.caption?.en : undefined` in
+`GalleryBlockView`; `block.items.find(it => it.position ===
+pos)?.caption?.en` in `BlockCustomizer`). Visibility is gated on the
+caption text being non-empty, matching the customizer panel's
+existing gate exactly.
+
+The architectural split holds:
+
+- Block Editor edits content (`block.items[i].caption.en`).
+- Customizer edits presentation
+  (`appearance.slots[pos].caption.{visible, posX, posY, style}`)
+  AND now displays the actual content alongside its drag handle.
+
 ## Related
 
 - `entities/block/block.types.ts` — `GalleryArtItem.caption` field.
 - `features/admin/blocks/ui/BlockCustomizer/CaptionControls.tsx` —
   customizer's appearance UI; reads the same `item.caption?.en` gate.
+- `shared/ui/ComposableBlockView/ComposableBlockView.tsx` — the
+  sibling renderer that always followed the correct contract.
 - `architecture--editor--dual-mode-context-control-plane.md` — the
   pattern this restoration follows (control plane in session, content
   flows through draft updates).

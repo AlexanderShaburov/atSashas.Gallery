@@ -67,8 +67,15 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
             <GalleryBlockView
                 block={blockWithAppearance}
                 resolveArt={resolveArt}
-                renderArtContent={(art, pos, picture) => {
+                renderArtContent={(_art, pos, picture) => {
                     const slotApp = appearance.slots[pos];
+                    // Read the user-authored slot caption — NOT the art
+                    // item's title. The two are distinct by design:
+                    // caption is per-slot content owned by the Block
+                    // Editor; title is metadata on the art catalog entry.
+                    const itemForPos = block.items.find((it) => it.position === pos);
+                    const slotCaptionText =
+                        itemForPos?.kind === 'art' ? itemForPos.caption?.en : undefined;
                     return (
                         <>
                             <div
@@ -84,7 +91,7 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
                             >
                                 <span className="bcz__frame-handle-icon">⋮⋮</span>
                             </div>
-                            {slotApp?.caption?.visible && art.title?.en && (
+                            {slotApp?.caption?.visible && slotCaptionText && (
                                 <span
                                     className="bcz__caption-overlay"
                                     style={{
@@ -96,7 +103,7 @@ export function BlockCustomizer({ block, appearance, onChange }: Props) {
                                     }}
                                     onPointerDown={(e) => onCaptionPointerDown(pos, e)}
                                 >
-                                    {art.title.en}
+                                    {slotCaptionText}
                                 </span>
                             )}
                         </>

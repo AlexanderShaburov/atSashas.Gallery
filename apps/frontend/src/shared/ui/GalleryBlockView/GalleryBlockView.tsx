@@ -125,9 +125,16 @@ export function GalleryBlockView({
       />
     );
 
-    // Slot caption
+    // Slot caption — read the user-authored caption text from the
+    // gallery item, NOT the art item's title. Caption (slot content,
+    // owned by the Block Editor) and title (metadata on the art
+    // catalog entry) are distinct fields by design. Sibling renderer
+    // ComposableBlockView already follows this rule via
+    // `slot.caption?.en`; this brings GalleryBlockView in line.
+    const slotCaptionText =
+      item.kind === 'art' ? item.caption?.en : undefined;
     const slotCaption =
-      slotApp?.caption?.visible && art.title?.en ? (
+      slotApp?.caption?.visible && slotCaptionText ? (
         <span
           className="block__slot-caption"
           style={{
@@ -138,7 +145,7 @@ export function GalleryBlockView({
             color: slotApp.caption.style.color,
           }}
         >
-          {art.title.en}
+          {slotCaptionText}
         </span>
       ) : null;
 
